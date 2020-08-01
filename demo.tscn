@@ -29,7 +29,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MyImGui" type="Control" parent="."]
+[node name="ImGui" type="Control" parent="."]
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false

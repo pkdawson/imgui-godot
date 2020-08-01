@@ -8,13 +8,14 @@ using System.Collections.Generic;
 public class ImGuiNode : Control
 {
     [Export]
-    DynamicFont Font;
+    DynamicFont Font = null;
 
     private Dictionary<IntPtr, Texture> _loadedTextures;
     private int _textureId;
     private IntPtr? _fontTextureId;
-    Godot.Collections.Array<ArrayMesh> _meshes;
-    Godot.Collections.Array<ImGuiClippedNode> _children;
+    private Godot.Collections.Array<ArrayMesh> _meshes;
+    private Godot.Collections.Array<ImGuiClippedNode> _children;
+    private Godot.Collections.Array<byte[]> _fontStorage; // ugly...
 
     private class ImGuiClippedNode : Control
     {
@@ -25,6 +26,15 @@ public class ImGuiNode : Control
         {
             DrawMesh(Mesh, Texture);
         }
+    }
+
+    public ImGuiNode()
+    {
+        _textureId = 100;
+        _loadedTextures = new Dictionary<IntPtr, Texture>();
+        _meshes = new Godot.Collections.Array<ArrayMesh>();
+        _children = new Godot.Collections.Array<ImGuiClippedNode>();
+        _fontStorage = new Godot.Collections.Array<byte[]>();
     }
 
     public virtual void Init(ImGuiNET.ImGuiIOPtr io)
@@ -42,22 +52,7 @@ public class ImGuiNode : Control
 
     public virtual void Layout()
     {
-    }
-
-    private int FixKey(Godot.KeyList kc)
-    {
-        if ((int)kc < 256)
-            return (int)kc;
-        else
-            return 255 + (int)((uint)kc & 0xFF);
-    }
-
-    public ImGuiNode()
-    {
-        _textureId = 100;
-        _loadedTextures = new Dictionary<IntPtr, Texture>();
-        _meshes = new Godot.Collections.Array<ArrayMesh>();
-        _children = new Godot.Collections.Array<ImGuiClippedNode>();
+        // override me
     }
 
     public override void _Ready()
@@ -91,14 +86,72 @@ public class ImGuiNode : Control
         io.KeyMap[(int)ImGuiKey.Z] = (int)Godot.KeyList.Z;
 
         io.DisplaySize = new System.Numerics.Vector2(GetViewport().Size.x, GetViewport().Size.y);
+
         GetViewport().Connect("size_changed", this, nameof(_onViewportResize));
 
         Init(io);
     }
 
-    private void _onViewportResize()
+    public override void _Process(float delta)
     {
-        ImGui.GetIO().DisplaySize = new System.Numerics.Vector2(GetViewport().Size.x, GetViewport().Size.y);
+        var io = ImGui.GetIO();
+        io.DeltaTime = delta;
+
+        io.KeyCtrl = Godot.Input.IsKeyPressed((int)Godot.KeyList.Control);
+        io.KeyAlt = Godot.Input.IsKeyPressed((int)Godot.KeyList.Alt);
+        io.KeyShift = Godot.Input.IsKeyPressed((int)Godot.KeyList.Shift);
+        io.KeySuper = Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperL) || Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperR);
+
+        ImGui.NewFrame();
+
+        Layout();
+
+        ImGui.Render();
+        unsafe { RenderDrawData(ImGui.GetDrawData()); }
+    }
+
+    public override void _Input(InputEvent evt)
+    {
+        if (ProcessInput(evt))
+        {
+            GetTree().SetInputAsHandled();
+        }
+    }
+
+    public IntPtr BindTexture(Texture tex)
+    {
+        var id = new IntPtr(_textureId++);
+        _loadedTextures.Add(id, tex);
+        return id;
+    }
+    public void UnbindTexture(IntPtr textureId)
+    {
+        _loadedTextures.Remove(textureId);
+    }
+
+    public ImFontPtr AddFont(DynamicFont font)
+    {
+        return AddFont(font.FontData, font.Size);
+    }
+
+    public unsafe ImFontPtr AddFont(DynamicFontData fontData, int fontSize)
+    {
+        ImFontPtr rv = null;
+        Godot.File fi = new File();
+        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
+        byte[] buf = fi.GetBuffer((int)fi.GetLen());
+
+        var io = ImGui.GetIO();
+        fixed (byte* p = buf)
+        {
+            IntPtr ptr = (IntPtr)p;
+            rv = io.Fonts.AddFontFromMemoryTTF(ptr, buf.Length, (float)fontSize);
+        }
+
+        // store buf so it doesn't get GC'd
+        _fontStorage.Add(buf);
+
+        return rv;
     }
 
     public unsafe void RebuildFontAtlas()
@@ -122,15 +175,10 @@ public class ImGuiNode : Control
         io.Fonts.ClearTexData();
     }
 
-    public IntPtr BindTexture(Texture tex)
+
+    private void _onViewportResize()
     {
-        var id = new IntPtr(_textureId++);
-        _loadedTextures.Add(id, tex);
-        return id;
-    }
-    public void UnbindTexture(IntPtr textureId)
-    {
-        _loadedTextures.Remove(textureId);
+        ImGui.GetIO().DisplaySize = new System.Numerics.Vector2(GetViewport().Size.x, GetViewport().Size.y);
     }
 
     private void RenderDrawData(ImDrawDataPtr drawData)
@@ -150,6 +198,7 @@ public class ImGuiNode : Control
             AddChild(newChild);
             _children.Add(newChild);
         }
+        // TODO: trim unused nodes?
         foreach (ArrayMesh arrayMesh in _meshes)
         {
             while (arrayMesh.GetSurfaceCount() > 0)
@@ -235,22 +284,12 @@ public class ImGuiNode : Control
         }
     }
 
-    public override void _Process(float delta)
+    private int FixKey(Godot.KeyList kc)
     {
-        var io = ImGui.GetIO();
-        io.DeltaTime = delta;
-
-        io.KeyCtrl = Godot.Input.IsKeyPressed((int)Godot.KeyList.Control);
-        io.KeyAlt = Godot.Input.IsKeyPressed((int)Godot.KeyList.Alt);
-        io.KeyShift = Godot.Input.IsKeyPressed((int)Godot.KeyList.Shift);
-        io.KeySuper = Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperL) || Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperR);
-
-        ImGui.NewFrame();
-
-        Layout();
-
-        ImGui.Render();
-        unsafe { RenderDrawData(ImGui.GetDrawData()); }
+        if ((int)kc < 256)
+            return (int)kc;
+        else
+            return 255 + (int)((uint)kc & 0xFF);
     }
 
     protected bool ProcessInput(InputEvent evt)
@@ -307,41 +346,5 @@ public class ImGuiNode : Control
         }
 
         return consumed;
-    }
-
-    public override void _Input(InputEvent evt)
-    {
-        if (ProcessInput(evt))
-        {
-            GetTree().SetInputAsHandled();
-        }
-    }
-
-    private Godot.Collections.Array<byte[]> fontStorage;
-
-    public ImFontPtr AddFont(DynamicFont font)
-    {
-        return AddFont(font.FontData, font.Size);
-    }
-
-    public unsafe ImFontPtr AddFont(DynamicFontData fontData, int fontSize)
-    {
-        ImFontPtr rv = null;
-        fontStorage = new Godot.Collections.Array<byte[]>();
-        Godot.File fi = new File();
-        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
-        byte[] buf = fi.GetBuffer((int)fi.GetLen());
-        
-        var io = ImGui.GetIO();
-        fixed (byte* p = buf)
-        {
-            IntPtr ptr = (IntPtr)p;
-            rv = io.Fonts.AddFontFromMemoryTTF(ptr, buf.Length, (float)fontSize);
-        }
-
-        // store buf so it doesn't get GC'd
-        fontStorage.Add(buf);
-
-        return rv;
     }
 }
