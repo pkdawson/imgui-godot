@@ -68,6 +68,7 @@
     <Compile Include="addons\imgui-godot\ImGuiPlugin.cs" />
     <Compile Include="MyGui.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SomeOtherNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -19,6 +19,11 @@ config/name="Dear ImGui for Godot Demo"
 run/main_scene="res://demo.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=1280
+window/size/height=720
+
 [editor_plugins]
 
 enabled=PoolStringArray( "imgui-godot" )

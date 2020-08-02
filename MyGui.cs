@@ -5,21 +5,19 @@ using Vector2 = System.Numerics.Vector2;
 
 public class MyGui : ImGuiNode
 {
-    private IntPtr iconTextureId;
-
     public override void Init(ImGuiIOPtr io)
     {
-        base.Init(io);
-        iconTextureId = BindTexture(GD.Load<Texture>("res://icon.png"));
+        // instead of calling base.Init(io) to setup the font, we'll do it ourselves
+
+        // add font directly from the filesystem, not a resource
+        io.Fonts.AddFontFromFileTTF("Hack-Regular.ttf", 16);
+        RebuildFontAtlas();
     }
 
     public override void Layout()
     {
-        ImGui.Begin("test");
-        ImGui.Text("hello Godot");
-        ImGui.Image(iconTextureId, new Vector2(64, 64));
-        ImGui.End();
-
         ImGui.ShowDemoWindow();
+
+        base.Layout(); // this emits the signal
     }
 }

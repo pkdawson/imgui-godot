@@ -4,11 +4,13 @@ using ImGuiNET;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 
-[Tool]
 public class ImGuiNode : Control
 {
     [Export]
     DynamicFont Font = null;
+
+    [Signal]
+    public delegate void LayoutSignal();
 
     private Dictionary<IntPtr, Texture> _loadedTextures;
     private int _textureId;
@@ -52,10 +54,10 @@ public class ImGuiNode : Control
 
     public virtual void Layout()
     {
-        // override me
+        EmitSignal(nameof(LayoutSignal));
     }
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
@@ -118,12 +120,19 @@ public class ImGuiNode : Control
         }
     }
 
+    public override void _ExitTree()
+    {
+        // crashes
+        // ImGui.DestroyContext();
+    }
+
     public IntPtr BindTexture(Texture tex)
     {
         var id = new IntPtr(_textureId++);
         _loadedTextures.Add(id, tex);
         return id;
     }
+
     public void UnbindTexture(IntPtr textureId)
     {
         _loadedTextures.Remove(textureId);
