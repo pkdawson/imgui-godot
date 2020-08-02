@@ -10,7 +10,7 @@ public class ImGuiNode : Control
     DynamicFont Font = null;
 
     [Signal]
-    public delegate void LayoutSignal();
+    public delegate void IGLayout();
 
     private Dictionary<IntPtr, Texture> _loadedTextures;
     private int _textureId;
@@ -54,7 +54,7 @@ public class ImGuiNode : Control
 
     public virtual void Layout()
     {
-        EmitSignal(nameof(LayoutSignal));
+        EmitSignal(nameof(IGLayout));
     }
 
     public override void _EnterTree()
@@ -122,7 +122,7 @@ public class ImGuiNode : Control
 
     public override void _ExitTree()
     {
-        // crashes
+        // crashes FIXME
         // ImGui.DestroyContext();
     }
 

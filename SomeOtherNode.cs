@@ -14,14 +14,14 @@ public class SomeOtherNode : Node
     public override void _Ready()
     {
         ig = GetNode<ImGuiNode>("/root/Control/ImGui");
-        ig.Connect("LayoutSignal", this, nameof(_Layout));
+        ig.Connect("IGLayout", this, nameof(_onLayout));
         iconTexture = GD.Load<Texture>("res://icon.png");
         iconTextureId = ig.BindTexture(iconTexture);
         filter = (iconTexture.Flags & (uint)Texture.FlagsEnum.Filter) != 0;
         iconSize = (int)iconTexture.GetSize().x;
     }
 
-    public void _Layout()
+    public void _onLayout()
     {
         ImGui.Begin("test");
         ImGui.Text("hello Godot");
