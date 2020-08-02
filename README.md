@@ -10,7 +10,7 @@ Just click `Build` in the top right corner (if you get errors, you probably need
 then go into `Project > Project Settings > Plugins` and re-enable the plugin.
 
 Installing this in your own project is extremely finicky (as of Godot 3.2.3, with C# support in "late alpha").
-I've tried to figure out and document the necssary steps.
+I've tried to figure out and document the necessary steps.
 
 1. Create a project and click `Build` in the top right to generate the .csproj file.
 
