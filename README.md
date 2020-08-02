@@ -76,3 +76,13 @@ When exporting your project with Godot, the native code cimgui library won't be 
 On Windows, you can just copy over cimgui.dll (from .mono\temp\bin\ExportRelease) to the same directory as your exe.
 
 On macOS, I haven't been able to get the .app to work no matter where I put the .dylib. It does work if you run the binary directly.
+
+## Credits
+
+All code written by Patrick Dawson, released to the public domain (Creative Commons Zero v1.0 Universal)
+
+Godot Logo (C) Andrea Calabró Distributed under the terms of the Creative Commons Attribution License version 3.0 (CC-BY 3.0) https://creativecommons.org/licenses/by/3.0/legalcode.
+
+Hack font distributed under the [MIT license](https://github.com/source-foundry/Hack/blob/master/LICENSE.md)
+
+This plugin's functionality relies heavily on [ImGui.NET](https://github.com/mellinoe/ImGui.NET) by Eric Mellino
