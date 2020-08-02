@@ -6,8 +6,8 @@ Still a work in progress, some unfinished stuff, not sure about the interface, p
 ## Getting Started
 
 When first opening the demo project, you'll get an error about being unable to load the addon script.
-Just click `Build` in the top right corner, then go into `Project > Project Settings > Plugins` and
-re-enable the plugin.
+Just click `Build` in the top right corner (if you get errors, you probably need to run `nuget restore`),
+then go into `Project > Project Settings > Plugins` and re-enable the plugin.
 
 Installing this in your own project is extremely finicky (as of Godot 3.2.3, with C# support in "late alpha").
 I've tried to figure out and document the necssary steps.
@@ -39,7 +39,7 @@ Add this with the other PackageReference tags:
     </PackageReference>
 ```
 
-6. Back in Godot, click `Build` again.
+6. Back in Godot, click `Build` again (if you get errors, you probably need to run `nuget restore`).
 
 7. Enable the plugin in `Project Settings`.
 
