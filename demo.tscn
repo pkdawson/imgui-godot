@@ -39,3 +39,4 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 Font = ExtResource( 2 )
+[connection signal="IGLayout" from="ImGui" to="SomeOtherNode" method="_onLayout"]

@@ -20,6 +20,7 @@ I've tried to figure out and document the necessary steps.
 
 4. Well, time to manually edit the .csproj. Refer to the demo csproj for guidance. Add these lines next to the other Compile tags:
 ```xml
+    <Compile Include="addons\imgui-godot\ImGuiGD.cs" />
     <Compile Include="addons\imgui-godot\ImGuiNode.cs" />
     <Compile Include="addons\imgui-godot\ImGuiPlugin.cs" />
 ```
@@ -69,6 +70,8 @@ If you need to override something, or if you just want to do everything with one
 
 3. Override `Layout` - see `MyGui.cs` for details. Be careful when overriding other methods; it should be
 ok if you make sure to call the parent method first (using `base`).
+
+Since this plugin is unfinished, it doesn't make sense to document an API yet. Check the samples and use the static methods provided by ImGuiGD.
 
 ## Project export
 

@@ -5,7 +5,6 @@ using Vector2 = System.Numerics.Vector2;
 
 public class SomeOtherNode : Node
 {
-    private ImGuiNode ig;
     private IntPtr iconTextureId;
     private Texture iconTexture;
     private bool filter;
@@ -13,12 +12,18 @@ public class SomeOtherNode : Node
 
     public override void _Ready()
     {
-        ig = GetNode<ImGuiNode>("/root/Control/ImGui");
-        ig.Connect("IGLayout", this, nameof(_onLayout));
+        // connect the signal in code or in the editor
+        // GetNode<ImGuiNode>("/root/Control/ImGui").Connect("IGLayout", this, nameof(_onLayout));
+
         iconTexture = GD.Load<Texture>("res://icon.png");
-        iconTextureId = ig.BindTexture(iconTexture);
+        iconTextureId = ImGuiGD.BindTexture(iconTexture);
         filter = (iconTexture.Flags & (uint)Texture.FlagsEnum.Filter) != 0;
         iconSize = (int)iconTexture.GetSize().x;
+    }
+
+    public override void _ExitTree()
+    {
+        ImGuiGD.UnbindTexture(iconTextureId);
     }
 
     public void _onLayout()

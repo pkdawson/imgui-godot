@@ -12,7 +12,7 @@ public class MyGui : ImGuiNode
         // add font directly from the filesystem, not a resource
         io.Fonts.AddFontFromFileTTF("Hack-Regular.ttf", 16);
         io.Fonts.AddFontDefault(); // just for comparison
-        RebuildFontAtlas();
+        ImGuiGD.RebuildFontAtlas();
     }
 
     public override void Layout()

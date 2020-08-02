@@ -1,8 +1,6 @@
 using Godot;
 using System;
 using ImGuiNET;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
 
 public class ImGuiNode : Control
 {
@@ -12,12 +10,8 @@ public class ImGuiNode : Control
     [Signal]
     public delegate void IGLayout();
 
-    private Dictionary<IntPtr, Texture> _loadedTextures;
-    private int _textureId;
-    private IntPtr? _fontTextureId;
     private Godot.Collections.Array<ArrayMesh> _meshes;
     private Godot.Collections.Array<ImGuiClippedNode> _children;
-    private Godot.Collections.Array<byte[]> _fontStorage; // ugly...
 
     private class ImGuiClippedNode : Control
     {
@@ -32,11 +26,8 @@ public class ImGuiNode : Control
 
     public ImGuiNode()
     {
-        _textureId = 100;
-        _loadedTextures = new Dictionary<IntPtr, Texture>();
         _meshes = new Godot.Collections.Array<ArrayMesh>();
         _children = new Godot.Collections.Array<ImGuiClippedNode>();
-        _fontStorage = new Godot.Collections.Array<byte[]>();
     }
 
     public virtual void Init(ImGuiNET.ImGuiIOPtr io)
@@ -47,9 +38,9 @@ public class ImGuiNode : Control
         }
         else
         {
-            AddFont(Font);
+            ImGuiGD.AddFont(Font);
         }
-        RebuildFontAtlas();
+        ImGuiGD.RebuildFontAtlas();
     }
 
     public virtual void Layout()
@@ -126,65 +117,6 @@ public class ImGuiNode : Control
         // ImGui.DestroyContext();
     }
 
-    public IntPtr BindTexture(Texture tex)
-    {
-        var id = new IntPtr(_textureId++);
-        _loadedTextures.Add(id, tex);
-        return id;
-    }
-
-    public void UnbindTexture(IntPtr textureId)
-    {
-        _loadedTextures.Remove(textureId);
-    }
-
-    public ImFontPtr AddFont(DynamicFont font)
-    {
-        return AddFont(font.FontData, font.Size);
-    }
-
-    public unsafe ImFontPtr AddFont(DynamicFontData fontData, int fontSize)
-    {
-        ImFontPtr rv = null;
-        Godot.File fi = new File();
-        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
-        byte[] buf = fi.GetBuffer((int)fi.GetLen());
-
-        var io = ImGui.GetIO();
-        fixed (byte* p = buf)
-        {
-            IntPtr ptr = (IntPtr)p;
-            rv = io.Fonts.AddFontFromMemoryTTF(ptr, buf.Length, (float)fontSize);
-        }
-
-        // store buf so it doesn't get GC'd
-        _fontStorage.Add(buf);
-
-        return rv;
-    }
-
-    public unsafe void RebuildFontAtlas()
-    {
-        var io = ImGui.GetIO();
-        io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
-
-        byte[] pixels = new byte[width * height * bytesPerPixel];
-        unsafe { Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length); }
-
-        Image img = new Image();
-        img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
-
-        var imgtex = new ImageTexture();
-        imgtex.CreateFromImage(img, 0);
-
-        if (_fontTextureId.HasValue) UnbindTexture(_fontTextureId.Value);
-        _fontTextureId = BindTexture(imgtex);
-
-        io.Fonts.SetTexID(_fontTextureId.Value);
-        io.Fonts.ClearTexData();
-    }
-
-
     private void _onViewportResize()
     {
         ImGui.GetIO().DisplaySize = new System.Numerics.Vector2(GetViewport().Size.x, GetViewport().Size.y);
@@ -223,7 +155,7 @@ public class ImGuiNode : Control
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[n];
-            int vtxOffset = 0;
+            // int vtxOffset = 0;
             int idxOffset = 0;
 
             int nVert = cmdList.VtxBuffer.Size;
@@ -250,7 +182,7 @@ public class ImGuiNode : Control
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++, nodeN++)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
-                int vtxCount = nVert - vtxOffset;
+                // int vtxCount = nVert - vtxOffset;
 
                 var arrays = new Godot.Collections.Array();
                 arrays.Resize((int)ArrayMesh.ArrayType.Max);
@@ -262,9 +194,9 @@ public class ImGuiNode : Control
                     return dst;
                 }
 
-                arrays[(int)ArrayMesh.ArrayType.Vertex] = ArraySlice(vertices, vtxOffset, vtxCount);
-                arrays[(int)ArrayMesh.ArrayType.Color] = ArraySlice(colors, vtxOffset, vtxCount);
-                arrays[(int)ArrayMesh.ArrayType.TexUv] = ArraySlice(uvs, vtxOffset, vtxCount);
+                arrays[(int)ArrayMesh.ArrayType.Vertex] = vertices; // ArraySlice(vertices, vtxOffset, vtxCount);
+                arrays[(int)ArrayMesh.ArrayType.Color] = colors; // ArraySlice(colors, vtxOffset, vtxCount);
+                arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs; // ArraySlice(uvs, vtxOffset, vtxCount);
                 arrays[(int)ArrayMesh.ArrayType.Index] = ArraySlice(indices, idxOffset, (int)drawCmd.ElemCount);
 
                 ArrayMesh arrayMesh = _meshes[nodeN];
@@ -278,10 +210,12 @@ public class ImGuiNode : Control
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                if (_children[nodeN].Texture != _loadedTextures[drawCmd.TextureId])
+                Texture tex = ImGuiGD.GetTexture(drawCmd.TextureId);
+
+                if (_children[nodeN].Texture != tex)
                 {
                     // need to redraw node if the texture changes
-                    _children[nodeN].Texture = _loadedTextures[drawCmd.TextureId];
+                    _children[nodeN].Texture = tex;
                     _children[nodeN].Update();
                 }
                 _children[nodeN].Mesh = arrayMesh;
@@ -289,7 +223,7 @@ public class ImGuiNode : Control
                 idxOffset += (int)drawCmd.ElemCount;
             }
 
-            vtxOffset += cmdList.VtxBuffer.Size;
+            // vtxOffset += cmdList.VtxBuffer.Size;
         }
     }
 
