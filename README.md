@@ -47,7 +47,6 @@ Add this with the other PackageReference tags:
 
 9. Write code finally!
 
-
 ## Interface
 
 I've provided two ways to use ImGui. See the demo project scenes for examples.
@@ -70,3 +69,10 @@ If you need to override something, or if you just want to do everything with one
 
 3. Override `Layout` - see `MyGui.cs` for details. Be careful when overriding other methods; it should be
 ok if you make sure to call the parent method first (using `base`).
+
+## Project export
+
+When exporting your project with Godot, the native code cimgui library won't be included.
+On Windows, you can just copy over cimgui.dll (from .mono\temp\bin\ExportRelease) to the same directory as your exe.
+
+On macOS, I haven't been able to get the .app to work no matter where I put the .dylib. It does work if you run the binary directly.
