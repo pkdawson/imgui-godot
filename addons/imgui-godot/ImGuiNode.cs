@@ -255,7 +255,7 @@ public class ImGuiNode : Node2D
         if ((int)kc < 256)
             return (int)kc;
         else
-            return 255 + (int)((uint)kc & 0xFF);
+            return 256 + (int)((uint)kc & 0xFF);
     }
 
     protected bool ProcessInput(InputEvent evt)
