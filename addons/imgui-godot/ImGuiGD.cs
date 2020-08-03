@@ -9,7 +9,6 @@ public class ImGuiGD
     private static Dictionary<IntPtr, Texture> _loadedTextures = new Dictionary<IntPtr, Texture>();
     private static int _textureId = 100;
     private static IntPtr? _fontTextureId;
-    private static Dictionary<string, byte[]> _fontStorage = new Dictionary<string, byte[]>();
 
     public static IntPtr BindTexture(Texture tex)
     {
@@ -39,23 +38,17 @@ public class ImGuiGD
     {
         ImFontPtr rv = null;
 
-        if (!_fontStorage.ContainsKey(fontData.FontPath))
-        {
-            // store buf so it doesn't get GC'd
-            Godot.File fi = new File();
-            var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
-            _fontStorage[fontData.FontPath] = fi.GetBuffer((int)fi.GetLen());
-            fi.Close();
-        }
+        Godot.File fi = new File();
+        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
+        byte[] buf = fi.GetBuffer((int)fi.GetLen());
+        fi.Close();
 
         // can't add a name, ImFontConfig seems unusable
 
-        byte[] buf = _fontStorage[fontData.FontPath];
-        fixed (byte* p = buf)
-        {
-            IntPtr ptr = (IntPtr)p;
-            rv = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(ptr, buf.Length, (float)fontSize);
-        }
+        // let ImGui manage this memory
+        IntPtr p = Marshal.AllocHGlobal(buf.Length);
+        Marshal.Copy(buf, 0, p, buf.Length);
+        rv = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, buf.Length, (float)fontSize);
 
         return rv;
     }

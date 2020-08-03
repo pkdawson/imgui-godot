@@ -125,8 +125,7 @@ public class ImGuiNode : Node2D
         {
             VisualServer.FreeRid(node.CanvasItem);
         }
-        // crashes FIXME
-        // ImGui.DestroyContext();
+        ImGui.DestroyContext();
     }
 
     private void _onViewportResize()
