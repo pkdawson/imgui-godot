@@ -238,6 +238,7 @@ public class ImGuiNode : Node2D
 
     private int FixKey(Godot.KeyList kc)
     {
+        // Godot reserves the first 24 bits for printable characters, but ImGui needs keycodes <512
         if ((int)kc < 256)
             return (int)kc;
         else
@@ -256,18 +257,39 @@ public class ImGuiNode : Node2D
         }
         else if (evt is InputEventMouseButton mb)
         {
-            if (mb.ButtonIndex <= (int)Godot.ButtonList.Middle)
+            switch ((Godot.ButtonList)mb.ButtonIndex)
             {
-                io.MouseDown[mb.ButtonIndex - 1] = mb.Pressed;
-            }
-            else if (mb.ButtonIndex == (int)Godot.ButtonList.WheelUp)
-            {
-                io.MouseWheel = mb.Factor * 1.0f;
-            }
-            else if (mb.ButtonIndex == (int)Godot.ButtonList.WheelDown)
-            {
-                io.MouseWheel = mb.Factor * -1.0f;
-            }
+                case ButtonList.Left:
+                    io.MouseDown[(int)ImGuiMouseButton.Left] = mb.Pressed;
+                    break;
+                case ButtonList.Right:
+                    io.MouseDown[(int)ImGuiMouseButton.Right] = mb.Pressed;
+                    break;
+                case ButtonList.Middle:
+                    io.MouseDown[(int)ImGuiMouseButton.Middle] = mb.Pressed;
+                    break;
+                case ButtonList.WheelUp:
+                    io.MouseWheel = mb.Factor * 1.0f;
+                    break;
+                case ButtonList.WheelDown:
+                    io.MouseWheel = mb.Factor * -1.0f;
+                    break;
+                case ButtonList.WheelLeft:
+                    io.MouseWheelH = mb.Factor * -1.0f;
+                    break;
+                case ButtonList.WheelRight:
+                    io.MouseWheelH = mb.Factor * 1.0f;
+                    break;
+                case ButtonList.Xbutton1:
+                    io.MouseDown[(int)ImGuiMouseButton.Middle + 1] = mb.Pressed;
+                    break;
+                case ButtonList.Xbutton2:
+                    io.MouseDown[(int)ImGuiMouseButton.Middle + 2] = mb.Pressed;
+                    break;
+                default:
+                    // more buttons not supported
+                    break;
+            };
 
             consumed = io.WantCaptureMouse;
         }
@@ -285,6 +307,7 @@ public class ImGuiNode : Node2D
         }
         else if (evt is InputEventPanGesture pg)
         {
+            io.MouseWheelH = -pg.Delta.x;
             io.MouseWheel = -pg.Delta.y;
             consumed = io.WantCaptureMouse;
         }
