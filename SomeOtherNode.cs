@@ -33,6 +33,14 @@ public class SomeOtherNode : Node
         ImGui.Image(iconTextureId, new Vector2(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
         ImGui.Checkbox("filter", ref filter);
+
+        ImGui.Dummy(new Vector2(0, 20.0f));
+
+        if (ImGui.Button("change scene"))
+        {
+            GetTree().ChangeScene("res://demo2.tscn");
+        }
+
         ImGui.End();
 
         ImGui.ShowDemoWindow();

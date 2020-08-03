@@ -13,16 +13,12 @@ public class ImGuiNode : Node2D
 
     private List<ImGuiClippedNode> _children;
 
-    private class ImGuiClippedNode : Node2D
+    private class ImGuiClippedNode
     {
-        public ArrayMesh Mesh { get; set; }
-        public Texture Texture { get; set; }
-        public IntPtr TextureId { get; set; }
-
-        public override void _Draw()
-        {
-            DrawMesh(Mesh, Texture);
-        }
+        public RID CanvasItem;
+        public ArrayMesh Mesh;
+        public Texture Texture;
+        public IntPtr TextureId;
     }
 
     public ImGuiNode()
@@ -125,6 +121,10 @@ public class ImGuiNode : Node2D
 
     public override void _ExitTree()
     {
+        foreach (var node in _children)
+        {
+            VisualServer.FreeRid(node.CanvasItem);
+        }
         // crashes FIXME
         // ImGui.DestroyContext();
     }
@@ -147,10 +147,20 @@ public class ImGuiNode : Node2D
         {
             ImGuiClippedNode newChild = new ImGuiClippedNode();
             newChild.Mesh = new ArrayMesh();
-            AddChild(newChild);
+            newChild.CanvasItem = VisualServer.CanvasItemCreate();
+            VisualServer.CanvasItemSetParent(newChild.CanvasItem, GetCanvasItem());
+            VisualServer.CanvasItemSetDrawIndex(newChild.CanvasItem, _children.Count);
             _children.Add(newChild);
         }
-        // TODO: trim unused nodes?
+
+        // trim unused nodes to reduce draw calls
+        while (_children.Count > neededNodes)
+        {
+            int idx = _children.Count - 1;
+            VisualServer.FreeRid(_children[idx].CanvasItem);
+            _children.RemoveAt(idx);
+        }
+
         foreach (var node in _children)
         {
             while (node.Mesh.GetSurfaceCount() > 0)
@@ -214,8 +224,8 @@ public class ImGuiNode : Node2D
 
                 node.Mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 
-                VisualServer.CanvasItemSetClip(node.GetCanvasItem(), true);
-                VisualServer.CanvasItemSetCustomRect(node.GetCanvasItem(), true, new Godot.Rect2(
+                VisualServer.CanvasItemSetClip(node.CanvasItem, true);
+                VisualServer.CanvasItemSetCustomRect(node.CanvasItem, true, new Godot.Rect2(
                     drawCmd.ClipRect.X,
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
@@ -227,7 +237,10 @@ public class ImGuiNode : Node2D
                     // need to redraw node if the texture changes
                     node.Texture = ImGuiGD.GetTexture(drawCmd.TextureId);
                     node.TextureId = drawCmd.TextureId;
-                    node.Update();
+                    VisualServer.CanvasItemClear(node.CanvasItem);
+
+                    // need to take care of the normalMap RID like this because of a bug in the C# binding
+                    VisualServer.CanvasItemAddMesh(node.CanvasItem, node.Mesh.GetRid(), null, null, node.Texture.GetRid(), new RID(null));
                 }
 
                 idxOffset += (int)drawCmd.ElemCount;

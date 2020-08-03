@@ -19,6 +19,13 @@ public class MyGui : ImGuiNode
     {
         ImGui.ShowDemoWindow();
 
+        ImGui.Begin("scene changer");
+        if (ImGui.Button("back to the first scene"))
+        {
+            GetTree().ChangeScene("res://demo.tscn");
+        }
+        ImGui.End();
+
         base.Layout(); // this emits the signal
     }
 }

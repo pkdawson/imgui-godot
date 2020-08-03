@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://addons/imgui-godot/ImGuiNode.cs" type="Script" id=1]
 [ext_resource path="res://guifont.tres" type="DynamicFont" id=2]
 [ext_resource path="res://icon.png" type="Texture" id=3]
 [ext_resource path="res://SomeOtherNode.cs" type="Script" id=4]
+[ext_resource path="res://Clicky.cs" type="Script" id=5]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -19,6 +20,9 @@ margin_right = 791.0
 margin_bottom = 553.0
 texture = ExtResource( 3 )
 expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Button" type="Button" parent="."]
 margin_left = 107.0
@@ -26,6 +30,7 @@ margin_top = 94.0
 margin_right = 258.0
 margin_bottom = 163.0
 text = "Click Me"
+script = ExtResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -36,4 +41,18 @@ script = ExtResource( 4 )
 [node name="ImGui" type="Node2D" parent="."]
 script = ExtResource( 1 )
 Font = ExtResource( 2 )
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -64.0
+margin_top = -64.0
+texture = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="pressed" from="Button" to="Button" method="_on_Button_pressed"]
 [connection signal="IGLayout" from="ImGui" to="SomeOtherNode" method="_onLayout"]
+[connection signal="IGLayout" from="ImGui" to="Button" method="_on_ImGui_IGLayout"]

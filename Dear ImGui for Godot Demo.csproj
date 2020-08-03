@@ -67,6 +67,7 @@
     <Compile Include="addons\imgui-godot\ImGuiGD.cs" />
     <Compile Include="addons\imgui-godot\ImGuiNode.cs" />
     <Compile Include="addons\imgui-godot\ImGuiPlugin.cs" />
+    <Compile Include="Clicky.cs" />
     <Compile Include="MyGui.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SomeOtherNode.cs" />
