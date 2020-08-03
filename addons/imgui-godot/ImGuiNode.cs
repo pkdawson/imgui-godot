@@ -13,12 +13,16 @@ public class ImGuiNode : Node2D
 
     private List<ImGuiClippedNode> _children;
 
-    private class ImGuiClippedNode
+    private class ImGuiClippedNode : Node2D
     {
-        public RID CanvasItem;
-        public ArrayMesh Mesh;
-        public Texture Texture;
-        public IntPtr TextureId;
+        public ArrayMesh Mesh { get; set; }
+        public Texture Texture { get; set; }
+        public IntPtr TextureId { get; set; }
+
+        public override void _Draw()
+        {
+            DrawMesh(Mesh, Texture);
+        }
     }
 
     public ImGuiNode()
@@ -142,8 +146,7 @@ public class ImGuiNode : Node2D
         {
             ImGuiClippedNode newChild = new ImGuiClippedNode();
             newChild.Mesh = new ArrayMesh();
-            newChild.CanvasItem = VisualServer.CanvasItemCreate();
-            VisualServer.CanvasItemSetParent(newChild.CanvasItem, GetCanvasItem());
+            AddChild(newChild);
             _children.Add(newChild);
         }
         // TODO: trim unused nodes?
@@ -210,8 +213,8 @@ public class ImGuiNode : Node2D
 
                 node.Mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 
-                VisualServer.CanvasItemSetClip(node.CanvasItem, true);
-                VisualServer.CanvasItemSetCustomRect(node.CanvasItem, true, new Godot.Rect2(
+                VisualServer.CanvasItemSetClip(node.GetCanvasItem(), true);
+                VisualServer.CanvasItemSetCustomRect(node.GetCanvasItem(), true, new Godot.Rect2(
                     drawCmd.ClipRect.X,
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
@@ -223,10 +226,7 @@ public class ImGuiNode : Node2D
                     // need to redraw node if the texture changes
                     node.Texture = ImGuiGD.GetTexture(drawCmd.TextureId);
                     node.TextureId = drawCmd.TextureId;
-                    VisualServer.CanvasItemClear(node.CanvasItem);
-
-                    // need to take care of the normalMap RID like this because of a bug in the C# binding
-                    VisualServer.CanvasItemAddMesh(node.CanvasItem, node.Mesh.GetRid(), null, null, node.Texture.GetRid(), new RID(null));
+                    node.Update();
                 }
 
                 idxOffset += (int)drawCmd.ElemCount;
