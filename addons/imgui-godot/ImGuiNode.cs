@@ -111,12 +111,13 @@ public class ImGuiNode : Node2D
         Layout();
 
         ImGui.Render();
-        RenderDrawData(ImGui.GetDrawData());
+        if (Visible)
+            RenderDrawData(ImGui.GetDrawData());
     }
 
     public override void _Input(InputEvent evt)
     {
-        if (ProcessInput(evt))
+        if (Visible && ProcessInput(evt))
         {
             GetTree().SetInputAsHandled();
         }
