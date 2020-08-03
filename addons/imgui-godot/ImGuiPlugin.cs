@@ -9,7 +9,7 @@ public class ImGuiPlugin : EditorPlugin
     {
         var script = GD.Load<Script>("res://addons/imgui-godot/ImGuiNode.cs");
         var texture = GD.Load<Texture>("res://addons/imgui-godot/imgui-icon.png");
-        AddCustomType("ImGuiNode", "Control", script, texture);
+        AddCustomType("ImGuiNode", "Node2D", script, texture);
     }
 
     public override void _ExitTree()

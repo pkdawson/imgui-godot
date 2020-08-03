@@ -1,8 +1,9 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using ImGuiNET;
 
-public class ImGuiNode : Control
+public class ImGuiNode : Node2D
 {
     [Export]
     DynamicFont Font = null;
@@ -10,13 +11,13 @@ public class ImGuiNode : Control
     [Signal]
     public delegate void IGLayout();
 
-    private Godot.Collections.Array<ArrayMesh> _meshes;
-    private Godot.Collections.Array<ImGuiClippedNode> _children;
+    private List<ImGuiClippedNode> _children;
 
-    private class ImGuiClippedNode : Control
+    private class ImGuiClippedNode : Node2D
     {
         public ArrayMesh Mesh { get; set; }
         public Texture Texture { get; set; }
+        public IntPtr TextureId { get; set; }
 
         public override void _Draw()
         {
@@ -26,8 +27,7 @@ public class ImGuiNode : Control
 
     public ImGuiNode()
     {
-        _meshes = new Godot.Collections.Array<ArrayMesh>();
-        _children = new Godot.Collections.Array<ImGuiClippedNode>();
+        _children = new List<ImGuiClippedNode>();
     }
 
     public virtual void Init(ImGuiNET.ImGuiIOPtr io)
@@ -54,6 +54,12 @@ public class ImGuiNode : Control
         ImGui.SetCurrentContext(context);
 
         var io = ImGui.GetIO();
+
+        io.BackendFlags = 0;
+        // io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
+        // io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+        io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
+        // io.BackendPlatformName = "imgui_impl_godot";
 
         io.KeyMap[(int)ImGuiKey.Tab] = FixKey(Godot.KeyList.Tab);
         io.KeyMap[(int)ImGuiKey.LeftArrow] = FixKey(Godot.KeyList.Left);
@@ -95,12 +101,17 @@ public class ImGuiNode : Control
         io.KeyShift = Godot.Input.IsKeyPressed((int)Godot.KeyList.Shift);
         io.KeySuper = Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperL) || Godot.Input.IsKeyPressed((int)Godot.KeyList.SuperR);
 
+        if (io.WantSetMousePos)
+        {
+            GetViewport().WarpMouse(new Godot.Vector2(io.MousePos.X, io.MousePos.Y));
+        }
+
         ImGui.NewFrame();
 
         Layout();
 
         ImGui.Render();
-        unsafe { RenderDrawData(ImGui.GetDrawData()); }
+        RenderDrawData(ImGui.GetDrawData());
     }
 
     public override void _Input(InputEvent evt)
@@ -131,20 +142,19 @@ public class ImGuiNode : Control
             neededNodes += drawData.CmdListsRange[i].CmdBuffer.Size;
         }
 
-        while (_meshes.Count < neededNodes)
+        while (_children.Count < neededNodes)
         {
-            _meshes.Add(new ArrayMesh());
-
             ImGuiClippedNode newChild = new ImGuiClippedNode();
+            newChild.Mesh = new ArrayMesh();
             AddChild(newChild);
             _children.Add(newChild);
         }
         // TODO: trim unused nodes?
-        foreach (ArrayMesh arrayMesh in _meshes)
+        foreach (var node in _children)
         {
-            while (arrayMesh.GetSurfaceCount() > 0)
+            while (node.Mesh.GetSurfaceCount() > 0)
             {
-                arrayMesh.SurfaceRemove(0);
+                node.Mesh.SurfaceRemove(0);
             }
         }
 
@@ -199,26 +209,25 @@ public class ImGuiNode : Control
                 arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs; // ArraySlice(uvs, vtxOffset, vtxCount);
                 arrays[(int)ArrayMesh.ArrayType.Index] = ArraySlice(indices, idxOffset, (int)drawCmd.ElemCount);
 
-                ArrayMesh arrayMesh = _meshes[nodeN];
-                arrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+                var node = _children[nodeN];
 
-                VisualServer.CanvasItemSetClip(_children[nodeN].GetCanvasItem(), true);
-                VisualServer.CanvasItemSetCustomRect(_children[nodeN].GetCanvasItem(), true, new Godot.Rect2(
+                node.Mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+
+                VisualServer.CanvasItemSetClip(node.GetCanvasItem(), true);
+                VisualServer.CanvasItemSetCustomRect(node.GetCanvasItem(), true, new Godot.Rect2(
                     drawCmd.ClipRect.X,
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                Texture tex = ImGuiGD.GetTexture(drawCmd.TextureId);
-
-                if (_children[nodeN].Texture != tex)
+                if (node.TextureId != drawCmd.TextureId)
                 {
                     // need to redraw node if the texture changes
-                    _children[nodeN].Texture = tex;
-                    _children[nodeN].Update();
+                    node.Texture = ImGuiGD.GetTexture(drawCmd.TextureId);
+                    node.TextureId = drawCmd.TextureId;
+                    node.Update();
                 }
-                _children[nodeN].Mesh = arrayMesh;
 
                 idxOffset += (int)drawCmd.ElemCount;
             }
