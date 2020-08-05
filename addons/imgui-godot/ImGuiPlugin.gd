@@ -10,7 +10,16 @@ func _enter_tree():
 func _exit_tree():
     remove_custom_type("ImGuiNode")
 
-func fix_csproj(fn):
+func prompt(fn):
+    var dlg = ConfirmationDialog.new()
+    dlg.window_title = "imgui-godot"
+    dlg.dialog_text = "Your .csproj will be modified to support imgui-godot. Is that ok?"
+    dlg.connect("modal_closed", dlg, "queue_free")
+    dlg.connect("confirmed", self, "fix_csproj", [fn, true])
+    get_editor_interface().get_base_control().add_child(dlg)
+    dlg.popup_centered()
+
+func fix_csproj(fn, really=false):
     # this is very silly, never do this
     var needSources = true
     var needNuget = true
@@ -32,16 +41,21 @@ func fix_csproj(fn):
         elif line.find("<PackageReference") != -1:
             if line.find("ImGui.NET") != -1:
                 needNuget = false
-        elif line.find("<AllowUnsafeBlocks>true</AllowUnsafeBlocks>") != -1:
+        elif line.find("<AllowUnsafeBlocks>") != -1:
             needUnsafe = false
     fi.close()
-    
+
     if needSources or needNuget or needUnsafe:
-        print("imgui-godot: fixing ", fn)
+        if not really:
+            prompt(fn)
+            return
+        else:
+            print("imgui-godot: fixing ", fn)
     else:
         return
 
     fi.open(fn, File.WRITE)
+    var i = 0
     for line in fileLines:
         if needSources and line.find("<Compile") != -1:
             needSources = false
@@ -57,6 +71,10 @@ func fix_csproj(fn):
         elif needUnsafe and line.find("<ConsolePause>") != -1:
             fi.store_line(line)
             fi.store_line("    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>")
+        elif i == fileLines.size() - 1:
+            # avoid adding an extra newline at the end
+            fi.store_string(line)
         else:
             fi.store_line(line)
+        i += 1
     fi.close()
