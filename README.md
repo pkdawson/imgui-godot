@@ -5,48 +5,33 @@ Still a work in progress, some unfinished stuff, not sure about the interface, p
 
 ## Getting Started
 
-When first opening the demo project, you'll get an error about being unable to load the addon script.
-Just click `Build` in the top right corner (if you get errors, you probably need to run `nuget restore`),
-then go into `Project > Project Settings > Plugins` and re-enable the plugin.
+### Demo
 
-Installing this in your own project is extremely finicky (as of Godot 3.2.3, with C# support in "late alpha").
-I've tried to figure out and document the necessary steps.
+On Windows, just click `Build` in the top right then play the project. On other platforms, you may need to
+run `nuget restore`, then try the build again.
+
+### Your project
+
+C# support in Godot is somewhat incomplete, so I've tried to fill in the gaps with a script that runs
+when you enable the plugin.
+
+**WARNING:** This could corrupt your .csproj file. Always use source control, or at least make a backup first.
 
 1. Create a project and click `Build` in the top right to generate the .csproj file.
 
 2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder.
 
-3. Notice that you can't enable the plugin.
+3. Enable the plugin in `Project > Project Settings > Plugins`.
 
-4. Well, time to manually edit the .csproj. Refer to the demo csproj for guidance. Add these lines next to the other Compile tags:
-```xml
-    <Compile Include="addons\imgui-godot\ImGuiGD.cs" />
-    <Compile Include="addons\imgui-godot\ImGuiNode.cs" />
-    <Compile Include="addons\imgui-godot\ImGuiPlugin.cs" />
-```
+4. When prompted, click OK to patch your .csproj file.
 
-5. While you're here, you can enable unsafe code and add `ImGui.NET` as a NuGet package. Or do that in Visual Studio if you prefer.
+    (Otherwise, you'll have to modify it yourself: add the .cs scripts in addons\imgui-godot, allow unsafe blocks, and install ImGui.NET with NuGet.)
 
-Add this to all three configurations (probably below ConsolePause):
-```xml
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-```
+5. Click `Build` again (if you get errors, you probably need to run `nuget restore`).
 
-Add this with the other PackageReference tags:
+6. Add an `ImGuiNode` to your scene.
 
-```xml
-    <PackageReference Include="ImGui.NET">
-      <Version>1.75.0</Version>
-    </PackageReference>
-```
-
-6. Back in Godot, click `Build` again (if you get errors, you probably need to run `nuget restore`).
-
-7. Enable the plugin in `Project Settings`.
-
-8. Add an `ImGuiNode` to your scene.
-
-9. Write code finally!
+7. Write code!
 
 ## Interface
 
