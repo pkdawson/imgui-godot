@@ -11,19 +11,11 @@ public class ImGuiNode : Node2D
     [Signal]
     public delegate void IGLayout();
 
-    private List<ImGuiClippedNode> _children;
-
-    private class ImGuiClippedNode
-    {
-        public RID CanvasItem;
-        public ArrayMesh Mesh;
-        public Texture Texture;
-        public IntPtr TextureId;
-    }
+    private List<RID> _children;
 
     public ImGuiNode()
     {
-        _children = new List<ImGuiClippedNode>();
+        _children = new List<RID>();
     }
 
     public virtual void Init(ImGuiNET.ImGuiIOPtr io)
@@ -121,9 +113,9 @@ public class ImGuiNode : Node2D
 
     public override void _ExitTree()
     {
-        foreach (var node in _children)
+        foreach (RID rid in _children)
         {
-            VisualServer.FreeRid(node.CanvasItem);
+            VisualServer.FreeRid(rid);
         }
         ImGui.DestroyContext();
     }
@@ -135,7 +127,7 @@ public class ImGuiNode : Node2D
 
     private void RenderDrawData(ImDrawDataPtr drawData)
     {
-        // allocate and clear out our mesh pool as needed
+        // allocate and clear out our CanvasItem pool as needed
         int neededNodes = 0;
         for (int i = 0; i < drawData.CmdListsCount; i++)
         {
@@ -144,11 +136,9 @@ public class ImGuiNode : Node2D
 
         while (_children.Count < neededNodes)
         {
-            ImGuiClippedNode newChild = new ImGuiClippedNode();
-            newChild.Mesh = new ArrayMesh();
-            newChild.CanvasItem = VisualServer.CanvasItemCreate();
-            VisualServer.CanvasItemSetParent(newChild.CanvasItem, GetCanvasItem());
-            VisualServer.CanvasItemSetDrawIndex(newChild.CanvasItem, _children.Count);
+            RID newChild = VisualServer.CanvasItemCreate();
+            VisualServer.CanvasItemSetParent(newChild, GetCanvasItem());
+            VisualServer.CanvasItemSetDrawIndex(newChild, _children.Count);
             _children.Add(newChild);
         }
 
@@ -156,16 +146,8 @@ public class ImGuiNode : Node2D
         while (_children.Count > neededNodes)
         {
             int idx = _children.Count - 1;
-            VisualServer.FreeRid(_children[idx].CanvasItem);
+            VisualServer.FreeRid(_children[idx]);
             _children.RemoveAt(idx);
-        }
-
-        foreach (var node in _children)
-        {
-            while (node.Mesh.GetSurfaceCount() > 0)
-            {
-                node.Mesh.SurfaceRemove(0);
-            }
         }
 
         // render
@@ -175,7 +157,6 @@ public class ImGuiNode : Node2D
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[n];
-            // int vtxOffset = 0;
             int idxOffset = 0;
 
             int nVert = cmdList.VtxBuffer.Size;
@@ -183,7 +164,6 @@ public class ImGuiNode : Node2D
             Godot.Vector2[] vertices = new Godot.Vector2[nVert];
             Godot.Color[] colors = new Godot.Color[nVert];
             Godot.Vector2[] uvs = new Godot.Vector2[nVert];
-            int[] indices = new int[cmdList.IdxBuffer.Size];
 
             for (int i = 0; i < cmdList.VtxBuffer.Size; i++)
             {
@@ -194,58 +174,32 @@ public class ImGuiNode : Node2D
                 colors[i] = Godot.Color.Color8(col[0], col[1], col[2], col[3]);
                 uvs[i] = new Godot.Vector2(v.uv.X, v.uv.Y);
             }
-            for (int i = 0; i < cmdList.IdxBuffer.Size; i++)
-            {
-                indices[i] = cmdList.IdxBuffer[i];
-            }
 
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++, nodeN++)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
-                // int vtxCount = nVert - vtxOffset;
 
-                var arrays = new Godot.Collections.Array();
-                arrays.Resize((int)ArrayMesh.ArrayType.Max);
-
-                T[] ArraySlice<T>(T[] src, int start, int count)
+                int[] indices = new int[drawCmd.ElemCount];
+                for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; i++, j++)
                 {
-                    T[] dst = new T[count];
-                    Array.Copy(src, start, dst, 0, count);
-                    return dst;
+                    indices[j] = cmdList.IdxBuffer[i];
                 }
 
-                arrays[(int)ArrayMesh.ArrayType.Vertex] = vertices; // ArraySlice(vertices, vtxOffset, vtxCount);
-                arrays[(int)ArrayMesh.ArrayType.Color] = colors; // ArraySlice(colors, vtxOffset, vtxCount);
-                arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs; // ArraySlice(uvs, vtxOffset, vtxCount);
-                arrays[(int)ArrayMesh.ArrayType.Index] = ArraySlice(indices, idxOffset, (int)drawCmd.ElemCount);
+                RID child = _children[nodeN];
 
-                var node = _children[nodeN];
-
-                node.Mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
-
-                VisualServer.CanvasItemSetClip(node.CanvasItem, true);
-                VisualServer.CanvasItemSetCustomRect(node.CanvasItem, true, new Godot.Rect2(
+                Texture tex = ImGuiGD.GetTexture(drawCmd.TextureId);
+                VisualServer.CanvasItemClear(child);
+                VisualServer.CanvasItemSetClip(child, true);
+                VisualServer.CanvasItemSetCustomRect(child, true, new Godot.Rect2(
                     drawCmd.ClipRect.X,
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
-
-                if (node.TextureId != drawCmd.TextureId)
-                {
-                    // need to redraw node if the texture changes
-                    node.Texture = ImGuiGD.GetTexture(drawCmd.TextureId);
-                    node.TextureId = drawCmd.TextureId;
-                    VisualServer.CanvasItemClear(node.CanvasItem);
-
-                    // need to take care of the normalMap RID like this because of a bug in the C# binding
-                    VisualServer.CanvasItemAddMesh(node.CanvasItem, node.Mesh.GetRid(), null, null, node.Texture.GetRid(), new RID(null));
-                }
+                VisualServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1, new RID(null));
 
                 idxOffset += (int)drawCmd.ElemCount;
             }
-
-            // vtxOffset += cmdList.VtxBuffer.Size;
         }
     }
 
