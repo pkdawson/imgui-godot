@@ -10,6 +10,7 @@ public class ImGuiGD
     private static int _textureId = 100;
     private static IntPtr? _fontTextureId;
     private static List<RID> _children = new List<RID>();
+    private static List<ArrayMesh> _meshes = new List<ArrayMesh>();
 
     public static IntPtr BindTexture(Texture tex)
     {
@@ -250,6 +251,7 @@ public class ImGuiGD
             VisualServer.CanvasItemSetParent(newChild, parent);
             VisualServer.CanvasItemSetDrawIndex(newChild, _children.Count);
             _children.Add(newChild);
+            _meshes.Add(new ArrayMesh());
         }
 
         // trim unused nodes to reduce draw calls
@@ -258,6 +260,7 @@ public class ImGuiGD
             int idx = _children.Count - 1;
             VisualServer.FreeRid(_children[idx]);
             _children.RemoveAt(idx);
+            _meshes.RemoveAt(idx);
         }
 
         // render
@@ -295,9 +298,23 @@ public class ImGuiGD
                     indices[j] = cmdList.IdxBuffer[i];
                 }
 
+                var arrays = new Godot.Collections.Array();
+                arrays.Resize((int)ArrayMesh.ArrayType.Max);
+                arrays[(int)ArrayMesh.ArrayType.Vertex] = vertices;
+                arrays[(int)ArrayMesh.ArrayType.Color] = colors;
+                arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs;
+                arrays[(int)ArrayMesh.ArrayType.Index] = indices;
+
+                var mesh = _meshes[nodeN];
+                while (mesh.GetSurfaceCount() > 0)
+                {
+                    mesh.SurfaceRemove(0);
+                }
+                mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+
                 RID child = _children[nodeN];
 
-                Texture tex = ImGuiGD.GetTexture(drawCmd.TextureId);
+                Texture tex = GetTexture(drawCmd.TextureId);
                 VisualServer.CanvasItemClear(child);
                 VisualServer.CanvasItemSetClip(child, true);
                 VisualServer.CanvasItemSetCustomRect(child, true, new Godot.Rect2(
@@ -306,7 +323,10 @@ public class ImGuiGD
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
-                VisualServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1, new RID(null));
+                VisualServer.CanvasItemAddMesh(child, mesh.GetRid(), null, null, tex.GetRid(), new RID(null));
+
+                // why doesn't this quite work?
+                // VisualServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1, new RID(null));
 
                 idxOffset += (int)drawCmd.ElemCount;
             }
