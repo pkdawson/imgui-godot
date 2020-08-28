@@ -12,20 +12,15 @@ run `nuget restore`, then try the build again.
 
 ### Your project
 
-C# support in Godot is somewhat incomplete, so I've tried to fill in the gaps with a script that runs
-when you enable the plugin.
-
-**WARNING:** This could corrupt your .csproj file. Always use source control, or at least make a backup first.
-
 1. Create a project and click `Build` in the top right to generate the .csproj file.
 
 2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder.
 
 3. Enable the plugin in `Project > Project Settings > Plugins`.
 
-4. When prompted, click OK to patch your .csproj file.
+4. In Visual Studio or another IDE, open the solution and allow unsafe blocks in all configurations, and install `ImGui.NET` with NuGet. Save and return to Godot.
 
-    (Otherwise, you'll have to modify it yourself: add the .cs scripts in addons\imgui-godot, allow unsafe blocks, and install ImGui.NET with NuGet.)
+    (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications, or copy it entirely.)
 
 5. Click `Build` again (if you get errors, you probably need to run `nuget restore`).
 
