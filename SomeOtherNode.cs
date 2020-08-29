@@ -19,6 +19,8 @@ public class SomeOtherNode : Node
         iconTextureId = ImGuiGD.BindTexture(iconTexture);
         filter = (iconTexture.Flags & (uint)Texture.FlagsEnum.Filter) != 0;
         iconSize = (int)iconTexture.GetSize().x;
+
+        ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
     }
 
     public override void _ExitTree()

@@ -84,7 +84,7 @@ public class ImGuiGD
         var io = ImGui.GetIO();
 
         io.BackendFlags = 0;
-        // io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
+        io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
         // io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
         // io.BackendPlatformName = "imgui_impl_godot";
@@ -115,6 +115,65 @@ public class ImGuiGD
         io.DisplaySize = new System.Numerics.Vector2(vp.Size.x, vp.Size.y);
     }
 
+    private static void UpdateJoypads()
+    {
+        const float deadZone = 0.05f; // not sure about this value
+        var io = ImGui.GetIO();
+        if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
+            return;
+
+        var ids = Input.GetConnectedJoypads();
+        foreach (int id in ids)
+        {
+            float lx = Input.GetJoyAxis(id, (int)Godot.JoystickList.AnalogLx);
+            if (Math.Abs(lx) > deadZone)
+            {
+                if (lx > 0)
+                {
+                    io.NavInputs[(int)ImGuiNavInput.LStickRight] = lx;
+                }
+                else
+                {
+                    io.NavInputs[(int)ImGuiNavInput.LStickLeft] = -lx;
+                }
+            }
+
+            float ly = Input.GetJoyAxis(id, (int)Godot.JoystickList.AnalogLy);
+            if (Math.Abs(ly) > deadZone)
+            {
+                if (ly > 0)
+                {
+                    io.NavInputs[(int)ImGuiNavInput.LStickDown] = ly;
+                }
+                else
+                {
+                    io.NavInputs[(int)ImGuiNavInput.LStickUp] = -ly;
+                }
+            }
+
+            void MapButton(ImGuiNavInput igni, JoystickList gdjl)
+            {
+                // this wouldn't support multiple gamepads
+                // io.NavInputs[(int)igni] = Input.IsJoyButtonPressed(id, (int)gdjl) ? 1 : 0;
+
+                if (Input.IsJoyButtonPressed(id, (int)gdjl))
+                {
+                    io.NavInputs[(int)igni] = 1;
+                }
+            }
+
+            MapButton(ImGuiNavInput.DpadUp, JoystickList.DpadUp);
+            MapButton(ImGuiNavInput.DpadDown, JoystickList.DpadDown);
+            MapButton(ImGuiNavInput.DpadLeft, JoystickList.DpadLeft);
+            MapButton(ImGuiNavInput.DpadRight, JoystickList.DpadRight);
+
+            MapButton(ImGuiNavInput.Activate, JoystickList.SonyX);
+            MapButton(ImGuiNavInput.Cancel, JoystickList.SonyCircle);
+            MapButton(ImGuiNavInput.Input, JoystickList.SonyTriangle);
+            MapButton(ImGuiNavInput.Menu, JoystickList.SonySquare);
+        }
+    }
+
     public static void Update(float delta, Viewport vp)
     {
         var io = ImGui.GetIO();
@@ -130,6 +189,8 @@ public class ImGuiGD
         {
             vp.WarpMouse(new Godot.Vector2(io.MousePos.X, io.MousePos.Y));
         }
+
+        UpdateJoypads();
 
         ImGui.NewFrame();
     }
@@ -214,14 +275,6 @@ public class ImGuiGD
             io.MouseWheelH = -pg.Delta.x;
             io.MouseWheel = -pg.Delta.y;
             consumed = io.WantCaptureMouse;
-        }
-        else if (evt is InputEventJoypadMotion jm)
-        {
-            // TODO
-        }
-        else if (evt is InputEventJoypadButton jb)
-        {
-            // TODO
         }
 
         return consumed;
