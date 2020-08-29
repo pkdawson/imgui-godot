@@ -117,61 +117,40 @@ public class ImGuiGD
 
     private static void UpdateJoypads()
     {
-        const float deadZone = 0.05f; // not sure about this value
         var io = ImGui.GetIO();
         if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
             return;
 
-        var ids = Input.GetConnectedJoypads();
-        foreach (int id in ids)
+        void MapAnalog(ImGuiNavInput igni, string act)
         {
-            float lx = Input.GetJoyAxis(id, (int)Godot.JoystickList.AnalogLx);
-            if (Math.Abs(lx) > deadZone)
+            if (Input.IsActionPressed(act))
             {
-                if (lx > 0)
-                {
-                    io.NavInputs[(int)ImGuiNavInput.LStickRight] = lx;
-                }
-                else
-                {
-                    io.NavInputs[(int)ImGuiNavInput.LStickLeft] = -lx;
-                }
+                io.NavInputs[(int)igni] = Input.GetActionStrength(act);
             }
-
-            float ly = Input.GetJoyAxis(id, (int)Godot.JoystickList.AnalogLy);
-            if (Math.Abs(ly) > deadZone)
-            {
-                if (ly > 0)
-                {
-                    io.NavInputs[(int)ImGuiNavInput.LStickDown] = ly;
-                }
-                else
-                {
-                    io.NavInputs[(int)ImGuiNavInput.LStickUp] = -ly;
-                }
-            }
-
-            void MapButton(ImGuiNavInput igni, JoystickList gdjl)
-            {
-                // this wouldn't support multiple gamepads
-                // io.NavInputs[(int)igni] = Input.IsJoyButtonPressed(id, (int)gdjl) ? 1 : 0;
-
-                if (Input.IsJoyButtonPressed(id, (int)gdjl))
-                {
-                    io.NavInputs[(int)igni] = 1;
-                }
-            }
-
-            MapButton(ImGuiNavInput.DpadUp, JoystickList.DpadUp);
-            MapButton(ImGuiNavInput.DpadDown, JoystickList.DpadDown);
-            MapButton(ImGuiNavInput.DpadLeft, JoystickList.DpadLeft);
-            MapButton(ImGuiNavInput.DpadRight, JoystickList.DpadRight);
-
-            MapButton(ImGuiNavInput.Activate, JoystickList.SonyX);
-            MapButton(ImGuiNavInput.Cancel, JoystickList.SonyCircle);
-            MapButton(ImGuiNavInput.Input, JoystickList.SonyTriangle);
-            MapButton(ImGuiNavInput.Menu, JoystickList.SonySquare);
         }
+
+        void MapButton(ImGuiNavInput igni, string act)
+        {
+            if (Input.IsActionPressed(act))
+            {
+                io.NavInputs[(int)igni] = 1;
+            }
+        }
+
+        MapButton(ImGuiNavInput.DpadUp, "ImGui_DpadUp");
+        MapButton(ImGuiNavInput.DpadDown, "ImGui_DpadDown");
+        MapButton(ImGuiNavInput.DpadLeft, "ImGui_DpadLeft");
+        MapButton(ImGuiNavInput.DpadRight, "ImGui_DpadRight");
+
+        MapAnalog(ImGuiNavInput.LStickUp, "ImGui_ScrollUp");
+        MapAnalog(ImGuiNavInput.LStickDown, "ImGui_ScrollDown");
+        MapAnalog(ImGuiNavInput.LStickLeft, "ImGui_ScrollLeft");
+        MapAnalog(ImGuiNavInput.LStickRight, "ImGui_ScrollRight");
+
+        MapButton(ImGuiNavInput.Activate, "ImGui_Activate");
+        MapButton(ImGuiNavInput.Cancel, "ImGui_Cancel");
+        MapButton(ImGuiNavInput.Input, "ImGui_Input");
+        MapButton(ImGuiNavInput.Menu, "ImGui_Menu");
     }
 
     public static void Update(float delta, Viewport vp)
