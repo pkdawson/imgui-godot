@@ -5,8 +5,10 @@ using ImGuiNET;
 
 public class ImGuiNode : Node2D
 {
+#pragma warning disable 0649
     [Export]
     DynamicFont Font = null;
+#pragma warning restore 0649
 
     [Signal]
     public delegate void IGLayout();
