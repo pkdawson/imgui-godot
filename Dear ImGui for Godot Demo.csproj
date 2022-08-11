@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/3.2.3">
+<Project Sdk="Godot.NET.Sdk/3.3.0">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>DearImGuiforGodotDemo</RootNamespace>
@@ -13,6 +13,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.78.0" />
+    <PackageReference Include="ImGui.NET" Version="1.87.3" />
   </ItemGroup>
 </Project>

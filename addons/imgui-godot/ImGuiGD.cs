@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -104,7 +104,7 @@ public class ImGuiGD
         io.KeyMap[(int)ImGuiKey.Space] = FixKey(KeyList.Space);
         io.KeyMap[(int)ImGuiKey.Enter] = FixKey(KeyList.Enter);
         io.KeyMap[(int)ImGuiKey.Escape] = FixKey(KeyList.Escape);
-        io.KeyMap[(int)ImGuiKey.KeyPadEnter] = FixKey(KeyList.KpEnter);
+        io.KeyMap[(int)ImGuiKey.KeypadEnter] = FixKey(KeyList.KpEnter);
         io.KeyMap[(int)ImGuiKey.A] = (int)KeyList.A;
         io.KeyMap[(int)ImGuiKey.C] = (int)KeyList.C;
         io.KeyMap[(int)ImGuiKey.V] = (int)KeyList.V;
