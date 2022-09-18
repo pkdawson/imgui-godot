@@ -9,6 +9,9 @@ public partial class ImGuiNode : Node2D
     [Export]
     public float FontSize = 16.0f;
 
+    [Export]
+    public bool IncludeDefaultFont = true;
+
     [Signal]
     public delegate void imgui_layoutEventHandler();
 
@@ -17,6 +20,8 @@ public partial class ImGuiNode : Node2D
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);
+            if (IncludeDefaultFont)
+                io.Fonts.AddFontDefault();
         }
         else
         {

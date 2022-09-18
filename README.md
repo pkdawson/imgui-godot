@@ -58,7 +58,7 @@ cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
 
 Use the `Font` and `FontSize` properties to add a custom font. `ImGuiNode` respects the `Visible` property, so that's the best way to hide the GUI as needed.
 
-For custom textures, call the static methods `BindTexture`, `UnbindTexture`, and `GetTexture` in `ImGuiGD`.
+For custom textures, use the static methods `BindTexture` and `UnbindTexture` in `ImGuiGD`.
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
