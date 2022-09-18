@@ -302,7 +302,6 @@ public class ImGuiGD
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[n];
-            int idxOffset = 0;
 
             int nVert = cmdList.VtxBuffer.Size;
 
@@ -325,6 +324,7 @@ public class ImGuiGD
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
 
                 int[] indices = new int[drawCmd.ElemCount];
+                int idxOffset = (int)drawCmd.IdxOffset;
                 for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; i++, j++)
                 {
                     indices[j] = cmdList.IdxBuffer[i];
