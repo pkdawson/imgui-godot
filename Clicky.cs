@@ -2,20 +2,20 @@ using Godot;
 using ImGuiNET;
 using System;
 
-public class Clicky : Button
+public partial class Clicky : Button
 {
     private bool show = false;
     
-    private void _on_Button_pressed()
+    private void _on_button2_pressed()
     {
         show = !show;
     }
 
-    private void _on_ImGui_IGLayout()
+    private void _on_imgui_layout()
     {
         if (show)
         {
-            ImGui.Begin("a new window", ref show, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
+            ImGui.Begin("a new window", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize);
             ImGui.Text("you clicked the button");
             ImGui.End();
         }

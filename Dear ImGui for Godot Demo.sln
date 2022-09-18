@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dear ImGui for Godot Demo", "Dear ImGui for Godot Demo.csproj", "{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dear ImGui for Godot Demo", "Dear ImGui for Godot Demo.csproj", "{D939DAF9-46BC-4305-9D69-D920E185BDC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,11 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{ABD95615-B4D9-4195-866C-F56F3AEE9BFE}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{D939DAF9-46BC-4305-9D69-D920E185BDC7}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal

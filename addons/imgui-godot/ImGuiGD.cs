@@ -4,15 +4,135 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public class ImGuiGD
+public partial class ImGuiGD
 {
-    private static Dictionary<IntPtr, Texture> _loadedTextures = new Dictionary<IntPtr, Texture>();
-    private static int _textureId = 100;
+    public static float JoyAxisDeadZone { get; set; } = 0.15f;
+
+    private static Dictionary<IntPtr, Texture2D> _loadedTextures = new Dictionary<IntPtr, Texture2D>();
+    private static int _textureId = 0x100;
     private static IntPtr? _fontTextureId;
     private static List<RID> _children = new List<RID>();
-    private static List<ArrayMesh> _meshes = new List<ArrayMesh>();
+    private static Vector2 _mouseWheel = Vector2.Zero;
 
-    public static IntPtr BindTexture(Texture tex)
+    private static readonly Dictionary<Key, ImGuiKey> _keyMap = new Dictionary<Key, ImGuiKey>()
+    {
+        { Key.Tab, ImGuiKey.Tab },
+        { Key.Left, ImGuiKey.LeftArrow },
+        { Key.Right, ImGuiKey.RightArrow },
+        { Key.Up, ImGuiKey.UpArrow },
+        { Key.Down, ImGuiKey.DownArrow },
+        { Key.Pageup, ImGuiKey.PageUp },
+        { Key.Pagedown, ImGuiKey.PageDown },
+        { Key.Home, ImGuiKey.Home },
+        { Key.End, ImGuiKey.End },
+        { Key.Insert, ImGuiKey.Insert },
+        { Key.Delete, ImGuiKey.Delete },
+        { Key.Backspace, ImGuiKey.Backspace },
+        { Key.Space, ImGuiKey.Space },
+        { Key.Enter, ImGuiKey.Enter },
+        { Key.Escape, ImGuiKey.Escape },
+        { Key.Menu, ImGuiKey.Menu },
+        { Key.Key0, ImGuiKey._0 },
+        { Key.Key1, ImGuiKey._1 },
+        { Key.Key2, ImGuiKey._2 },
+        { Key.Key3, ImGuiKey._3 },
+        { Key.Key4, ImGuiKey._4 },
+        { Key.Key5, ImGuiKey._5 },
+        { Key.Key6, ImGuiKey._6 },
+        { Key.Key7, ImGuiKey._7 },
+        { Key.Key8, ImGuiKey._8 },
+        { Key.Key9, ImGuiKey._9 },
+        { Key.Apostrophe, ImGuiKey.Apostrophe },
+        { Key.Comma, ImGuiKey.Comma },
+        { Key.Minus, ImGuiKey.Minus },
+        { Key.Period, ImGuiKey.Period },
+        { Key.Slash, ImGuiKey.Slash },
+        { Key.Semicolon, ImGuiKey.Semicolon },
+        { Key.Equal, ImGuiKey.Equal },
+        { Key.Bracketleft, ImGuiKey.LeftBracket },
+        { Key.Backslash, ImGuiKey.Backslash },
+        { Key.Bracketright, ImGuiKey.RightBracket },
+        { Key.Quoteleft, ImGuiKey.GraveAccent },
+        { Key.Capslock, ImGuiKey.CapsLock },
+        { Key.Scrolllock, ImGuiKey.ScrollLock },
+        { Key.Numlock, ImGuiKey.NumLock },
+        { Key.Print, ImGuiKey.PrintScreen },
+        { Key.Pause, ImGuiKey.Pause },
+        { Key.Kp0, ImGuiKey.Keypad0 },
+        { Key.Kp1, ImGuiKey.Keypad1 },
+        { Key.Kp2, ImGuiKey.Keypad2 },
+        { Key.Kp3, ImGuiKey.Keypad3 },
+        { Key.Kp4, ImGuiKey.Keypad4 },
+        { Key.Kp5, ImGuiKey.Keypad5 },
+        { Key.Kp6, ImGuiKey.Keypad6 },
+        { Key.Kp7, ImGuiKey.Keypad7 },
+        { Key.Kp8, ImGuiKey.Keypad8 },
+        { Key.Kp9, ImGuiKey.Keypad9 },
+        { Key.KpPeriod, ImGuiKey.KeypadDecimal },
+        { Key.KpDivide, ImGuiKey.KeypadDivide },
+        { Key.KpMultiply, ImGuiKey.KeypadMultiply },
+        { Key.KpSubtract, ImGuiKey.KeypadSubtract },
+        { Key.KpAdd, ImGuiKey.KeypadAdd },
+        { Key.KpEnter, ImGuiKey.KeypadEnter },
+        { Key.A, ImGuiKey.A },
+        { Key.B, ImGuiKey.B },
+        { Key.C, ImGuiKey.C },
+        { Key.D, ImGuiKey.D },
+        { Key.E, ImGuiKey.E },
+        { Key.F, ImGuiKey.F },
+        { Key.G, ImGuiKey.G },
+        { Key.H, ImGuiKey.H },
+        { Key.I, ImGuiKey.I },
+        { Key.J, ImGuiKey.J },
+        { Key.K, ImGuiKey.K },
+        { Key.L, ImGuiKey.L },
+        { Key.M, ImGuiKey.M },
+        { Key.N, ImGuiKey.N },
+        { Key.O, ImGuiKey.O },
+        { Key.P, ImGuiKey.P },
+        { Key.Q, ImGuiKey.Q },
+        { Key.R, ImGuiKey.R },
+        { Key.S, ImGuiKey.S },
+        { Key.T, ImGuiKey.T },
+        { Key.U, ImGuiKey.U },
+        { Key.V, ImGuiKey.V },
+        { Key.W, ImGuiKey.W },
+        { Key.X, ImGuiKey.X },
+        { Key.Y, ImGuiKey.Y },
+        { Key.Z, ImGuiKey.Z },
+        { Key.F1, ImGuiKey.F1 },
+        { Key.F2, ImGuiKey.F2 },
+        { Key.F3, ImGuiKey.F3 },
+        { Key.F4, ImGuiKey.F4 },
+        { Key.F5, ImGuiKey.F5 },
+        { Key.F6, ImGuiKey.F6 },
+        { Key.F7, ImGuiKey.F7 },
+        { Key.F8, ImGuiKey.F8 },
+        { Key.F9, ImGuiKey.F9 },
+        { Key.F10, ImGuiKey.F10 },
+        { Key.F11, ImGuiKey.F11 },
+        { Key.F12, ImGuiKey.F12 },
+    };
+
+    private static Dictionary<JoyButton, ImGuiKey> _joypadButtons = new Dictionary<JoyButton, ImGuiKey>
+    {
+        { JoyButton.Start, ImGuiKey.GamepadStart },
+        { JoyButton.Back, ImGuiKey.GamepadBack },
+        { JoyButton.Y, ImGuiKey.GamepadFaceUp },
+        { JoyButton.A, ImGuiKey.GamepadFaceDown },
+        { JoyButton.X, ImGuiKey.GamepadFaceLeft },
+        { JoyButton.B, ImGuiKey.GamepadFaceRight },
+        { JoyButton.DpadUp, ImGuiKey.GamepadDpadUp },
+        { JoyButton.DpadDown, ImGuiKey.GamepadDpadDown },
+        { JoyButton.DpadLeft, ImGuiKey.GamepadDpadLeft },
+        { JoyButton.DpadRight, ImGuiKey.GamepadDpadRight },
+        { JoyButton.LeftShoulder, ImGuiKey.GamepadL1 },
+        { JoyButton.RightShoulder, ImGuiKey.GamepadR1 },
+        { JoyButton.LeftStick, ImGuiKey.GamepadL3 },
+        { JoyButton.RightStick, ImGuiKey.GamepadR3 },
+    };
+
+    public static IntPtr BindTexture(Texture2D tex)
     {
         // decided not to add duplicate prevention, could cause problems
         var id = new IntPtr(_textureId++);
@@ -26,35 +146,21 @@ public class ImGuiGD
     }
 
     // used by renderer
-    public static Texture GetTexture(IntPtr textureId)
+    public static Texture2D GetTexture(IntPtr textureId)
     {
         return _loadedTextures[textureId];
     }
 
-    public static ImFontPtr AddFont(DynamicFont font)
+    public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize)
     {
-        return AddFont(font.FontData, font.Size);
-    }
-
-    public static unsafe ImFontPtr AddFont(DynamicFontData fontData, int fontSize)
-    {
-        ImFontPtr rv = null;
-
-        Godot.File fi = new File();
-        var err = fi.Open(fontData.FontPath, File.ModeFlags.Read);
-        byte[] buf = fi.GetBuffer((int)fi.GetLen());
-        fi.Close();
-
-        // can't add a name, ImFontConfig seems unusable
-
+        int len = fontData.Data.Length;
         // let ImGui manage this memory
-        IntPtr p = Marshal.AllocHGlobal(buf.Length);
-        Marshal.Copy(buf, 0, p, buf.Length);
-        rv = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, buf.Length, (float)fontSize);
-
-        return rv;
+        IntPtr p = Marshal.AllocHGlobal(len);
+        Marshal.Copy(fontData.Data, 0, p, len);
+        return ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize);
     }
 
+    // only call this once, shortly after Init
     public static unsafe void RebuildFontAtlas()
     {
         var io = ImGui.GetIO();
@@ -66,8 +172,7 @@ public class ImGuiGD
         Image img = new Image();
         img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
-        var imgtex = new ImageTexture();
-        imgtex.CreateFromImage(img, 0);
+        var imgtex = ImageTexture.CreateFromImage(img);
 
         if (_fontTextureId.HasValue) UnbindTexture(_fontTextureId.Value);
         _fontTextureId = BindTexture(imgtex);
@@ -80,96 +185,42 @@ public class ImGuiGD
     {
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
-
         var io = ImGui.GetIO();
 
         io.BackendFlags = 0;
         io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
-        // io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
-        // io.BackendPlatformName = "imgui_impl_godot";
+        // io.BackendPlatformName = "imgui_impl_godot4";
 
-        io.KeyMap[(int)ImGuiKey.Tab] = FixKey(KeyList.Tab);
-        io.KeyMap[(int)ImGuiKey.LeftArrow] = FixKey(KeyList.Left);
-        io.KeyMap[(int)ImGuiKey.RightArrow] = FixKey(KeyList.Right);
-        io.KeyMap[(int)ImGuiKey.UpArrow] = FixKey(KeyList.Up);
-        io.KeyMap[(int)ImGuiKey.DownArrow] = FixKey(KeyList.Down);
-        io.KeyMap[(int)ImGuiKey.PageUp] = FixKey(KeyList.Pageup);
-        io.KeyMap[(int)ImGuiKey.PageDown] = FixKey(KeyList.Pagedown);
-        io.KeyMap[(int)ImGuiKey.Home] = FixKey(KeyList.Home);
-        io.KeyMap[(int)ImGuiKey.End] = FixKey(KeyList.End);
-        io.KeyMap[(int)ImGuiKey.Insert] = FixKey(KeyList.Insert);
-        io.KeyMap[(int)ImGuiKey.Delete] = FixKey(KeyList.Delete);
-        io.KeyMap[(int)ImGuiKey.Backspace] = FixKey(KeyList.Backspace);
-        io.KeyMap[(int)ImGuiKey.Space] = FixKey(KeyList.Space);
-        io.KeyMap[(int)ImGuiKey.Enter] = FixKey(KeyList.Enter);
-        io.KeyMap[(int)ImGuiKey.Escape] = FixKey(KeyList.Escape);
-        io.KeyMap[(int)ImGuiKey.KeypadEnter] = FixKey(KeyList.KpEnter);
-        io.KeyMap[(int)ImGuiKey.A] = (int)KeyList.A;
-        io.KeyMap[(int)ImGuiKey.C] = (int)KeyList.C;
-        io.KeyMap[(int)ImGuiKey.V] = (int)KeyList.V;
-        io.KeyMap[(int)ImGuiKey.X] = (int)KeyList.X;
-        io.KeyMap[(int)ImGuiKey.Y] = (int)KeyList.Y;
-        io.KeyMap[(int)ImGuiKey.Z] = (int)KeyList.Z;
+        var vpSize = vp.GetVisibleRect().Size;
+        io.DisplaySize = new System.Numerics.Vector2(vpSize.x, vpSize.y);
 
-        io.DisplaySize = new System.Numerics.Vector2(vp.Size.x, vp.Size.y);
+        // clear orphaned CanvasItems when changing scenes
+        while (_children.Count > 0)
+        {
+            RenderingServer.FreeRid(_children[0]);
+            _children.RemoveAt(0);
+        }
     }
 
-    private static void UpdateJoypads()
+    public static void Update(double delta, Viewport vp)
     {
         var io = ImGui.GetIO();
-        if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
-            return;
-
-        void MapAnalog(ImGuiNavInput igni, string act)
-        {
-            if (Input.IsActionPressed(act))
-            {
-                io.NavInputs[(int)igni] = Input.GetActionStrength(act);
-            }
-        }
-
-        void MapButton(ImGuiNavInput igni, string act)
-        {
-            if (Input.IsActionPressed(act))
-            {
-                io.NavInputs[(int)igni] = 1;
-            }
-        }
-
-        MapButton(ImGuiNavInput.DpadUp, "ImGui_DpadUp");
-        MapButton(ImGuiNavInput.DpadDown, "ImGui_DpadDown");
-        MapButton(ImGuiNavInput.DpadLeft, "ImGui_DpadLeft");
-        MapButton(ImGuiNavInput.DpadRight, "ImGui_DpadRight");
-
-        MapAnalog(ImGuiNavInput.LStickUp, "ImGui_ScrollUp");
-        MapAnalog(ImGuiNavInput.LStickDown, "ImGui_ScrollDown");
-        MapAnalog(ImGuiNavInput.LStickLeft, "ImGui_ScrollLeft");
-        MapAnalog(ImGuiNavInput.LStickRight, "ImGui_ScrollRight");
-
-        MapButton(ImGuiNavInput.Activate, "ImGui_Activate");
-        MapButton(ImGuiNavInput.Cancel, "ImGui_Cancel");
-        MapButton(ImGuiNavInput.Input, "ImGui_Input");
-        MapButton(ImGuiNavInput.Menu, "ImGui_Menu");
-    }
-
-    public static void Update(float delta, Viewport vp)
-    {
-        var io = ImGui.GetIO();
-        io.DisplaySize = new System.Numerics.Vector2(vp.Size.x, vp.Size.y);
-        io.DeltaTime = delta;
-
-        io.KeyCtrl = Input.IsKeyPressed((int)KeyList.Control);
-        io.KeyAlt = Input.IsKeyPressed((int)KeyList.Alt);
-        io.KeyShift = Input.IsKeyPressed((int)KeyList.Shift);
-        io.KeySuper = Input.IsKeyPressed((int)KeyList.SuperL) || Input.IsKeyPressed((int)KeyList.SuperR);
+        var vpSize = vp.GetVisibleRect().Size;
+        io.DisplaySize = new System.Numerics.Vector2(vpSize.x, vpSize.y);
+        io.DeltaTime = (float)delta;
 
         if (io.WantSetMousePos)
         {
-            vp.WarpMouse(new Godot.Vector2(io.MousePos.X, io.MousePos.Y));
+            vp.WarpMouse(new Vector2(io.MousePos.X, io.MousePos.Y));
         }
 
-        UpdateJoypads();
+        // scrolling works better if we allow no more than one event per frame
+        if (_mouseWheel != Vector2.Zero)
+        {
+            io.AddMouseWheelEvent(_mouseWheel.x, _mouseWheel.y);
+            _mouseWheel = Vector2.Zero;
+        }
 
         ImGui.NewFrame();
     }
@@ -184,7 +235,7 @@ public class ImGuiGD
     {
         foreach (RID rid in _children)
         {
-            VisualServer.FreeRid(rid);
+            RenderingServer.FreeRid(rid);
         }
         ImGui.DestroyContext();
     }
@@ -196,171 +247,193 @@ public class ImGuiGD
 
         if (evt is InputEventMouseMotion mm)
         {
-            io.MousePos = new System.Numerics.Vector2(mm.Position.x, mm.Position.y);
+            io.AddMousePosEvent(mm.Position.x, mm.Position.y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)
         {
-            switch ((ButtonList)mb.ButtonIndex)
+            switch (mb.ButtonIndex)
             {
-                case ButtonList.Left:
-                    io.MouseDown[(int)ImGuiMouseButton.Left] = mb.Pressed;
+                case MouseButton.Left:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
                     break;
-                case ButtonList.Right:
-                    io.MouseDown[(int)ImGuiMouseButton.Right] = mb.Pressed;
+                case MouseButton.Right:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Right, mb.Pressed);
                     break;
-                case ButtonList.Middle:
-                    io.MouseDown[(int)ImGuiMouseButton.Middle] = mb.Pressed;
+                case MouseButton.Middle:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle, mb.Pressed);
                     break;
-                case ButtonList.WheelUp:
-                    io.MouseWheel = mb.Factor * 1.0f;
+                case MouseButton.WheelUp:
+                    _mouseWheel.y = mb.Factor;
                     break;
-                case ButtonList.WheelDown:
-                    io.MouseWheel = mb.Factor * -1.0f;
+                case MouseButton.WheelDown:
+                    _mouseWheel.y = -mb.Factor;
                     break;
-                case ButtonList.WheelLeft:
-                    io.MouseWheelH = mb.Factor * -1.0f;
+                case MouseButton.WheelLeft:
+                    _mouseWheel.x = -mb.Factor;
                     break;
-                case ButtonList.WheelRight:
-                    io.MouseWheelH = mb.Factor * 1.0f;
+                case MouseButton.WheelRight:
+                    _mouseWheel.x = mb.Factor;
                     break;
-                case ButtonList.Xbutton1:
-                    io.MouseDown[(int)ImGuiMouseButton.Middle + 1] = mb.Pressed;
+                case MouseButton.Xbutton1:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 1, mb.Pressed);
                     break;
-                case ButtonList.Xbutton2:
-                    io.MouseDown[(int)ImGuiMouseButton.Middle + 2] = mb.Pressed;
-                    break;
-                default:
-                    // more buttons not supported
+                case MouseButton.Xbutton2:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 2, mb.Pressed);
                     break;
             };
-
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventKey k)
         {
-            KeyList kc = (KeyList)k.Scancode;
-            int code = FixKey(kc);
-
-            io.KeysDown[code] = k.Pressed;
-            if (k.Pressed)
+            UpdateKeyMods(io, k);
+            Key kc = k.Keycode;
+            if (_keyMap.TryGetValue(kc, out var igk))
             {
-                io.AddInputCharacter(k.Unicode);
+                io.AddKeyEvent(igk, k.Pressed);
+
+                if (k.Pressed && k.Unicode != 0)
+                {
+                    io.AddInputCharacter((uint)k.Unicode);
+                }
             }
             consumed = io.WantCaptureKeyboard || io.WantTextInput;
         }
         else if (evt is InputEventPanGesture pg)
         {
-            io.MouseWheelH = -pg.Delta.x;
-            io.MouseWheel = -pg.Delta.y;
+            _mouseWheel = new Vector2(-pg.Delta.x, -pg.Delta.y);
             consumed = io.WantCaptureMouse;
+        }
+        else if (evt is InputEventJoypadButton jb)
+        {
+            if (_joypadButtons.TryGetValue(jb.ButtonIndex, out var igk))
+            {
+                io.AddKeyEvent(igk, jb.Pressed);
+            }
+        }
+        else if (evt is InputEventJoypadMotion jm)
+        {
+            bool pressed = true;
+            float v = jm.AxisValue;
+            if (Math.Abs(v) < JoyAxisDeadZone)
+            {
+                v = 0f;
+                pressed = false;
+            }
+            switch (jm.Axis)
+            {
+                case JoyAxis.LeftX:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickRight, pressed, v);
+                    break;
+                case JoyAxis.LeftY:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickDown, pressed, v);
+                    break;
+                case JoyAxis.RightX:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickRight, pressed, v);
+                    break;
+                case JoyAxis.RightY:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickDown, pressed, v);
+                    break;
+                case JoyAxis.TriggerLeft:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadL2, pressed, v);
+                    break;
+                case JoyAxis.TriggerRight:
+                    io.AddKeyAnalogEvent(ImGuiKey.GamepadR2, pressed, v);
+                    break;
+            };
         }
 
         return consumed;
     }
 
-    private static int FixKey(KeyList kc)
+    private static void UpdateKeyMods(ImGuiIOPtr io, InputEventKey k)
     {
-        // Godot reserves the first 24 bits for printable characters, but ImGui needs keycodes <512
-        if ((int)kc < 256)
-            return (int)kc;
-        else
-            return 256 + (int)((uint)kc & 0xFF);
+        io.AddKeyEvent(ImGuiKey.ModCtrl, k.CtrlPressed);
+        io.AddKeyEvent(ImGuiKey.ModShift, k.ShiftPressed);
+        io.AddKeyEvent(ImGuiKey.ModAlt, k.AltPressed);
+        io.AddKeyEvent(ImGuiKey.ModSuper, k.MetaPressed);
     }
 
     private static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
     {
         // allocate and clear out our CanvasItem pool as needed
         int neededNodes = 0;
-        for (int i = 0; i < drawData.CmdListsCount; i++)
+        for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             neededNodes += drawData.CmdListsRange[i].CmdBuffer.Size;
         }
 
         while (_children.Count < neededNodes)
         {
-            RID newChild = VisualServer.CanvasItemCreate();
-            VisualServer.CanvasItemSetParent(newChild, parent);
-            VisualServer.CanvasItemSetDrawIndex(newChild, _children.Count);
+            RID newChild = RenderingServer.CanvasItemCreate();
+            RenderingServer.CanvasItemSetParent(newChild, parent);
+            RenderingServer.CanvasItemSetDrawIndex(newChild, _children.Count);
             _children.Add(newChild);
-            _meshes.Add(new ArrayMesh());
         }
 
         // trim unused nodes to reduce draw calls
         while (_children.Count > neededNodes)
         {
             int idx = _children.Count - 1;
-            VisualServer.FreeRid(_children[idx]);
+            RenderingServer.FreeRid(_children[idx]);
             _children.RemoveAt(idx);
-            _meshes.RemoveAt(idx);
         }
 
         // render
         drawData.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
         int nodeN = 0;
 
-        for (int n = 0; n < drawData.CmdListsCount; n++)
+        for (int n = 0; n < drawData.CmdListsCount; ++n)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[n];
 
             int nVert = cmdList.VtxBuffer.Size;
 
-            Godot.Vector2[] vertices = new Godot.Vector2[nVert];
-            Godot.Color[] colors = new Godot.Color[nVert];
-            Godot.Vector2[] uvs = new Godot.Vector2[nVert];
+            var vertices = new Vector2[nVert];
+            var colors = new Color[nVert];
+            var uvs = new Vector2[nVert];
 
-            for (int i = 0; i < cmdList.VtxBuffer.Size; i++)
+            for (int i = 0; i < cmdList.VtxBuffer.Size; ++i)
             {
                 var v = cmdList.VtxBuffer[i];
-                vertices[i] = new Godot.Vector2(v.pos.X, v.pos.Y);
+                vertices[i] = new Vector2(v.pos.X, v.pos.Y);
                 // need to reverse the color bytes
-                byte[] col = BitConverter.GetBytes(v.col);
-                colors[i] = Godot.Color.Color8(col[0], col[1], col[2], col[3]);
-                uvs[i] = new Godot.Vector2(v.uv.X, v.uv.Y);
+                uint rgba = v.col;
+                float r = (rgba & 0xFFu) / 255f;
+                rgba >>= 8;
+                float g = (rgba & 0xFFu) / 255f;
+                rgba >>= 8;
+                float b = (rgba & 0xFFu) / 255f;
+                rgba >>= 8;
+                float a = (rgba & 0xFFu) / 255f;
+                colors[i] = new Color(r, g, b, a);
+                uvs[i] = new Vector2(v.uv.X, v.uv.Y);
             }
 
-            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++, nodeN++)
+            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi, ++nodeN)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
 
-                int[] indices = new int[drawCmd.ElemCount];
+                var indices = new int[drawCmd.ElemCount];
                 int idxOffset = (int)drawCmd.IdxOffset;
-                for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; i++, j++)
+                for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; ++i, ++j)
                 {
                     indices[j] = cmdList.IdxBuffer[i];
                 }
 
-                var arrays = new Godot.Collections.Array();
-                arrays.Resize((int)ArrayMesh.ArrayType.Max);
-                arrays[(int)ArrayMesh.ArrayType.Vertex] = vertices;
-                arrays[(int)ArrayMesh.ArrayType.Color] = colors;
-                arrays[(int)ArrayMesh.ArrayType.TexUv] = uvs;
-                arrays[(int)ArrayMesh.ArrayType.Index] = indices;
-
-                var mesh = _meshes[nodeN];
-                while (mesh.GetSurfaceCount() > 0)
-                {
-                    mesh.SurfaceRemove(0);
-                }
-                mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
-
                 RID child = _children[nodeN];
 
-                Texture tex = GetTexture(drawCmd.TextureId);
-                VisualServer.CanvasItemClear(child);
-                VisualServer.CanvasItemSetClip(child, true);
-                VisualServer.CanvasItemSetCustomRect(child, true, new Godot.Rect2(
+                Texture2D tex = GetTexture(drawCmd.GetTexID());
+                RenderingServer.CanvasItemClear(child);
+                RenderingServer.CanvasItemSetClip(child, true);
+                RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
                     drawCmd.ClipRect.X,
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
-                VisualServer.CanvasItemAddMesh(child, mesh.GetRid(), null, null, tex.GetRid(), new RID(null));
 
-                // why doesn't this quite work?
-                // VisualServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1, new RID(null));
-
-                idxOffset += (int)drawCmd.ElemCount;
+                RenderingServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1);
             }
         }
     }

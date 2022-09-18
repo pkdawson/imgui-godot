@@ -1,46 +1,43 @@
 using Godot;
-using System;
-using System.Collections.Generic;
 using ImGuiNET;
 
-public class ImGuiNode : Node2D
+public partial class ImGuiNode : Node2D
 {
     [Export]
-    DynamicFont Font = null;
+    public FontFile Font = null;
+
+    [Export]
+    public float FontSize = 16.0f;
 
     [Signal]
-    public delegate void IGLayout();
+    public delegate void imgui_layoutEventHandler();
 
     public virtual void Init(ImGuiIOPtr io)
     {
-        if (Font is null)
+        if (Font is not null)
         {
-            io.Fonts.AddFontDefault();
+            ImGuiGD.AddFont(Font, FontSize);
         }
         else
         {
-            ImGuiGD.AddFont(Font);
+            io.Fonts.AddFontDefault();
         }
-        ImGuiGD.RebuildFontAtlas();
-    }
-
-    public virtual void Layout()
-    {
-        EmitSignal(nameof(IGLayout));
     }
 
     public override void _EnterTree()
     {
+        ProcessPriority = int.MaxValue; // try to be last
         ImGuiGD.Init(GetViewport());
         Init(ImGui.GetIO());
+        ImGuiGD.RebuildFontAtlas();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (Visible)
         {
             ImGuiGD.Update(delta, GetViewport());
-            Layout();
+            EmitSignal("imgui_layout");
             ImGuiGD.Render(GetCanvasItem());
         }
     }
@@ -49,7 +46,7 @@ public class ImGuiNode : Node2D
     {
         if (Visible && ImGuiGD.ProcessInput(evt))
         {
-            GetTree().SetInputAsHandled();
+            GetViewport().SetInputAsHandled();
         }
     }
 

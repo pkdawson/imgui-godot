@@ -4,3 +4,4 @@
 *.old
 imgui.ini
 export_presets.cfg
+.godot/

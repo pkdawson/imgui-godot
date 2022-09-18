@@ -1,13 +1,35 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=5 format=3 uid="uid://dr8hy6iu5hk8a"]
 
-[ext_resource path="res://MyGui.cs" type="Script" id=1]
+[ext_resource type="Script" path="res://Clicky.cs" id="1_luuqi"]
+[ext_resource type="Script" path="res://addons/imgui-godot/ImGuiNode.cs" id="1_yojj6"]
+[ext_resource type="Script" path="res://MySecondNode.cs" id="2_gnjei"]
+[ext_resource type="FontFile" uid="uid://blkln4jih4r2t" path="res://Hack-Regular.ttf" id="3_7cyft"]
 
 [node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button2" type="Button" parent="."]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 608.0
+offset_right = 177.0
+offset_bottom = 667.0
+text = "click me"
+script = ExtResource("1_luuqi")
 
 [node name="ImGuiNode" type="Node2D" parent="."]
-script = ExtResource( 1 )
+unique_name_in_owner = true
+script = ExtResource("1_yojj6")
+Font = ExtResource("3_7cyft")
+FontSize = 18.0
+
+[node name="MySecondNode" type="Node" parent="."]
+script = ExtResource("2_gnjei")
+
+[connection signal="pressed" from="Button2" to="Button2" method="_on_button2_pressed"]
+[connection signal="imgui_layout" from="ImGuiNode" to="Button2" method="_on_imgui_layout"]

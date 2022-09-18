@@ -1,70 +1,72 @@
-# imgui-godot
-[Godot](https://github.com/godotengine/godot) plugin for integrating [Dear ImGui](https://github.com/ocornut/imgui)
+# [Dear ImGui](https://github.com/ocornut/imgui) plugin for [Godot 4](https://github.com/godotengine/godot) (C#)
 
-Still a work in progress, some unfinished stuff, not sure about the interface, probably bugs, resource leaks, etc
+![screenshot](doc/screenshot.png)
+
+Dear ImGui is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/mellinoe/ImGui.NET), allows you to use ImGui in Godot with C#.
+
+After a little setup, usage is as simple as this:
+```csharp
+public partial class MyNode : Node
+{
+    public void _on_imgui_layout()
+    {
+        ImGui.Begin("ImGui on Godot 4");
+        ImGui.Text("hello world");
+        ImGui.End();
+    }
+}
+```
 
 ## Getting Started
 
 ### Demo
 
-On Windows, just click `Build` in the top right then play the project. On other platforms, you may need to
-run `nuget restore`, then try the build again.
+As of Godot 4.0 beta 1, you'll probably get a warning when you open the project. Just click Ok, click Build, then go to `Project > Project Settings > Plugins` and enable the plugin.
+
+Click `Build` in the top right, then play the project.
+
+On macOS, you will need to do something like:
+```
+cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
+```
 
 ### Your project
 
-1. Create a project and click `Build` in the top right to generate the .csproj file.
+1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
 
 2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder.
 
-3. Enable the plugin in `Project > Project Settings > Plugins`.
-
-4. In Visual Studio or another IDE, open the solution and allow unsafe blocks in all configurations, and install `ImGui.NET` with NuGet. Save and return to Godot.
+3. In Visual Studio or another IDE, open the solution and allow unsafe code, and install `ImGui.NET` with NuGet. Save and return to Godot.
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications, or copy it entirely.)
 
-5. Click `Build` again (if you get errors, you probably need to run `nuget restore`).
+4. Back in the Godot editor, click `Build`.
+
+5. Enable the plugin in `Project > Project Settings > Plugins`.
 
 6. Add an `ImGuiNode` to your scene.
 
 7. Write code!
 
-## Interface
-
-I've provided two ways to use ImGui. See the demo project scenes for examples.
-
-### Signals
+## Usage
 
 1. Drop an `ImGuiNode` wherever you want in your scene (usually near the end, so it's rendered on top).
 
-2. From a script on any other node (or multiple nodes!), connect the `IGLayout` signal.
+2. From a script on any other node (or multiple nodes!), connect the `imgui_layout` signal.
 
-3. In the function which handles this signal, use `ImGuiNET` to create your GUI.
+3. In the method which handles this signal, use `ImGuiNET` to create your GUI.
 
-### Script extension
+Use the `Font` and `FontSize` properties to add a custom font. `ImGuiNode` respects the `Visible` property, so that's the best way to hide the GUI as needed.
 
-If you need to override something, or if you just want to do everything with one node:
+For custom textures, call the static methods `BindTexture`, `UnbindTexture`, and `GetTexture` in `ImGuiGD`.
 
-1. Add the `ImGuiNode`, then use `Extend Script`.
-
-2. The Godot prompt won't let you inherit from `ImGuiNode`, so be sure to fix that after your new script is created.
-
-3. Override `Layout` - see `MyGui.cs` for details. Be careful when overriding other methods; it should be
-ok if you make sure to call the parent method first (using `base`).
-
-Since this plugin is unfinished, it doesn't make sense to document an API yet. Check the samples and use the static methods provided by ImGuiGD.
-
-## Project export
-
-When exporting your project with Godot, the native code cimgui library won't be included.
-On Windows, you can just copy over cimgui.dll (from .mono\temp\bin\ExportRelease) to the same directory as your exe.
-
-On macOS, I haven't been able to get the .app to work no matter where I put the .dylib. It does work if you run the binary directly.
+That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
 ## Credits
 
-All code written by Patrick Dawson, released to the public domain (Creative Commons Zero v1.0 Universal)
+All code written by Patrick Dawson, released under the MIT license
 
-Godot Logo (C) Andrea Calabró Distributed under the terms of the Creative Commons Attribution License version 3.0 (CC-BY 3.0) https://creativecommons.org/licenses/by/3.0/legalcode.
+Godot Logo (C) Andrea Calabró, distributed under the terms of the Creative Commons Attribution 4.0 International License (CC-BY-4.0 International) https://creativecommons.org/licenses/by/4.0/
 
 Hack font distributed under the [MIT license](https://github.com/source-foundry/Hack/blob/master/LICENSE.md)
 
