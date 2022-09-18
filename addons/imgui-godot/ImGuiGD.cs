@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 public partial class ImGuiGD
 {
@@ -14,6 +15,7 @@ public partial class ImGuiGD
     private static IntPtr? _fontTextureId;
     private static List<RID> _children = new List<RID>();
     private static Vector2 _mouseWheel = Vector2.Zero;
+    private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
 
     public static IntPtr BindTexture(Texture2D tex)
     {
@@ -92,15 +94,8 @@ public partial class ImGuiGD
 
         unsafe
         {
-            if (io.NativePtr->BackendPlatformName == null)
-            {
-                string backendName = "imgui_impl_godot4";
-                io.NativePtr->BackendPlatformName = (byte*)Marshal.AllocHGlobal(backendName.Length + 1);
-                Unsafe.InitBlockUnaligned(io.NativePtr->BackendPlatformName, 0, (uint)backendName.Length + 1);
-                for (int i = 0; i < backendName.Length; ++i)
-                    io.NativePtr->BackendPlatformName[i] = Convert.ToByte(backendName[i]);
-                io.NativePtr->BackendRendererName = io.NativePtr->BackendPlatformName;
-            }
+            io.NativePtr->BackendPlatformName = (byte*)_backendName.AddrOfPinnedObject();
+            io.NativePtr->BackendRendererName = (byte*)_backendName.AddrOfPinnedObject();
         }
 
         var vpSize = vp.GetVisibleRect().Size;
