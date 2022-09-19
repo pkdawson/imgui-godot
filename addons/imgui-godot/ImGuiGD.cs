@@ -43,22 +43,36 @@ public partial class ImGuiGD
 
     public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, IntPtr glyphRanges)
     {
+        // ImFontConfig has a constructor, so we don't zero it
+        ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
+        string name = string.Format("{0}, {1}px", System.IO.Path.GetFileName(fontData.ResourcePath), fontSize);
+        for (int i = 0; i < name.Length && i < 40; ++i)
+        {
+            fc->Name[i] = Convert.ToByte(name[i]);
+        }
+
+        ImFontPtr rv = AddFont(fontData, fontSize, glyphRanges, fc);
+        ImGuiNative.ImFontConfig_destroy(fc);
+        return rv;
+    }
+
+    public static unsafe ImFontPtr AddFontMerge(FontFile fontData, float fontSize, IntPtr glyphRanges)
+    {
+        ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
+        fc->MergeMode = 1;
+        ImFontPtr rv = AddFont(fontData, fontSize, glyphRanges, fc);
+        ImGui.GetIO().Fonts.Build();
+        ImGuiNative.ImFontConfig_destroy(fc);
+        return rv;
+    }
+
+    private static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, IntPtr glyphRanges, ImFontConfig* fc)
+    {
         int len = fontData.Data.Length;
         // let ImGui manage this memory
         IntPtr p = Marshal.AllocHGlobal(len);
         Marshal.Copy(fontData.Data, 0, p, len);
-
-        // ImFontConfig has a constructor, so we don't zero it
-        ImFontConfig* fcptr = ImGuiNative.ImFontConfig_ImFontConfig();
-        string name = string.Format("{0}, {1}px", System.IO.Path.GetFileName(fontData.ResourcePath), fontSize);
-        for (int i = 0; i < name.Length && i < 40; ++i)
-        {
-            fcptr->Name[i] = Convert.ToByte(name[i]);
-        }
-
-        ImFontPtr rv = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fcptr, glyphRanges);
-        ImGuiNative.ImFontConfig_destroy(fcptr);
-        return rv;
+        return ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, glyphRanges);
     }
 
     // only call this once, shortly after Init
