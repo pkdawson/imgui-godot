@@ -270,11 +270,17 @@ public partial class ImGuiGD
 
     private static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
     {
-        // allocate and clear out our CanvasItem pool as needed
+        // allocate our CanvasItem pool as needed
         int neededNodes = 0;
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
-            neededNodes += drawData.CmdListsRange[i].CmdBuffer.Size;
+            var cmdBuf = drawData.CmdListsRange[i].CmdBuffer;
+            neededNodes += cmdBuf.Size;
+            for (int j = 0; j < cmdBuf.Size; ++j)
+            {
+                if (cmdBuf[j].ElemCount == 0)
+                    --neededNodes;
+            }
         }
 
         while (_children.Count < neededNodes)
@@ -285,7 +291,7 @@ public partial class ImGuiGD
             _children.Add(newChild);
         }
 
-        // trim unused nodes to reduce draw calls
+        // trim unused nodes
         while (_children.Count > neededNodes)
         {
             int idx = _children.Count - 1;
@@ -324,9 +330,14 @@ public partial class ImGuiGD
                 uvs[i] = new Vector2(v.uv.X, v.uv.Y);
             }
 
-            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi, ++nodeN)
+            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
+
+                if (drawCmd.ElemCount == 0)
+                {
+                    continue;
+                }
 
                 var indices = new int[drawCmd.ElemCount];
                 int idxOffset = (int)drawCmd.IdxOffset;
@@ -335,7 +346,7 @@ public partial class ImGuiGD
                     indices[j] = cmdList.IdxBuffer[i];
                 }
 
-                RID child = _children[nodeN];
+                RID child = _children[nodeN++];
 
                 Texture2D tex = GetTexture(drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
