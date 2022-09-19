@@ -1,5 +1,6 @@
 using Godot;
 using ImGuiNET;
+using System;
 
 public partial class ImGuiNode : Node2D
 {
@@ -8,6 +9,15 @@ public partial class ImGuiNode : Node2D
 
     [Export]
     public float FontSize = 16.0f;
+
+    [Export]
+    public FontFile ExtraFont = null;
+
+    [Export]
+    public float ExtraFontSize = 16.0f;
+
+    [Export(PropertyHint.Enum, "Korean,Japanese,ChineseFull,ChineseSimplifiedCommon,Cyrillic,Thai,Vietnamese")]
+    public string ExtraFontGlyphRange = "Japanese";
 
     [Export]
     public bool IncludeDefaultFont = true;
@@ -20,10 +30,24 @@ public partial class ImGuiNode : Node2D
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);
-            if (IncludeDefaultFont)
-                io.Fonts.AddFontDefault();
+            if (ExtraFont is not null)
+            {
+                IntPtr gr = ExtraFontGlyphRange switch
+                {
+                    "Korean" => io.Fonts.GetGlyphRangesKorean(),
+                    "Japanese" => io.Fonts.GetGlyphRangesJapanese(),
+                    "ChineseFull" => io.Fonts.GetGlyphRangesChineseFull(),
+                    "ChineseSimplifiedCommon" => io.Fonts.GetGlyphRangesChineseSimplifiedCommon(),
+                    "Cyrillic" => io.Fonts.GetGlyphRangesCyrillic(),
+                    "Thai" => io.Fonts.GetGlyphRangesThai(),
+                    "Vietnamese" => io.Fonts.GetGlyphRangesVietnamese(),
+                    _ => throw new Exception("invalid glyph range")
+                };
+                ImGuiGD.AddFontMerge(ExtraFont, ExtraFontSize, gr);
+            }
         }
-        else
+
+        if (IncludeDefaultFont)
         {
             io.Fonts.AddFontDefault();
         }
