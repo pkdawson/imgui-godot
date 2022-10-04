@@ -1,4 +1,4 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dear ImGui for Godot Demo", "Dear ImGui for Godot Demo.csproj", "{D939DAF9-46BC-4305-9D69-D920E185BDC7}"
 EndProject

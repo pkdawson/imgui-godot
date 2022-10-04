@@ -6,3 +6,4 @@ imgui.ini
 export_presets.cfg
 .godot/
 *.user
+Properties/

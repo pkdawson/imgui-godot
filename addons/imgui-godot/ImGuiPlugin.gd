@@ -2,7 +2,7 @@
 extends EditorPlugin
 
 func _enter_tree():
-    add_custom_type("ImGuiNode", "Node2D", preload("ImGuiNode.cs"), preload("icon.tres"))
+    add_autoload_singleton("ImGuiLayer", "res://addons/imgui-godot/ImGuiLayer.tscn")
 
 func _exit_tree():
-    remove_custom_type("ImGuiNode")
+    remove_autoload_singleton("ImGuiLayer")
