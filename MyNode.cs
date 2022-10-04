@@ -4,18 +4,7 @@ using System;
 
 public partial class MyNode : Node
 {
-    public override void _Ready()
-    {
-        ImGuiLayer.Instance.imgui_layout += _imgui_layout;
-    }
-
-    public override void _ExitTree()
-    {
-        // TODO: remove after beta 3
-        ImGuiLayer.Instance.imgui_layout -= _imgui_layout;
-    }
-
-    private void _imgui_layout()
+    public override void _Process(double delta)
     {
         ImGui.ShowDemoWindow();
     }

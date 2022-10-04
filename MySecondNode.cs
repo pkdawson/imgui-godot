@@ -36,16 +36,12 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Instance.imgui_layout += _imgui_layout;
-
         iconTexture = GD.Load<Texture2D>("res://icon.svg");
         iconTextureId = ImGuiGD.BindTexture(iconTexture);
     }
 
     public override void _ExitTree()
     {
-        // TODO: remove after beta 3
-        ImGuiLayer.Instance.imgui_layout -= _imgui_layout;
         ImGuiGD.UnbindTexture(iconTextureId);
 
         // restore the hardware mouse cursor
@@ -55,7 +51,7 @@ public partial class MySecondNode : Node
         Input.MouseMode = Input.MouseModeEnum.Visible;
     }
 
-    private void _imgui_layout()
+    public override void _Process(double delta)
     {
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
