@@ -1,6 +1,5 @@
-[gd_scene load_steps=5 format=3 uid="uid://sdgew7sm2686"]
+[gd_scene load_steps=4 format=3 uid="uid://sdgew7sm2686"]
 
-[ext_resource type="Script" path="res://addons/imgui-godot/ImGuiNode.cs" id="1"]
 [ext_resource type="Texture2D" uid="uid://pkj4drhkpad" path="res://icon.svg" id="1_c7hdb"]
 [ext_resource type="FontFile" uid="uid://blkln4jih4r2t" path="res://Hack-Regular.ttf" id="3_fjiyg"]
 [ext_resource type="Script" path="res://MyNode.cs" id="3_qvd0t"]
@@ -38,9 +37,6 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_c7hdb")
 
-[node name="ImGuiNode" type="Node2D" parent="."]
-script = ExtResource("1")
-
 [node name="TextureRect2" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 3
@@ -59,4 +55,3 @@ ignore_texture_size = true
 script = ExtResource("3_qvd0t")
 
 [connection signal="pressed" from="Button1" to="MyNode" method="_on_button1_pressed"]
-[connection signal="imgui_layout" from="ImGuiNode" to="MyNode" method="_on_imgui_layout"]

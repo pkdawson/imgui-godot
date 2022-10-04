@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Dear ImGui for Godot Demo"
 run/main_scene="res://demo.tscn"
-config/features=PackedStringArray("4.0", "C#", "Vulkan Clustered")
+config/features=PackedStringArray("4.0", "C#")
 config/icon="res://icon.svg"
+
+[autoload]
+
+ImGuiLayer="*res://addons/imgui-godot/ImGuiLayer.tscn"
 
 [display]
 
