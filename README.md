@@ -8,12 +8,7 @@ After installing the plugin, usage is as simple as this:
 ```csharp
 public partial class MyNode : Node
 {
-    public override void _Ready()
-    {
-        ImGuiLayer.Instance.imgui_layout += _imgui_layout;
-    }
-
-    private void _imgui_layout()
+    public override void _Process()
     {
         ImGui.Begin("ImGui on Godot 4");
         ImGui.Text("hello world");
@@ -51,14 +46,7 @@ cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
 
 ## Usage
 
-1. In any Node, connect to the `imgui_layout` signal in `_Ready` or `_EnterTree`:
-    ```
-    ImGuiLayer.Instance.imgui_layout += _imgui_layout;
-    ```
-
-2. In the method which handles this signal, use `ImGuiNET` to create your GUI.
-
-The layout signal is emitted at the end of the processing step.
+In any Node's `_Process` method, use `ImGuiNET` to create your GUI.
 
 If you want to customize fonts or other settings, open the scene `res://addons/imgui-godot/ImGuiLayer.tscn`
 
@@ -67,6 +55,8 @@ Use the `Font` and `FontSize` properties to add a custom font. Use the `Visible`
 For custom textures, use the static methods `BindTexture` and `UnbindTexture` in `ImGuiGD`.
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
+
+Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
 
 ## Credits
 

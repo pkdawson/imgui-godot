@@ -8,23 +8,12 @@ public partial class Clicky : Button
     private static readonly ImGuiWindowFlags winFlags = ImGuiWindowFlags.NoTitleBar |
         ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize;
 
-    public override void _Ready()
-    {
-        ImGuiLayer.Instance.imgui_layout += _imgui_layout;
-    }
-
-    public override void _ExitTree()
-    {
-        // TODO: remove after beta 3
-        ImGuiLayer.Instance.imgui_layout -= _imgui_layout;
-    }
-
     private void _on_button2_pressed()
     {
         show = !show;
     }
 
-    private void _imgui_layout()
+    public override void _Process(double delta)
     {
         if (show)
         {
