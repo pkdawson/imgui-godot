@@ -22,34 +22,29 @@ public partial class ImGuiLayer : CanvasLayer
     [Export]
     public bool AddDefaultFont = true;
 
+    [Signal]
+    public delegate void ImGuiLayoutEventHandler();
+
     private RID _canvasItem;
 
-    private partial class RenderLast : Node
+    private partial class UpdateFirst : Node
     {
-        private RID _ci;
-
-        public RenderLast(RID ci)
-        {
-            _ci = ci;
-        }
-
         public override void _EnterTree()
         {
-            ProcessPriority = int.MaxValue;
+            ProcessPriority = int.MinValue;
         }
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Render(_ci);
+            ImGuiGD.Update(delta, GetViewport());
         }
     }
-
 
     public override void _EnterTree()
     {
         Instance = this;
 
-        ProcessPriority = int.MinValue;
+        ProcessPriority = int.MaxValue;
         _canvasItem = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
         VisibilityChanged += OnChangeVisibility;
@@ -70,9 +65,8 @@ public partial class ImGuiLayer : CanvasLayer
         }
         ImGuiGD.RebuildFontAtlas();
 
+        AddChild(new UpdateFirst());
         OnChangeVisibility();
-
-        AddChild(new RenderLast(_canvasItem));
     }
 
     public override void _ExitTree()
@@ -99,7 +93,8 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Process(double delta)
     {
-        ImGuiGD.Update(delta, GetViewport());
+        EmitSignal(SignalName.ImGuiLayout);
+        ImGuiGD.Render(_canvasItem);
     }
 
     public override void _Input(InputEvent e)
@@ -108,5 +103,10 @@ public partial class ImGuiLayer : CanvasLayer
         {
             GetViewport().SetInputAsHandled();
         }
+    }
+
+    public void Connect(ImGuiLayoutEventHandler d)
+    {
+        ImGuiLayout += d;
     }
 }
