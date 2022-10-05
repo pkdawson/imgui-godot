@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://cul7rwt5m68dn"
-path="res://.godot/imported/MPLUS2-Regular.ttf-bf7e0a713bd9f28f62f11650f8c1a99d.fontdata"
+uid="uid://bk0s2hduow46m"
+path="res://.godot/imported/MPLUS2-Regular.ttf-7fe86ccd65e167ffa0da418b024bf3c5.fontdata"
 
 [deps]
 
-source_file="res://MPLUS2-Regular.ttf"
-dest_files=["res://.godot/imported/MPLUS2-Regular.ttf-bf7e0a713bd9f28f62f11650f8c1a99d.fontdata"]
+source_file="res://data/MPLUS2-Regular.ttf"
+dest_files=["res://.godot/imported/MPLUS2-Regular.ttf-7fe86ccd65e167ffa0da418b024bf3c5.fontdata"]
 
 [params]
 

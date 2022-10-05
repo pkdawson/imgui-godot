@@ -22,6 +22,6 @@ public partial class MyNode : Node
 
     private void _on_button1_pressed()
     {
-        GetTree().ChangeSceneToFile("res://demo2.tscn");
+        GetTree().ChangeSceneToFile("res://data/demo2.tscn");
     }
 }

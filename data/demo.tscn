@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://sdgew7sm2686"]
 
-[ext_resource type="Texture2D" uid="uid://pkj4drhkpad" path="res://icon.svg" id="1_c7hdb"]
-[ext_resource type="FontFile" uid="uid://blkln4jih4r2t" path="res://Hack-Regular.ttf" id="3_fjiyg"]
-[ext_resource type="Script" path="res://MyNode.cs" id="3_qvd0t"]
+[ext_resource type="Texture2D" uid="uid://2cvgmt2fmpao" path="res://data/icon.svg" id="1_c7hdb"]
+[ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="3_fjiyg"]
+[ext_resource type="Script" path="res://src/MyNode.cs" id="3_qvd0t"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
