@@ -36,22 +36,25 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
+        ImGuiLayer.Instance?.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://icon.svg");
         iconTextureId = ImGuiGD.BindTexture(iconTexture);
     }
 
     public override void _ExitTree()
     {
+        // TODO: remove after beta 3
+        ImGuiLayer.Instance.ImGuiLayout -= _ImGuiLayout;
         ImGuiGD.UnbindTexture(iconTextureId);
 
         // restore the hardware mouse cursor
         var io = ImGui.GetIO();
         io.MouseDrawCursor = false;
-        io.BackendFlags &= ~ImGuiBackendFlags.HasMouseCursors;
+        //io.BackendFlags &= ~ImGuiBackendFlags.HasMouseCursors;
         Input.MouseMode = Input.MouseModeEnum.Visible;
     }
 
-    public override void _Process(double delta)
+    private void _ImGuiLayout()
     {
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
@@ -74,5 +77,19 @@ public partial class MySecondNode : Node
         ImGui.End();
 
         ImGui.ShowDemoWindow();
+    }
+
+    private void _on_show_hide()
+    {
+        if (ImGuiLayer.Instance.Visible)
+        {
+            ImGuiLayer.Instance.Visible = false;
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+        }
+        else
+        {
+            ImGuiLayer.Instance.Visible = true;
+            Input.MouseMode = Input.MouseModeEnum.Hidden;
+        }
     }
 }

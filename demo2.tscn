@@ -29,4 +29,20 @@ script = ExtResource("1_luuqi")
 [node name="MySecondNode" type="Node" parent="."]
 script = ExtResource("2_gnjei")
 
+[node name="ShowHideButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -96.0
+offset_top = -48.0
+offset_right = -7.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "show/hide"
+
 [connection signal="pressed" from="Button2" to="Button2" method="_on_button2_pressed"]
+[connection signal="pressed" from="ShowHideButton" to="MySecondNode" method="_on_show_hide"]
