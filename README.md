@@ -46,7 +46,9 @@ cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
 
 ## Usage
 
-In any Node's `_Process` method, use `ImGuiNET` to create your GUI.
+In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
+
+You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal.
 
 If you want to customize fonts or other settings, open the scene `res://addons/imgui-godot/ImGuiLayer.tscn`
 
@@ -56,7 +58,6 @@ For custom textures, use the static methods `BindTexture` and `UnbindTexture` in
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
-Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
 
 ## Credits
 

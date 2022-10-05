@@ -17,8 +17,8 @@ public partial class MySecondNode : Node
             ImGuiGD.Init();
 
             // use Hack for the default glyphs, M+2 for Japanese
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://Hack-Regular.ttf"), 18.0f);
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://MPLUS2-Regular.ttf"), 22.0f, merge: true);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18.0f);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22.0f, merge: true);
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();
@@ -37,7 +37,7 @@ public partial class MySecondNode : Node
     public override void _Ready()
     {
         ImGuiLayer.Instance?.Connect(_ImGuiLayout);
-        iconTexture = GD.Load<Texture2D>("res://icon.svg");
+        iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         iconTextureId = ImGuiGD.BindTexture(iconTexture);
     }
 
@@ -65,7 +65,7 @@ public partial class MySecondNode : Node
 
         if (ImGui.Button("change scene"))
         {
-            GetTree().ChangeSceneToFile("res://demo.tscn");
+            GetTree().ChangeSceneToFile("res://data/demo.tscn");
         }
 
         ImGui.End();

@@ -2,19 +2,19 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://blkln4jih4r2t"
-path="res://.godot/imported/Hack-Regular.ttf-4957220eed9c50075bb4de8b4fadc317.fontdata"
+uid="uid://c2o4vx2jik43e"
+path="res://.godot/imported/Hack-Regular.ttf-3d6007156cf38336f0685ad871feaf05.fontdata"
 
 [deps]
 
-source_file="res://Hack-Regular.ttf"
-dest_files=["res://.godot/imported/Hack-Regular.ttf-4957220eed9c50075bb4de8b4fadc317.fontdata"]
+source_file="res://data/Hack-Regular.ttf"
+dest_files=["res://.godot/imported/Hack-Regular.ttf-3d6007156cf38336f0685ad871feaf05.fontdata"]
 
 [params]
 
 Rendering=null
 antialiasing=1
-generate_mipmaps=true
+generate_mipmaps=false
 multichannel_signed_distance_field=false
 msdf_pixel_range=8
 msdf_size=48

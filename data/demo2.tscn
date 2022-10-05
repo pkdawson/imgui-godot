@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dr8hy6iu5hk8a"]
 
-[ext_resource type="Script" path="res://Clicky.cs" id="1_luuqi"]
-[ext_resource type="Script" path="res://MySecondNode.cs" id="2_gnjei"]
+[ext_resource type="Script" path="res://src/Clicky.cs" id="1_luuqi"]
+[ext_resource type="Script" path="res://src/MySecondNode.cs" id="2_gnjei"]
 
 [node name="Background" type="ColorRect"]
 anchors_preset = 15
