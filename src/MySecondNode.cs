@@ -4,6 +4,8 @@ using ImGuiNET;
 public partial class MySecondNode : Node
 {
     private Texture2D iconTexture;
+    private SubViewport vp;
+    private ColorRect vpSquare;
     private int iconSize = 64;
     private static bool fontLoaded = false;
 
@@ -35,6 +37,8 @@ public partial class MySecondNode : Node
     {
         ImGuiLayer.Instance?.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
+        vp = GetNode<SubViewport>("%SubViewport");
+        vpSquare = GetNode<ColorRect>("%VPSquare");
     }
 
     public override void _ExitTree()
@@ -44,6 +48,11 @@ public partial class MySecondNode : Node
         io.MouseDrawCursor = false;
         //io.BackendFlags &= ~ImGuiBackendFlags.HasMouseCursors;
         Input.MouseMode = Input.MouseModeEnum.Visible;
+    }
+
+    public override void _Process(double delta)
+    {
+        vpSquare.Rotation += (float)delta;
     }
 
     private void _ImGuiLayout()
@@ -66,6 +75,10 @@ public partial class MySecondNode : Node
         ImGui.Text("Hiragana: こんばんは");
         ImGui.Text("Katakana: ハロウィーン");
         ImGui.Text("   Kanji: 日本語");
+        ImGui.End();
+
+        ImGui.Begin("SubViewport test");
+        ImGuiGodot.SubViewport(vp);
         ImGui.End();
 
         ImGui.ShowDemoWindow();

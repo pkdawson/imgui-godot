@@ -8,8 +8,17 @@ using Vector4 = System.Numerics.Vector4;
 
 public static class ImGuiGodot
 {
-    public static void Viewport(Viewport vp)
+    /// <summary>
+    /// Be sure to change the SubViewport's <c>Update Mode</c> to <b>Always</b>
+    /// </summary>
+    public static void SubViewport(SubViewport vp)
     {
+        Image(vp.GetTexture(), new(vp.Size.x, vp.Size.y));
+    }
+
+    public static void SubViewport(SubViewport vp, Vector2 size)
+    {
+        Image(vp.GetTexture(), size);
     }
 
     public static void Image(Texture2D tex, Vector2 size)
