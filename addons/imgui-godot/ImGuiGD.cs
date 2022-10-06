@@ -12,18 +12,17 @@ public static class ImGuiGD
         return ImGuiGDInternal.BindTexture(tex);
     }
 
-    public static void UnbindTexture(IntPtr textureId)
+    public static void UnbindTexture(IntPtr texid)
     {
-        ImGuiGDInternal.UnbindTexture(textureId);
-    }
-
-    public static Texture2D GetTexture(IntPtr textureId)
-    {
-        return ImGuiGDInternal.GetTexture(textureId);
+        ImGuiGDInternal.UnbindTexture(texid);
     }
 
     public static void Init()
     {
+        if (IntPtr.Size != sizeof(ulong))
+        {
+            GD.PrintErr("imgui-godot requires 64-bit pointers");
+        }
         ImGuiGDInternal.Init();
     }
 

@@ -1,11 +1,9 @@
 using Godot;
 using ImGuiNET;
-using System;
 using Vec2 = System.Numerics.Vector2;
 
 public partial class MySecondNode : Node
 {
-    private IntPtr iconTextureId;
     private Texture2D iconTexture;
     private int iconSize = 64;
     private static bool fontLoaded = false;
@@ -38,14 +36,12 @@ public partial class MySecondNode : Node
     {
         ImGuiLayer.Instance?.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
-        iconTextureId = ImGuiGD.BindTexture(iconTexture);
     }
 
     public override void _ExitTree()
     {
         // TODO: remove after beta 3
         ImGuiLayer.Instance.ImGuiLayout -= _ImGuiLayout;
-        ImGuiGD.UnbindTexture(iconTextureId);
 
         // restore the hardware mouse cursor
         var io = ImGui.GetIO();
@@ -58,7 +54,7 @@ public partial class MySecondNode : Node
     {
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
-        ImGui.Image(iconTextureId, new Vec2(iconSize, iconSize));
+        ImGuiGodot.Image(iconTexture, new Vec2(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
 
         ImGui.Dummy(new Vec2(0, 20.0f));
