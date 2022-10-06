@@ -44,5 +44,21 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "show/hide"
 
+[node name="SubViewport" type="SubViewport" parent="."]
+unique_name_in_owner = true
+size = Vector2i(100, 100)
+render_target_update_mode = 4
+
+[node name="Camera2d" type="Camera2D" parent="SubViewport"]
+offset = Vector2(20, 20)
+current = true
+
+[node name="VPSquare" type="ColorRect" parent="SubViewport"]
+unique_name_in_owner = true
+offset_right = 40.0
+offset_bottom = 40.0
+pivot_offset = Vector2(20, 20)
+color = Color(0, 1, 0, 1)
+
 [connection signal="pressed" from="Button2" to="Button2" method="_on_button2_pressed"]
 [connection signal="pressed" from="ShowHideButton" to="MySecondNode" method="_on_show_hide"]
