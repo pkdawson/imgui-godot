@@ -46,7 +46,7 @@ text = "show/hide"
 
 [node name="SubViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
-size = Vector2i(100, 100)
+size = Vector2i(200, 200)
 render_target_update_mode = 4
 
 [node name="Camera2d" type="Camera2D" parent="SubViewport"]

@@ -59,26 +59,33 @@ public partial class MySecondNode : Node
     {
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
+
+        ImGui.Separator();
+        ImGui.Text("Simple texture");
         ImGuiGodot.Image(iconTexture, new(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
 
-        ImGui.Dummy(new(0, 20.0f));
+        ImGui.Separator();
+        ImGui.Text("SubViewport");
+        // TODO: fix error on changing scene (one frame where texture is missing?)
+        ImGuiGodot.SubViewport(vp);
 
-        if (ImGui.Button("change scene"))
-        {
-            GetTree().ChangeSceneToFile("res://data/demo.tscn");
-        }
-
-        ImGui.End();
-
-        ImGui.Begin("Unicode test");
+        ImGui.Separator();
+        ImGui.Text("Unicode");
         ImGui.Text("Hiragana: こんばんは");
         ImGui.Text("Katakana: ハロウィーン");
         ImGui.Text("   Kanji: 日本語");
         ImGui.End();
 
-        ImGui.Begin("SubViewport test");
-        ImGuiGodot.SubViewport(vp);
+
+        ImGui.SetNextWindowPos(new(10, 10));
+        ImGui.Begin("change scene window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
+            ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing |
+            ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove);
+        if (ImGui.Button("change scene"))
+        {
+            GetTree().ChangeSceneToFile("res://data/demo.tscn");
+        }
         ImGui.End();
 
         ImGui.ShowDemoWindow();
