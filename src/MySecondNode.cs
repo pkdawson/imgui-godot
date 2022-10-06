@@ -1,6 +1,5 @@
 using Godot;
 using ImGuiNET;
-using Vec2 = System.Numerics.Vector2;
 
 public partial class MySecondNode : Node
 {
@@ -40,9 +39,6 @@ public partial class MySecondNode : Node
 
     public override void _ExitTree()
     {
-        // TODO: remove after beta 3
-        ImGuiLayer.Instance.ImGuiLayout -= _ImGuiLayout;
-
         // restore the hardware mouse cursor
         var io = ImGui.GetIO();
         io.MouseDrawCursor = false;
@@ -54,10 +50,10 @@ public partial class MySecondNode : Node
     {
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
-        ImGuiGodot.Image(iconTexture, new Vec2(iconSize, iconSize));
+        ImGuiGodot.Image(iconTexture, new(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
 
-        ImGui.Dummy(new Vec2(0, 20.0f));
+        ImGui.Dummy(new(0, 20.0f));
 
         if (ImGui.Button("change scene"))
         {

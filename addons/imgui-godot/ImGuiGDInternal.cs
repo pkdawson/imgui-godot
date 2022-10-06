@@ -43,17 +43,18 @@ internal static class ImGuiGDInternal
         if (merge)
         {
             fc->MergeMode = 1;
-            rv = AddFont(fontData, fontSize, glyphRanges, fc);
-            ImGui.GetIO().Fonts.Build();
         }
-        else
+
+        string name = string.Format("{0}, {1}px", System.IO.Path.GetFileName(fontData.ResourcePath), fontSize);
+        for (int i = 0; i < name.Length && i < 40; ++i)
         {
-            string name = string.Format("{0}, {1}px", System.IO.Path.GetFileName(fontData.ResourcePath), fontSize);
-            for (int i = 0; i < name.Length && i < 40; ++i)
-            {
-                fc->Name[i] = Convert.ToByte(name[i]);
-            }
-            rv = AddFont(fontData, fontSize, glyphRanges, fc);
+            fc->Name[i] = Convert.ToByte(name[i]);
+        }
+        rv = AddFont(fontData, fontSize, glyphRanges, fc);
+
+        if (merge)
+        {
+            ImGui.GetIO().Fonts.Build();
         }
         ImGuiNative.ImFontConfig_destroy(fc);
         return rv;
