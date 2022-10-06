@@ -2,36 +2,30 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
 internal static class ImGuiGDInternal
 {
-    private static Dictionary<IntPtr, Texture2D> _loadedTextures = new();
-    private static nint _textureId = 0x100;
-    private static IntPtr? _fontTextureId;
+    private static Texture2D _fontTexture;
     private static List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
 
+    // necessary because we can't construct arbitrary RIDs without using reflection
+    private static Dictionary<IntPtr, RID> _rids = new();
+
     public static IntPtr BindTexture(Texture2D tex)
     {
-        // decided not to add duplicate prevention, could cause problems
-        IntPtr id = _textureId++;
-        _loadedTextures.Add(id, tex);
-        return id;
+        RID rid = tex.GetRid();
+        IntPtr texid = (IntPtr)rid.Id;
+        _rids.TryAdd(texid, rid);
+        return texid;
     }
 
-    public static void UnbindTexture(IntPtr textureId)
+    public static void UnbindTexture(IntPtr texid)
     {
-        _loadedTextures.Remove(textureId);
-    }
-
-    // used by renderer
-    public static Texture2D GetTexture(IntPtr textureId)
-    {
-        return _loadedTextures[textureId];
+        _rids.Remove(texid);
     }
 
     public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, bool merge)
@@ -96,11 +90,8 @@ internal static class ImGuiGDInternal
         img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
         var imgtex = ImageTexture.CreateFromImage(img);
-
-        if (_fontTextureId.HasValue) UnbindTexture(_fontTextureId.Value);
-        _fontTextureId = BindTexture(imgtex);
-
-        io.Fonts.SetTexID(_fontTextureId.Value);
+        _fontTexture = imgtex;
+        io.Fonts.SetTexID(BindTexture(_fontTexture));
         io.Fonts.ClearTexData();
     }
 
@@ -358,7 +349,8 @@ internal static class ImGuiGDInternal
 
                 RID child = _children[nodeN++];
 
-                Texture2D tex = GetTexture(drawCmd.GetTexID());
+                IntPtr texid = drawCmd.GetTexID();
+                RID texrid = _rids[texid];
                 RenderingServer.CanvasItemClear(child);
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
@@ -368,7 +360,7 @@ internal static class ImGuiGDInternal
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, tex.GetRid(), -1);
+                RenderingServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, texrid, -1);
             }
         }
     }

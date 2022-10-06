@@ -19,6 +19,8 @@ public partial class MyNode : Node
 
 ## Getting Started
 
+imgui-godot requires Godot 4.0-beta3 or later, running on a 64-bit platform.
+
 ### Demo
 
 Click `Build` in the top right, then run the project.

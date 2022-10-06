@@ -11,10 +11,16 @@ public partial class ImGuiLayer : CanvasLayer
     public int FontSize = 16;
 
     [Export]
-    public FontFile ExtraFont = null;
+    public FontFile ExtraFont1 = null;
 
     [Export]
-    public int ExtraFontSize = 16;
+    public int ExtraFont1Size = 16;
+
+    [Export]
+    public FontFile ExtraFont2 = null;
+
+    [Export]
+    public int ExtraFont2Size = 16;
 
     [Export]
     public bool MergeFonts = true;
@@ -53,9 +59,13 @@ public partial class ImGuiLayer : CanvasLayer
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);
-            if (ExtraFont is not null)
+            if (ExtraFont1 is not null)
             {
-                ImGuiGD.AddFont(ExtraFont, ExtraFontSize, MergeFonts);
+                ImGuiGD.AddFont(ExtraFont1, ExtraFont1Size, MergeFonts);
+            }
+            if (ExtraFont2 is not null)
+            {
+                ImGuiGD.AddFont(ExtraFont2, ExtraFont2Size, MergeFonts);
             }
         }
 
@@ -66,6 +76,10 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.RebuildFontAtlas();
 
         AddChild(new UpdateFirst());
+    }
+
+    public override void _Ready()
+    {
         OnChangeVisibility();
     }
 
@@ -107,6 +121,10 @@ public partial class ImGuiLayer : CanvasLayer
 
     public void Connect(ImGuiLayoutEventHandler d)
     {
-        ImGuiLayout += d;
+        // temporary workaround for a bug in the early Godot 4 betas
+        Connect(SignalName.ImGuiLayout, new Callable(d.Target as Object, d.Method.Name));
+
+        // TODO: use this after Godot 4.0-beta3 is released
+        // ImGuiLayout += d;
     }
 }
