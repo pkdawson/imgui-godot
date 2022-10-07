@@ -13,13 +13,12 @@ public static class ImGuiGodot
     /// </summary>
     public static void SubViewport(SubViewport vp)
     {
-        SubViewport(vp, new(vp.Size.x, vp.Size.y));
-    }
-
-    public static void SubViewport(SubViewport vp, Vector2 size)
-    {
+        Vector2 vpSize = new(vp.Size.x, vp.Size.y);
         var pos = ImGui.GetCursorScreenPos();
-        ImageButton(vp.GetTexture(), size, Vector2.Zero, Vector2.One, 0, Vector4.Zero, Vector4.One);
+        var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
+        ImGui.GetWindowDrawList().AddImage(ImGuiGD.BindTexture(vp.GetTexture()), pos, pos_max);
+
+        ImGui.InvisibleButton(string.Format("{0}##{1}", vp.Name, vp.GetViewportRid().Id), vpSize);
         if (ImGui.IsItemHovered())
         {
             ImGuiGDInternal.CurrentSubViewport = vp;
