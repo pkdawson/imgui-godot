@@ -111,6 +111,11 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.Render(_canvasItem);
     }
 
+    public override void _Notification(long what)
+    {
+        ImGuiGDInternal.ProcessNotification(what);
+    }
+
     public override void _Input(InputEvent e)
     {
         if (ImGuiGD.ProcessInput(e))

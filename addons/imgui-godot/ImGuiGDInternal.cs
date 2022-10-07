@@ -298,6 +298,19 @@ internal static class ImGuiGDInternal
         io.AddKeyEvent(ImGuiKey.ModSuper, Input.IsKeyPressed(Key.SuperL));
     }
 
+    public static void ProcessNotification(long what)
+    {
+        switch (what)
+        {
+            case MainLoop.NotificationApplicationFocusIn:
+                ImGui.GetIO().AddFocusEvent(true);
+                break;
+            case MainLoop.NotificationApplicationFocusOut:
+                ImGui.GetIO().AddFocusEvent(false);
+                break;
+        };
+    }
+
     public static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
     {
         // allocate our CanvasItem pool as needed
