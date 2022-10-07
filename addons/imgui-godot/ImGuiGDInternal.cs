@@ -224,7 +224,7 @@ internal static class ImGuiGDInternal
         }
         else if (evt is InputEventKey k)
         {
-            UpdateKeyMods(io, k);
+            UpdateKeyMods(io);
             ImGuiKey igk = ConvertKey(k.Keycode);
             if (igk != ImGuiKey.None)
             {
@@ -290,12 +290,12 @@ internal static class ImGuiGDInternal
         return consumed;
     }
 
-    private static void UpdateKeyMods(ImGuiIOPtr io, InputEventKey k)
+    private static void UpdateKeyMods(ImGuiIOPtr io)
     {
-        io.AddKeyEvent(ImGuiKey.ModCtrl, k.CtrlPressed);
-        io.AddKeyEvent(ImGuiKey.ModShift, k.ShiftPressed);
-        io.AddKeyEvent(ImGuiKey.ModAlt, k.AltPressed);
-        io.AddKeyEvent(ImGuiKey.ModSuper, k.MetaPressed);
+        io.AddKeyEvent(ImGuiKey.ModCtrl, Input.IsKeyPressed(Key.Ctrl));
+        io.AddKeyEvent(ImGuiKey.ModShift, Input.IsKeyPressed(Key.Shift));
+        io.AddKeyEvent(ImGuiKey.ModAlt, Input.IsKeyPressed(Key.Alt));
+        io.AddKeyEvent(ImGuiKey.ModSuper, Input.IsKeyPressed(Key.SuperL));
     }
 
     public static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
@@ -444,6 +444,11 @@ internal static class ImGuiGDInternal
         Key.Space => ImGuiKey.Space,
         Key.Enter => ImGuiKey.Enter,
         Key.Escape => ImGuiKey.Escape,
+        Key.Ctrl => ImGuiKey.LeftCtrl,
+        Key.Shift => ImGuiKey.LeftShift,
+        Key.Alt => ImGuiKey.LeftAlt,
+        Key.SuperL => ImGuiKey.LeftSuper,
+        Key.SuperR => ImGuiKey.RightSuper,
         Key.Menu => ImGuiKey.Menu,
         Key.Key0 => ImGuiKey._0,
         Key.Key1 => ImGuiKey._1,
