@@ -18,10 +18,12 @@ public static class ImGuiGodot
 
     public static void SubViewport(SubViewport vp, Vector2 size)
     {
+        var pos = ImGui.GetCursorScreenPos();
         ImageButton(vp.GetTexture(), size, Vector2.Zero, Vector2.One, 0, Vector4.Zero, Vector4.One);
         if (ImGui.IsItemHovered())
         {
-            // TODO: forward input events
+            ImGuiGDInternal.CurrentSubViewport = vp;
+            ImGuiGDInternal.CurrentSubViewportPos = pos;
         }
     }
 
