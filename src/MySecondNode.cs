@@ -5,7 +5,6 @@ public partial class MySecondNode : Node
 {
     private Texture2D iconTexture;
     private SubViewport vp;
-    private ColorRect vpSquare;
     private int iconSize = 64;
     private static bool fontLoaded = false;
     private static ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
@@ -36,20 +35,12 @@ public partial class MySecondNode : Node
         ImGuiLayer.Instance?.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         vp = GetNode<SubViewport>("%SubViewport");
-        vpSquare = GetNode<ColorRect>("%VPSquare");
-    }
-
-    public override void _ExitTree()
-    {
-    }
-
-    public override void _Process(double delta)
-    {
-        vpSquare.Rotation += (float)delta;
     }
 
     private void _ImGuiLayout()
     {
+        ImGui.ShowDemoWindow();
+
         ImGui.SetNextWindowPos(new(10, 10));
         ImGui.Begin("change scene window", cswinflags);
         if (ImGui.Button("change scene"))
@@ -69,28 +60,27 @@ public partial class MySecondNode : Node
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
 
         ImGui.Separator();
-        ImGui.Text("SubViewport");
-        ImGuiGodot.SubViewport(vp);
-
-        ImGui.Separator();
         ImGui.Text("Unicode");
         ImGui.Text("Hiragana: こんばんは");
         ImGui.Text("Katakana: ハロウィーン");
         ImGui.Text("   Kanji: 日本語");
         ImGui.End();
 
-        ImGui.ShowDemoWindow();
+        ImGui.SetNextWindowSize(new(200, 200), ImGuiCond.Once);
+        if (ImGui.Begin("SubViewport test"))
+        {
+            var size = ImGui.GetContentRegionAvail();
+            if (size.X > 5 && size.Y > 5)
+            {
+                vp.Size = new((int)size.X - 5, (int)size.Y - 5);
+                ImGuiGodot.SubViewport(vp);
+            }
+        }
+        ImGui.End();
     }
 
     private void _on_show_hide()
     {
-        if (ImGuiLayer.Instance.Visible)
-        {
-            ImGuiLayer.Instance.Visible = false;
-        }
-        else
-        {
-            ImGuiLayer.Instance.Visible = true;
-        }
+        ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
     }
 }

@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://dr8hy6iu5hk8a"]
+[gd_scene load_steps=4 format=3 uid="uid://dr8hy6iu5hk8a"]
 
-[ext_resource type="Script" path="res://src/Clicky.cs" id="1_luuqi"]
 [ext_resource type="Script" path="res://src/MySecondNode.cs" id="2_gnjei"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_xokfw"]
+
+[sub_resource type="Environment" id="Environment_jn4g1"]
+background_mode = 1
 
 [node name="Background" type="ColorRect"]
 anchors_preset = 15
@@ -10,21 +14,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0784314, 0, 0.117647, 1)
-
-[node name="Button2" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 72.0
-offset_top = -112.0
-offset_right = 177.0
-offset_bottom = -53.0
-grow_vertical = 0
-focus_mode = 0
-toggle_mode = true
-text = "click me"
-script = ExtResource("1_luuqi")
 
 [node name="MySecondNode" type="Node" parent="."]
 script = ExtResource("2_gnjei")
@@ -49,16 +38,17 @@ unique_name_in_owner = true
 size = Vector2i(200, 200)
 render_target_update_mode = 4
 
-[node name="Camera2d" type="Camera2D" parent="SubViewport"]
-offset = Vector2(20, 20)
+[node name="MeshInstance3d" type="MeshInstance3D" parent="SubViewport"]
+mesh = SubResource("SphereMesh_xokfw")
+
+[node name="Camera3d" type="Camera3D" parent="SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.872321)
 current = true
 
-[node name="VPSquare" type="ColorRect" parent="SubViewport"]
-unique_name_in_owner = true
-offset_right = 40.0
-offset_bottom = 40.0
-pivot_offset = Vector2(20, 20)
-color = Color(0, 1, 0, 1)
+[node name="SpotLight3d" type="SpotLight3D" parent="SubViewport"]
+transform = Transform3D(0.732947, 0, 0.680286, 0, 1, 0, -0.680286, 0, 0.732947, 1.70622, 0, 1.48179)
 
-[connection signal="pressed" from="Button2" to="Button2" method="_on_button2_pressed"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport"]
+environment = SubResource("Environment_jn4g1")
+
 [connection signal="pressed" from="ShowHideButton" to="MySecondNode" method="_on_show_hide"]
