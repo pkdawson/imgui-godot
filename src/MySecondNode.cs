@@ -8,6 +8,9 @@ public partial class MySecondNode : Node
     private ColorRect vpSquare;
     private int iconSize = 64;
     private static bool fontLoaded = false;
+    private static ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
+        ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
+        ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove;
 
     public override void _EnterTree()
     {
@@ -57,6 +60,16 @@ public partial class MySecondNode : Node
 
     private void _ImGuiLayout()
     {
+        ImGui.SetNextWindowPos(new(10, 10));
+        ImGui.Begin("change scene window", cswinflags);
+        if (ImGui.Button("change scene"))
+        {
+            GetTree().ChangeSceneToFile("res://data/demo.tscn");
+            // return so we don't try to draw a viewport texture after it's deleted
+            return;
+        }
+        ImGui.End();
+
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
 
@@ -67,7 +80,6 @@ public partial class MySecondNode : Node
 
         ImGui.Separator();
         ImGui.Text("SubViewport");
-        // TODO: fix error on changing scene (one frame where texture is missing?)
         ImGuiGodot.SubViewport(vp);
 
         ImGui.Separator();
@@ -75,17 +87,6 @@ public partial class MySecondNode : Node
         ImGui.Text("Hiragana: こんばんは");
         ImGui.Text("Katakana: ハロウィーン");
         ImGui.Text("   Kanji: 日本語");
-        ImGui.End();
-
-
-        ImGui.SetNextWindowPos(new(10, 10));
-        ImGui.Begin("change scene window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize |
-            ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing |
-            ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove);
-        if (ImGui.Button("change scene"))
-        {
-            GetTree().ChangeSceneToFile("res://data/demo.tscn");
-        }
         ImGui.End();
 
         ImGui.ShowDemoWindow();

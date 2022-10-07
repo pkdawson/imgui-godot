@@ -13,12 +13,16 @@ public static class ImGuiGodot
     /// </summary>
     public static void SubViewport(SubViewport vp)
     {
-        Image(vp.GetTexture(), new(vp.Size.x, vp.Size.y));
+        SubViewport(vp, new(vp.Size.x, vp.Size.y));
     }
 
     public static void SubViewport(SubViewport vp, Vector2 size)
     {
-        Image(vp.GetTexture(), size);
+        ImageButton(vp.GetTexture(), size, Vector2.Zero, Vector2.One, 0, Vector4.Zero, Vector4.One);
+        if (ImGui.IsItemHovered())
+        {
+            // TODO: forward input events
+        }
     }
 
     public static void Image(Texture2D tex, Vector2 size)

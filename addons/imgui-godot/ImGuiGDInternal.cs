@@ -140,12 +140,6 @@ internal static class ImGuiGDInternal
         ImGui.NewFrame();
     }
 
-    public static void Render(RID parent)
-    {
-        ImGui.Render();
-        RenderDrawData(ImGui.GetDrawData(), parent);
-    }
-
     public static void ClearCanvasItems()
     {
         foreach (RID rid in _children)
