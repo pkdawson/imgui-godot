@@ -4,12 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using CursorShape = Godot.DisplayServer.CursorShape;
 
 internal static class ImGuiGDInternal
 {
+    internal static SubViewport CurrentSubViewport { get; set; }
+    internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
+
     private static Texture2D _fontTexture;
     private static List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
+    private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
 
     // necessary because we can't construct arbitrary RIDs without using reflection
@@ -110,6 +115,7 @@ internal static class ImGuiGDInternal
         io.BackendFlags = 0;
         io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
+        io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
 
         unsafe
         {
@@ -137,6 +143,21 @@ internal static class ImGuiGDInternal
             _mouseWheel = Vector2.Zero;
         }
 
+        if (io.WantCaptureMouse)
+        {
+            var newCursor = ImGui.GetMouseCursor();
+            if (newCursor != _currentCursor)
+            {
+                DisplayServer.CursorSetShape(ConvertCursorShape(newCursor));
+                _currentCursor = newCursor;
+            }
+        }
+        else
+        {
+            _currentCursor = ImGuiMouseCursor.None;
+        }
+
+        CurrentSubViewport = null;
         ImGui.NewFrame();
     }
 
@@ -151,6 +172,14 @@ internal static class ImGuiGDInternal
 
     public static bool ProcessInput(InputEvent evt)
     {
+        if (CurrentSubViewport != null)
+        {
+            // TODO: correct mouse pos
+            CurrentSubViewport.PushInput(evt, true);
+            if (evt is not InputEventMouseMotion)
+                return true;
+        }
+
         var io = ImGui.GetIO();
         bool consumed = false;
 
@@ -201,7 +230,7 @@ internal static class ImGuiGDInternal
             {
                 io.AddKeyEvent(igk, k.Pressed);
 
-                if (k.Pressed && k.Unicode != 0)
+                if (k.Pressed && k.Unicode != 0 && io.WantTextInput)
                 {
                     io.AddInputCharacter((uint)k.Unicode);
                 }
@@ -364,6 +393,20 @@ internal static class ImGuiGDInternal
             }
         }
     }
+
+    private static CursorShape ConvertCursorShape(ImGuiMouseCursor cur) => cur switch
+    {
+        ImGuiMouseCursor.Arrow => CursorShape.Arrow,
+        ImGuiMouseCursor.TextInput => CursorShape.Ibeam,
+        ImGuiMouseCursor.ResizeAll => CursorShape.Move,
+        ImGuiMouseCursor.ResizeNS => CursorShape.Vsize,
+        ImGuiMouseCursor.ResizeEW => CursorShape.Hsize,
+        ImGuiMouseCursor.ResizeNESW => CursorShape.Bdiagsize,
+        ImGuiMouseCursor.ResizeNWSE => CursorShape.Fdiagsize,
+        ImGuiMouseCursor.Hand => CursorShape.PointingHand,
+        ImGuiMouseCursor.NotAllowed => CursorShape.Forbidden,
+        _ => CursorShape.Arrow,
+    };
 
     private static ImGuiKey ConvertJoyButton(JoyButton btn) => btn switch
     {

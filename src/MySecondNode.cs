@@ -29,11 +29,6 @@ public partial class MySecondNode : Node
 
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
-
-        // let ImGui draw the mouse cursor
-        io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
-        io.MouseDrawCursor = true;
-        Input.MouseMode = Input.MouseModeEnum.Hidden;
     }
 
     public override void _Ready()
@@ -46,11 +41,6 @@ public partial class MySecondNode : Node
 
     public override void _ExitTree()
     {
-        // restore the hardware mouse cursor
-        var io = ImGui.GetIO();
-        io.MouseDrawCursor = false;
-        //io.BackendFlags &= ~ImGuiBackendFlags.HasMouseCursors;
-        Input.MouseMode = Input.MouseModeEnum.Visible;
     }
 
     public override void _Process(double delta)
@@ -97,12 +87,10 @@ public partial class MySecondNode : Node
         if (ImGuiLayer.Instance.Visible)
         {
             ImGuiLayer.Instance.Visible = false;
-            Input.MouseMode = Input.MouseModeEnum.Visible;
         }
         else
         {
             ImGuiLayer.Instance.Visible = true;
-            Input.MouseMode = Input.MouseModeEnum.Hidden;
         }
     }
 }
