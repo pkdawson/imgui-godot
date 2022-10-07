@@ -213,44 +213,49 @@ internal static class ImGuiGDInternal
             _mouseWheel = new(-pg.Delta.x, -pg.Delta.y);
             consumed = io.WantCaptureMouse;
         }
-        else if (evt is InputEventJoypadButton jb)
+        else if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
         {
-            ImGuiKey igk = ConvertJoyButton(jb.ButtonIndex);
-            if (igk != ImGuiKey.None)
+            if (evt is InputEventJoypadButton jb)
             {
-                io.AddKeyEvent(igk, jb.Pressed);
+                ImGuiKey igk = ConvertJoyButton(jb.ButtonIndex);
+                if (igk != ImGuiKey.None)
+                {
+                    io.AddKeyEvent(igk, jb.Pressed);
+                    consumed = true;
+                }
             }
-        }
-        else if (evt is InputEventJoypadMotion jm)
-        {
-            bool pressed = true;
-            float v = jm.AxisValue;
-            if (Math.Abs(v) < ImGuiGD.JoyAxisDeadZone)
+            else if (evt is InputEventJoypadMotion jm)
             {
-                v = 0f;
-                pressed = false;
+                bool pressed = true;
+                float v = jm.AxisValue;
+                if (Math.Abs(v) < ImGuiGD.JoyAxisDeadZone)
+                {
+                    v = 0f;
+                    pressed = false;
+                }
+                switch (jm.Axis)
+                {
+                    case JoyAxis.LeftX:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickRight, pressed, v);
+                        break;
+                    case JoyAxis.LeftY:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickDown, pressed, v);
+                        break;
+                    case JoyAxis.RightX:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickRight, pressed, v);
+                        break;
+                    case JoyAxis.RightY:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickDown, pressed, v);
+                        break;
+                    case JoyAxis.TriggerLeft:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadL2, pressed, v);
+                        break;
+                    case JoyAxis.TriggerRight:
+                        io.AddKeyAnalogEvent(ImGuiKey.GamepadR2, pressed, v);
+                        break;
+                };
+                consumed = true;
             }
-            switch (jm.Axis)
-            {
-                case JoyAxis.LeftX:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickRight, pressed, v);
-                    break;
-                case JoyAxis.LeftY:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadLStickDown, pressed, v);
-                    break;
-                case JoyAxis.RightX:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickRight, pressed, v);
-                    break;
-                case JoyAxis.RightY:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadRStickDown, pressed, v);
-                    break;
-                case JoyAxis.TriggerLeft:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadL2, pressed, v);
-                    break;
-                case JoyAxis.TriggerRight:
-                    io.AddKeyAnalogEvent(ImGuiKey.GamepadR2, pressed, v);
-                    break;
-            };
         }
 
         return consumed;
