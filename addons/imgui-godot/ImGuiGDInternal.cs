@@ -18,19 +18,19 @@ internal static class ImGuiGDInternal
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
 
     // necessary because we can't construct arbitrary RIDs without using reflection
-    private static Dictionary<IntPtr, RID> _rids = new();
+    private static Dictionary<IntPtr, RID> _texrids = new();
 
     public static IntPtr BindTexture(Texture2D tex)
     {
         RID rid = tex.GetRid();
         IntPtr texid = (IntPtr)rid.Id;
-        _rids.TryAdd(texid, rid);
+        _texrids.TryAdd(texid, rid);
         return texid;
     }
 
     public static void UnbindTexture(IntPtr texid)
     {
-        _rids.Remove(texid);
+        _texrids.Remove(texid);
     }
 
     public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, bool merge)
@@ -176,8 +176,6 @@ internal static class ImGuiGDInternal
         {
             // TODO: correct mouse pos
             CurrentSubViewport.PushInput(evt, true);
-            if (evt is not InputEventMouseMotion)
-                return true;
         }
 
         var io = ImGui.GetIO();
@@ -391,8 +389,7 @@ internal static class ImGuiGDInternal
 
                 RID child = _children[nodeN++];
 
-                IntPtr texid = drawCmd.GetTexID();
-                RID texrid = _rids[texid];
+                RID texrid = _texrids[drawCmd.GetTexID()];
                 RenderingServer.CanvasItemClear(child);
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(

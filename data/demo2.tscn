@@ -19,6 +19,7 @@ color = Color(0.0784314, 0, 0.117647, 1)
 script = ExtResource("2_gnjei")
 
 [node name="ShowHideButton" type="Button" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -31,7 +32,9 @@ offset_right = -7.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
-text = "show/hide"
+focus_mode = 0
+toggle_mode = true
+text = "hide"
 
 [node name="SubViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true

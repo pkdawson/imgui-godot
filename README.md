@@ -8,7 +8,7 @@ After installing the plugin, usage is as simple as this:
 ```csharp
 public partial class MyNode : Node
 {
-    public override void _Process()
+    public override void _Process(double delta)
     {
         ImGui.Begin("ImGui on Godot 4");
         ImGui.Text("hello world");
