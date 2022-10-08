@@ -1,5 +1,6 @@
 using Godot;
 using ImGuiNET;
+using ImGuiGodot;
 
 public partial class MySecondNode : Node
 {
@@ -56,7 +57,7 @@ public partial class MySecondNode : Node
 
         ImGui.Separator();
         ImGui.Text("Simple texture");
-        ImGuiGodot.Image(iconTexture, new(iconSize, iconSize));
+        Widgets.Image(iconTexture, new(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
 
         ImGui.Separator();
@@ -73,7 +74,7 @@ public partial class MySecondNode : Node
             if (size.X > 5 && size.Y > 5)
             {
                 vp.Size = new((int)size.X - 5, (int)size.Y - 5);
-                ImGuiGodot.SubViewport(vp);
+                Widgets.SubViewport(vp);
             }
         }
         ImGui.End();
