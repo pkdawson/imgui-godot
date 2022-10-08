@@ -82,5 +82,14 @@ public partial class MySecondNode : Node
     private void _on_show_hide()
     {
         ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
+        if (ImGuiLayer.Instance.Visible)
+        {
+            GetNode<Button>("%ShowHideButton").Text = "hide";
+        }
+        else
+        {
+            GetNode<Button>("%ShowHideButton").Text = "show";
+        }
+
     }
 }

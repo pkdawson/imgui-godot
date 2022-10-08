@@ -18,7 +18,10 @@ public static class ImGuiGodot
         var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
         ImGui.GetWindowDrawList().AddImage(ImGuiGD.BindTexture(vp.GetTexture()), pos, pos_max);
 
-        ImGui.InvisibleButton(string.Format("{0}##{1}", vp.Name, vp.GetViewportRid().Id), vpSize);
+        ImGui.PushID(vp.NativeInstance);
+        ImGui.InvisibleButton("godot_subviewport", vpSize);
+        ImGui.PopID();
+
         if (ImGui.IsItemHovered())
         {
             ImGuiGDInternal.CurrentSubViewport = vp;
