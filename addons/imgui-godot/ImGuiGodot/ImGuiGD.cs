@@ -75,5 +75,21 @@ namespace ImGuiGodot
         {
             return ImGuiGDInternal.ProcessInput(evt);
         }
+
+        /// <summary>
+        /// Extension method to translate between <see cref="Key"/> and <see cref="ImGuiKey"/>
+        /// </summary>
+        public static ImGuiKey ToImGuiKey(this Key key)
+        {
+            return ImGuiGDInternal.ConvertKey(key);
+        }
+
+        /// <summary>
+        /// Extension method to translate between <see cref="JoyButton"/> and <see cref="ImGuiKey"/>
+        /// </summary>
+        public static ImGuiKey ToImGuiKey(this JoyButton button)
+        {
+            return ImGuiGDInternal.ConvertJoyButton(button);
+        }
     }
 }
