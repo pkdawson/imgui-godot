@@ -421,7 +421,7 @@ namespace ImGuiGodot
             _ => CursorShape.Arrow,
         };
 
-        private static ImGuiKey ConvertJoyButton(JoyButton btn) => btn switch
+        public static ImGuiKey ConvertJoyButton(JoyButton btn) => btn switch
         {
             JoyButton.Start => ImGuiKey.GamepadStart,
             JoyButton.Back => ImGuiKey.GamepadBack,
@@ -440,7 +440,7 @@ namespace ImGuiGodot
             _ => ImGuiKey.None
         };
 
-        private static ImGuiKey ConvertKey(Key k) => k switch
+        public static ImGuiKey ConvertKey(Key k) => k switch
         {
             Key.Tab => ImGuiKey.Tab,
             Key.Left => ImGuiKey.LeftArrow,
