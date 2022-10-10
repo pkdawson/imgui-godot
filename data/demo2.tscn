@@ -57,6 +57,7 @@ mesh = SubResource("PlaneMesh_dsg5q")
 
 [node name="Piece" type="MeshInstance3D" parent="SubViewport"]
 unique_name_in_owner = true
+layers = 2
 mesh = SubResource("CylinderMesh_kek8d")
 surface_material_override/0 = SubResource("StandardMaterial3D_eanfn")
 

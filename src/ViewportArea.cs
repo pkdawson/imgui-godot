@@ -27,7 +27,8 @@ public partial class ViewportArea : Area3D
                 {
                     TextureAlbedo = decalTexture,
                     Scale = new(10, 10, 10),
-                    Position = pos
+                    Position = pos,
+                    CullMask = 1,
                 });
             }
             else if (mb.ButtonIndex == MouseButton.Right)
