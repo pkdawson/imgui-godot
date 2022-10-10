@@ -38,6 +38,12 @@ public partial class MySecondNode : Node
         vp = GetNode<SubViewport>("%SubViewport");
     }
 
+    public override void _ExitTree()
+    {
+        ImGuiGD.UnbindTexture(iconTexture);
+        ImGuiGD.UnbindTexture(vp.GetTexture());
+    }
+
     private void _ImGuiLayout()
     {
         ImGui.ShowDemoWindow();

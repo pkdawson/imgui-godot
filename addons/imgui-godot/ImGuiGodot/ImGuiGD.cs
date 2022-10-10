@@ -19,6 +19,12 @@ namespace ImGuiGodot
             ImGuiGDInternal.UnbindTexture(texid);
         }
 
+        public static void UnbindTexture(Texture2D tex)
+        {
+            IntPtr texid = (IntPtr)tex.GetRid().Id;
+            ImGuiGDInternal.UnbindTexture(texid);
+        }
+
         public static void Init()
         {
             if (IntPtr.Size != sizeof(ulong))

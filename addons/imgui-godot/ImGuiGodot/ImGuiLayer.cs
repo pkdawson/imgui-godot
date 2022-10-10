@@ -39,6 +39,7 @@ namespace ImGuiGodot
         {
             public override void _EnterTree()
             {
+                Name = "ImGuiLayer_UpdateFirst";
                 ProcessPriority = int.MinValue;
             }
 
