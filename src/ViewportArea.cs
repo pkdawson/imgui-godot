@@ -23,10 +23,12 @@ public partial class ViewportArea : Area3D
         {
             if (mb.ButtonIndex == MouseButton.Left)
             {
-                var decal = new Decal();
-                decal.TextureAlbedo = decalTexture;
-                decal.Scale = new(10, 10, 10);
-                decal.Position = pos;
+                var decal = new Decal
+                {
+                    TextureAlbedo = decalTexture,
+                    Scale = new(10, 10, 10),
+                    Position = pos
+                };
                 board.AddChild(decal);
             }
             else if (mb.ButtonIndex == MouseButton.Right)
