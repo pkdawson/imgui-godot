@@ -180,7 +180,9 @@ namespace ImGuiGodot
                 var vpEvent = evt.Duplicate() as InputEvent;
                 if (vpEvent is InputEventMouse mouseEvent)
                 {
-                    mouseEvent.Position = new(mouseEvent.Position.x - CurrentSubViewportPos.X, mouseEvent.Position.y - CurrentSubViewportPos.Y);
+                    mouseEvent.Position = new Vector2(mouseEvent.Position.x - CurrentSubViewportPos.X,
+                        mouseEvent.Position.y - CurrentSubViewportPos.Y)
+                        .Clamp(Vector2.Zero, CurrentSubViewport.Size);
                 }
                 CurrentSubViewport.PushInput(vpEvent, true);
                 if (!CurrentSubViewport.IsInputHandled())
