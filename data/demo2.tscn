@@ -1,11 +1,21 @@
-[gd_scene load_steps=4 format=3 uid="uid://dr8hy6iu5hk8a"]
+[gd_scene load_steps=7 format=3 uid="uid://dr8hy6iu5hk8a"]
 
+[ext_resource type="Script" path="res://src/ViewportArea.cs" id="2_btjlu"]
 [ext_resource type="Script" path="res://src/MySecondNode.cs" id="2_gnjei"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_xokfw"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_dsg5q"]
+size = Vector2(250, 250)
 
-[sub_resource type="Environment" id="Environment_jn4g1"]
-background_mode = 1
+[sub_resource type="CylinderMesh" id="CylinderMesh_kek8d"]
+top_radius = 2.0
+bottom_radius = 10.0
+height = 30.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eanfn"]
+albedo_color = Color(0.615686, 0.556863, 0.968627, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6s853"]
+size = Vector3(230, 1, 230)
 
 [node name="Background" type="ColorRect"]
 anchors_preset = 15
@@ -38,20 +48,26 @@ text = "hide"
 
 [node name="SubViewport" type="SubViewport" parent="."]
 unique_name_in_owner = true
-size = Vector2i(200, 200)
+physics_object_picking = true
 render_target_update_mode = 4
 
-[node name="MeshInstance3d" type="MeshInstance3D" parent="SubViewport"]
-mesh = SubResource("SphereMesh_xokfw")
+[node name="Board" type="MeshInstance3D" parent="SubViewport"]
+unique_name_in_owner = true
+mesh = SubResource("PlaneMesh_dsg5q")
+
+[node name="Piece" type="MeshInstance3D" parent="SubViewport"]
+unique_name_in_owner = true
+mesh = SubResource("CylinderMesh_kek8d")
+surface_material_override/0 = SubResource("StandardMaterial3D_eanfn")
 
 [node name="Camera3d" type="Camera3D" parent="SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.872321)
+transform = Transform3D(1, 0, 0, 0, 0.422618, 0.906308, 0, -0.906308, 0.422618, 0, 150, 100)
 current = true
 
-[node name="SpotLight3d" type="SpotLight3D" parent="SubViewport"]
-transform = Transform3D(0.732947, 0, 0.680286, 0, 1, 0, -0.680286, 0, 0.732947, 1.70622, 0, 1.48179)
+[node name="Area3d" type="Area3D" parent="SubViewport"]
+script = ExtResource("2_btjlu")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport"]
-environment = SubResource("Environment_jn4g1")
+[node name="CollisionShape3d" type="CollisionShape3D" parent="SubViewport/Area3d"]
+shape = SubResource("BoxShape3D_6s853")
 
 [connection signal="pressed" from="ShowHideButton" to="MySecondNode" method="_on_show_hide"]
