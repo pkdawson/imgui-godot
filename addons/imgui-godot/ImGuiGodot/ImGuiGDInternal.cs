@@ -181,11 +181,11 @@ namespace ImGuiGodot
                 if (vpEvent is InputEventMouse mouseEvent)
                 {
                     mouseEvent.Position = new(mouseEvent.Position.x - CurrentSubViewportPos.X, mouseEvent.Position.y - CurrentSubViewportPos.Y);
-                    CurrentSubViewport.PushUnhandledInput(mouseEvent);
                 }
-                else
+                CurrentSubViewport.PushInput(vpEvent, true);
+                if (!CurrentSubViewport.IsInputHandled())
                 {
-                    CurrentSubViewport.PushUnhandledInput(vpEvent);
+                    CurrentSubViewport.PushUnhandledInput(vpEvent, true);
                 }
             }
 
