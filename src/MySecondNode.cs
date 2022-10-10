@@ -58,6 +58,7 @@ public partial class MySecondNode : Node
         }
         ImGui.End();
 
+        ImGui.SetNextWindowPos(new(20, 400), ImGuiCond.Once);
         ImGui.Begin("Scene 2");
         ImGui.Text("hello Godot 4");
 
@@ -73,8 +74,9 @@ public partial class MySecondNode : Node
         ImGui.Text("   Kanji: 日本語");
         ImGui.End();
 
-        ImGui.SetNextWindowSize(new(200, 200), ImGuiCond.Once);
-        if (ImGui.Begin("SubViewport test"))
+        ImGui.SetNextWindowPos(new(20, 60), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(new(400, 300), ImGuiCond.Once);
+        if (ImGui.Begin("SubViewport (press R to reset)"))
         {
             var size = ImGui.GetContentRegionAvail();
             if (size.X > 5 && size.Y > 5)

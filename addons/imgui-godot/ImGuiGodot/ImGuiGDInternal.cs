@@ -177,8 +177,16 @@ namespace ImGuiGodot
         {
             if (CurrentSubViewport != null)
             {
-                // TODO: correct mouse pos
-                CurrentSubViewport.PushInput(evt, true);
+                var vpEvent = evt.Duplicate() as InputEvent;
+                if (vpEvent is InputEventMouse mouseEvent)
+                {
+                    mouseEvent.Position = new(mouseEvent.Position.x - CurrentSubViewportPos.X, mouseEvent.Position.y - CurrentSubViewportPos.Y);
+                    CurrentSubViewport.PushUnhandledInput(mouseEvent);
+                }
+                else
+                {
+                    CurrentSubViewport.PushUnhandledInput(vpEvent);
+                }
             }
 
             var io = ImGui.GetIO();
