@@ -1,6 +1,6 @@
 using Godot;
-using ImGuiNET;
 using ImGuiGodot;
+using ImGuiNET;
 
 public partial class MySecondNode : Node
 {
@@ -8,7 +8,7 @@ public partial class MySecondNode : Node
     private SubViewport vp;
     private int iconSize = 64;
     private static bool fontLoaded = false;
-    private static ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
+    private static readonly ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
         ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove;
 
@@ -91,14 +91,6 @@ public partial class MySecondNode : Node
     private void _on_show_hide()
     {
         ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
-        if (ImGuiLayer.Instance.Visible)
-        {
-            GetNode<Button>("%ShowHideButton").Text = "hide";
-        }
-        else
-        {
-            GetNode<Button>("%ShowHideButton").Text = "show";
-        }
-
+        GetNode<Button>("%ShowHideButton").Text = ImGuiLayer.Instance.Visible ? "hide" : "show";
     }
 }
