@@ -146,7 +146,7 @@ namespace ImGuiGodot
                 _mouseWheel = Vector2.Zero;
             }
 
-            if (io.WantCaptureMouse)
+            if (io.WantCaptureMouse && !io.ConfigFlags.HasFlag(ImGuiConfigFlags.NoMouseCursorChange))
             {
                 var newCursor = ImGui.GetMouseCursor();
                 if (newCursor != _currentCursor)
