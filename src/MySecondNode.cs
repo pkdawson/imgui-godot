@@ -33,7 +33,7 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Instance?.Connect(_ImGuiLayout);
+        ImGuiLayer.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         vp = GetNode<SubViewport>("%SubViewport");
     }
