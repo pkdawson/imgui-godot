@@ -52,18 +52,30 @@ In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't s
 
 You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal.
 
+### ImGuiLayer
+
 If you want to customize fonts or other settings, open the scene `res://addons/imgui-godot/ImGuiLayer.tscn`
 
-Use the `Font` and `FontSize` properties to add a custom font. Use the `Visible` property to show/hide the GUI as needed. Change the `Layer` if you need to render anything on top of the GUI.
+Use the `Font` and `FontSize` properties to add custom fonts. Use the `Visible` property to show/hide the GUI as needed (when not visible, it uses almost zero resources). Change the `Layer` if you need to render anything on top of the GUI.
 
-For custom textures, use the static methods `BindTexture` and `UnbindTexture` in `ImGuiGD`.
+### Widgets
+
+These methods should only be called within `_Process` or an `ImGuiLayout` callback.
+
+`Image` and `ImageButton` are simple wrappers for your convenience.
+
+`SubViewport` displays an interactive viewport which receives input events. Be sure to change your SubViewport's `Update Mode` to **Always**.
+
+### ImGuiGD
+
+This is the rest of the public API. You typically won't need to call any of these methods directly.
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
 
 ## Credits
 
-All code written by Patrick Dawson, released under the MIT license
+Code written by Patrick Dawson and contributors, released under the MIT license
 
 Godot Logo (C) Andrea Calabró, distributed under the terms of the Creative Commons Attribution 4.0 International License (CC-BY-4.0 International) https://creativecommons.org/licenses/by/4.0/
 
