@@ -52,7 +52,7 @@ internal static class ImGuiGDInternal
             fc->MergeMode = 1;
         }
 
-        string name = string.Format("{0}, {1}px", System.IO.Path.GetFileName(fontData.ResourcePath), fontSize);
+        string name = $"{System.IO.Path.GetFileName(fontData.ResourcePath)}, {fontSize}px";
         for (int i = 0; i < name.Length && i < 40; ++i)
         {
             fc->Name[i] = Convert.ToByte(name[i]);
