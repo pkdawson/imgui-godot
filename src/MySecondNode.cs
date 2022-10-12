@@ -16,6 +16,9 @@ public partial class MySecondNode : Node
     {
         if (!fontLoaded)
         {
+            // it's easier to configure fonts in the ImGuiLayer scene,
+            // but here's how it can be done in code
+ 
             ImGuiGD.Init();
 
             // use Hack for the default glyphs, M+2 for Japanese
@@ -40,6 +43,7 @@ public partial class MySecondNode : Node
 
     public override void _ExitTree()
     {
+        // call UnbindTexture when you're done to free a few bytes of memory
         ImGuiGD.UnbindTexture(iconTexture);
         ImGuiGD.UnbindTexture(vp.GetTexture());
     }

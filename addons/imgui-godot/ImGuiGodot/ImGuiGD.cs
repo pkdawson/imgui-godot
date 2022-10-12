@@ -6,7 +6,14 @@ namespace ImGuiGodot;
 
 public static class ImGuiGD
 {
+    /// <summary>
+    /// Deadzone for all axes
+    /// </summary>
     public static float JoyAxisDeadZone { get; set; } = 0.15f;
+
+    /// <summary>
+    /// Swap the functionality of the activate (face down) and cancel (face right) buttons
+    /// </summary>
     public static bool JoyButtonSwapAB { get; set; } = false;
 
     public static IntPtr BindTexture(Texture2D tex)

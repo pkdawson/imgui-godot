@@ -6,32 +6,16 @@ public partial class ImGuiLayer : CanvasLayer
 {
     public static ImGuiLayer Instance { get; private set; }
 
-    [Export]
-    public FontFile Font = null;
+    [Export] public FontFile Font = null;
+    [Export] public int FontSize = 16;
+    [Export] public FontFile ExtraFont1 = null;
+    [Export] public int ExtraFont1Size = 16;
+    [Export] public FontFile ExtraFont2 = null;
+    [Export] public int ExtraFont2Size = 16;
+    [Export] public bool MergeFonts = true;
+    [Export] public bool AddDefaultFont = true;
 
-    [Export]
-    public int FontSize = 16;
-
-    [Export]
-    public FontFile ExtraFont1 = null;
-
-    [Export]
-    public int ExtraFont1Size = 16;
-
-    [Export]
-    public FontFile ExtraFont2 = null;
-
-    [Export]
-    public int ExtraFont2Size = 16;
-
-    [Export]
-    public bool MergeFonts = true;
-
-    [Export]
-    public bool AddDefaultFont = true;
-
-    [Signal]
-    public delegate void ImGuiLayoutEventHandler();
+    [Signal] public delegate void ImGuiLayoutEventHandler();
 
     private RID _canvasItem;
 

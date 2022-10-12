@@ -9,8 +9,11 @@ namespace ImGuiGodot;
 public static class Widgets
 {
     /// <summary>
-    /// Be sure to change the SubViewport's <c>Update Mode</c> to <b>Always</b>
+    /// Display an interactable SubViewport
     /// </summary>
+    /// <remarks>
+    /// Be sure to change the SubViewport's <c>Update Mode</c> to <b>Always</b>
+    /// </remarks>
     public static void SubViewport(SubViewport vp)
     {
         Vector2 vpSize = new(vp.Size.x, vp.Size.y);
