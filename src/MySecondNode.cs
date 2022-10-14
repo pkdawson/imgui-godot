@@ -18,7 +18,7 @@ public partial class MySecondNode : Node
         {
             // it's easier to configure fonts in the ImGuiLayer scene,
             // but here's how it can be done in code
- 
+
             ImGuiGD.Init();
 
             // use Hack for the default glyphs, M+2 for Japanese

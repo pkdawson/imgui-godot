@@ -50,7 +50,10 @@ cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
 
 In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
 
-You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal.
+You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal:
+```csharp
+ImGuiLayer.Connect(OnImGuiLayout);
+```
 
 ### ImGuiLayer
 
