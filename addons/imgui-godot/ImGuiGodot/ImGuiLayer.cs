@@ -118,7 +118,7 @@ public partial class ImGuiLayer : CanvasLayer
             // temporary workaround for a bug in the early Godot 4 betas
             Instance.Connect(SignalName.ImGuiLayout, new Callable(d.Target as Object, d.Method.Name));
 
-            // TODO: use this after Godot 4.0-beta3 is released
+            // TODO: use this when it no longer breaks on changing scenes
             // Instance.ImGuiLayout += d;
         }
     }
