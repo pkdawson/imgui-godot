@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 namespace ImGuiGodot;
@@ -63,6 +64,7 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.RebuildFontAtlas();
 
         AddChild(new UpdateFirst());
+        GetTree().NodeRemoved += OnNodeRemoved;
     }
 
     public override void _Ready()
@@ -115,11 +117,25 @@ public partial class ImGuiLayer : CanvasLayer
     {
         if (Instance != null)
         {
-            // temporary workaround for a bug in the early Godot 4 betas
-            Instance.Connect(SignalName.ImGuiLayout, new Callable(d.Target as Object, d.Method.Name));
+            Instance.ImGuiLayout += d;
+        }
+    }
 
-            // TODO: use this when it no longer breaks on changing scenes
-            // Instance.ImGuiLayout += d;
+    private static void OnNodeRemoved(Node node)
+    {
+        // signals declared in C# don't (yet?) work like normal Godot signals,
+        // we need to clean up after removed Objects ourselves
+
+        // backing_ImGuiLayout is an implementation detail that could change
+        if (Instance.backing_ImGuiLayout == null)
+            return;
+
+        foreach (Delegate d in Instance.backing_ImGuiLayout.GetInvocationList())
+        {
+            if (d.Target == node)
+            {
+                Instance.ImGuiLayout -= (ImGuiLayoutEventHandler)d;
+            }
         }
     }
 }
