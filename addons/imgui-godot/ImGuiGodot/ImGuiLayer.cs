@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 
 namespace ImGuiGodot;
@@ -16,9 +17,13 @@ public partial class ImGuiLayer : CanvasLayer
     [Export] public bool MergeFonts = true;
     [Export] public bool AddDefaultFont = true;
 
+    /// <summary>
+    /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
+    /// </summary>
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
     private RID _canvasItem;
+    private static readonly HashSet<Godot.Object> _connectedObjects = new();
 
     private partial class UpdateFirst : Node
     {
@@ -64,7 +69,6 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.RebuildFontAtlas();
 
         AddChild(new UpdateFirst());
-        GetTree().NodeRemoved += OnNodeRemoved;
     }
 
     public override void _Ready()
@@ -118,6 +122,15 @@ public partial class ImGuiLayer : CanvasLayer
         if (Instance != null)
         {
             Instance.ImGuiLayout += d;
+
+            if (d.Target is Godot.Object obj)
+            {
+                if (_connectedObjects.Count == 0)
+                {
+                    Instance.GetTree().NodeRemoved += OnNodeRemoved;
+                }
+                _connectedObjects.Add(obj);
+            }
         }
     }
 
@@ -126,16 +139,25 @@ public partial class ImGuiLayer : CanvasLayer
         // signals declared in C# don't (yet?) work like normal Godot signals,
         // we need to clean up after removed Objects ourselves
 
-        // backing_ImGuiLayout is an implementation detail that could change
-        if (Instance.backing_ImGuiLayout == null)
+        if (!_connectedObjects.Contains(node))
+        {
             return;
+        }
+        _connectedObjects.Remove(node);
 
+        // backing_ImGuiLayout is an implementation detail that could change
         foreach (Delegate d in Instance.backing_ImGuiLayout.GetInvocationList())
         {
+            // remove ALL delegates with the removed Node as a target
             if (d.Target == node)
             {
                 Instance.ImGuiLayout -= (ImGuiLayoutEventHandler)d;
             }
+        }
+
+        if (_connectedObjects.Count == 0)
+        {
+            Instance.GetTree().NodeRemoved -= OnNodeRemoved;
         }
     }
 }

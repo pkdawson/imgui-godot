@@ -12,7 +12,7 @@ public static class Widgets
     /// Display an interactable SubViewport
     /// </summary>
     /// <remarks>
-    /// Be sure to change the SubViewport's <c>Update Mode</c> to <b>Always</b>
+    /// Be sure to change the SubViewport's <see cref="SubViewport.RenderTargetUpdateMode"/> to <see cref="SubViewport.UpdateMode.Always"/>
     /// </remarks>
     public static void SubViewport(SubViewport vp)
     {
