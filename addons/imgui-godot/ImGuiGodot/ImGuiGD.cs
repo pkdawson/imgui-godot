@@ -16,6 +16,45 @@ public static class ImGuiGD
     /// </summary>
     public static bool JoyButtonSwapAB { get; set; } = false;
 
+    /// <summary>
+    /// Try to calculate how many pixels squared per point. Should be 1 or 2 on non-mobile displays
+    /// </summary>
+    public static int DpiFactor
+    {
+        get
+        {
+            if (_dpiFactor == null)
+            {
+                _dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
+            }
+            return _dpiFactor.Value;
+        }
+    }
+    private static int? _dpiFactor;
+
+    /// <summary>
+    /// Adjust the scale based on <see cref="DpiFactor"/>
+    /// </summary>
+    public static bool ScaleToDpi { get; set; } = true;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float Scale
+    {
+        get { return _scale; }
+        set
+        {
+            if (_scale != value && value >= 0.25f)
+            {
+                _scale = value;
+                Init(false);
+                RebuildFontAtlas();
+            }
+        }
+    }
+    private static float _scale = 1.0f;
+
     public static IntPtr BindTexture(Texture2D tex)
     {
         return ImGuiGDInternal.BindTexture(tex);
@@ -32,29 +71,23 @@ public static class ImGuiGD
         ImGuiGDInternal.UnbindTexture(texid);
     }
 
-    public static void Init()
+    public static void Init(bool resetFontConfig = true)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
             GD.PrintErr("imgui-godot requires 64-bit pointers");
         }
-        ImGuiGDInternal.Init();
+        ImGuiGDInternal.Init(ScaleToDpi ? Scale * DpiFactor : Scale, resetFontConfig);
     }
 
-    public static ImFontPtr AddFont(FontFile fontData, float fontSize, bool merge = false)
+    public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        return ImGuiGDInternal.AddFont(fontData, fontSize, merge);
+        ImGuiGDInternal.AddFont(fontData, fontSize, merge);
     }
 
-    public static ImFontPtr AddFont(FontFile fontData, float fontSize, IntPtr glyphRanges, bool merge = false)
+    public static void AddFontDefault()
     {
-        return ImGuiGDInternal.AddFont(fontData, fontSize, glyphRanges, merge);
-    }
-
-    public static ImFontPtr AddFontDefault()
-    {
-        // right now this is a simple wrapper, but that will change
-        return ImGui.GetIO().Fonts.AddFontDefault();
+        ImGuiGDInternal.AddFont(null, 13, false);
     }
 
     // only call this once, shortly after Init

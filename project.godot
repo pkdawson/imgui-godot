@@ -23,7 +23,6 @@ ImGuiLayer="*res://addons/imgui-godot/ImGuiLayer.tscn"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/dpi/allow_hidpi=false
 
 [dotnet]
 

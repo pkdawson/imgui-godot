@@ -1,6 +1,6 @@
+using Godot;
 using System;
 using System.Collections.Generic;
-using Godot;
 
 namespace ImGuiGodot;
 
@@ -47,6 +47,18 @@ public partial class ImGuiLayer : CanvasLayer
         _canvasItem = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
         VisibilityChanged += OnChangeVisibility;
+
+        // TODO: something
+        Window window = (Window)GetViewport();
+        switch (window.ContentScaleMode)
+        {
+            case Window.ContentScaleModeEnum.Disabled:
+                break;
+            case Window.ContentScaleModeEnum.CanvasItems:
+                break;
+            case Window.ContentScaleModeEnum.Viewport:
+                break;
+        }
 
         ImGuiGD.Init();
         if (Font is not null)

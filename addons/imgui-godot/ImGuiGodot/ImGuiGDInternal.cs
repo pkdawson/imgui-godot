@@ -18,9 +18,18 @@ internal static class ImGuiGDInternal
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
+    private static float _scale = 1.0f;
 
     // necessary because we can't construct arbitrary RIDs without using reflection
-    private static Dictionary<IntPtr, RID> _texrids = new();
+    private static readonly Dictionary<IntPtr, RID> _texrids = new();
+
+    private class FontParams
+    {
+        public FontFile Font { get; init; }
+        public int FontSize { get; init; }
+        public bool Merge { get; init; }
+    }
+    private static readonly List<FontParams> _fontConfiguration = new();
 
     public static IntPtr BindTexture(Texture2D tex)
     {
@@ -35,36 +44,52 @@ internal static class ImGuiGDInternal
         _texrids.Remove(texid);
     }
 
-    public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, bool merge)
+    public static void AddFont(FontFile fontData, float fontSize, bool merge)
     {
-        ImVector ranges = GetRanges(fontData);
-        return AddFont(fontData, fontSize, ranges.Data, merge);
+        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = (int)fontSize, Merge = merge });
     }
 
-    public static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, IntPtr glyphRanges, bool merge)
+    private static unsafe void _AddFont(FontFile fontData, int fontSize, bool merge)
     {
-        ImFontPtr rv = null;
-        // ImFontConfig has a constructor, so we don't zero it
         ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
-
         if (merge)
         {
             fc->MergeMode = 1;
         }
 
-        string name = $"{System.IO.Path.GetFileName(fontData.ResourcePath)}, {fontSize}px";
-        for (int i = 0; i < name.Length && i < 40; ++i)
+        if (fontData == null)
         {
-            fc->Name[i] = Convert.ToByte(name[i]);
+            // default font
+            var fcptr = new ImFontConfigPtr(fc)
+            {
+                SizePixels = fontSize,
+                OversampleH = 1,
+                OversampleV = 1,
+                PixelSnapH = true
+            };
+            ImGui.GetIO().Fonts.AddFontDefault(fc);
         }
-        rv = AddFont(fontData, fontSize, glyphRanges, fc);
+        else
+        {
+            ImVector ranges = GetRanges(fontData);
+            string name = $"{System.IO.Path.GetFileName(fontData.ResourcePath)}, {fontSize}px";
+            for (int i = 0; i < name.Length && i < 40; ++i)
+            {
+                fc->Name[i] = Convert.ToByte(name[i]);
+            }
+
+            int len = fontData.Data.Length;
+            // let ImGui manage this memory
+            IntPtr p = Marshal.AllocHGlobal(len);
+            Marshal.Copy(fontData.Data, 0, p, len);
+            ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
+        }
 
         if (merge)
         {
             ImGui.GetIO().Fonts.Build();
         }
         ImGuiNative.ImFontConfig_destroy(fc);
-        return rv;
     }
 
     private static unsafe ImVector GetRanges(Font font)
@@ -76,18 +101,14 @@ internal static class ImGuiGDInternal
         return vec;
     }
 
-    private static unsafe ImFontPtr AddFont(FontFile fontData, float fontSize, IntPtr glyphRanges, ImFontConfig* fc)
-    {
-        int len = fontData.Data.Length;
-        // let ImGui manage this memory
-        IntPtr p = Marshal.AllocHGlobal(len);
-        Marshal.Copy(fontData.Data, 0, p, len);
-        return ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, glyphRanges);
-    }
-
     // only call this once, shortly after Init
     public static unsafe void RebuildFontAtlas()
     {
+        foreach (var fontParams in _fontConfiguration)
+        {
+            _AddFont(fontParams.Font, (int)(fontParams.FontSize * _scale), fontParams.Merge);
+        }
+
         var io = ImGui.GetIO();
         io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
 
@@ -101,10 +122,16 @@ internal static class ImGuiGDInternal
         _fontTexture = imgtex;
         io.Fonts.SetTexID(BindTexture(_fontTexture));
         io.Fonts.ClearTexData();
+
+        ImGui.GetStyle().ScaleAllSizes(_scale);
     }
 
-    public static void Init()
+    public static void Init(float scale, bool resetFontConfig)
     {
+        _scale = scale;
+        if (resetFontConfig)
+            _fontConfiguration.Clear();
+
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
         {
             ImGui.DestroyContext();

@@ -7,6 +7,7 @@ public partial class MySecondNode : Node
     private Texture2D iconTexture;
     private SubViewport vp;
     private int iconSize = 64;
+    private float scale;
     private static bool fontLoaded = false;
     private static readonly ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
@@ -22,8 +23,8 @@ public partial class MySecondNode : Node
             ImGuiGD.Init();
 
             // use Hack for the default glyphs, M+2 for Japanese
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18.0f);
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22.0f, merge: true);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22, merge: true);
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();
@@ -39,6 +40,7 @@ public partial class MySecondNode : Node
         ImGuiLayer.Connect(_ImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         vp = GetNode<SubViewport>("%SubViewport");
+        scale = ImGuiGD.Scale;
     }
 
     public override void _ExitTree()
@@ -76,6 +78,19 @@ public partial class MySecondNode : Node
         ImGui.Text("Hiragana: こんばんは");
         ImGui.Text("Katakana: ハロウィーン");
         ImGui.Text("   Kanji: 日本語");
+
+        ImGui.Separator();
+        ImGui.Text("GUI scale");
+        for (int i = 0; i < 6; ++i)
+        {
+            float s = 0.75f + (i * 0.25f);
+            if (ImGui.RadioButton(s.ToString("0.00"), scale == s))
+            {
+                scale = s;
+                CallDeferred("OnScaleChanged");
+            }
+            if (i < 5) ImGui.SameLine();
+        }
         ImGui.End();
 
         ImGui.SetNextWindowPos(new(20, 60), ImGuiCond.Once);
@@ -96,5 +111,10 @@ public partial class MySecondNode : Node
     {
         ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
         GetNode<Button>("%ShowHideButton").Text = ImGuiLayer.Instance.Visible ? "hide" : "show";
+    }
+
+    private void OnScaleChanged()
+    {
+        ImGuiGD.Scale = scale;
     }
 }
