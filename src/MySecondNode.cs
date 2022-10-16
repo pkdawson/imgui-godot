@@ -8,7 +8,10 @@ public partial class MySecondNode : Node
     private SubViewport vp;
     private int iconSize = 64;
     private float scale;
+    private ImFontPtr proggy;
+
     private static bool fontLoaded = false;
+    private static System.Numerics.Vector4 myTextColor = Colors.Aquamarine.ToVector4();
     private static readonly ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
         ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove;
@@ -33,6 +36,7 @@ public partial class MySecondNode : Node
 
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
+        proggy = io.Fonts.Fonts[1];
     }
 
     public override void _Ready()
@@ -66,7 +70,9 @@ public partial class MySecondNode : Node
 
         ImGui.SetNextWindowPos(new(20, 400), ImGuiCond.Once);
         ImGui.Begin("Scene 2");
-        ImGui.Text("hello Godot 4");
+        ImGui.PushFont(proggy);
+        ImGui.TextColored(myTextColor, "hello Godot 4");
+        ImGui.PopFont();
 
         ImGui.Separator();
         ImGui.Text("Simple texture");
@@ -116,5 +122,8 @@ public partial class MySecondNode : Node
     private void OnScaleChanged()
     {
         ImGuiGD.Scale = scale;
+
+        // old font pointers are invalid after changing scale
+        proggy = ImGui.GetIO().Fonts.Fonts[1];
     }
 }

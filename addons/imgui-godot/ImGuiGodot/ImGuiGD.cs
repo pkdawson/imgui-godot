@@ -1,6 +1,7 @@
 using Godot;
 using ImGuiNET;
 using System;
+using Vector4 = System.Numerics.Vector4;
 
 namespace ImGuiGodot;
 
@@ -136,5 +137,13 @@ public static class ImGuiGD
     public static ImGuiKey ToImGuiKey(this JoyButton button)
     {
         return ImGuiGDInternal.ConvertJoyButton(button);
+    }
+
+    /// <summary>
+    /// Convert <see cref="Godot.Color"/> to ImGui color
+    /// </summary>
+    public static Vector4 ToVector4(this Color color)
+    {
+        return new Vector4(color.r, color.g, color.b, color.a);
     }
 }
