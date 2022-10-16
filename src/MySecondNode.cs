@@ -9,6 +9,7 @@ public partial class MySecondNode : Node
     private int iconSize = 64;
     private float scale;
     private ImFontPtr proggy;
+    private ColorRect background;
 
     private static bool fontLoaded = false;
     private static System.Numerics.Vector4 myTextColor = Colors.Aquamarine.ToVector4();
@@ -37,6 +38,7 @@ public partial class MySecondNode : Node
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
         proggy = io.Fonts.Fonts[1];
+        background = GetNode<ColorRect>("/root/Background");
     }
 
     public override void _Ready()
@@ -96,6 +98,13 @@ public partial class MySecondNode : Node
                 CallDeferred("OnScaleChanged");
             }
             if (i < 5) ImGui.SameLine();
+        }
+
+        ImGui.Separator();
+        var col = background.Color.ToVector3();
+        if (ImGui.ColorEdit3("background color", ref col))
+        {
+            background.Color = col.ToColor();
         }
         ImGui.End();
 

@@ -1,6 +1,7 @@
 using Godot;
 using ImGuiNET;
 using System;
+using Vector3 = System.Numerics.Vector3;
 using Vector4 = System.Numerics.Vector4;
 
 namespace ImGuiGodot;
@@ -140,10 +141,34 @@ public static class ImGuiGD
     }
 
     /// <summary>
-    /// Convert <see cref="Godot.Color"/> to ImGui color
+    /// Convert <see cref="Color"/> to ImGui color RGBA
     /// </summary>
     public static Vector4 ToVector4(this Color color)
     {
         return new Vector4(color.r, color.g, color.b, color.a);
+    }
+
+    /// <summary>
+    /// Convert <see cref="Color"/> to ImGui color RGB
+    /// </summary>
+    public static Vector3 ToVector3(this Color color)
+    {
+        return new Vector3(color.r, color.g, color.b);
+    }
+
+    /// <summary>
+    /// Convert RGB <see cref="Vector3"/> to <see cref="Color"/>
+    /// </summary>
+    public static Color ToColor(this Vector3 vec)
+    {
+        return new Color(vec.X, vec.Y, vec.Z);
+    }
+
+    /// <summary>
+    /// Convert RGBA <see cref="Vector4"/> to <see cref="Color"/>
+    /// </summary>
+    public static Color ToColor(this Vector4 vec)
+    {
+        return new Color(vec.W, vec.X, vec.Y, vec.Z);
     }
 }
