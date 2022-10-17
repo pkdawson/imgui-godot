@@ -60,6 +60,8 @@ public partial class MySecondNode : Node
     {
         ImGui.ShowDemoWindow();
 
+        float fh = ImGui.GetFrameHeight();
+
         ImGui.SetNextWindowPos(new(10, 10));
         ImGui.Begin("change scene window", cswinflags);
         if (ImGui.Button("change scene"))
@@ -70,8 +72,21 @@ public partial class MySecondNode : Node
         }
         ImGui.End();
 
-        ImGui.SetNextWindowPos(new(20, 400), ImGuiCond.Once);
-        ImGui.Begin("Scene 2");
+        ImGui.SetNextWindowPos(new(fh, ImGui.GetIO().DisplaySize.Y - (11 * fh) - 5.0f), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(new(18 * fh, 11 * fh), ImGuiCond.Once);
+        if (ImGui.Begin("SubViewport (press R to reset)"))
+        {
+            var size = ImGui.GetContentRegionAvail();
+            if (size.X > 5 && size.Y > 5)
+            {
+                vp.Size = new((int)size.X - 5, (int)size.Y - 5);
+                Widgets.SubViewport(vp);
+            }
+        }
+        ImGui.End();
+
+        ImGui.SetNextWindowPos(new(fh, 3*fh), ImGuiCond.Once);
+        ImGui.Begin("Scene 2", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.PushFont(proggy);
         ImGui.TextColored(myTextColor, "hello Godot 4");
         ImGui.PopFont();
@@ -105,19 +120,6 @@ public partial class MySecondNode : Node
         if (ImGui.ColorEdit3("background color", ref col))
         {
             background.Color = col.ToColor();
-        }
-        ImGui.End();
-
-        ImGui.SetNextWindowPos(new(20, 60), ImGuiCond.Once);
-        ImGui.SetNextWindowSize(new(400, 300), ImGuiCond.Once);
-        if (ImGui.Begin("SubViewport (press R to reset)"))
-        {
-            var size = ImGui.GetContentRegionAvail();
-            if (size.X > 5 && size.Y > 5)
-            {
-                vp.Size = new((int)size.X - 5, (int)size.Y - 5);
-                Widgets.SubViewport(vp);
-            }
         }
         ImGui.End();
     }

@@ -40,7 +40,7 @@ public static class ImGuiGD
     public static bool ScaleToDpi { get; set; } = true;
 
     /// <summary>
-    /// 
+    /// Setting this will reinitialize ImGui with rescaled fonts
     /// </summary>
     public static float Scale
     {
@@ -50,7 +50,7 @@ public static class ImGuiGD
             if (_scale != value && value >= 0.25f)
             {
                 _scale = value;
-                Init(false);
+                Init(resetFontConfig: false);
                 RebuildFontAtlas();
             }
         }
@@ -73,12 +73,18 @@ public static class ImGuiGD
         ImGuiGDInternal.UnbindTexture(texid);
     }
 
-    public static void Init(bool resetFontConfig = true)
+    public static void Init(float? scale = null, bool resetFontConfig = true)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
             GD.PrintErr("imgui-godot requires 64-bit pointers");
         }
+
+        if (scale != null)
+        {
+            _scale = scale.Value;
+        }
+
         ImGuiGDInternal.Init(ScaleToDpi ? Scale * DpiFactor : Scale, resetFontConfig);
     }
 

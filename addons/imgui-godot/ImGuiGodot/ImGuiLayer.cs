@@ -17,41 +17,44 @@ public partial class ImGuiLayer : CanvasLayer
     [Export] public bool MergeFonts = true;
     [Export] public bool AddDefaultFont = true;
 
+    [Export(PropertyHint.Range, "0.25,4.0,or_greater")]
+    public new float Scale = 1.0f;
+    [Export] public bool ScaleToDpi = true;
+
     /// <summary>
     /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
     /// </summary>
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
+    private RID _canvas;
     private RID _canvasItem;
-    private static SubViewport _subViewport;
+    private Window _window;
+    private SubViewportContainer _subViewportContainer;
+    private SubViewport _subViewport;
     private static readonly HashSet<Godot.Object> _connectedObjects = new();
 
     private partial class UpdateFirst : Node
     {
-        public override void _EnterTree()
-        {
-            Name = "ImGuiLayer_UpdateFirst";
-            ProcessPriority = int.MinValue;
-        }
+        public Viewport Viewport { get; set; }
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, _subViewport);
+            ImGuiGD.Update(delta, Viewport);
         }
     }
 
     public override void _EnterTree()
     {
         Instance = this;
+        _window = (Window)GetViewport();
 
         CheckContentScale();
 
         ProcessPriority = int.MaxValue;
-        _canvasItem = RenderingServer.CanvasItemCreate();
-        RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
         VisibilityChanged += OnChangeVisibility;
 
-        ImGuiGD.Init();
+        ImGuiGD.ScaleToDpi = ScaleToDpi;
+        ImGuiGD.Init(Scale);
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);
@@ -71,34 +74,56 @@ public partial class ImGuiLayer : CanvasLayer
         }
         ImGuiGD.RebuildFontAtlas();
 
-        AddChild(new UpdateFirst());
+        _subViewportContainer = new SubViewportContainer
+        {
+            Name = "ImGuiLayer_SubViewportContainer",
+            AnchorsPreset = 15,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Stretch = true
+        };
+
+        _subViewport = new SubViewport
+        {
+            Name = "ImGuiLayer_SubViewport",
+            TransparentBg = true,
+            HandleInputLocally = false,
+            GuiDisableInput = true,
+            RenderTargetUpdateMode = SubViewport.UpdateMode.Always
+        };
+
+        _subViewportContainer.AddChild(_subViewport);
+
+        _canvas = RenderingServer.CanvasCreate();
+        _canvasItem = RenderingServer.CanvasItemCreate();
+        RenderingServer.ViewportAttachCanvas(_subViewport.GetViewportRid(), _canvas);
+        RenderingServer.CanvasItemSetParent(_canvasItem, _canvas);
+        AddChild(_subViewportContainer);
+
+        AddChild(new UpdateFirst
+        {
+            Name = "ImGuiLayer_UpdateFirst",
+            ProcessPriority = int.MinValue,
+            Viewport = _subViewport
+        });
+
+        _subViewport.SizeChanged += OnWindowSizeChanged;
     }
 
     public override void _Ready()
     {
         OnChangeVisibility();
-
-        _subViewport = GetNode<SubViewport>("/root/ImGuiLayer/SubViewportContainer/SubViewport");
-        _subViewport.GuiDisableInput = true;
-
-        // TODO: cleanup
-        RID canvas = RenderingServer.CanvasCreate();
-        RenderingServer.ViewportAttachCanvas(_subViewport.GetViewportRid(), canvas);
-        RenderingServer.CanvasItemSetParent(_canvasItem, canvas);
-
-        Window window = (Window)GetViewport();
-        _subViewport.SizeChanged += OnWindowSizeChanged;
     }
 
     private void OnWindowSizeChanged()
     {
-        _subViewport.Size = ((Window)GetViewport()).Size;
+        _subViewport.Size = _window.Size;
     }
 
     public override void _ExitTree()
     {
         ImGuiGD.Shutdown();
         RenderingServer.FreeRid(_canvasItem);
+        RenderingServer.FreeRid(_canvas);
     }
 
     private void OnChangeVisibility()
@@ -180,29 +205,28 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
-    private static void CheckContentScale()
+    private void CheckContentScale()
     {
-        Window window = (Window)Instance.GetViewport();
-        switch (window.ContentScaleMode)
+        switch (_window.ContentScaleMode)
         {
             case Window.ContentScaleModeEnum.Disabled:
                 break;
             case Window.ContentScaleModeEnum.CanvasItems:
-                if (window.ContentScaleAspect != Window.ContentScaleAspectEnum.Expand)
+                if (_window.ContentScaleAspect != Window.ContentScaleAspectEnum.Expand)
                 {
-                    PrintErrContentScale(window);
+                    PrintErrContentScale();
                 }
                 break;
             case Window.ContentScaleModeEnum.Viewport:
-                PrintErrContentScale(window);
+                PrintErrContentScale();
                 break;
         }
     }
 
-    private static void PrintErrContentScale(Window window)
+    private void PrintErrContentScale()
     {
         GD.PrintErr($"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}" +
             $" or {Window.ContentScaleModeEnum.CanvasItems}/{Window.ContentScaleAspectEnum.Expand}");
-        GD.PrintErr($"  current mode is {window.ContentScaleMode}/{window.ContentScaleAspect}");
+        GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }
