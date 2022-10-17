@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://sdgew7sm2686"]
+[gd_scene load_steps=5 format=3 uid="uid://sdgew7sm2686"]
 
 [ext_resource type="Texture2D" uid="uid://2cvgmt2fmpao" path="res://data/icon.svg" id="1_c7hdb"]
 [ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="3_fjiyg"]
 [ext_resource type="Script" path="res://src/MyNode.cs" id="3_qvd0t"]
+[ext_resource type="ButtonGroup" uid="uid://ucf261yyiwkq" path="res://data/buttongroup.tres" id="4_7oj01"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -54,4 +55,55 @@ ignore_texture_size = true
 [node name="MyNode" type="Node" parent="."]
 script = ExtResource("3_qvd0t")
 
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -143.0
+offset_right = 256.0
+grow_vertical = 0
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer"]
+layout_mode = 2
+offset_right = 256.0
+offset_bottom = 143.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/CenterContainer"]
+layout_mode = 2
+offset_left = 40.0
+offset_top = 23.0
+offset_right = 215.0
+offset_bottom = 119.0
+
+[node name="Label" type="Label" parent="PanelContainer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+offset_right = 175.0
+offset_bottom = 26.0
+text = "Content scale mode"
+horizontal_alignment = 1
+
+[node name="ButtonCIE" type="Button" parent="PanelContainer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 30.0
+offset_right = 175.0
+offset_bottom = 61.0
+focus_mode = 0
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("4_7oj01")
+text = "canvas_items/expand"
+
+[node name="ButtonD" type="Button" parent="PanelContainer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 65.0
+offset_right = 175.0
+offset_bottom = 96.0
+focus_mode = 0
+toggle_mode = true
+button_group = ExtResource("4_7oj01")
+text = "disabled"
+
 [connection signal="pressed" from="Button1" to="MyNode" method="_on_button1_pressed"]
+[connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonCIE" to="MyNode" method="OnContentScaleCIE"]
+[connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonD" to="MyNode" method="OnContentScaleDisabled"]
