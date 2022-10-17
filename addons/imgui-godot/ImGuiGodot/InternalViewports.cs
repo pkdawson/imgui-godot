@@ -1,3 +1,4 @@
+#if IMGUI_GODOT_DEV
 using ImGuiNET;
 
 namespace ImGuiGodot;
@@ -10,3 +11,4 @@ internal static class InternalViewports
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
     }
 }
+#endif

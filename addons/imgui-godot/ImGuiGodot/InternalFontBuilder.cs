@@ -1,3 +1,4 @@
+#if IMGUI_GODOT_DEV
 using Godot;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -42,3 +43,4 @@ internal class InternalFontBuilder
         return null;
     }
 }
+#endif

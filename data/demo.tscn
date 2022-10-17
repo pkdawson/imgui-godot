@@ -13,15 +13,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Button1" type="Button" parent="."]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 211.0
-offset_bottom = 69.0
-theme_override_fonts/font = ExtResource("3_fjiyg")
-theme_override_font_sizes/font_size = 24
-text = "Switch scene"
+[node name="MyNode" type="Node" parent="."]
+script = ExtResource("3_qvd0t")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -52,8 +45,15 @@ grow_vertical = 0
 texture = ExtResource("1_c7hdb")
 ignore_texture_size = true
 
-[node name="MyNode" type="Node" parent="."]
-script = ExtResource("3_qvd0t")
+[node name="Button1" type="Button" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 211.0
+offset_bottom = 69.0
+theme_override_fonts/font = ExtResource("3_fjiyg")
+theme_override_font_sizes/font_size = 24
+text = "Switch scene"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
