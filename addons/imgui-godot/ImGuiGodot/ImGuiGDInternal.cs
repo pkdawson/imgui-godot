@@ -14,7 +14,7 @@ internal static class ImGuiGDInternal
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
 
     private static Texture2D _fontTexture;
-    private static List<RID> _children = new();
+    private static readonly List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);

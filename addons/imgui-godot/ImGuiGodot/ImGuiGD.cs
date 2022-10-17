@@ -25,10 +25,7 @@ public static class ImGuiGD
     {
         get
         {
-            if (_dpiFactor == null)
-            {
-                _dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-            }
+            _dpiFactor ??= Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
             return _dpiFactor.Value;
         }
     }
@@ -44,7 +41,7 @@ public static class ImGuiGD
     /// </summary>
     public static float Scale
     {
-        get { return _scale; }
+        get => _scale;
         set
         {
             if (_scale != value && value >= 0.25f)

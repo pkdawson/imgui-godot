@@ -85,7 +85,7 @@ public partial class MySecondNode : Node
         }
         ImGui.End();
 
-        ImGui.SetNextWindowPos(new(fh, 3*fh), ImGuiCond.Once);
+        ImGui.SetNextWindowPos(new(fh, 3 * fh), ImGuiCond.Once);
         ImGui.Begin("Scene 2", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.PushFont(proggy);
         ImGui.TextColored(myTextColor, "hello Godot 4");
