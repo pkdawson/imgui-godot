@@ -206,8 +206,8 @@ internal static class ImGuiGDInternal
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(mouseEvent.Position.x - CurrentSubViewportPos.X,
-                    mouseEvent.Position.y - CurrentSubViewportPos.Y)
+                mouseEvent.Position = new Vector2(mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
+                    mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
@@ -222,7 +222,7 @@ internal static class ImGuiGDInternal
 
         if (evt is InputEventMouseMotion mm)
         {
-            io.AddMousePosEvent(mm.Position.x, mm.Position.y);
+            io.AddMousePosEvent(mm.GlobalPosition.x, mm.GlobalPosition.y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)

@@ -23,6 +23,7 @@ public partial class ImGuiLayer : CanvasLayer
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
     private RID _canvasItem;
+    private static SubViewport _subViewport;
     private static readonly HashSet<Godot.Object> _connectedObjects = new();
 
     private partial class UpdateFirst : Node
@@ -35,7 +36,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, GetViewport());
+            ImGuiGD.Update(delta, _subViewport);
         }
     }
 
@@ -43,22 +44,12 @@ public partial class ImGuiLayer : CanvasLayer
     {
         Instance = this;
 
+        CheckContentScale();
+
         ProcessPriority = int.MaxValue;
         _canvasItem = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
         VisibilityChanged += OnChangeVisibility;
-
-        // TODO: something
-        Window window = (Window)GetViewport();
-        switch (window.ContentScaleMode)
-        {
-            case Window.ContentScaleModeEnum.Disabled:
-                break;
-            case Window.ContentScaleModeEnum.CanvasItems:
-                break;
-            case Window.ContentScaleModeEnum.Viewport:
-                break;
-        }
 
         ImGuiGD.Init();
         if (Font is not null)
@@ -86,6 +77,22 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _Ready()
     {
         OnChangeVisibility();
+
+        _subViewport = GetNode<SubViewport>("/root/ImGuiLayer/SubViewportContainer/SubViewport");
+        _subViewport.GuiDisableInput = true;
+
+        // TODO: cleanup
+        RID canvas = RenderingServer.CanvasCreate();
+        RenderingServer.ViewportAttachCanvas(_subViewport.GetViewportRid(), canvas);
+        RenderingServer.CanvasItemSetParent(_canvasItem, canvas);
+
+        Window window = (Window)GetViewport();
+        _subViewport.SizeChanged += OnWindowSizeChanged;
+    }
+
+    private void OnWindowSizeChanged()
+    {
+        _subViewport.Size = ((Window)GetViewport()).Size;
     }
 
     public override void _ExitTree()
@@ -171,5 +178,31 @@ public partial class ImGuiLayer : CanvasLayer
         {
             Instance.GetTree().NodeRemoved -= OnNodeRemoved;
         }
+    }
+
+    private static void CheckContentScale()
+    {
+        Window window = (Window)Instance.GetViewport();
+        switch (window.ContentScaleMode)
+        {
+            case Window.ContentScaleModeEnum.Disabled:
+                break;
+            case Window.ContentScaleModeEnum.CanvasItems:
+                if (window.ContentScaleAspect != Window.ContentScaleAspectEnum.Expand)
+                {
+                    PrintErrContentScale(window);
+                }
+                break;
+            case Window.ContentScaleModeEnum.Viewport:
+                PrintErrContentScale(window);
+                break;
+        }
+    }
+
+    private static void PrintErrContentScale(Window window)
+    {
+        GD.PrintErr($"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}" +
+            $" or {Window.ContentScaleModeEnum.CanvasItems}/{Window.ContentScaleAspectEnum.Expand}");
+        GD.PrintErr($"  current mode is {window.ContentScaleMode}/{window.ContentScaleAspect}");
     }
 }
