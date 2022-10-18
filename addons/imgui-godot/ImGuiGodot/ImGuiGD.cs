@@ -81,39 +81,39 @@ public static class ImGuiGD
             _scale = scale.Value;
         }
 
-        ImGuiGDInternal.Init(ScaleToDpi ? Scale * DpiFactor : Scale, resetFontConfig);
+        Internal.Init(ScaleToDpi ? Scale * DpiFactor : Scale, resetFontConfig);
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        ImGuiGDInternal.AddFont(fontData, fontSize, merge);
+        Internal.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        ImGuiGDInternal.AddFont(null, 13, false);
+        Internal.AddFont(null, 13, false);
     }
 
     // only call this once, shortly after Init
     public static void RebuildFontAtlas()
     {
-        ImGuiGDInternal.RebuildFontAtlas();
+        Internal.RebuildFontAtlas();
     }
 
     public static void Update(double delta, Viewport vp)
     {
-        ImGuiGDInternal.Update(delta, vp);
+        Internal.Update(delta, vp);
     }
 
     public static void Render(RID parent)
     {
         ImGui.Render();
-        ImGuiGDInternal.RenderDrawData(ImGui.GetDrawData(), parent);
+        Internal.RenderDrawData(ImGui.GetDrawData(), parent);
     }
 
     public static void Shutdown()
     {
-        ImGuiGDInternal.ClearCanvasItems();
+        Internal.ClearCanvasItems();
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
             ImGui.DestroyContext();
     }
@@ -123,7 +123,7 @@ public static class ImGuiGD
     /// </returns>
     public static bool ProcessInput(InputEvent evt)
     {
-        return ImGuiGDInternal.ProcessInput(evt);
+        return Internal.ProcessInput(evt);
     }
 
     /// <summary>
@@ -131,7 +131,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this Key key)
     {
-        return ImGuiGDInternal.ConvertKey(key);
+        return Internal.ConvertKey(key);
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this JoyButton button)
     {
-        return ImGuiGDInternal.ConvertJoyButton(button);
+        return Internal.ConvertJoyButton(button);
     }
 
     /// <summary>

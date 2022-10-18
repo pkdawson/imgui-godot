@@ -10,7 +10,7 @@ using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot;
 
-internal static class ImGuiGDInternal
+internal static class Internal
 {
     internal static SubViewport CurrentSubViewport { get; set; }
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
@@ -33,7 +33,7 @@ internal static class ImGuiGDInternal
     private delegate RID RIDConstructor(ulong id);
     private static readonly RIDConstructor ConstructRID;
 
-    static ImGuiGDInternal()
+    static Internal()
     {
         ConstructorInfo cinfo = typeof(RID).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
         if (cinfo is null)

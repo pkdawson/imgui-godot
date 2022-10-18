@@ -138,7 +138,7 @@ public partial class ImGuiLayer : CanvasLayer
         {
             ProcessMode = ProcessModeEnum.Disabled;
             SetProcessInput(false);
-            ImGuiGDInternal.ClearCanvasItems();
+            Internal.ClearCanvasItems();
         }
     }
 
@@ -150,7 +150,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Notification(long what)
     {
-        ImGuiGDInternal.ProcessNotification(what);
+        Internal.ProcessNotification(what);
     }
 
     public override void _Input(InputEvent e)
