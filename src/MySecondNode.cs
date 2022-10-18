@@ -49,13 +49,6 @@ public partial class MySecondNode : Node
         scale = ImGuiGD.Scale;
     }
 
-    public override void _ExitTree()
-    {
-        // call UnbindTexture when you're done to free a few bytes of memory
-        ImGuiGD.UnbindTexture(iconTexture);
-        ImGuiGD.UnbindTexture(vp.GetTexture());
-    }
-
     private void _ImGuiLayout()
     {
         ImGui.ShowDemoWindow();

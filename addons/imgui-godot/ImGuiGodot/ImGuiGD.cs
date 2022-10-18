@@ -56,18 +56,17 @@ public static class ImGuiGD
 
     public static IntPtr BindTexture(Texture2D tex)
     {
-        return ImGuiGDInternal.BindTexture(tex);
+        return (IntPtr)tex.GetRid().Id;
     }
 
+    [Obsolete("UnbindTexture is no longer necessary")]
     public static void UnbindTexture(IntPtr texid)
     {
-        ImGuiGDInternal.UnbindTexture(texid);
     }
 
+    [Obsolete("UnbindTexture is no longer necessary")]
     public static void UnbindTexture(Texture2D tex)
     {
-        IntPtr texid = (IntPtr)tex.GetRid().Id;
-        ImGuiGDInternal.UnbindTexture(texid);
     }
 
     public static void Init(float? scale = null, bool resetFontConfig = true)

@@ -19,7 +19,7 @@ public static class Widgets
         Vector2 vpSize = new(vp.Size.x, vp.Size.y);
         var pos = ImGui.GetCursorScreenPos();
         var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
-        ImGui.GetWindowDrawList().AddImage(ImGuiGDInternal.BindTexture(vp.GetTexture()), pos, pos_max);
+        ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);
 
         ImGui.PushID(vp.NativeInstance);
         ImGui.InvisibleButton("godot_subviewport", vpSize);
@@ -54,8 +54,7 @@ public static class Widgets
 
     public static void Image(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 tint_col, Vector4 border_col)
     {
-        IntPtr texid = ImGuiGDInternal.BindTexture(tex);
-        ImGuiNative.igImage(texid, size, uv0, uv1, tint_col, border_col);
+        ImGuiNative.igImage((IntPtr)tex.GetRid().Id, size, uv0, uv1, tint_col, border_col);
     }
 
     public static bool ImageButton(Texture2D tex, Vector2 size)
@@ -85,7 +84,6 @@ public static class Widgets
 
     public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, int frame_padding, Vector4 bg_col, Vector4 tint_col)
     {
-        IntPtr texid = ImGuiGDInternal.BindTexture(tex);
-        return ImGuiNative.igImageButton(texid, size, uv0, uv1, frame_padding, bg_col, tint_col) != 0;
+        return ImGuiNative.igImageButton((IntPtr)tex.GetRid().Id, size, uv0, uv1, frame_padding, bg_col, tint_col) != 0;
     }
 }

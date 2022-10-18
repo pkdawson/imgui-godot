@@ -2,6 +2,8 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using CursorShape = Godot.DisplayServer.CursorShape;
@@ -20,9 +22,6 @@ internal static class ImGuiGDInternal
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
     private static float _scale = 1.0f;
 
-    // necessary because we can't construct arbitrary RIDs without using reflection
-    private static readonly Dictionary<IntPtr, RID> _texrids = new();
-
     private class FontParams
     {
         public FontFile Font { get; init; }
@@ -31,17 +30,24 @@ internal static class ImGuiGDInternal
     }
     private static readonly List<FontParams> _fontConfiguration = new();
 
-    public static IntPtr BindTexture(Texture2D tex)
-    {
-        RID rid = tex.GetRid();
-        IntPtr texid = (IntPtr)rid.Id;
-        _texrids.TryAdd(texid, rid);
-        return texid;
-    }
+    private delegate RID RIDConstructor(ulong id);
+    private static readonly RIDConstructor ConstructRID;
 
-    public static void UnbindTexture(IntPtr texid)
+    static ImGuiGDInternal()
     {
-        _texrids.Remove(texid);
+        ConstructorInfo cinfo = typeof(RID).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
+        if (cinfo is null)
+        {
+            GD.PrintErr("failed to get RID constructor");
+            return;
+        }
+
+        DynamicMethod dm = new DynamicMethod("ConstructRID", typeof(RID), new[] { typeof(ulong) });
+        ILGenerator il = dm.GetILGenerator();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Newobj, cinfo);
+        il.Emit(OpCodes.Ret);
+        ConstructRID = dm.CreateDelegate<RIDConstructor>();
     }
 
     public static void AddFont(FontFile fontData, float fontSize, bool merge)
@@ -120,7 +126,7 @@ internal static class ImGuiGDInternal
 
         var imgtex = ImageTexture.CreateFromImage(img);
         _fontTexture = imgtex;
-        io.Fonts.SetTexID(BindTexture(_fontTexture));
+        io.Fonts.SetTexID((IntPtr)_fontTexture.GetRid().Id);
         io.Fonts.ClearTexData();
 
         ImGui.GetStyle().ScaleAllSizes(_scale);
@@ -428,7 +434,7 @@ internal static class ImGuiGDInternal
 
                 RID child = _children[nodeN++];
 
-                RID texrid = _texrids[drawCmd.GetTexID()];
+                RID texrid = ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
