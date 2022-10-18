@@ -168,7 +168,7 @@ internal static class Internal
 
         if (io.WantSetMousePos)
         {
-            vp.WarpMouse(new(io.MousePos.X, io.MousePos.Y));
+            Input.WarpMouse(new(io.MousePos.X, io.MousePos.Y));
         }
 
         // scrolling works better if we allow no more than one event per frame
