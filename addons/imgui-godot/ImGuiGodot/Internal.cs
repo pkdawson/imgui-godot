@@ -30,8 +30,7 @@ internal static class Internal
     }
     private static readonly List<FontParams> _fontConfiguration = new();
 
-    private delegate RID RIDConstructor(ulong id);
-    private static readonly RIDConstructor ConstructRID;
+    private static readonly Func<ulong, RID> ConstructRID;
 
     static Internal()
     {
@@ -42,12 +41,12 @@ internal static class Internal
             return;
         }
 
-        DynamicMethod dm = new DynamicMethod("ConstructRID", typeof(RID), new[] { typeof(ulong) });
+        DynamicMethod dm = new("ConstructRID", typeof(RID), new[] { typeof(ulong) });
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Newobj, cinfo);
         il.Emit(OpCodes.Ret);
-        ConstructRID = dm.CreateDelegate<RIDConstructor>();
+        ConstructRID = dm.CreateDelegate<Func<ulong, RID>>();
     }
 
     public static void AddFont(FontFile fontData, float fontSize, bool merge)
