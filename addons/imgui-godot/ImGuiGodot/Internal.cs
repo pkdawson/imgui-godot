@@ -121,7 +121,24 @@ internal static class Internal
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
         Image img = new();
-        img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
+        try
+        {
+            void f() => img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
+            f();
+        }
+        catch
+        {
+            // slow workaround for bug in Godot git
+            // TODO: change to static Image.CreateFromData when it's available in C#
+            img.Data = new Godot.Collections.Dictionary()
+            {
+                ["width"] = width,
+                ["height"] = height,
+                ["format"] = "RGBA8",
+                ["mipmaps"] = false,
+                ["data"] = new Godot.Collections.Array<byte>(pixels)
+            };
+        }
 
         var imgtex = ImageTexture.CreateFromImage(img);
         _fontTexture = imgtex;
