@@ -23,13 +23,8 @@ public static class ImGuiGD
     /// </summary>
     public static int DpiFactor
     {
-        get
-        {
-            _dpiFactor ??= Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-            return _dpiFactor.Value;
-        }
+        get => Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
     }
-    private static int? _dpiFactor;
 
     /// <summary>
     /// Adjust the scale based on <see cref="DpiFactor"/>
@@ -47,7 +42,6 @@ public static class ImGuiGD
             if (_scale != value && value >= 0.25f)
             {
                 _scale = value;
-                Init(resetFontConfig: false);
                 RebuildFontAtlas();
             }
         }
@@ -69,7 +63,7 @@ public static class ImGuiGD
     {
     }
 
-    public static void Init(float? scale = null, bool resetFontConfig = true)
+    public static void Init(float? scale = null)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
@@ -81,7 +75,12 @@ public static class ImGuiGD
             _scale = scale.Value;
         }
 
-        Internal.Init(ScaleToDpi ? Scale * DpiFactor : Scale, resetFontConfig);
+        Internal.Init();
+    }
+
+    public static void ResetFonts()
+    {
+        Internal.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
@@ -94,10 +93,9 @@ public static class ImGuiGD
         Internal.AddFont(null, 13, false);
     }
 
-    // only call this once, shortly after Init
     public static void RebuildFontAtlas()
     {
-        Internal.RebuildFontAtlas();
+        Internal.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
     public static void Update(double delta, Viewport vp)

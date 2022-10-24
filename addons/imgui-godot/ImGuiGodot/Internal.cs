@@ -20,7 +20,6 @@ internal static class Internal
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
-    private static float _scale = 1.0f;
 
     private class FontParams
     {
@@ -106,15 +105,61 @@ internal static class Internal
         return vec;
     }
 
-    // only call this once, shortly after Init
-    public static unsafe void RebuildFontAtlas()
+    private static unsafe void ResetStyle()
     {
+        ImGuiStylePtr defaultStyle = new(ImGuiNative.ImGuiStyle_ImGuiStyle());
+        ImGuiStylePtr style = ImGui.GetStyle();
+
+        style.WindowPadding = defaultStyle.WindowPadding;
+        style.WindowRounding = defaultStyle.WindowRounding;
+        style.WindowMinSize = defaultStyle.WindowMinSize;
+        style.ChildRounding = defaultStyle.ChildRounding;
+        style.PopupRounding = defaultStyle.PopupRounding;
+        style.FramePadding = defaultStyle.FramePadding;
+        style.FrameRounding = defaultStyle.FrameRounding;
+        style.ItemSpacing = defaultStyle.ItemSpacing;
+        style.ItemInnerSpacing = defaultStyle.ItemInnerSpacing;
+        style.CellPadding = defaultStyle.CellPadding;
+        style.TouchExtraPadding = defaultStyle.TouchExtraPadding;
+        style.IndentSpacing = defaultStyle.IndentSpacing;
+        style.ColumnsMinSpacing = defaultStyle.ColumnsMinSpacing;
+        style.ScrollbarSize = defaultStyle.ScrollbarSize;
+        style.ScrollbarRounding = defaultStyle.ScrollbarRounding;
+        style.GrabMinSize = defaultStyle.GrabMinSize;
+        style.GrabRounding = defaultStyle.GrabRounding;
+        style.LogSliderDeadzone = defaultStyle.LogSliderDeadzone;
+        style.TabRounding = defaultStyle.TabRounding;
+        style.TabMinWidthForCloseButton = defaultStyle.TabMinWidthForCloseButton;
+        style.DisplayWindowPadding = defaultStyle.DisplayWindowPadding;
+        style.DisplaySafeAreaPadding = defaultStyle.DisplaySafeAreaPadding;
+        style.MouseCursorScale = defaultStyle.MouseCursorScale;
+
+        defaultStyle.Destroy();
+    }
+
+    public static unsafe void RebuildFontAtlas(float scale)
+    {
+        var io = ImGui.GetIO();
+        int fontIndex = -1;
+        if (io.NativePtr->FontDefault != null)
+        {
+            for (int i = 0; i < io.Fonts.Fonts.Size; ++i)
+            {
+                if (io.Fonts.Fonts[i].NativePtr == io.FontDefault.NativePtr)
+                {
+                    fontIndex = i;
+                    break;
+                }
+            }
+            io.NativePtr->FontDefault = null;
+        }
+        io.Fonts.Clear();
+
         foreach (var fontParams in _fontConfiguration)
         {
-            _AddFont(fontParams.Font, (int)(fontParams.FontSize * _scale), fontParams.Merge);
+            _AddFont(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
         }
 
-        var io = ImGui.GetIO();
         io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
 
         byte[] pixels = new byte[width * height * bytesPerPixel];
@@ -145,14 +190,18 @@ internal static class Internal
         io.Fonts.SetTexID((IntPtr)_fontTexture.GetRid().Id);
         io.Fonts.ClearTexData();
 
-        ImGui.GetStyle().ScaleAllSizes(_scale);
+        if (fontIndex != -1 && fontIndex < io.Fonts.Fonts.Size)
+        {
+            io.NativePtr->FontDefault = io.Fonts.Fonts[fontIndex].NativePtr;
+        }
+
+        ResetStyle();
+        ImGui.GetStyle().ScaleAllSizes(scale);
     }
 
-    public static void Init(float scale, bool resetFontConfig)
+    public static void Init()
     {
-        _scale = scale;
-        if (resetFontConfig)
-            _fontConfiguration.Clear();
+        _fontConfiguration.Clear();
 
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
         {
@@ -173,6 +222,14 @@ internal static class Internal
             io.NativePtr->BackendPlatformName = (byte*)_backendName.AddrOfPinnedObject();
             io.NativePtr->BackendRendererName = (byte*)_backendName.AddrOfPinnedObject();
         }
+    }
+
+    public static void ResetFonts()
+    {
+        var io = ImGui.GetIO();
+        io.Fonts.Clear();
+        unsafe { io.NativePtr->FontDefault = null; }
+        _fontConfiguration.Clear();
     }
 
     public static void Update(double delta, Viewport vp)
