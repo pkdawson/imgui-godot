@@ -20,6 +20,7 @@ internal static class Internal
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
+    private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
     private class FontParams
     {
@@ -230,6 +231,26 @@ internal static class Internal
         io.Fonts.Clear();
         unsafe { io.NativePtr->FontDefault = null; }
         _fontConfiguration.Clear();
+    }
+
+    public unsafe static void SetIniFilename(ImGuiIOPtr io, string fileName)
+    {
+        io.NativePtr->IniFilename = null;
+
+        if (_iniFilenameBuffer != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(_iniFilenameBuffer);
+            _iniFilenameBuffer = IntPtr.Zero;
+        }
+
+        if (fileName?.Length > 0)
+        {
+            fileName = ProjectSettings.GlobalizePath(fileName);
+            byte[] fnbuf = Encoding.UTF8.GetBytes(fileName + '\0');
+            _iniFilenameBuffer = Marshal.AllocHGlobal(fnbuf.Length);
+            Marshal.Copy(fnbuf, 0, _iniFilenameBuffer, fnbuf.Length);
+            io.NativePtr->IniFilename = (byte*)_iniFilenameBuffer;
+        }
     }
 
     public static void Update(double delta, Viewport vp)

@@ -1,4 +1,5 @@
 using Godot;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 
@@ -20,6 +21,8 @@ public partial class ImGuiLayer : CanvasLayer
     [Export(PropertyHint.Range, "0.25,4.0,or_greater")]
     public new float Scale = 1.0f;
     [Export] public bool ScaleToDpi = true;
+
+    [Export] public string IniFilename = "user://imgui.ini";
 
     /// <summary>
     /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
@@ -55,6 +58,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         ImGuiGD.ScaleToDpi = ScaleToDpi;
         ImGuiGD.Init(Scale);
+        ImGui.GetIO().SetIniFilename(IniFilename);
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);

@@ -171,4 +171,12 @@ public static class ImGuiGD
     {
         return new Color(vec.X, vec.Y, vec.Z, vec.W);
     }
+
+    /// <summary>
+    /// Set IniFilename, converting Godot path to native
+    /// </summary>
+    public static void SetIniFilename(this ImGuiIOPtr io, string fileName)
+    {
+        Internal.SetIniFilename(io, fileName);
+    }
 }
