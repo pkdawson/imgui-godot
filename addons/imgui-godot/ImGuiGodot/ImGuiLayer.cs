@@ -38,11 +38,11 @@ public partial class ImGuiLayer : CanvasLayer
 
     private partial class UpdateFirst : Node
     {
-        public Viewport Viewport { get; set; }
+        public Viewport GuiViewport { get; set; }
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, Viewport);
+            ImGuiGD.Update(delta, GuiViewport);
         }
     }
 
@@ -107,7 +107,7 @@ public partial class ImGuiLayer : CanvasLayer
         {
             Name = "ImGuiLayer_UpdateFirst",
             ProcessPriority = int.MinValue,
-            Viewport = _subViewport
+            GuiViewport = _subViewport
         });
 
         _subViewport.SizeChanged += OnWindowSizeChanged;

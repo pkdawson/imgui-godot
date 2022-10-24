@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Text;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot;
@@ -19,7 +18,7 @@ internal static class Internal
     private static readonly List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private static GCHandle _backendName = GCHandle.Alloc(Encoding.ASCII.GetBytes("imgui_impl_godot4"), GCHandleType.Pinned);
+    private static IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4");
     private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
     private class FontParams
@@ -220,8 +219,8 @@ internal static class Internal
 
         unsafe
         {
-            io.NativePtr->BackendPlatformName = (byte*)_backendName.AddrOfPinnedObject();
-            io.NativePtr->BackendRendererName = (byte*)_backendName.AddrOfPinnedObject();
+            io.NativePtr->BackendPlatformName = (byte*)_backendName;
+            io.NativePtr->BackendRendererName = (byte*)_backendName;
         }
     }
 
@@ -239,16 +238,14 @@ internal static class Internal
 
         if (_iniFilenameBuffer != IntPtr.Zero)
         {
-            Marshal.FreeHGlobal(_iniFilenameBuffer);
+            Marshal.FreeCoTaskMem(_iniFilenameBuffer);
             _iniFilenameBuffer = IntPtr.Zero;
         }
 
         if (fileName?.Length > 0)
         {
             fileName = ProjectSettings.GlobalizePath(fileName);
-            byte[] fnbuf = Encoding.UTF8.GetBytes(fileName + '\0');
-            _iniFilenameBuffer = Marshal.AllocHGlobal(fnbuf.Length);
-            Marshal.Copy(fnbuf, 0, _iniFilenameBuffer, fnbuf.Length);
+            _iniFilenameBuffer = Marshal.StringToCoTaskMemUTF8(fileName);
             io.NativePtr->IniFilename = (byte*)_iniFilenameBuffer;
         }
     }
