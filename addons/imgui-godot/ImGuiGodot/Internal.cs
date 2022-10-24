@@ -18,7 +18,7 @@ internal static class Internal
     private static readonly List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private static IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4");
+    private static IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
     private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
     private class FontParams
@@ -165,24 +165,17 @@ internal static class Internal
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
-        Image img = new();
-        try
+        Image img;
+        MethodInfo mi = typeof(Image).GetMethod("CreateFromData");
+        if (mi.IsStatic)
         {
-            void f() => img.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
-            f();
+            img = (Image)mi.Invoke(null, new object[] { width, height, false, Image.Format.Rgba8, pixels });
         }
-        catch
+        else
         {
-            // slow workaround for bug in Godot git
-            // TODO: change to static Image.CreateFromData when it's available in C#
-            img.Data = new Godot.Collections.Dictionary()
-            {
-                ["width"] = width,
-                ["height"] = height,
-                ["format"] = "RGBA8",
-                ["mipmaps"] = false,
-                ["data"] = new Godot.Collections.Array<byte>(pixels)
-            };
+            // TODO: remove compatibility with beta 3
+            img = new();
+            mi.Invoke(img, new object[] { width, height, false, Image.Format.Rgba8, pixels });
         }
 
         var imgtex = ImageTexture.CreateFromImage(img);
