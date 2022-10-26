@@ -84,7 +84,7 @@ internal static class Internal
 
             int len = fontData.Data.Length;
             // let ImGui manage this memory
-            IntPtr p = Marshal.AllocHGlobal(len);
+            IntPtr p = ImGui.MemAlloc((uint)len);
             Marshal.Copy(fontData.Data, 0, p, len);
             ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
         }
