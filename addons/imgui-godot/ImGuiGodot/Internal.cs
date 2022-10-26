@@ -209,6 +209,7 @@ internal static class Internal
         io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
         io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
         unsafe
         {
@@ -516,6 +517,22 @@ internal static class Internal
                     indices[j] = cmdList.IdxBuffer[i];
                 }
 
+                Vector2[] cmdvertices = vertices;
+                Color[] cmdcolors = colors;
+                Vector2[] cmduvs = uvs;
+                if (drawCmd.VtxOffset > 0)
+                {
+                    // this implementation of RendererHasVtxOffset is awful,
+                    // but we can't do much better without using RenderingDevice directly
+                    var localSize = cmdList.VtxBuffer.Size - drawCmd.VtxOffset;
+                    cmdvertices = new Vector2[localSize];
+                    cmdcolors = new Color[localSize];
+                    cmduvs = new Vector2[localSize];
+                    Array.Copy(vertices, drawCmd.VtxOffset, cmdvertices, 0, localSize);
+                    Array.Copy(colors, drawCmd.VtxOffset, cmdcolors, 0, localSize);
+                    Array.Copy(uvs, drawCmd.VtxOffset, cmduvs, 0, localSize);
+                }
+
                 RID child = _children[nodeN++];
 
                 RID texrid = ConstructRID((ulong)drawCmd.GetTexID());
@@ -528,7 +545,7 @@ internal static class Internal
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, vertices, colors, uvs, null, null, texrid, -1);
+                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texrid, -1);
             }
         }
     }
