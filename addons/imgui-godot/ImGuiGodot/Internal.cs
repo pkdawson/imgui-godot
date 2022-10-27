@@ -18,7 +18,7 @@ internal static class Internal
     private static readonly List<RID> _children = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private static IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
+    private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
     private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
     private class FontParams
@@ -216,6 +216,10 @@ internal static class Internal
             io.NativePtr->BackendPlatformName = (byte*)_backendName;
             io.NativePtr->BackendRendererName = (byte*)_backendName;
         }
+
+#if IMGUI_GODOT_DEV
+        InternalViewports.Init(ImGui.GetIO());
+#endif
     }
 
     public static void ResetFonts()
@@ -226,7 +230,7 @@ internal static class Internal
         _fontConfiguration.Clear();
     }
 
-    public unsafe static void SetIniFilename(ImGuiIOPtr io, string fileName)
+    public static unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
     {
         io.NativePtr->IniFilename = null;
 
