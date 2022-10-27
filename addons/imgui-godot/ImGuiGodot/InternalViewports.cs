@@ -76,6 +76,11 @@ internal static class InternalViewports
         private readonly GCHandle _gcHandle;
         private readonly ImGuiViewportPtr _vp;
         public int WindowId { get; init; }
+        public RID ViewportRid { get; init; }
+        public RID CanvasRid { get; init; }
+        public RID RootCanvasItem { get; init; }
+        public bool Focused { get; set; }
+        private Rect2i _oldRect;
 
         public GodotImGuiWindow(ImGuiViewportPtr vp)
         {
@@ -83,13 +88,37 @@ internal static class InternalViewports
             _vp = vp;
             _vp.PlatformHandle = (IntPtr)_gcHandle;
 
-            //uint winFlags = (uint)(DisplayServer.WindowFlags.Borderless | DisplayServer.WindowFlags.Transparent);
+            // uint winFlags = (uint)(DisplayServer.WindowFlags.Borderless | DisplayServer.WindowFlags.Transparent);
             uint winFlags = (uint)DisplayServer.WindowFlags.Borderless;
+
+            Rect2i winRect = new(_vp.Pos.ToVector2i(), _vp.Size.ToVector2i());
 
             WindowId = DisplayServer.CreateSubWindow(
                 DisplayServer.WindowMode.Windowed,
                 DisplayServer.WindowGetVsyncMode((int)DisplayServer.MainWindowId),
-                winFlags);
+                winFlags,
+                winRect
+                );
+
+            DisplayServer.WindowSetWindowEventCallback(new Callable(OnWindowEvent), WindowId);
+            DisplayServer.WindowSetInputEventCallback(new Callable(OnInputEvent), WindowId);
+            DisplayServer.WindowSetRectChangedCallback(new Callable(OnRectChanged), WindowId);
+
+            ViewportRid = RenderingServer.ViewportCreate();
+            RenderingServer.ViewportSetRenderDirectToScreen(ViewportRid, true);
+            RenderingServer.ViewportSetActive(ViewportRid, true);
+            RenderingServer.ViewportSetUpdateMode(ViewportRid, RenderingServer.ViewportUpdateMode.WhenVisible);
+            RenderingServer.ViewportSetTransparentBackground(ViewportRid, true);
+
+            CanvasRid = RenderingServer.CanvasCreate();
+            RenderingServer.ViewportAttachCanvas(ViewportRid, CanvasRid);
+
+            RootCanvasItem = RenderingServer.CanvasItemCreate();
+            RenderingServer.CanvasItemSetParent(RootCanvasItem, CanvasRid);
+            RenderingServer.CanvasItemAddRect(RootCanvasItem, new(0, 0, 100, 100), Colors.Red);
+
+            _oldRect = winRect;
+            OnRectChanged(winRect);
         }
 
         public GodotImGuiWindow(ImGuiViewportPtr vp, int windowId)
@@ -103,8 +132,48 @@ internal static class InternalViewports
         public void Dispose()
         {
             if (WindowId != DisplayServer.MainWindowId)
+            {
+                RenderingServer.FreeRid(RootCanvasItem);
+                RenderingServer.FreeRid(CanvasRid);
+                RenderingServer.FreeRid(ViewportRid);
                 DisplayServer.DeleteSubWindow(WindowId);
+            }
             _gcHandle.Free();
+        }
+
+        private void OnWindowEvent(DisplayServer.WindowEvent evt)
+        {
+            switch (evt)
+            {
+                case DisplayServer.WindowEvent.FocusIn:
+                    Focused = true;
+                    break;
+                case DisplayServer.WindowEvent.FocusOut:
+                    Focused = false;
+                    break;
+                case DisplayServer.WindowEvent.CloseRequest:
+                    _vp.PlatformRequestClose = true;
+                    break;
+            }
+        }
+
+        private void OnInputEvent(InputEvent evt)
+        {
+            Internal.ProcessInput(evt);
+        }
+
+        private void OnRectChanged(Rect2i rect)
+        {
+            if (_oldRect.Size != rect.Size)
+                _vp.PlatformRequestResize = true;
+            if (_oldRect.Position != rect.Position)
+                _vp.PlatformRequestMove = true;
+
+            RenderingServer.ViewportSetSize(ViewportRid, rect.Size.x, rect.Size.y);
+            rect.Position = new(0, 0);
+            RenderingServer.ViewportAttachToScreen(ViewportRid, rect, WindowId);
+
+            _oldRect = rect;
         }
     }
 
@@ -155,8 +224,6 @@ internal static class InternalViewports
 
         ImGuiPlatformIO_Set_Platform_GetWindowPos(pio, Marshal.GetFunctionPointerForDelegate(_getWindowPos));
         ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
-
-        UpdateMonitors();
     }
 
     public static void Init(ImGuiIOPtr io)
@@ -164,11 +231,10 @@ internal static class InternalViewports
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
 
-
-        var igvp = ImGui.GetMainViewport();
-        _mainWindow = new(igvp, (int)DisplayServer.MainWindowId);
+        _mainWindow = new(ImGui.GetMainViewport(), (int)DisplayServer.MainWindowId);
 
         InitPlatformInterface();
+        UpdateMonitors();
     }
 
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
@@ -188,8 +254,7 @@ internal static class InternalViewports
 
     private static void Godot_ShowWindow(ImGuiViewportPtr vp)
     {
-        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        // TODO: ...
+        // Godot does not support real hidden windows, so create = show
     }
 
     private static void Godot_SetWindowPos(ImGuiViewportPtr vp, Vector2 pos)
@@ -225,15 +290,14 @@ internal static class InternalViewports
     private static bool Godot_GetWindowFocus(ImGuiViewportPtr vp)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        // TODO: ...
-        return false;
+        return window.Focused;
     }
 
     private static bool Godot_GetWindowMinimized(ImGuiViewportPtr vp)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        // TODO: ...
-        return false;
+        var mode = DisplayServer.WindowGetMode(window.WindowId);
+        return mode.HasFlag(DisplayServer.WindowMode.Minimized);
     }
 
     private static void Godot_SetWindowTitle(ImGuiViewportPtr vp, string title)
