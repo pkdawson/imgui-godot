@@ -165,18 +165,7 @@ internal static class Internal
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
-        Image img;
-        MethodInfo mi = typeof(Image).GetMethod("CreateFromData");
-        if (mi.IsStatic)
-        {
-            img = (Image)mi.Invoke(null, new object[] { width, height, false, Image.Format.Rgba8, pixels });
-        }
-        else
-        {
-            // TODO: remove compatibility with beta 3
-            img = new();
-            mi.Invoke(img, new object[] { width, height, false, Image.Format.Rgba8, pixels });
-        }
+        Image img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
         var imgtex = ImageTexture.CreateFromImage(img);
         _fontTexture = imgtex;

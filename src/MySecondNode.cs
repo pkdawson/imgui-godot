@@ -16,6 +16,7 @@ public partial class MySecondNode : Node
     private static readonly ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
         ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove;
+    private static readonly string versionString = Engine.GetVersionInfo()["string"].AsString();
 
     public override void _EnterTree()
     {
@@ -81,7 +82,7 @@ public partial class MySecondNode : Node
         ImGui.SetNextWindowPos(new(fh, 3 * fh), ImGuiCond.Once);
         ImGui.Begin("Scene 2", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.PushFont(proggy);
-        ImGui.TextColored(myTextColor, "hello Godot 4");
+        ImGui.TextColored(myTextColor, $"hello Godot {versionString}");
         ImGui.PopFont();
 
         ImGui.Separator();
