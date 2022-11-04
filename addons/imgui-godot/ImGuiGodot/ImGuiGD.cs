@@ -105,16 +105,7 @@ public static class ImGuiGD
 
     public static void Render(RID parent)
     {
-        ImGui.Render();
-#if IMGUI_GODOT_DEV
-        var io = ImGui.GetIO();
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-        {
-            ImGui.UpdatePlatformWindows();
-            ImGui.RenderPlatformWindowsDefault();
-        }
-#endif
-        Internal.RenderDrawData(ImGui.GetDrawData(), parent);
+        Internal.Render(parent);
     }
 
     public static void Shutdown()

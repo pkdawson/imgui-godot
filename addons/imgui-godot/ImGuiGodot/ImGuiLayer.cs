@@ -137,12 +137,14 @@ public partial class ImGuiLayer : CanvasLayer
         {
             ProcessMode = ProcessModeEnum.Always;
             SetProcessInput(true);
+            // TODO: show all windows
         }
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
             SetProcessInput(false);
             Internal.ClearCanvasItems();
+            // TODO: hide all windows
         }
     }
 

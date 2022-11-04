@@ -15,7 +15,7 @@ internal static class Internal
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
 
     private static Texture2D _fontTexture;
-    private static readonly List<RID> _children = new();
+    private static readonly Dictionary<RID, List<RID>> _canvasItemPools = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
@@ -276,11 +276,14 @@ internal static class Internal
 
     public static void ClearCanvasItems()
     {
-        foreach (RID rid in _children)
+        foreach (RID parent in _canvasItemPools.Keys)
         {
-            RenderingServer.FreeRid(rid);
+            foreach (RID ci in _canvasItemPools[parent])
+            {
+                RenderingServer.FreeRid(ci);
+            }
         }
-        _children.Clear();
+        _canvasItemPools.Clear();
     }
 
     public static bool ProcessInput(InputEvent evt)
@@ -432,8 +435,28 @@ internal static class Internal
         };
     }
 
+    public static void Render(RID parent)
+    {
+        ImGui.Render();
+        RenderDrawData(ImGui.GetDrawData(), parent);
+
+#if IMGUI_GODOT_DEV
+        var io = ImGui.GetIO();
+        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
+        {
+            ImGui.UpdatePlatformWindows();
+            InternalViewports.RenderViewports();
+        }
+#endif
+    }
+
     public static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
     {
+        if (!_canvasItemPools.ContainsKey(parent))
+            _canvasItemPools[parent] = new();
+
+        var children = _canvasItemPools[parent];
+
         // allocate our CanvasItem pool as needed
         int neededNodes = 0;
         for (int i = 0; i < drawData.CmdListsCount; ++i)
@@ -447,20 +470,20 @@ internal static class Internal
             }
         }
 
-        while (_children.Count < neededNodes)
+        while (children.Count < neededNodes)
         {
             RID newChild = RenderingServer.CanvasItemCreate();
             RenderingServer.CanvasItemSetParent(newChild, parent);
-            RenderingServer.CanvasItemSetDrawIndex(newChild, _children.Count);
-            _children.Add(newChild);
+            RenderingServer.CanvasItemSetDrawIndex(newChild, children.Count);
+            children.Add(newChild);
         }
 
         // trim unused nodes
-        while (_children.Count > neededNodes)
+        while (children.Count > neededNodes)
         {
-            int idx = _children.Count - 1;
-            RenderingServer.FreeRid(_children[idx]);
-            _children.RemoveAt(idx);
+            int idx = children.Count - 1;
+            RenderingServer.FreeRid(children[idx]);
+            children.RemoveAt(idx);
         }
 
         // render
@@ -526,7 +549,7 @@ internal static class Internal
                     Array.Copy(uvs, drawCmd.VtxOffset, cmduvs, 0, localSize);
                 }
 
-                RID child = _children[nodeN++];
+                RID child = children[nodeN++];
 
                 RID texrid = ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
