@@ -14,6 +14,7 @@ internal class InternalVkRenderer : IRenderer
     //private readonly Color[] clearColors = new[] { new Color(0.45098f, 0.54902f, 0.60f) };
     private readonly RID _shader;
     private readonly RID _pipeline;
+    private readonly RID _sampler;
     private readonly long _vtxFormat;
     private readonly Dictionary<RID, RID> _framebuffers = new();
 
@@ -86,6 +87,17 @@ internal class InternalVkRenderer : IRenderer
             new RDPipelineMultisampleState(),
             new RDPipelineDepthStencilState(),
             blendData);
+
+        var samplerState = new RDSamplerState
+        {
+            MinFilter = RenderingDevice.SamplerFilter.Linear,
+            MagFilter = RenderingDevice.SamplerFilter.Linear,
+            MipFilter = RenderingDevice.SamplerFilter.Linear,
+            RepeatU = RenderingDevice.SamplerRepeatMode.Repeat,
+            RepeatV = RenderingDevice.SamplerRepeatMode.Repeat,
+            RepeatW = RenderingDevice.SamplerRepeatMode.Repeat
+        };
+        _sampler = RD.SamplerCreate(samplerState);
     }
 
     public void InitViewport(Viewport vp)
@@ -108,19 +120,23 @@ internal class InternalVkRenderer : IRenderer
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
+        float[] scale = new float[2];
+        scale[0] = 2.0f / drawData.DisplaySize.X;
+        scale[1] = 2.0f / drawData.DisplaySize.Y;
+
+        float[] translate = new float[2];
+        translate[0] = -1.0f - (drawData.DisplayPos.X * scale[0]);
+        translate[1] = -1.0f - (drawData.DisplayPos.Y * scale[1]);
+
+        byte[] pcbuf = new byte[16];
+        Buffer.BlockCopy(scale, 0, pcbuf, 0, 8);
+        Buffer.BlockCopy(translate, 0, pcbuf, 8, 8);
+
         var vtxBuffers = new RID[drawData.CmdListsCount];
         var vtxArrays = new RID[drawData.CmdListsCount];
         var idxBuffers = new RID[drawData.CmdListsCount];
         var idxArrays = new List<RID[]>(drawData.CmdListsCount);
-
-        float[] pcfloats = new float[4];
-
-        pcfloats[0] = 2.0f / drawData.DisplaySize.X;
-        pcfloats[1] = 2.0f / drawData.DisplaySize.Y;
-        pcfloats[2] = -1.0f - (drawData.DisplayPos.X * pcfloats[0]);
-        pcfloats[3] = -1.0f - (drawData.DisplayPos.Y * pcfloats[1]);
-        byte[] pcbuf = new byte[16];
-        Buffer.BlockCopy(pcfloats, 0, pcbuf, 0, 16);
+        var uniformSets = new Dictionary<IntPtr, RID>();
 
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
@@ -146,6 +162,25 @@ internal class InternalVkRenderer : IRenderer
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
                 idxArrays[i][cmdi] = RD.IndexArrayCreate(idxBuffers[i], drawCmd.IdxOffset, drawCmd.ElemCount);
+
+                if (drawCmd.VtxOffset > 0)
+                {
+                    // TODO: ...
+                }
+
+                IntPtr texid = drawCmd.GetTexID();
+                if (!uniformSets.ContainsKey(texid))
+                {
+                    RID texrid = RenderingServer.TextureGetRdTexture(Internal.ConstructRID((ulong)texid));
+
+                    RDUniform uniform = new();
+                    uniform.Binding = 0;
+                    uniform.UniformType = RenderingDevice.UniformType.SamplerWithTexture;
+                    uniform.AddId(_sampler);
+                    uniform.AddId(texrid);
+                    RID uniformSet = RD.UniformSetCreate(new() { uniform }, _shader, 0);
+                    uniformSets.Add(texid, uniformSet);
+                }
             }
         }
 
@@ -169,27 +204,7 @@ internal class InternalVkRenderer : IRenderer
                 if (drawCmd.ElemCount == 0)
                     continue;
 
-                RID texrid = RenderingServer.TextureGetRdTexture(Internal.ConstructRID((ulong)drawCmd.GetTexID()));
-
-                var samplerState = new RDSamplerState
-                {
-                    MinFilter = RenderingDevice.SamplerFilter.Linear,
-                    MagFilter = RenderingDevice.SamplerFilter.Linear,
-                    MipFilter = RenderingDevice.SamplerFilter.Linear,
-                    RepeatU = RenderingDevice.SamplerRepeatMode.Repeat,
-                    RepeatV = RenderingDevice.SamplerRepeatMode.Repeat,
-                    RepeatW = RenderingDevice.SamplerRepeatMode.Repeat
-                };
-                RID sampler = RD.SamplerCreate(samplerState);
-
-                RDUniform uniform = new();
-                uniform.Binding = 0;
-                uniform.UniformType = RenderingDevice.UniformType.SamplerWithTexture;
-                uniform.AddId(sampler);
-                uniform.AddId(texrid);
-                RID uniformSet = RD.UniformSetCreate(new() { uniform }, _shader, 0);
-
-                RD.DrawListBindUniformSet(dl, uniformSet, 0);
+                RD.DrawListBindUniformSet(dl, uniformSets[drawCmd.GetTexID()], 0);
                 RD.DrawListBindIndexArray(dl, idxArrays[i][cmdi]);
 
                 RD.DrawListEnableScissor(dl, new Rect2(
@@ -200,7 +215,6 @@ internal class InternalVkRenderer : IRenderer
 
                 RD.DrawListDraw(dl, true, 1);
 
-                RD.FreeRid(sampler);
                 RD.FreeRid(idxArrays[i][cmdi]);
             }
 
@@ -218,6 +232,7 @@ internal class InternalVkRenderer : IRenderer
 
     public void Shutdown()
     {
+        RD.FreeRid(_sampler);
         RD.FreeRid(_shader);
     }
 
