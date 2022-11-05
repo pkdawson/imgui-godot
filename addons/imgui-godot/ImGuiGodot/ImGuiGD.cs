@@ -103,14 +103,14 @@ public static class ImGuiGD
         Internal.Update(delta, vp);
     }
 
-    public static void Render(RID parent)
+    public static void Render(Viewport vp)
     {
-        Internal.Render(parent);
+        Internal.Render(vp);
     }
 
     public static void Shutdown()
     {
-        Internal.ClearCanvasItems();
+        Internal.Renderer.Shutdown();
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
             ImGui.DestroyContext();
     }

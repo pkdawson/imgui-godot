@@ -76,10 +76,8 @@ internal static class InternalViewports
         private readonly GCHandle _gcHandle;
         private readonly ImGuiViewportPtr _vp;
 
-        public RID CanvasRid { get; init; }
-        public RID RootCanvasItem { get; init; }
         private bool _focused;
-        private readonly Window _godotWindow;
+        public Window GodotWindow { get; init; }
 
         public GodotImGuiWindow(ImGuiViewportPtr vp)
         {
@@ -92,7 +90,7 @@ internal static class InternalViewports
 
             ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
 
-            _godotWindow = new Window()
+            GodotWindow = new Window()
             {
                 // Borderless = true,
                 Position = winRect.Position,
@@ -101,24 +99,21 @@ internal static class InternalViewports
                 TransparentBg = true
             };
 
-            _godotWindow.FocusEntered += () => _focused = true;
-            _godotWindow.FocusExited += () => _focused = false;
-            _godotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
-            _godotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
-            _godotWindow.WindowInput += OnWindowInput;
+            GodotWindow.FocusEntered += () => _focused = true;
+            GodotWindow.FocusExited += () => _focused = false;
+            GodotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
+            GodotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
+            GodotWindow.WindowInput += OnWindowInput;
 
-            ImGuiLayer.Instance.AddChild(_godotWindow);
+            ImGuiLayer.Instance.AddChild(GodotWindow);
 
             // need to do this after AddChild
-            _godotWindow.Transparent = true;
+            GodotWindow.Transparent = true;
 
-            CanvasRid = RenderingServer.CanvasCreate();
-            RootCanvasItem = RenderingServer.CanvasItemCreate();
-            RenderingServer.ViewportAttachCanvas(_godotWindow.GetViewportRid(), CanvasRid);
-            RenderingServer.ViewportSetTransparentBackground(_godotWindow.GetViewportRid(), true);
-            RenderingServer.CanvasItemSetParent(RootCanvasItem, CanvasRid);
+            Internal.Renderer.InitViewport(GodotWindow);
+            RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
 
-            RenderingServer.CanvasItemAddRect(RootCanvasItem, new(0, 0, 100, 100), Colors.Red);
+            //RenderingServer.CanvasItemAddRect(RootCanvasItem, new(0, 0, 100, 100), Colors.Red);
         }
 
         public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
@@ -126,16 +121,16 @@ internal static class InternalViewports
             _gcHandle = GCHandle.Alloc(this);
             _vp = vp;
             _vp.PlatformHandle = (IntPtr)_gcHandle;
-            _godotWindow = gw;
+            GodotWindow = gw;
         }
 
         public void Dispose()
         {
-            if (_godotWindow.GetParent() != null)
+            if (GodotWindow.GetParent() != null)
             {
-                RenderingServer.FreeRid(RootCanvasItem);
-                RenderingServer.FreeRid(CanvasRid);
-                _godotWindow.QueueFree();
+                //RenderingServer.FreeRid(RootCanvasItem);
+                //RenderingServer.FreeRid(CanvasRid);
+                GodotWindow.QueueFree();
             }
             _gcHandle.Free();
         }
@@ -147,32 +142,32 @@ internal static class InternalViewports
 
         public void ShowWindow()
         {
-            _godotWindow.Show();
+            GodotWindow.Show();
         }
 
         public void SetWindowPos(Vector2i pos)
         {
-            _godotWindow.Position = pos;
+            GodotWindow.Position = pos;
         }
 
         public Vector2i GetWindowPos()
         {
-            return _godotWindow.Position;
+            return GodotWindow.Position;
         }
 
         public void SetWindowSize(Vector2i size)
         {
-            _godotWindow.Size = size;
+            GodotWindow.Size = size;
         }
 
         public Vector2i GetWindowSize()
         {
-            return _godotWindow.Size;
+            return GodotWindow.Size;
         }
 
         public void SetWindowFocus()
         {
-            _godotWindow.MoveToForeground();
+            GodotWindow.MoveToForeground();
         }
 
         public bool GetWindowFocus()
@@ -182,12 +177,12 @@ internal static class InternalViewports
 
         public bool GetWindowMinimized()
         {
-            return _godotWindow.Mode.HasFlag(Window.ModeEnum.Minimized);
+            return GodotWindow.Mode.HasFlag(Window.ModeEnum.Minimized);
         }
 
         public void SetWindowTitle(string title)
         {
-            _godotWindow.Title = title;
+            GodotWindow.Title = title;
         }
     }
 
@@ -245,7 +240,7 @@ internal static class InternalViewports
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
 
-        io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
+        // io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
 
         _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetViewport() as Window);
 
@@ -329,7 +324,7 @@ internal static class InternalViewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            Internal.RenderDrawData(vp.DrawData, window.RootCanvasItem);
+            Internal.Renderer.RenderDrawData(window.GodotWindow, vp.DrawData);
         }
     }
 }

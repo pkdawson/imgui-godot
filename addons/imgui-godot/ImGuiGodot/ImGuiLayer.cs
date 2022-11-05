@@ -29,8 +29,6 @@ public partial class ImGuiLayer : CanvasLayer
     /// </summary>
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
-    private RID _canvas;
-    private RID _canvasItem;
     private Window _window;
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
@@ -97,10 +95,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         _subViewportContainer.AddChild(_subViewport);
 
-        _canvas = RenderingServer.CanvasCreate();
-        _canvasItem = RenderingServer.CanvasItemCreate();
-        RenderingServer.ViewportAttachCanvas(_subViewport.GetViewportRid(), _canvas);
-        RenderingServer.CanvasItemSetParent(_canvasItem, _canvas);
+        Internal.Renderer.InitViewport(_subViewport);
         AddChild(_subViewportContainer);
 
         AddChild(new UpdateFirst
@@ -126,13 +121,10 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _ExitTree()
     {
         ImGuiGD.Shutdown();
-        RenderingServer.FreeRid(_canvasItem);
-        RenderingServer.FreeRid(_canvas);
     }
 
     private void OnChangeVisibility()
     {
-        RenderingServer.CanvasItemSetVisible(_canvasItem, Visible);
         if (Visible)
         {
             ProcessMode = ProcessModeEnum.Always;
@@ -143,7 +135,7 @@ public partial class ImGuiLayer : CanvasLayer
         {
             ProcessMode = ProcessModeEnum.Disabled;
             SetProcessInput(false);
-            Internal.ClearCanvasItems();
+            Internal.Renderer.OnHide();
             // TODO: hide all windows
         }
     }
@@ -151,7 +143,7 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _Process(double delta)
     {
         EmitSignal(SignalName.ImGuiLayout);
-        ImGuiGD.Render(_canvasItem);
+        ImGuiGD.Render(_subViewport);
     }
 
     public override void _Notification(long what)

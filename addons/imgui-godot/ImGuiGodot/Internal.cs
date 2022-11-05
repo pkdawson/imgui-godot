@@ -9,17 +9,26 @@ using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot;
 
+internal interface IRenderer
+{
+    public void InitViewport(Viewport vp);
+    public void CloseViewport(Viewport vp);
+    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData);
+    public void OnHide();
+    public void Shutdown();
+}
+
 internal static class Internal
 {
     internal static SubViewport CurrentSubViewport { get; set; }
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
 
     private static Texture2D _fontTexture;
-    private static readonly Dictionary<RID, List<RID>> _canvasItemPools = new();
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
     private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
+    internal static IRenderer Renderer { get; }
 
     private class FontParams
     {
@@ -29,7 +38,7 @@ internal static class Internal
     }
     private static readonly List<FontParams> _fontConfiguration = new();
 
-    private static readonly Func<ulong, RID> ConstructRID;
+    internal static readonly Func<ulong, RID> ConstructRID;
 
     static Internal()
     {
@@ -46,6 +55,12 @@ internal static class Internal
         il.Emit(OpCodes.Newobj, cinfo);
         il.Emit(OpCodes.Ret);
         ConstructRID = dm.CreateDelegate<Func<ulong, RID>>();
+
+#if IMGUI_GODOT_DEV
+        Renderer = new InternalVkRenderer();
+#else
+        Renderer = new InternalCanvasRenderer();
+#endif
     }
 
     public static void AddFont(FontFile fontData, float fontSize, bool merge)
@@ -274,18 +289,6 @@ internal static class Internal
         ImGui.NewFrame();
     }
 
-    public static void ClearCanvasItems()
-    {
-        foreach (RID parent in _canvasItemPools.Keys)
-        {
-            foreach (RID ci in _canvasItemPools[parent])
-            {
-                RenderingServer.FreeRid(ci);
-            }
-        }
-        _canvasItemPools.Clear();
-    }
-
     public static bool ProcessInput(InputEvent evt)
     {
         if (CurrentSubViewport != null)
@@ -435,10 +438,10 @@ internal static class Internal
         };
     }
 
-    public static void Render(RID parent)
+    public static void Render(Viewport vp)
     {
         ImGui.Render();
-        RenderDrawData(ImGui.GetDrawData(), parent);
+        Renderer.RenderDrawData(vp, ImGui.GetDrawData());
 
 #if IMGUI_GODOT_DEV
         var io = ImGui.GetIO();
@@ -448,122 +451,6 @@ internal static class Internal
             InternalViewports.RenderViewports();
         }
 #endif
-    }
-
-    public static void RenderDrawData(ImDrawDataPtr drawData, RID parent)
-    {
-        if (!_canvasItemPools.ContainsKey(parent))
-            _canvasItemPools[parent] = new();
-
-        var children = _canvasItemPools[parent];
-
-        // allocate our CanvasItem pool as needed
-        int neededNodes = 0;
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
-        {
-            var cmdBuf = drawData.CmdListsRange[i].CmdBuffer;
-            neededNodes += cmdBuf.Size;
-            for (int j = 0; j < cmdBuf.Size; ++j)
-            {
-                if (cmdBuf[j].ElemCount == 0)
-                    --neededNodes;
-            }
-        }
-
-        while (children.Count < neededNodes)
-        {
-            RID newChild = RenderingServer.CanvasItemCreate();
-            RenderingServer.CanvasItemSetParent(newChild, parent);
-            RenderingServer.CanvasItemSetDrawIndex(newChild, children.Count);
-            children.Add(newChild);
-        }
-
-        // trim unused nodes
-        while (children.Count > neededNodes)
-        {
-            int idx = children.Count - 1;
-            RenderingServer.FreeRid(children[idx]);
-            children.RemoveAt(idx);
-        }
-
-        // render
-        drawData.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
-        int nodeN = 0;
-
-        for (int n = 0; n < drawData.CmdListsCount; ++n)
-        {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[n];
-
-            int nVert = cmdList.VtxBuffer.Size;
-
-            var vertices = new Vector2[nVert];
-            var colors = new Color[nVert];
-            var uvs = new Vector2[nVert];
-
-            for (int i = 0; i < cmdList.VtxBuffer.Size; ++i)
-            {
-                var v = cmdList.VtxBuffer[i];
-                vertices[i] = new(v.pos.X, v.pos.Y);
-                // need to reverse the color bytes
-                uint rgba = v.col;
-                float r = (rgba & 0xFFu) / 255f;
-                rgba >>= 8;
-                float g = (rgba & 0xFFu) / 255f;
-                rgba >>= 8;
-                float b = (rgba & 0xFFu) / 255f;
-                rgba >>= 8;
-                float a = (rgba & 0xFFu) / 255f;
-                colors[i] = new(r, g, b, a);
-                uvs[i] = new(v.uv.X, v.uv.Y);
-            }
-
-            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
-            {
-                ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
-
-                if (drawCmd.ElemCount == 0)
-                {
-                    continue;
-                }
-
-                var indices = new int[drawCmd.ElemCount];
-                int idxOffset = (int)drawCmd.IdxOffset;
-                for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; ++i, ++j)
-                {
-                    indices[j] = cmdList.IdxBuffer[i];
-                }
-
-                Vector2[] cmdvertices = vertices;
-                Color[] cmdcolors = colors;
-                Vector2[] cmduvs = uvs;
-                if (drawCmd.VtxOffset > 0)
-                {
-                    // this implementation of RendererHasVtxOffset is awful,
-                    // but we can't do much better without using RenderingDevice directly
-                    var localSize = cmdList.VtxBuffer.Size - drawCmd.VtxOffset;
-                    cmdvertices = new Vector2[localSize];
-                    cmdcolors = new Color[localSize];
-                    cmduvs = new Vector2[localSize];
-                    Array.Copy(vertices, drawCmd.VtxOffset, cmdvertices, 0, localSize);
-                    Array.Copy(colors, drawCmd.VtxOffset, cmdcolors, 0, localSize);
-                    Array.Copy(uvs, drawCmd.VtxOffset, cmduvs, 0, localSize);
-                }
-
-                RID child = children[nodeN++];
-
-                RID texrid = ConstructRID((ulong)drawCmd.GetTexID());
-                RenderingServer.CanvasItemClear(child);
-                RenderingServer.CanvasItemSetClip(child, true);
-                RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
-                    drawCmd.ClipRect.X,
-                    drawCmd.ClipRect.Y,
-                    drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
-                    drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
-                );
-
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texrid, -1);
-            }
-        }
     }
 
     private static CursorShape ConvertCursorShape(ImGuiMouseCursor cur) => cur switch
