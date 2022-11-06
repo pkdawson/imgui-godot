@@ -10,7 +10,7 @@ namespace ImGuiGodot;
 internal class InternalVkRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
-    private readonly Color[] clearColors = new[] { Colors.Transparent };
+    private readonly Color[] clearColors = new[] { new Color(0f, 0f, 0f, 0f) };
     //private readonly Color[] clearColors = new[] { new Color(0.45098f, 0.54902f, 0.60f) };
     private readonly RID _shader;
     private readonly RID _pipeline;
