@@ -33,6 +33,7 @@ public partial class ImGuiLayer : CanvasLayer
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
     private static readonly HashSet<Godot.Object> _connectedObjects = new();
+    private int sizeCheck = 0;
 
     private partial class UpdateFirst : Node
     {
@@ -142,6 +143,18 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Process(double delta)
     {
+        // workaround for missing size change signal
+        // TODO: debug this in Godot
+        if (++sizeCheck > 30)
+        {
+            sizeCheck = 0;
+            var winSize = _window.Size;
+            if (_subViewport.Size != winSize)
+            {
+                _subViewport.Size = _window.Size;
+            }
+        }
+
         EmitSignal(SignalName.ImGuiLayout);
         ImGuiGD.Render(_subViewport);
     }
