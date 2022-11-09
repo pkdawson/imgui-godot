@@ -141,20 +141,23 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
-    public override void _Process(double delta)
+    public override void _PhysicsProcess(double delta)
     {
         // workaround for missing size change signal
         // TODO: debug this in Godot
-        if (++sizeCheck > 30)
+        if (++sizeCheck == 30)
         {
             sizeCheck = 0;
             var winSize = _window.Size;
             if (_subViewport.Size != winSize)
             {
-                _subViewport.Size = _window.Size;
+                _subViewport.Size = winSize;
             }
         }
+    }
 
+    public override void _Process(double delta)
+    {
         EmitSignal(SignalName.ImGuiLayout);
         ImGuiGD.Render(_subViewport);
     }
