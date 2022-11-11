@@ -1,4 +1,3 @@
-#if IMGUI_GODOT_DEV
 using Godot;
 using ImGuiNET;
 using System;
@@ -7,27 +6,34 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot;
 
-internal class InternalVkRenderer : IRenderer
+internal class InternalRdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
     private readonly Color[] clearColors = new[] { new Color(0f, 0f, 0f, 0f) };
-    //private readonly Color[] clearColors = new[] { new Color(0.45098f, 0.54902f, 0.60f) };
     private readonly RID _shader;
     private readonly RID _pipeline;
     private readonly RID _sampler;
     private readonly long _vtxFormat;
     private readonly Dictionary<RID, RID> _framebuffers = new();
 
-    public InternalVkRenderer()
+    public string Name => "imgui_impl_godot4_rd";
+
+    public InternalRdRenderer()
     {
         RD = RenderingServer.GetRenderingDevice();
 
-        var src = new RDShaderSource();
-        src.SourceVertex = vertexShaderSource;
-        src.SourceFragment = fragmentShaderSource;
+        // set up everything to match the official Vulkan backend as closely as possible
+
+        // compile shader
+        var src = new RDShaderSource
+        {
+            SourceVertex = vertexShaderSource,
+            SourceFragment = fragmentShaderSource
+        };
         var spirv = RD.ShaderCompileSpirvFromSource(src);
         _shader = RD.ShaderCreateFromSpirv(spirv);
 
+        // create vertex format
         uint vtxStride = (uint)Marshal.SizeOf<ImDrawVert>();
 
         RDVertexAttribute attrPoints = new()
@@ -57,6 +63,7 @@ internal class InternalVkRenderer : IRenderer
         var vattrs = new Godot.Collections.Array<RDVertexAttribute>() { attrPoints, attrUvs, attrColors };
         _vtxFormat = RD.VertexFormatCreate(vattrs);
 
+        // blend state
         var bsa = new RDPipelineColorBlendStateAttachment
         {
             EnableBlend = true,
@@ -69,15 +76,20 @@ internal class InternalVkRenderer : IRenderer
             DstAlphaBlendFactor = RenderingDevice.BlendFactor.OneMinusSrcAlpha,
             AlphaBlendOp = RenderingDevice.BlendOperation.Add,
         };
-        var blendData = new RDPipelineColorBlendState();
-        blendData.Attachments.Add(bsa);
-        blendData.BlendConstant = new Color(0, 0, 0, 0);
 
+        var blendData = new RDPipelineColorBlendState
+        {
+            BlendConstant = new Color(0, 0, 0, 0),
+        };
+        blendData.Attachments.Add(bsa);
+
+        // rasterization state
         var rasterizationState = new RDPipelineRasterizationState
         {
             FrontFace = RenderingDevice.PolygonFrontFace.CounterClockwise
         };
 
+        // pipeline
         _pipeline = RD.RenderPipelineCreate(
             _shader,
             RD.ScreenGetFramebufferFormat(),
@@ -88,6 +100,7 @@ internal class InternalVkRenderer : IRenderer
             new RDPipelineDepthStencilState(),
             blendData);
 
+        // sampler used for all textures
         var samplerState = new RDSamplerState
         {
             MinFilter = RenderingDevice.SamplerFilter.Linear,
@@ -133,7 +146,7 @@ internal class InternalVkRenderer : IRenderer
         Buffer.BlockCopy(translate, 0, pcbuf, 8, 8);
 
         var vtxBuffers = new RID[drawData.CmdListsCount];
-        var vtxArrays = new RID[drawData.CmdListsCount];
+        var vtxArrays = new List<Dictionary<uint, RID>>(drawData.CmdListsCount);
         var idxBuffers = new RID[drawData.CmdListsCount];
         var idxArrays = new List<RID[]>(drawData.CmdListsCount);
         var uniformSets = new Dictionary<IntPtr, RID>();
@@ -151,8 +164,7 @@ internal class InternalVkRenderer : IRenderer
             Marshal.Copy(cmdList.IdxBuffer.Data, idxBuf, 0, idxBytes);
 
             vtxBuffers[i] = RD.VertexBufferCreate((uint)vertBuf.Length, vertBuf);
-            vtxArrays[i] = RD.VertexArrayCreate((uint)cmdList.VtxBuffer.Size, _vtxFormat,
-                new() { vtxBuffers[i], vtxBuffers[i], vtxBuffers[i] });
+            vtxArrays.Add(new());
 
             idxBuffers[i] = RD.IndexBufferCreate((uint)cmdList.IdxBuffer.Size, RenderingDevice.IndexBufferFormat.Uint16, idxBuf);
 
@@ -161,11 +173,23 @@ internal class InternalVkRenderer : IRenderer
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
+                if (drawCmd.ElemCount == 0)
+                    continue;
+
                 idxArrays[i][cmdi] = RD.IndexArrayCreate(idxBuffers[i], drawCmd.IdxOffset, drawCmd.ElemCount);
 
-                if (drawCmd.VtxOffset > 0)
+                if (!vtxArrays[i].ContainsKey(drawCmd.VtxOffset))
                 {
-                    // TODO: ...
+                    long voff = drawCmd.VtxOffset * vertSize;
+#if IMGUI_GODOT_DEV
+                    vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate((uint)cmdList.VtxBuffer.Size, _vtxFormat,
+                        new() { vtxBuffers[i], vtxBuffers[i], vtxBuffers[i] },
+                        new[] { voff, voff, voff });
+#else
+                    // TODO: offsets workaround
+                    vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate((uint)cmdList.VtxBuffer.Size, _vtxFormat,
+                        new() { vtxBuffers[i], vtxBuffers[i], vtxBuffers[i] });
+#endif
                 }
 
                 IntPtr texid = drawCmd.GetTexID();
@@ -195,8 +219,6 @@ internal class InternalVkRenderer : IRenderer
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
 
-            RD.DrawListBindVertexArray(dl, vtxArrays[i]);
-
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
@@ -206,6 +228,7 @@ internal class InternalVkRenderer : IRenderer
 
                 RD.DrawListBindUniformSet(dl, uniformSets[drawCmd.GetTexID()], 0);
                 RD.DrawListBindIndexArray(dl, idxArrays[i][cmdi]);
+                RD.DrawListBindVertexArray(dl, vtxArrays[i][drawCmd.VtxOffset]);
 
                 RD.DrawListEnableScissor(dl, new Rect2(
                     drawCmd.ClipRect.X,
@@ -218,7 +241,10 @@ internal class InternalVkRenderer : IRenderer
                 RD.FreeRid(idxArrays[i][cmdi]);
             }
 
-            RD.FreeRid(vtxArrays[i]);
+            foreach (RID rid in vtxArrays[i].Values)
+            {
+                RD.FreeRid(rid);
+            }
             RD.FreeRid(vtxBuffers[i]);
             RD.FreeRid(idxBuffers[i]);
         }
@@ -277,4 +303,3 @@ void main()
     fColor = In.Color * texture(sTexture, In.UV.st);
 }";
 }
-#endif

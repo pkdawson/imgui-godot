@@ -11,6 +11,7 @@ namespace ImGuiGodot;
 
 internal interface IRenderer
 {
+    public string Name { get; }
     public void InitViewport(Viewport vp);
     public void CloseViewport(Viewport vp);
     public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData);
@@ -27,8 +28,9 @@ internal static class Internal
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
+    private static IntPtr _rendererName = IntPtr.Zero;
     private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
-    internal static IRenderer Renderer { get; }
+    internal static IRenderer Renderer { get; private set; }
 
     private class FontParams
     {
@@ -46,7 +48,7 @@ internal static class Internal
         if (cinfo is null)
         {
             GD.PrintErr("failed to get RID constructor");
-            return;
+            throw new PlatformNotSupportedException();
         }
 
         DynamicMethod dm = new("ConstructRID", typeof(RID), new[] { typeof(ulong) });
@@ -55,17 +57,11 @@ internal static class Internal
         il.Emit(OpCodes.Newobj, cinfo);
         il.Emit(OpCodes.Ret);
         ConstructRID = dm.CreateDelegate<Func<ulong, RID>>();
-
-#if IMGUI_GODOT_DEV
-        Renderer = new InternalVkRenderer();
-#else
-        Renderer = new InternalCanvasRenderer();
-#endif
     }
 
-    public static void AddFont(FontFile fontData, float fontSize, bool merge)
+    public static void AddFont(FontFile fontData, int fontSize, bool merge)
     {
-        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = (int)fontSize, Merge = merge });
+        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
     }
 
     private static unsafe void _AddFont(FontFile fontData, int fontSize, bool merge)
@@ -196,8 +192,9 @@ internal static class Internal
         ImGui.GetStyle().ScaleAllSizes(scale);
     }
 
-    public static void Init()
+    public static void Init(IRenderer renderer)
     {
+        Renderer = renderer;
         _fontConfiguration.Clear();
 
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
@@ -215,10 +212,15 @@ internal static class Internal
         io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
+        if (_rendererName == IntPtr.Zero)
+        {
+            _rendererName = Marshal.StringToCoTaskMemAnsi(Renderer.Name);
+        }
+
         unsafe
         {
             io.NativePtr->BackendPlatformName = (byte*)_backendName;
-            io.NativePtr->BackendRendererName = (byte*)_backendName;
+            io.NativePtr->BackendRendererName = (byte*)_rendererName;
         }
 
 #if IMGUI_GODOT_DEV

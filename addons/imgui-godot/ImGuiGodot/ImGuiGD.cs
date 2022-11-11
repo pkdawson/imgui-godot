@@ -63,11 +63,11 @@ public static class ImGuiGD
     {
     }
 
-    public static void Init(float? scale = null)
+    public static void Init(float? scale = null, Renderer renderer = Renderer.RenderingDevice)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
-            GD.PrintErr("imgui-godot requires 64-bit pointers");
+            throw new PlatformNotSupportedException("imgui-godot requires 64-bit pointers");
         }
 
         if (scale != null)
@@ -75,7 +75,12 @@ public static class ImGuiGD
             _scale = scale.Value;
         }
 
-        Internal.Init();
+        Internal.Init(renderer switch
+        {
+            Renderer.Canvas => new InternalCanvasRenderer(),
+            Renderer.RenderingDevice => new InternalRdRenderer(),
+            _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
+        });
     }
 
     public static void ResetFonts()
@@ -178,4 +183,10 @@ public static class ImGuiGD
     {
         Internal.SetIniFilename(io, fileName);
     }
+}
+
+public enum Renderer
+{
+    Canvas,
+    RenderingDevice
 }

@@ -16,6 +16,8 @@ internal class InternalCanvasRenderer : IRenderer
     private readonly Dictionary<RID, List<RID>> _canvasItemPools = new();
     private readonly Dictionary<RID, ViewportData> _vpData = new();
 
+    public string Name => "imgui_impl_godot4_canvas";
+
     public void InitViewport(Viewport vp)
     {
         RID vprid = vp.GetViewportRid();

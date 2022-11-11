@@ -29,6 +29,9 @@ public partial class ImGuiLayer : CanvasLayer
     /// </summary>
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
+    [Export(PropertyHint.Enum, "RenderingDevice,Canvas")]
+    public string Renderer = "RenderingDevice";
+
     private Window _window;
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
@@ -56,7 +59,7 @@ public partial class ImGuiLayer : CanvasLayer
         VisibilityChanged += OnChangeVisibility;
 
         ImGuiGD.ScaleToDpi = ScaleToDpi;
-        ImGuiGD.Init(Scale);
+        ImGuiGD.Init(Scale, Enum.Parse<Renderer>(Renderer));
         ImGui.GetIO().SetIniFilename(IniFilename);
         if (Font is not null)
         {
