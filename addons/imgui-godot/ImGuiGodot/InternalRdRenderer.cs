@@ -3,6 +3,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Buffers;
 
 namespace ImGuiGodot;
 
@@ -15,6 +16,10 @@ internal class InternalRdRenderer : IRenderer
     private readonly RID _sampler;
     private readonly long _vtxFormat;
     private readonly Dictionary<RID, RID> _framebuffers = new();
+    private readonly float[] _scale = new float[2];
+    private readonly float[] _translate = new float[2];
+    private readonly byte[] _pcbuf = new byte[16];
+    private readonly ArrayPool<byte> _arrayPool = ArrayPool<byte>.Create();
 
     public string Name => "imgui_impl_godot4_rd";
 
@@ -133,17 +138,14 @@ internal class InternalRdRenderer : IRenderer
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
-        float[] scale = new float[2];
-        scale[0] = 2.0f / drawData.DisplaySize.X;
-        scale[1] = 2.0f / drawData.DisplaySize.Y;
+        _scale[0] = 2.0f / drawData.DisplaySize.X;
+        _scale[1] = 2.0f / drawData.DisplaySize.Y;
 
-        float[] translate = new float[2];
-        translate[0] = -1.0f - (drawData.DisplayPos.X * scale[0]);
-        translate[1] = -1.0f - (drawData.DisplayPos.Y * scale[1]);
+        _translate[0] = -1.0f - (drawData.DisplayPos.X * _scale[0]);
+        _translate[1] = -1.0f - (drawData.DisplayPos.Y * _scale[1]);
 
-        byte[] pcbuf = new byte[16];
-        Buffer.BlockCopy(scale, 0, pcbuf, 0, 8);
-        Buffer.BlockCopy(translate, 0, pcbuf, 8, 8);
+        Buffer.BlockCopy(_scale, 0, _pcbuf, 0, 8);
+        Buffer.BlockCopy(_translate, 0, _pcbuf, 8, 8);
 
         var vtxBuffers = new RID[drawData.CmdListsCount];
         var vtxArrays = new List<Dictionary<uint, RID>>(drawData.CmdListsCount);
@@ -156,17 +158,22 @@ internal class InternalRdRenderer : IRenderer
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
 
             int vertBytes = cmdList.VtxBuffer.Size * vertSize;
-            byte[] vertBuf = new byte[vertBytes];
+            byte[] vertBuf = _arrayPool.Rent(vertBytes);
             Marshal.Copy(cmdList.VtxBuffer.Data, vertBuf, 0, vertBytes);
 
             int idxBytes = cmdList.IdxBuffer.Size * sizeof(ushort);
-            byte[] idxBuf = new byte[idxBytes];
+            byte[] idxBuf = _arrayPool.Rent(idxBytes);
             Marshal.Copy(cmdList.IdxBuffer.Data, idxBuf, 0, idxBytes);
 
-            vtxBuffers[i] = RD.VertexBufferCreate((uint)vertBuf.Length, vertBuf);
+            vtxBuffers[i] = RD.VertexBufferCreate((uint)vertBytes);
+            RD.BufferUpdate(vtxBuffers[i], 0, (uint)vertBytes, vertBuf);
             vtxArrays.Add(new());
 
-            idxBuffers[i] = RD.IndexBufferCreate((uint)cmdList.IdxBuffer.Size, RenderingDevice.IndexBufferFormat.Uint16, idxBuf);
+            idxBuffers[i] = RD.IndexBufferCreate((uint)cmdList.IdxBuffer.Size, RenderingDevice.IndexBufferFormat.Uint16);
+            RD.BufferUpdate(idxBuffers[i], 0, (uint)idxBytes, idxBuf);
+
+            _arrayPool.Return(idxBuf);
+            _arrayPool.Return(vertBuf);
 
             // create an index array for each draw command
             idxArrays.Add(new RID[cmdList.CmdBuffer.Size]);
@@ -214,7 +221,7 @@ internal class InternalRdRenderer : IRenderer
             RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
             clearColors);
         RD.DrawListBindRenderPipeline(dl, _pipeline);
-        RD.DrawListSetPushConstant(dl, pcbuf, (uint)pcbuf.Length);
+        RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
