@@ -196,10 +196,11 @@ internal class InternalRdRenderer : IRenderer
                 if (!uniformSets.ContainsKey(texid))
                 {
                     RID texrid = RenderingServer.TextureGetRdTexture(Internal.ConstructRID((ulong)texid));
-
-                    RDUniform uniform = new();
-                    uniform.Binding = 0;
-                    uniform.UniformType = RenderingDevice.UniformType.SamplerWithTexture;
+                    RDUniform uniform = new()
+                    {
+                        Binding = 0,
+                        UniformType = RenderingDevice.UniformType.SamplerWithTexture
+                    };
                     uniform.AddId(_sampler);
                     uniform.AddId(texrid);
                     RID uniformSet = RD.UniformSetCreate(new() { uniform }, _shader, 0);

@@ -47,8 +47,7 @@ internal static class Internal
         ConstructorInfo cinfo = typeof(RID).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
         if (cinfo is null)
         {
-            GD.PrintErr("failed to get RID constructor");
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException("failed to get RID constructor");
         }
 
         DynamicMethod dm = new("ConstructRID", typeof(RID), new[] { typeof(ulong) });

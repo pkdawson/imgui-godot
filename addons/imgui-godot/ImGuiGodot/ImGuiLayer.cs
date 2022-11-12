@@ -9,6 +9,10 @@ public partial class ImGuiLayer : CanvasLayer
 {
     public static ImGuiLayer Instance { get; private set; }
 
+#if IMGUI_GODOT_DEV
+    public ImGuiAPI API = new();
+#endif
+
     [Export] public FontFile Font = null;
     [Export] public int FontSize = 16;
     [Export] public FontFile ExtraFont1 = null;
@@ -125,6 +129,9 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _ExitTree()
     {
         ImGuiGD.Shutdown();
+#if IMGUI_GODOT_DEV
+        API.Free();
+#endif
     }
 
     private void OnChangeVisibility()
