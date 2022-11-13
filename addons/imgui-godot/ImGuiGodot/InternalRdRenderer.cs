@@ -147,6 +147,26 @@ internal class InternalRdRenderer : IRenderer
     {
     }
 
+    private void ResizeAndClear(List<Dictionary<uint, RID>> dicts, int len)
+    {
+        if (dicts.Count > len)
+        {
+            dicts.RemoveRange(len, dicts.Count - len);
+        }
+        else
+        {
+            while (dicts.Count < len)
+            {
+                dicts.Add(new());
+            }
+        }
+
+        foreach (var d in dicts)
+        {
+            d.Clear();
+        }
+    }
+
     public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
     {
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
@@ -165,9 +185,15 @@ internal class InternalRdRenderer : IRenderer
 
         var vtxBuffers = _ridArrayPool.Rent(drawData.CmdListsCount);
         var idxBuffers = _ridArrayPool.Rent(drawData.CmdListsCount);
-        _vtxArrays.Clear();
+        ResizeAndClear(_vtxArrays, drawData.CmdListsCount);
         _idxArrays.Clear();
         _usedTextures.Clear();
+
+        foreach (var kv in _uniformSets)
+        {
+            if (!RD.UniformSetIsValid(kv.Value))
+                _uniformSets.Remove(kv.Key);
+        }
 
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
@@ -183,7 +209,6 @@ internal class InternalRdRenderer : IRenderer
 
             vtxBuffers[i] = RD.VertexBufferCreate((uint)vertBytes);
             RD.BufferUpdate(vtxBuffers[i], 0, (uint)vertBytes, vertBuf);
-            _vtxArrays.Add(new());
 
             idxBuffers[i] = RD.IndexBufferCreate((uint)cmdList.IdxBuffer.Size, RenderingDevice.IndexBufferFormat.Uint16);
             RD.BufferUpdate(idxBuffers[i], 0, (uint)idxBytes, idxBuf);
@@ -235,7 +260,7 @@ internal class InternalRdRenderer : IRenderer
                     uniform.AddId(texrid);
                     _uniformArray[0] = uniform;
                     RID uniformSet = RD.UniformSetCreate(_uniformArray, _shader, 0);
-                    _uniformSets.Add(texid, uniformSet);
+                    _uniformSets[texid] = uniformSet;
                 }
             }
         }

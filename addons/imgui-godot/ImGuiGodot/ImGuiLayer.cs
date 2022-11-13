@@ -28,13 +28,13 @@ public partial class ImGuiLayer : CanvasLayer
 
     [Export] public string IniFilename = "user://imgui.ini";
 
+    [Export(PropertyHint.Enum, "RenderingDevice,Canvas")]
+    public string Renderer = "RenderingDevice";
+
     /// <summary>
     /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
     /// </summary>
     [Signal] public delegate void ImGuiLayoutEventHandler();
-
-    [Export(PropertyHint.Enum, "RenderingDevice,Canvas")]
-    public string Renderer = "RenderingDevice";
 
     private Window _window;
     private SubViewportContainer _subViewportContainer;
