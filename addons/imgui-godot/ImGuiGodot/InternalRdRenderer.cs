@@ -258,6 +258,11 @@ internal class InternalRdRenderer : IRenderer
         }
         RD.DrawListEnd();
         RD.DrawCommandEndLabel();
+
+        foreach (RID rid in uniformSets.Values)
+        {
+            RD.FreeRid(rid);
+        }
     }
 
     public void OnHide()
