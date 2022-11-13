@@ -19,12 +19,19 @@ internal class InternalRdRenderer : IRenderer
     private readonly float[] _scale = new float[2];
     private readonly float[] _translate = new float[2];
     private readonly byte[] _pcbuf = new byte[16];
-    private readonly ArrayPool<byte> _arrayPool = ArrayPool<byte>.Create();
+    private readonly ArrayPool<byte> _bufPool = ArrayPool<byte>.Create();
+    private readonly ArrayPool<RID> _ridArrayPool = ArrayPool<RID>.Create();
 
     private readonly Dictionary<IntPtr, RID> _uniformSets = new(8);
-    private readonly Godot.Collections.Array<RID> _srcBuffers = new();
+    private readonly List<RID[]> _idxArrays = new(32);
+    private readonly List<Dictionary<uint, RID>> _vtxArrays = new(32);
+    private readonly HashSet<IntPtr> _usedTextures = new(8);
+
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
     private readonly Godot.Collections.Array _storageTextures = new();
+    private readonly Godot.Collections.Array<RID> _srcBuffers = new();
+    private readonly Godot.Collections.Array<long> _vtxOffsets = new();
+    private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
 
     public string Name => "imgui_impl_godot4_rd";
 
@@ -123,6 +130,8 @@ internal class InternalRdRenderer : IRenderer
         _sampler = RD.SamplerCreate(samplerState);
 
         _srcBuffers.Resize(3);
+        _vtxOffsets.Resize(3);
+        _uniformArray.Resize(1);
     }
 
     public void InitViewport(Viewport vp)
@@ -154,62 +163,58 @@ internal class InternalRdRenderer : IRenderer
         Buffer.BlockCopy(_scale, 0, _pcbuf, 0, 8);
         Buffer.BlockCopy(_translate, 0, _pcbuf, 8, 8);
 
-        var vtxBuffers = new RID[drawData.CmdListsCount];
-        var vtxArrays = new List<Dictionary<uint, RID>>(drawData.CmdListsCount);
-        var idxBuffers = new RID[drawData.CmdListsCount];
-        var idxArrays = new List<RID[]>(drawData.CmdListsCount);
-        HashSet<IntPtr> usedTextures = new();
+        var vtxBuffers = _ridArrayPool.Rent(drawData.CmdListsCount);
+        var idxBuffers = _ridArrayPool.Rent(drawData.CmdListsCount);
+        _vtxArrays.Clear();
+        _idxArrays.Clear();
+        _usedTextures.Clear();
 
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
 
             int vertBytes = cmdList.VtxBuffer.Size * vertSize;
-            byte[] vertBuf = _arrayPool.Rent(vertBytes);
+            byte[] vertBuf = _bufPool.Rent(vertBytes);
             Marshal.Copy(cmdList.VtxBuffer.Data, vertBuf, 0, vertBytes);
 
             int idxBytes = cmdList.IdxBuffer.Size * sizeof(ushort);
-            byte[] idxBuf = _arrayPool.Rent(idxBytes);
+            byte[] idxBuf = _bufPool.Rent(idxBytes);
             Marshal.Copy(cmdList.IdxBuffer.Data, idxBuf, 0, idxBytes);
 
             vtxBuffers[i] = RD.VertexBufferCreate((uint)vertBytes);
             RD.BufferUpdate(vtxBuffers[i], 0, (uint)vertBytes, vertBuf);
-            vtxArrays.Add(new());
+            _vtxArrays.Add(new());
 
             idxBuffers[i] = RD.IndexBufferCreate((uint)cmdList.IdxBuffer.Size, RenderingDevice.IndexBufferFormat.Uint16);
             RD.BufferUpdate(idxBuffers[i], 0, (uint)idxBytes, idxBuf);
 
-            _arrayPool.Return(idxBuf);
-            _arrayPool.Return(vertBuf);
+            _bufPool.Return(idxBuf);
+            _bufPool.Return(vertBuf);
 
             // create an index array for each draw command
-            idxArrays.Add(new RID[cmdList.CmdBuffer.Size]);
+            _idxArrays.Add(_ridArrayPool.Rent(cmdList.CmdBuffer.Size));
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
                 if (drawCmd.ElemCount == 0)
                     continue;
 
-                idxArrays[i][cmdi] = RD.IndexArrayCreate(idxBuffers[i], drawCmd.IdxOffset, drawCmd.ElemCount);
+                _idxArrays[i][cmdi] = RD.IndexArrayCreate(idxBuffers[i], drawCmd.IdxOffset, drawCmd.ElemCount);
 
-                if (!vtxArrays[i].ContainsKey(drawCmd.VtxOffset))
+                if (!_vtxArrays[i].ContainsKey(drawCmd.VtxOffset))
                 {
                     long voff = drawCmd.VtxOffset * vertSize;
+                    _srcBuffers[0] = _srcBuffers[1] = _srcBuffers[2] = vtxBuffers[i];
 #if IMGUI_GODOT_DEV
-                    _srcBuffers[0] = vtxBuffers[i];
-                    _srcBuffers[1] = vtxBuffers[i];
-                    _srcBuffers[2] = vtxBuffers[i];
+                    _vtxOffsets[0] = _vtxOffsets[1] = _vtxOffsets[2] = voff;
                     vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate(
                         (uint)cmdList.VtxBuffer.Size,
                         _vtxFormat,
                         _srcBuffers,
-                        new[] { voff, voff, voff });
+                        _vtxOffsets);
 #else
-                    _srcBuffers[0] = vtxBuffers[i];
-                    _srcBuffers[1] = vtxBuffers[i];
-                    _srcBuffers[2] = vtxBuffers[i];
                     // TODO: offsets workaround
-                    vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate(
+                    _vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate(
                         (uint)cmdList.VtxBuffer.Size,
                         _vtxFormat,
                         _srcBuffers);
@@ -217,7 +222,7 @@ internal class InternalRdRenderer : IRenderer
                 }
 
                 IntPtr texid = drawCmd.GetTexID();
-                usedTextures.Add(texid);
+                _usedTextures.Add(texid);
                 if (!_uniformSets.ContainsKey(texid))
                 {
                     RID texrid = RenderingServer.TextureGetRdTexture(Internal.ConstructRID((ulong)texid));
@@ -228,7 +233,8 @@ internal class InternalRdRenderer : IRenderer
                     };
                     uniform.AddId(_sampler);
                     uniform.AddId(texrid);
-                    RID uniformSet = RD.UniformSetCreate(new() { uniform }, _shader, 0);
+                    _uniformArray[0] = uniform;
+                    RID uniformSet = RD.UniformSetCreate(_uniformArray, _shader, 0);
                     _uniformSets.Add(texid, uniformSet);
                 }
             }
@@ -253,8 +259,8 @@ internal class InternalRdRenderer : IRenderer
                     continue;
 
                 RD.DrawListBindUniformSet(dl, _uniformSets[drawCmd.GetTexID()], 0);
-                RD.DrawListBindIndexArray(dl, idxArrays[i][cmdi]);
-                RD.DrawListBindVertexArray(dl, vtxArrays[i][drawCmd.VtxOffset]);
+                RD.DrawListBindIndexArray(dl, _idxArrays[i][cmdi]);
+                RD.DrawListBindVertexArray(dl, _vtxArrays[i][drawCmd.VtxOffset]);
 
                 RD.DrawListEnableScissor(dl, new Rect2(
                     drawCmd.ClipRect.X,
@@ -264,10 +270,11 @@ internal class InternalRdRenderer : IRenderer
 
                 RD.DrawListDraw(dl, true, 1);
 
-                RD.FreeRid(idxArrays[i][cmdi]);
+                RD.FreeRid(_idxArrays[i][cmdi]);
             }
 
-            foreach (RID rid in vtxArrays[i].Values)
+            _ridArrayPool.Return(_idxArrays[i]);
+            foreach (RID rid in _vtxArrays[i].Values)
             {
                 RD.FreeRid(rid);
             }
@@ -279,12 +286,15 @@ internal class InternalRdRenderer : IRenderer
 
         foreach (IntPtr texid in _uniformSets.Keys)
         {
-            if (!usedTextures.Contains(texid))
+            if (!_usedTextures.Contains(texid))
             {
                 RD.FreeRid(_uniformSets[texid]);
                 _uniformSets.Remove(texid);
             }
         }
+
+        _ridArrayPool.Return(vtxBuffers);
+        _ridArrayPool.Return(idxBuffers);
     }
 
     public void OnHide()
