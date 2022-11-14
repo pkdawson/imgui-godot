@@ -63,7 +63,7 @@ public static class ImGuiGD
     {
     }
 
-    public static void Init(float? scale = null, Renderer renderer = Renderer.RenderingDevice)
+    public static void Init(float? scale = null, RendererType renderer = RendererType.RenderingDevice)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
@@ -77,8 +77,9 @@ public static class ImGuiGD
 
         Internal.Init(renderer switch
         {
-            Renderer.Canvas => new InternalCanvasRenderer(),
-            Renderer.RenderingDevice => new InternalRdRenderer(),
+            RendererType.Dummy => new InternalDummyRenderer(),
+            RendererType.Canvas => new InternalCanvasRenderer(),
+            RendererType.RenderingDevice => new InternalRdRenderer(),
             _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
         });
     }
@@ -185,8 +186,9 @@ public static class ImGuiGD
     }
 }
 
-public enum Renderer
+public enum RendererType
 {
+    Dummy,
     Canvas,
     RenderingDevice
 }

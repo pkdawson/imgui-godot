@@ -10,7 +10,7 @@ namespace ImGuiGodot;
 internal class InternalRdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
-    private readonly Color[] clearColors = new[] { new Color(0f, 0f, 0f, 0f) };
+    private readonly Color[] _clearColors = new[] { new Color(0f, 0f, 0f, 0f) };
     private readonly RID _shader;
     private readonly RID _pipeline;
     private readonly RID _sampler;
@@ -30,7 +30,7 @@ internal class InternalRdRenderer : IRenderer
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
     private readonly Godot.Collections.Array _storageTextures = new();
     private readonly Godot.Collections.Array<RID> _srcBuffers = new();
-    private readonly Godot.Collections.Array<long> _vtxOffsets = new();
+    private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
 
     public string Name => "imgui_impl_godot4_rd";
@@ -130,7 +130,6 @@ internal class InternalRdRenderer : IRenderer
         _sampler = RD.SamplerCreate(samplerState);
 
         _srcBuffers.Resize(3);
-        _vtxOffsets.Resize(3);
         _uniformArray.Resize(1);
     }
 
@@ -149,21 +148,16 @@ internal class InternalRdRenderer : IRenderer
 
     private void ResizeAndClear(List<Dictionary<uint, RID>> dicts, int len)
     {
-        if (dicts.Count > len)
+        // never remove elements, for better performance with multi-viewports
+
+        while (dicts.Count < len)
         {
-            dicts.RemoveRange(len, dicts.Count - len);
-        }
-        else
-        {
-            while (dicts.Count < len)
-            {
-                dicts.Add(new());
-            }
+            dicts.Add(new());
         }
 
-        foreach (var d in dicts)
+        for (int i = 0; i < len; ++i)
         {
-            d.Clear();
+            dicts[i].Clear();
         }
     }
 
@@ -232,7 +226,7 @@ internal class InternalRdRenderer : IRenderer
                     _srcBuffers[0] = _srcBuffers[1] = _srcBuffers[2] = vtxBuffers[i];
 #if IMGUI_GODOT_DEV
                     _vtxOffsets[0] = _vtxOffsets[1] = _vtxOffsets[2] = voff;
-                    vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate(
+                    _vtxArrays[i][drawCmd.VtxOffset] = RD.VertexArrayCreate(
                         (uint)cmdList.VtxBuffer.Size,
                         _vtxFormat,
                         _srcBuffers,
@@ -268,7 +262,7 @@ internal class InternalRdRenderer : IRenderer
         var dl = RD.DrawListBegin(fb,
             RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
             RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
-            clearColors, 1, 0, _zeroRect, _storageTextures);
+            _clearColors, 1f, 0, _zeroRect, _storageTextures);
         RD.DrawListBindRenderPipeline(dl, _pipeline);
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 

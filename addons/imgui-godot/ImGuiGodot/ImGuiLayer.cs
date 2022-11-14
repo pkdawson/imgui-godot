@@ -41,6 +41,7 @@ public partial class ImGuiLayer : CanvasLayer
     private SubViewport _subViewport;
     private static readonly HashSet<Godot.Object> _connectedObjects = new();
     private int sizeCheck = 0;
+    private bool _headless = false;
 
     private partial class UpdateFirst : Node
     {
@@ -55,6 +56,7 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _EnterTree()
     {
         Instance = this;
+        _headless = DisplayServer.GetName() == "headless";
         _window = (Window)GetViewport();
 
         CheckContentScale();
@@ -63,7 +65,7 @@ public partial class ImGuiLayer : CanvasLayer
         VisibilityChanged += OnChangeVisibility;
 
         ImGuiGD.ScaleToDpi = ScaleToDpi;
-        ImGuiGD.Init(Scale, Enum.Parse<Renderer>(Renderer));
+        ImGuiGD.Init(Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
         ImGui.GetIO().SetIniFilename(IniFilename);
         if (Font is not null)
         {
