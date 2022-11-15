@@ -44,18 +44,18 @@ internal class InternalRdRenderer : IRenderer
         // set up everything to match the official Vulkan backend as closely as possible
 
         // compile shader
-        var src = new RDShaderSource
+        using var src = new RDShaderSource
         {
             SourceVertex = vertexShaderSource,
             SourceFragment = fragmentShaderSource
         };
-        var spirv = RD.ShaderCompileSpirvFromSource(src);
+        using var spirv = RD.ShaderCompileSpirvFromSource(src);
         _shader = RD.ShaderCreateFromSpirv(spirv);
 
         // create vertex format
         uint vtxStride = (uint)Marshal.SizeOf<ImDrawVert>();
 
-        RDVertexAttribute attrPoints = new()
+        using RDVertexAttribute attrPoints = new()
         {
             Location = 0,
             Format = RenderingDevice.DataFormat.R32g32Sfloat,
@@ -63,7 +63,7 @@ internal class InternalRdRenderer : IRenderer
             Offset = 0
         };
 
-        RDVertexAttribute attrUvs = new()
+        using RDVertexAttribute attrUvs = new()
         {
             Location = 1,
             Format = RenderingDevice.DataFormat.R32g32Sfloat,
@@ -71,7 +71,7 @@ internal class InternalRdRenderer : IRenderer
             Offset = sizeof(float) * 2
         };
 
-        RDVertexAttribute attrColors = new()
+        using RDVertexAttribute attrColors = new()
         {
             Location = 2,
             Format = RenderingDevice.DataFormat.R8g8b8a8Unorm,
@@ -83,7 +83,7 @@ internal class InternalRdRenderer : IRenderer
         _vtxFormat = RD.VertexFormatCreate(vattrs);
 
         // blend state
-        var bsa = new RDPipelineColorBlendStateAttachment
+        using var bsa = new RDPipelineColorBlendStateAttachment
         {
             EnableBlend = true,
 
@@ -96,14 +96,14 @@ internal class InternalRdRenderer : IRenderer
             AlphaBlendOp = RenderingDevice.BlendOperation.Add,
         };
 
-        var blendData = new RDPipelineColorBlendState
+        using var blendData = new RDPipelineColorBlendState
         {
             BlendConstant = new Color(0, 0, 0, 0),
         };
         blendData.Attachments.Add(bsa);
 
         // rasterization state
-        var rasterizationState = new RDPipelineRasterizationState
+        using var rasterizationState = new RDPipelineRasterizationState
         {
             FrontFace = RenderingDevice.PolygonFrontFace.CounterClockwise
         };
@@ -120,7 +120,7 @@ internal class InternalRdRenderer : IRenderer
             blendData);
 
         // sampler used for all textures
-        var samplerState = new RDSamplerState
+        using var samplerState = new RDSamplerState
         {
             MinFilter = RenderingDevice.SamplerFilter.Linear,
             MagFilter = RenderingDevice.SamplerFilter.Linear,
@@ -209,7 +209,8 @@ internal class InternalRdRenderer : IRenderer
         uint globalIdxOffset = 0;
 
         // set up buffers
-        byte[] idxBuf = _bufPool.Rent(drawData.TotalIdxCount * sizeof(ushort));
+        int idxBufSize = drawData.TotalIdxCount * sizeof(ushort);
+        byte[] idxBuf = _bufPool.Rent(idxBufSize);
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
@@ -226,7 +227,7 @@ internal class InternalRdRenderer : IRenderer
 
             _bufPool.Return(vertBuf);
 
-            // create an index array for each draw command
+            // create a uniform set for each texture
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
@@ -251,7 +252,7 @@ internal class InternalRdRenderer : IRenderer
                 }
             }
         }
-        RD.BufferUpdate(_idxBuffer, 0, (uint)drawData.TotalIdxCount * sizeof(ushort), idxBuf);
+        RD.BufferUpdate(_idxBuffer, 0, (uint)idxBufSize, idxBuf);
         _bufPool.Return(idxBuf);
 
         // draw
@@ -263,7 +264,6 @@ internal class InternalRdRenderer : IRenderer
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 
         globalIdxOffset = 0;
-
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
@@ -306,6 +306,7 @@ internal class InternalRdRenderer : IRenderer
         RD.DrawListEnd();
         RD.DrawCommandEndLabel();
 
+        // clean up unused textures
         foreach (IntPtr texid in _uniformSets.Keys)
         {
             if (!_usedTextures.Contains(texid))
