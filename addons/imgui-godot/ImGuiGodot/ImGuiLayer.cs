@@ -141,12 +141,14 @@ public partial class ImGuiLayer : CanvasLayer
         if (Visible)
         {
             ProcessMode = ProcessModeEnum.Always;
+            SetPhysicsProcess(true);
             SetProcessInput(true);
             // TODO: show all windows
         }
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
+            SetPhysicsProcess(false);
             SetProcessInput(false);
             Internal.Renderer.OnHide();
             // TODO: hide all windows
