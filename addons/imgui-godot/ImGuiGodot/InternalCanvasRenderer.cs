@@ -18,6 +18,11 @@ internal class InternalCanvasRenderer : IRenderer
 
     public string Name => "imgui_impl_godot4_canvas";
 
+    public void Init(ImGuiIOPtr io)
+    {
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
+    }
+
     public void InitViewport(Viewport vp)
     {
         RID vprid = vp.GetViewportRid();

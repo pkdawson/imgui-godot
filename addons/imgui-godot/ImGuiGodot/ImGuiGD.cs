@@ -21,10 +21,7 @@ public static class ImGuiGD
     /// <summary>
     /// Try to calculate how many pixels squared per point. Should be 1 or 2 on non-mobile displays
     /// </summary>
-    public static int DpiFactor
-    {
-        get => Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-    }
+    public static int DpiFactor => Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
 
     /// <summary>
     /// Adjust the scale based on <see cref="DpiFactor"/>

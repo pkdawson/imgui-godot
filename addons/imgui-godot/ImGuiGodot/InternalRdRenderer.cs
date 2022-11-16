@@ -46,16 +46,16 @@ internal class InternalRdRenderer : IRenderer
         // compiling from source takes ~400ms, so we embed the SPIR-V
         using var spirv = new RDShaderSPIRV()
         {
-            BytecodeFragment = fragmentBytecode,
-            BytecodeVertex = vertexBytecode,
+            BytecodeFragment = _fragmentBytecode,
+            BytecodeVertex = _vertexBytecode,
         };
         _shader = RD.ShaderCreateFromSpirv(spirv);
 
 #if IMGUI_GODOT_DEV
         using var src = new RDShaderSource()
         {
-            SourceFragment = fragmentShaderSource,
-            SourceVertex = vertexShaderSource,
+            SourceFragment = _fragmentShaderSource,
+            SourceVertex = _vertexShaderSource,
         };
         using var freshSpirv = RD.ShaderCompileSpirvFromSource(src);
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeFragment, freshSpirv.BytecodeFragment))
@@ -145,6 +145,11 @@ internal class InternalRdRenderer : IRenderer
 
         _srcBuffers.Resize(3);
         _uniformArray.Resize(1);
+    }
+
+    public void Init(ImGuiIOPtr io)
+    {
+        io.BackendFlags &= ~ImGuiBackendFlags.RendererHasVtxOffset;
     }
 
     public void InitViewport(Viewport vp)
@@ -360,7 +365,7 @@ internal class InternalRdRenderer : IRenderer
 
 #if IMGUI_GODOT_DEV
     // shader source borrowed from imgui_impl_vulkan.cpp
-    private static readonly string vertexShaderSource = @"#version 450 core
+    private static readonly string _vertexShaderSource = @"#version 450 core
 layout(location = 0) in vec2 aPos;
 layout(location = 1) in vec2 aUV;
 layout(location = 2) in vec4 aColor;
@@ -376,7 +381,7 @@ void main()
     gl_Position = vec4(aPos * pc.uScale + pc.uTranslate, 0, 1);
 }";
 
-    private static readonly string fragmentShaderSource = @"#version 450 core
+    private static readonly string _fragmentShaderSource = @"#version 450 core
 layout(location = 0) out vec4 fColor;
 layout(set=0, binding=0) uniform sampler2D sTexture;
 layout(location = 0) in struct { vec4 Color; vec2 UV; } In;
@@ -386,7 +391,7 @@ void main()
 }";
 #endif
 
-    private static readonly byte[] vertexBytecode = new byte[] {
+    private static readonly byte[] _vertexBytecode = new byte[] {
         0x03, 0x02, 0x23, 0x07, 0x00, 0x05, 0x01, 0x00, 0x0B, 0x00, 0x08, 0x00, 0x2E, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0B, 0x00,
         0x06, 0x00, 0x01, 0x00, 0x00, 0x00, 0x47, 0x4C, 0x53, 0x4C, 0x2E, 0x73, 0x74, 0x64, 0x2E,
@@ -475,7 +480,7 @@ void main()
         0x00, 0x0D, 0x00, 0x00, 0x00, 0x3E, 0x00, 0x03, 0x00, 0x2D, 0x00, 0x00, 0x00, 0x2C, 0x00,
         0x00, 0x00, 0xFD, 0x00, 0x01, 0x00, 0x38, 0x00, 0x01, 0x00 };
 
-    private static readonly byte[] fragmentBytecode = new byte[] {
+    private static readonly byte[] _fragmentBytecode = new byte[] {
         0x03, 0x02, 0x23, 0x07, 0x00, 0x05, 0x01, 0x00, 0x0B, 0x00, 0x08, 0x00, 0x1E, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0B, 0x00,
         0x06, 0x00, 0x01, 0x00, 0x00, 0x00, 0x47, 0x4C, 0x53, 0x4C, 0x2E, 0x73, 0x74, 0x64, 0x2E,

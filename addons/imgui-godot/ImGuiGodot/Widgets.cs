@@ -14,7 +14,10 @@ public static class Widgets
     /// <remarks>
     /// Be sure to change the SubViewport's <see cref="SubViewport.RenderTargetUpdateMode"/> to <see cref="SubViewport.UpdateMode.Always"/>
     /// </remarks>
-    public static void SubViewport(SubViewport vp)
+    /// <returns>
+    /// True if active (mouse hovered)
+    /// </returns>
+    public static bool SubViewport(SubViewport vp)
     {
         Vector2 vpSize = new(vp.Size.x, vp.Size.y);
         var pos = ImGui.GetCursorScreenPos();
@@ -29,7 +32,9 @@ public static class Widgets
         {
             Internal.CurrentSubViewport = vp;
             Internal.CurrentSubViewportPos = pos;
+            return true;
         }
+        return false;
     }
 
     public static void Image(Texture2D tex, Vector2 size)

@@ -12,6 +12,7 @@ namespace ImGuiGodot;
 internal interface IRenderer
 {
     public string Name { get; }
+    public void Init(ImGuiIOPtr io);
     public void InitViewport(Viewport vp);
     public void CloseViewport(Viewport vp);
     public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData);
@@ -209,7 +210,6 @@ internal static class Internal
         io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
         io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
         if (_rendererName == IntPtr.Zero)
         {
@@ -221,6 +221,8 @@ internal static class Internal
             io.NativePtr->BackendPlatformName = (byte*)_backendName;
             io.NativePtr->BackendRendererName = (byte*)_rendererName;
         }
+
+        Renderer.Init(io);
 
 #if IMGUI_GODOT_DEV
         InternalViewports.Init(ImGui.GetIO());
