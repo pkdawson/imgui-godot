@@ -28,7 +28,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     [Export] public string IniFilename = "user://imgui.ini";
 
-    [Export(PropertyHint.Enum, "RenderingDevice,Canvas")]
+    [Export(PropertyHint.Enum, "RenderingDevice,Canvas,Dummy")]
     public string Renderer = "RenderingDevice";
 
     /// <summary>

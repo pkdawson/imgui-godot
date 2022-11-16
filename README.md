@@ -19,7 +19,7 @@ public partial class MyNode : Node
 
 ## Getting Started
 
-imgui-godot requires Godot 4.0-beta3 or later, running on a 64-bit platform.
+imgui-godot requires Godot 4.0.beta5 or later, running on a 64-bit platform.
 
 ### Demo
 
