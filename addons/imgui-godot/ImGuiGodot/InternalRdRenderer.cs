@@ -184,7 +184,9 @@ internal class InternalRdRenderer : IRenderer
         if (drawData.CmdListsCount == 0)
             return;
 
+#if IMGUI_GODOT_DEV
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
+#endif
         RID fb = GetFramebuffer(vp);
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
@@ -318,7 +320,9 @@ internal class InternalRdRenderer : IRenderer
             globalIdxOffset += cmdList.IdxBuffer.Size;
         }
         RD.DrawListEnd();
+#if IMGUI_GODOT_DEV
         RD.DrawCommandEndLabel();
+#endif
 
         // clean up unused textures
         foreach (IntPtr texid in _uniformSets.Keys)
