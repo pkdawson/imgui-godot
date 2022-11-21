@@ -10,7 +10,7 @@ namespace ImGuiGodot;
 internal class InternalRdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
-    private readonly Color[] _clearColors = new[] { new Color(0f, 0f, 0f, 0f) };
+    private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
     private readonly RID _shader;
     private readonly RID _pipeline;
     private readonly RID _sampler;
@@ -23,8 +23,8 @@ internal class InternalRdRenderer : IRenderer
 
     private RID _idxBuffer;
     private int _idxBufferSize = 0; // size in indices
-    private readonly List<RID> _vtxBuffers = new(16); // TODO: use only one buffer with offsets
-    private readonly List<int> _vtxBufferSizes = new(16); // sizes in bytes
+    private RID _vtxBuffer;
+    private int _vtxBufferSize = 0; // size in vertices
 
     private readonly Dictionary<IntPtr, RID> _uniformSets = new(8);
     private readonly HashSet<IntPtr> _usedTextures = new(8);
@@ -55,9 +55,9 @@ internal class InternalRdRenderer : IRenderer
         };
         using var freshSpirv = RD.ShaderCompileSpirvFromSource(src);
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeFragment, freshSpirv.BytecodeFragment))
-            throw new Exception("fragment bytecode out of date");
+            throw new Exception("fragment bytecode mismatch");
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeVertex, freshSpirv.BytecodeVertex))
-            throw new Exception("vertex bytecode out of date");
+            throw new Exception("vertex bytecode mismatch");
 #endif
 
         // create vertex format
@@ -145,7 +145,7 @@ internal class InternalRdRenderer : IRenderer
 
     public void Init(ImGuiIOPtr io)
     {
-        io.BackendFlags &= ~ImGuiBackendFlags.RendererHasVtxOffset;
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
     }
 
     public void InitViewport(Viewport vp)
@@ -159,24 +159,6 @@ internal class InternalRdRenderer : IRenderer
 
     public void CloseViewport(Viewport vp)
     {
-    }
-
-    private void AllocVtxBuffer(int idx, int numBytes)
-    {
-        while (_vtxBuffers.Count <= idx)
-        {
-            _vtxBuffers.Add(new());
-            _vtxBufferSizes.Add(0);
-        }
-
-        if (_vtxBufferSizes[idx] < numBytes)
-        {
-            if (_vtxBuffers[idx].Id != 0)
-                RD.FreeRid(_vtxBuffers[idx]);
-
-            _vtxBuffers[idx] = RD.VertexBufferCreate((uint)numBytes);
-            _vtxBufferSizes[idx] = numBytes;
-        }
     }
 
     public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
@@ -200,6 +182,7 @@ internal class InternalRdRenderer : IRenderer
         Buffer.BlockCopy(_scale, 0, _pcbuf, 0, 8);
         Buffer.BlockCopy(_translate, 0, _pcbuf, 8, 8);
 
+        // allocate merged index and vertex buffers
         if (_idxBufferSize < drawData.TotalIdxCount)
         {
             if (_idxBuffer.Id != 0)
@@ -207,13 +190,18 @@ internal class InternalRdRenderer : IRenderer
             _idxBuffer = RD.IndexBufferCreate((uint)drawData.TotalIdxCount, RenderingDevice.IndexBufferFormat.Uint16);
             _idxBufferSize = drawData.TotalIdxCount;
         }
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
+
+        if (_vtxBufferSize < drawData.TotalVtxCount)
         {
-            AllocVtxBuffer(i, drawData.CmdListsRange[i].VtxBuffer.Size * vertSize);
+            if (_vtxBuffer.Id != 0)
+                RD.FreeRid(_vtxBuffer);
+            _vtxBuffer = RD.VertexBufferCreate((uint)(drawData.TotalVtxCount * vertSize));
+            _vtxBufferSize = drawData.TotalVtxCount;
         }
 
         _usedTextures.Clear();
 
+        // check if our font texture is still valid
         foreach (var kv in _uniformSets)
         {
             if (!RD.UniformSetIsValid(kv.Value))
@@ -221,25 +209,24 @@ internal class InternalRdRenderer : IRenderer
         }
 
         int globalIdxOffset = 0;
+        int globalVtxOffset = 0;
 
         // set up buffers
         int idxBufSize = drawData.TotalIdxCount * sizeof(ushort);
         byte[] idxBuf = _bufPool.Rent(idxBufSize);
+        int vertBufSize = drawData.TotalVtxCount * vertSize;
+        byte[] vertBuf = _bufPool.Rent(vertBufSize);
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
 
             int vertBytes = cmdList.VtxBuffer.Size * vertSize;
-            byte[] vertBuf = _bufPool.Rent(vertBytes);
-            Marshal.Copy(cmdList.VtxBuffer.Data, vertBuf, 0, vertBytes);
+            Marshal.Copy(cmdList.VtxBuffer.Data, vertBuf, globalVtxOffset, vertBytes);
+            globalVtxOffset += vertBytes;
 
             int idxBytes = cmdList.IdxBuffer.Size * sizeof(ushort);
             Marshal.Copy(cmdList.IdxBuffer.Data, idxBuf, globalIdxOffset, idxBytes);
             globalIdxOffset += idxBytes;
-
-            RD.BufferUpdate(_vtxBuffers[i], 0, (uint)vertBytes, vertBuf);
-
-            _bufPool.Return(vertBuf);
 
             // create a uniform set for each texture
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
@@ -268,6 +255,8 @@ internal class InternalRdRenderer : IRenderer
         }
         RD.BufferUpdate(_idxBuffer, 0, (uint)idxBufSize, idxBuf);
         _bufPool.Return(idxBuf);
+        RD.BufferUpdate(_vtxBuffer, 0, (uint)vertBufSize, vertBuf);
+        _bufPool.Return(vertBuf);
 
         // draw
         var dl = RD.DrawListBegin(fb,
@@ -278,6 +267,7 @@ internal class InternalRdRenderer : IRenderer
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 
         globalIdxOffset = 0;
+        globalVtxOffset = 0;
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
@@ -292,15 +282,14 @@ internal class InternalRdRenderer : IRenderer
                     (uint)(drawCmd.IdxOffset + globalIdxOffset),
                     drawCmd.ElemCount);
 
-                long voff = drawCmd.VtxOffset * vertSize;
-                _srcBuffers[0] = _srcBuffers[1] = _srcBuffers[2] = _vtxBuffers[i];
+                long voff = (drawCmd.VtxOffset + globalVtxOffset) * vertSize;
+                _srcBuffers[0] = _srcBuffers[1] = _srcBuffers[2] = _vtxBuffer;
                 _vtxOffsets[0] = _vtxOffsets[1] = _vtxOffsets[2] = voff;
-                // TODO: use vtx offset
                 RID vtxArray = RD.VertexArrayCreate(
                     (uint)cmdList.VtxBuffer.Size,
                     _vtxFormat,
-                    _srcBuffers/*,
-                    _vtxOffsets*/);
+                    _srcBuffers,
+                    _vtxOffsets);
 
                 RD.DrawListBindUniformSet(dl, _uniformSets[drawCmd.GetTexID()], 0);
                 RD.DrawListBindIndexArray(dl, idxArray);
@@ -318,6 +307,7 @@ internal class InternalRdRenderer : IRenderer
                 RD.FreeRid(vtxArray);
             }
             globalIdxOffset += cmdList.IdxBuffer.Size;
+            globalVtxOffset += cmdList.VtxBuffer.Size;
         }
         RD.DrawListEnd();
 #if IMGUI_GODOT_DEV
@@ -344,8 +334,7 @@ internal class InternalRdRenderer : IRenderer
         RD.FreeRid(_sampler);
         RD.FreeRid(_shader);
         RD.FreeRid(_idxBuffer);
-        foreach (RID vb in _vtxBuffers)
-            RD.FreeRid(vb);
+        RD.FreeRid(_vtxBuffer);
     }
 
     private RID GetFramebuffer(Viewport vp)

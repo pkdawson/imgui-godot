@@ -29,7 +29,7 @@ public static class ImGuiGD
     public static bool ScaleToDpi { get; set; } = true;
 
     /// <summary>
-    /// Setting this will reinitialize ImGui with rescaled fonts
+    /// Setting this property will reload fonts and modify the ImGuiStyle
     /// </summary>
     public static float Scale
     {
