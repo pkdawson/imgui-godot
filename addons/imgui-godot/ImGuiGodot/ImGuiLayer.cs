@@ -39,6 +39,7 @@ public partial class ImGuiLayer : CanvasLayer
     private Window _window;
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
+    private UpdateFirst _updateFirst;
     private static readonly HashSet<Godot.Object> _connectedObjects = new();
     private int sizeCheck = 0;
     private bool _headless = false;
@@ -46,10 +47,14 @@ public partial class ImGuiLayer : CanvasLayer
     private partial class UpdateFirst : Node
     {
         public Viewport GuiViewport { get; set; }
+        public bool GuiVisible { get; set; }
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, GuiViewport);
+            if (GuiVisible)
+                ImGuiGD.Update(delta, GuiViewport);
+            else
+                ImGui.NewFrame();
         }
     }
 
@@ -108,12 +113,15 @@ public partial class ImGuiLayer : CanvasLayer
         Internal.Renderer.InitViewport(_subViewport);
         AddChild(_subViewportContainer);
 
-        AddChild(new UpdateFirst
+        _updateFirst = new UpdateFirst
         {
             Name = "ImGuiLayer_UpdateFirst",
             ProcessPriority = int.MinValue,
-            GuiViewport = _subViewport
-        });
+            GuiViewport = _subViewport,
+            ProcessMode = ProcessModeEnum.Always,
+            GuiVisible = Visible,
+        };
+        AddChild(_updateFirst);
 
         _subViewport.SizeChanged += OnWindowSizeChanged;
     }
@@ -138,21 +146,21 @@ public partial class ImGuiLayer : CanvasLayer
 
     private void OnChangeVisibility()
     {
-        if (Visible)
+        bool vis = Visible;
+        if (vis)
         {
             ProcessMode = ProcessModeEnum.Always;
-            SetPhysicsProcess(true);
-            SetProcessInput(true);
             // TODO: show all windows
         }
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
-            SetPhysicsProcess(false);
-            SetProcessInput(false);
             Internal.Renderer.OnHide();
             // TODO: hide all windows
         }
+        SetPhysicsProcess(vis);
+        SetProcessInput(vis);
+        _updateFirst.GuiVisible = vis;
     }
 
     public override void _PhysicsProcess(double delta)
