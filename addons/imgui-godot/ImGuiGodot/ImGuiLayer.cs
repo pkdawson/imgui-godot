@@ -47,14 +47,34 @@ public partial class ImGuiLayer : CanvasLayer
     private partial class UpdateFirst : Node
     {
         public Viewport GuiViewport { get; set; }
-        public bool GuiVisible { get; set; }
+        private uint _counter = 0;
+        private ImGuiLayer _parent;
+
+        public override void _Ready()
+        {
+            _parent = (ImGuiLayer)GetParent();
+            _parent.VisibilityChanged += OnChangeVisibility;
+            OnChangeVisibility();
+        }
+
+        public override void _PhysicsProcess(double delta)
+        {
+            // call NewFrame occasionally if GUI isn't visible, to prevent leaks
+            if (unchecked(_counter++) % 60 == 0)
+                ImGui.NewFrame();
+        }
 
         public override void _Process(double delta)
         {
-            if (GuiVisible)
-                ImGuiGD.Update(delta, GuiViewport);
-            else
-                ImGui.NewFrame();
+            ImGuiGD.Update(delta, GuiViewport);
+        }
+
+        private void OnChangeVisibility()
+        {
+            _counter = 0;
+            bool vis = _parent.Visible;
+            SetProcess(vis);
+            SetPhysicsProcess(!vis);
         }
     }
 
@@ -119,7 +139,6 @@ public partial class ImGuiLayer : CanvasLayer
             ProcessPriority = int.MinValue,
             GuiViewport = _subViewport,
             ProcessMode = ProcessModeEnum.Always,
-            GuiVisible = Visible,
         };
         AddChild(_updateFirst);
 
@@ -146,8 +165,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     private void OnChangeVisibility()
     {
-        bool vis = Visible;
-        if (vis)
+        if (Visible)
         {
             ProcessMode = ProcessModeEnum.Always;
             // TODO: show all windows
@@ -158,9 +176,6 @@ public partial class ImGuiLayer : CanvasLayer
             Internal.Renderer.OnHide();
             // TODO: hide all windows
         }
-        SetPhysicsProcess(vis);
-        SetProcessInput(vis);
-        _updateFirst.GuiVisible = vis;
     }
 
     public override void _PhysicsProcess(double delta)
