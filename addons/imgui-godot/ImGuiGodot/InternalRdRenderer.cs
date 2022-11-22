@@ -333,8 +333,10 @@ internal class InternalRdRenderer : IRenderer
     {
         RD.FreeRid(_sampler);
         RD.FreeRid(_shader);
-        RD.FreeRid(_idxBuffer);
-        RD.FreeRid(_vtxBuffer);
+        if (_idxBuffer.Id != 0)
+            RD.FreeRid(_idxBuffer);
+        if (_vtxBuffer.Id != 0)
+            RD.FreeRid(_vtxBuffer);
     }
 
     private RID GetFramebuffer(Viewport vp)
