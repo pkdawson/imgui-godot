@@ -2,6 +2,7 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ImGuiGodot;
 
@@ -227,6 +228,29 @@ public partial class ImGuiLayer : CanvasLayer
                 _connectedObjects.Add(obj);
             }
         }
+    }
+
+    // WIP, this will probably be changed or moved
+    public unsafe Godot.Collections.Array<long> GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
+    {
+        if (version != ImGui.GetVersion() ||
+            ioSize != Marshal.SizeOf<ImGuiIO>() ||
+            vertSize != Marshal.SizeOf<ImDrawVert>() ||
+            idxSize != sizeof(ushort))
+        {
+            throw new PlatformNotSupportedException($"ImGui version mismatch, use {ImGui.GetVersion()}-docking");
+        }
+
+        IntPtr mem_alloc = IntPtr.Zero;
+        IntPtr mem_free = IntPtr.Zero;
+        void* user_data = null;
+        ImGui.GetAllocatorFunctions(ref mem_alloc, ref mem_free, ref user_data);
+
+        return new(){
+            (long)ImGui.GetCurrentContext(),
+            (long)mem_alloc,
+            (long)mem_free
+        };
     }
 
     private static void OnNodeRemoved(Node node)

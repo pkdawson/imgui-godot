@@ -1,0 +1,21 @@
+{
+    "dependencies": [
+        {
+            "name": "imgui",
+            "features": [
+                "docking-experimental",
+                "freetype"
+            ]
+        },
+        "implot",
+        "imguizmo",
+        "gtest"
+    ],
+    "builtin-baseline": "6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2",
+    "overrides": [
+        {
+            "name": "imgui",
+            "version": "1.88"
+        }
+    ]
+}

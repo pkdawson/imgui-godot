@@ -7,3 +7,7 @@ export_presets.cfg
 .godot/
 *.user
 Properties/
+build/
+build.*/
+*.dll
+doc/cpp-demo/MyGame/addons/

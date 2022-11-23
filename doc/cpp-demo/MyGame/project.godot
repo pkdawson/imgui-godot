@@ -1,0 +1,36 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="MyGame"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.0", "C#")
+config/icon="res://icon.svg"
+
+[autoload]
+
+ImGuiLayer="*res://addons/imgui-godot/ImGuiLayer.tscn"
+
+[dotnet]
+
+project/assembly_name="MyGame"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")
+
+[native_extensions]
+
+paths=["res://demoext.gdextension"]
+
+[rendering]
+
+environment/defaults/default_environment="res://default_env.tres"
