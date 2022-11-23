@@ -2,8 +2,8 @@
 #include <godot_cpp/classes/node.hpp>
 #include <memory>
 
-using godot::Node;
 using godot::InputEvent;
+using godot::Node;
 using godot::Ref;
 
 class MyCppNode : public Node

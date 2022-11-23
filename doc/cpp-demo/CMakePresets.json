@@ -28,12 +28,26 @@
             }
         },
         {
-            "name": "msvc",
+            "name": "msvc.debug",
             "generator": "Visual Studio 17 2022",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/msvc.debug",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_INSTALL_PREFIX": "MyGame"
+                "CMAKE_INSTALL_PREFIX": "MyGame",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CONFIGURATION_TYPES": "Debug"
+            }
+        },
+        {
+            "name": "msvc.release",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/msvc.release",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_INSTALL_PREFIX": "MyGame",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
             }
         }
     ]

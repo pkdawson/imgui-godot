@@ -44,7 +44,12 @@ target_compile_definitions(demoext PUBLIC IMGUI_DISABLE_INCLUDE_IMCONFIG_H)
 
 set_property(TARGET demoext PROPERTY OUTPUT_NAME "demoext.$<IF:$<CONFIG:Debug>,debug,release>")
 
-install(TARGETS demoext DESTINATION bin)
+if (WIN32)
+    # avoid installing the .lib
+    install(TARGETS demoext RUNTIME DESTINATION bin)
+else()
+    install(TARGETS demoext DESTINATION bin)
+endif()
 
 enable_testing()
 add_executable(demotest test/test.cpp)

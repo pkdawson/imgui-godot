@@ -9,6 +9,7 @@ export_presets.cfg
 Properties/
 build/
 build.*/
+msvc.*/
 *.so
 *.dylib
 *.framework

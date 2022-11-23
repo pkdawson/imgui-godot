@@ -1,7 +1,6 @@
 #include "mycppnode.h"
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#include <godot_cpp/classes/input_event.hpp>
 #include <imgui.h>
 #include <implot.h>
 using namespace godot;
@@ -30,13 +29,16 @@ void MyCppNode::_ready()
     if (!igl)
         return;
 
-    PackedInt64Array imgui_ptrs = igl->call(
-        "GetImGuiPtrs",
-        ImGui::GetVersion(),
-        sizeof(ImGuiIO),
-        sizeof(ImDrawVert),
-        sizeof(ImDrawIdx)
-        );
+    Variant rv = igl->call("GetImGuiPtrs",
+                           ImGui::GetVersion(),
+                           static_cast<int64_t>(sizeof(ImGuiIO)),
+                           static_cast<int64_t>(sizeof(ImDrawVert)),
+                           static_cast<int64_t>(sizeof(ImDrawIdx)));
+
+    if (!rv)
+        return;
+
+    PackedInt64Array imgui_ptrs = rv;
 
     if (imgui_ptrs.size() < 3)
         return;
