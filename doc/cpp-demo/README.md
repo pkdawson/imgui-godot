@@ -10,6 +10,17 @@ cmake --preset msvc.release
 cmake --build msvc.release --config RelWithDebInfo --target install
 ```
 
+## macOS
+```
+cmake --preset debug
+cmake --build build.debug --target install
+
+cmake --preset release
+cmake --build build.release --target install
+```
+
 TODO: fonts with FreeType
 
-TODO: macOS build
+TODO: macOS frameworks instead of plain dylibs
+
+TODO: Linux? almost works but Godot fails to load the .so, missing symbol
