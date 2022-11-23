@@ -230,6 +230,7 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
+#if IMGUI_GODOT_DEV
     // WIP, this will probably be changed or moved
     public long[] GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
     {
@@ -255,6 +256,7 @@ public partial class ImGuiLayer : CanvasLayer
             (long)mem_free
         };
     }
+#endif
 
     private static void OnNodeRemoved(Node node)
     {
