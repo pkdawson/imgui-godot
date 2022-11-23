@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.22)
 
 # set up vcpkg
 if (WIN32)
@@ -8,6 +8,11 @@ file(TO_CMAKE_PATH "$ENV{VCPKG_ROOT}" VCPKG_ROOT)
 set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(demoext CXX)
+
+# this fixes the godot-cpp build on macOS for some reason
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (NOT TARGET godot-cpp)
     include(FetchContent)
@@ -39,7 +44,7 @@ target_compile_definitions(demoext PUBLIC IMGUI_DISABLE_INCLUDE_IMCONFIG_H)
 
 set_property(TARGET demoext PROPERTY OUTPUT_NAME "demoext.$<IF:$<CONFIG:Debug>,debug,release>")
 
-install(TARGETS demoext RUNTIME DESTINATION bin)
+install(TARGETS demoext DESTINATION bin)
 
 enable_testing()
 add_executable(demotest test/test.cpp)

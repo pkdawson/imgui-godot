@@ -231,7 +231,7 @@ public partial class ImGuiLayer : CanvasLayer
     }
 
     // WIP, this will probably be changed or moved
-    public unsafe Godot.Collections.Array<long> GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
+    public long[] GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
     {
         if (version != ImGui.GetVersion() ||
             ioSize != Marshal.SizeOf<ImGuiIO>() ||
@@ -243,10 +243,13 @@ public partial class ImGuiLayer : CanvasLayer
 
         IntPtr mem_alloc = IntPtr.Zero;
         IntPtr mem_free = IntPtr.Zero;
-        void* user_data = null;
-        ImGui.GetAllocatorFunctions(ref mem_alloc, ref mem_free, ref user_data);
+        unsafe
+        {
+            void* user_data = null;
+            ImGui.GetAllocatorFunctions(ref mem_alloc, ref mem_free, ref user_data);
+        }
 
-        return new(){
+        return new[] {
             (long)ImGui.GetCurrentContext(),
             (long)mem_alloc,
             (long)mem_free

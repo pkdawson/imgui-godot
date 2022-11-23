@@ -9,5 +9,9 @@ export_presets.cfg
 Properties/
 build/
 build.*/
+*.so
+*.dylib
+*.framework
 *.dll
-doc/cpp-demo/MyGame/addons/
+*.pdb
+doc/cpp-demo/MyGame/addons

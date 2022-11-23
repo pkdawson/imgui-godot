@@ -30,7 +30,7 @@ void MyCppNode::_ready()
     if (!igl)
         return;
 
-    godot::Array imgui_ptrs = igl->call(
+    PackedInt64Array imgui_ptrs = igl->call(
         "GetImGuiPtrs",
         ImGui::GetVersion(),
         sizeof(ImGuiIO),
