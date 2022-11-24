@@ -1,4 +1,4 @@
-#include "mycppnode.h"
+#include "MyCppNode.h"
 #include <godot_cpp/godot.hpp>
 #include <gtest/gtest.h>
 

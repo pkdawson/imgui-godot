@@ -26,6 +26,7 @@ endif()
 
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
+find_package(imguizmo CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
@@ -37,6 +38,7 @@ target_link_libraries(demoext PUBLIC
     imgui::imgui
     freetype
     implot::implot
+    imguizmo::imguizmo
     )
 target_include_directories(demoext PRIVATE src)
 target_compile_features(demoext PRIVATE cxx_std_20)

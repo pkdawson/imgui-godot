@@ -1,8 +1,7 @@
+#include "MyCppNode.h"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
-#include <imgui.h>
-#include <mycppnode.h>
 
 using namespace godot;
 

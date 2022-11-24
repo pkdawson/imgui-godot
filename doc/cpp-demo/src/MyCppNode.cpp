@@ -1,4 +1,5 @@
-#include "mycppnode.h"
+#include "MyCppNode.h"
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <imgui.h>
@@ -23,11 +24,18 @@ void MyCppNode::_bind_methods()
 
 void MyCppNode::_ready()
 {
-    // TODO: don't run in editor mode
     set_process(false);
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+        return;
+#endif
+
     Node* igl = get_node_or_null("/root/ImGuiLayer");
     if (!igl)
+    {
+        UtilityFunctions::push_error("couldn't get /root/ImGuiLayer");
         return;
+    }
 
     Variant rv = igl->call("GetImGuiPtrs",
                            ImGui::GetVersion(),
@@ -36,7 +44,10 @@ void MyCppNode::_ready()
                            static_cast<int64_t>(sizeof(ImDrawIdx)));
 
     if (!rv)
+    {
+        UtilityFunctions::push_error("GetImGuiPtrs failed");
         return;
+    }
 
     PackedInt64Array imgui_ptrs = rv;
 
