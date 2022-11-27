@@ -4,9 +4,13 @@ name: 🐧 Linux
 
 on:
   push:
+    paths:
+      - doc/cpp-demo
     branches-ignore:
       - godot3
   pull_request:
+    paths:
+      - doc/cpp-demo
     branches-ignore:
       - godot3
 
