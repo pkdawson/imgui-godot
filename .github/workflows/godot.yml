@@ -23,16 +23,16 @@ jobs:
         id: export
         uses: firebelley/godot-export@v4.4.0
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/Godot_v4.0-beta6_linux.x86_64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/Godot_v4.0-beta6_export_templates.tpz
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux.x86_64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_export_templates.tpz
           relative_project_path: ./
           archive_output: true
           use_godot_4: true
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: upload export
-          path: ${{ steps.export.outputs.archive_directory }}
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: upload export
+      #     path: ${{ steps.export.outputs.archive_directory }}
 
       - name: test
-        run: /home/runner/.local/share/godot/godot_executable/Godot_v4.0-beta6_linux.x86_64 --headless --editor --build-solutions --quit
+        run: find export
