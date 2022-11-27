@@ -1,4 +1,4 @@
-name: Microsoft C++ Code Analysis
+name: MSVC
 
 # TODO: upload dlls as artifact
 
@@ -12,16 +12,12 @@ on:
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
-
-permissions:
-  contents: read
+  build: "${{ github.workspace }}/doc/cpp-demo/msvc.debug"
+  config: Debug
 
 jobs:
   analyze:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-    name: Analyze
+    name: Build and Analyze
     runs-on: windows-latest
 
     steps:
@@ -39,15 +35,15 @@ jobs:
         run: cmake --preset msvc.debug doc/cpp-demo
         
       - name: CMake Build
-        run: cmake --build doc/cpp-demo/msvc.debug --config Debug --target install
+        run: cmake --build ${{ env.build }} --config ${{ env.config }} --target install
 
       - name: Run MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@v0.1.1
         id: run-analysis
         with:
-          cmakeBuildDirectory: doc/cpp-demo/msvc.debug
-          buildConfiguration: Debug
-          ignoredPaths: ${{ github.workspace }}/doc/cpp-demo/msvc.debug/_deps
+          cmakeBuildDirectory: ${{ env.build }}
+          buildConfiguration: ${{ env.config }}
+          ignoredPaths: ${{ env.build }}/_deps
           ruleset: NativeRecommendedRules.ruleset
 
       - name: Upload SARIF to GitHub
