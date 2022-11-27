@@ -8,6 +8,10 @@ on:
     branches-ignore:
       - godot3
 
+env:
+  gdver: "4.0"
+  gdrel: beta6
+
 jobs:
   export_game:
     name: Export Game
@@ -19,8 +23,8 @@ jobs:
       - name: Export
         uses: firebelley/godot-export@v4.4.0
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_export_templates.tpz
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/${{ env.gdver }}/${{ env.gdrel }}/mono/Godot_v${{ env.gdver }}-${{ env.gdrel }}_mono_linux_x86_64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/${{ env.gdver }}/${{ env.gdrel }}/mono/Godot_v${{ env.gdver }}-${{ env.gdrel }}_mono_export_templates.tpz
           relative_project_path: ./
           relative_export_path: export
           export_debug: true
