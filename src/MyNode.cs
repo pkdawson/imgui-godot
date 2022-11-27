@@ -1,8 +1,7 @@
 using Godot;
 using ImGuiNET;
 
-public partial class MyNode : Node
-{
+public partial class MyNode : Node {
     private Window _window;
 
     public override void _Ready()
