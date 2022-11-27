@@ -31,7 +31,7 @@ jobs:
           git checkout 2022.11.14
           .\bootstrap-vcpkg.bat
 
-      - name: Configure CMake
+      - name: CMake Configure
         run: cmake --preset msvc.debug doc/cpp-demo
         
       - name: CMake Build
