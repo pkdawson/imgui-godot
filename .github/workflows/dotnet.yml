@@ -2,9 +2,11 @@ name: .NET
 
 on:
   push:
-    branches: [ "master" ]
+    branches-ignore:
+      - godot3
   pull_request:
-    branches: [ "master" ]
+    branches-ignore:
+      - godot3
 
 jobs:
   build:
@@ -24,7 +26,7 @@ jobs:
       run: dotnet restore
       
     - name: Format
-      run: dotnet format --no-restore --verify-no-changes "${{ env.DemoProj }}" || (dotnet format --no-restore "${{ env.DemoProj }}" && git diff --color && exit 1)
+      run: dotnet format --no-restore --verify-no-changes --verbosity detailed "${{ env.DemoProj }}" || (dotnet format --no-restore "${{ env.DemoProj }}" && git diff --color && exit 1)
     
     - name: Build
       run: dotnet build --no-restore
