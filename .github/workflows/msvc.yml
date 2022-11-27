@@ -39,7 +39,7 @@ jobs:
         run: cmake --preset msvc.debug doc/cpp-demo
         
       - name: CMake Build
-        run: cmake --build msvc.debug --config Debug --target install
+        run: cmake --build doc/cpp-demo/msvc.debug --config Debug --target install
 
       - name: Run MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@v0.1.1
@@ -47,7 +47,7 @@ jobs:
         with:
           cmakeBuildDirectory: doc/cpp-demo/msvc.debug
           buildConfiguration: Debug
-          # ignoredPaths: ${{ github.workspace }}/dependencies;${{ github.workspace }}/test
+          ignoredPaths: ${{ github.workspace }}/doc/cpp-demo/msvc.debug/_deps
           ruleset: NativeRecommendedRules.ruleset
 
       - name: Upload SARIF to GitHub
