@@ -32,7 +32,7 @@ jobs:
         run: |
           git clone -n https://github.com/microsoft/vcpkg
           cd vcpkg
-          git switch 2022.11.14
+          git checkout 2022.11.14
           .\bootstrap-vcpkg.bat
 
       - name: Configure CMake
@@ -47,6 +47,7 @@ jobs:
         with:
           cmakeBuildDirectory: doc/cpp-demo/msvc.debug
           buildConfiguration: Debug
+          # ignoredPaths: ${{ github.workspace }}/dependencies;${{ github.workspace }}/test
           ruleset: NativeRecommendedRules.ruleset
 
       - name: Upload SARIF to GitHub
