@@ -1,0 +1,42 @@
+name: 🐧 Linux
+
+# TODO: upload *.so as artifacts
+
+on:
+  push:
+    branches-ignore:
+      - godot3
+  pull_request:
+    branches-ignore:
+      - godot3
+
+env:
+  VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+  build: "${{ github.workspace }}/doc/cpp-demo/build.debug"
+  config: Debug
+
+jobs:
+  analyze:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Get vcpkg
+        run: |
+          git clone -n https://github.com/microsoft/vcpkg
+          cd vcpkg
+          git checkout 2022.11.14
+          ./bootstrap-vcpkg.sh
+
+      - name: CMake Configure
+        run: cmake --preset build.debug doc/cpp-demo
+        
+      - name: CMake Build
+        run: cmake --build ${{ env.build }} --config ${{ env.config }} --target install
+        
+      - name: CMake Test
+        working-directory: ${{ env.build }}
+        run: ctest -C ${{env.config}}
