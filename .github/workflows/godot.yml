@@ -16,23 +16,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: setup
+      - name: Setup
         run: mkdir export
 
-      - name: export game
+      - name: Export
         id: export
         uses: firebelley/godot-export@v4.4.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_export_templates.tpz
           relative_project_path: ./
-          archive_output: true
+          export_debug: true
+          archive_output: false
           use_godot_4: true
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: upload export
-          path: ${{ steps.export.outputs.archive_directory }}
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     name: upload export
+      #     path: ${{ steps.export.outputs.archive_directory }}
 
-      - name: test
-        run: find .godot
+      # TODO: run tests with the exported binary
+      - name: Test
+        run: |
+          find ${{ steps.export.outputs.archive_directory }}
+          "./export/Dear ImGui for Godot Demo.x86_64" --headless --quit

@@ -8,7 +8,6 @@ public partial class MyNode : Node
     public override void _Ready()
     {
         _window = (Window)GetViewport();
-        GD.Print("MyNode ready");
     }
 
     public override void _Process(double delta)
