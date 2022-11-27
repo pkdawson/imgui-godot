@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "master", "add-workflow" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
