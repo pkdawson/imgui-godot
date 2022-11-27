@@ -10,37 +10,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       DemoProj: Dear ImGui for Godot Demo.csproj
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.0.x
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
 
-    - name: Get Godot
-      run: |
-        cd /tmp &&
-        wget https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip &&
-        unzip Godot_v4.0-beta6_mono_linux_x86_64.zip
-        
-    - name: Download SwiftShader
-      run: |
-        cd /tmp
-        wget https://github.com/godotengine/regression-test-project/releases/download/_ci-deps/swiftshader-ubuntu20.04-20211002.zip
-        unzip swiftshader-ubuntu20.04-20211002.zip
-        curr="$(pwd)/libvk_swiftshader.so"
-        sed -i "s|PATH_TO_CHANGE|$curr|" vk_swiftshader_icd.json        
+      - name: Get Godot
+        run: |
+          cd /tmp
+          wget https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip
+          unzip Godot_v4.0-beta6_mono_linux_x86_64.zip
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Build
+        run: dotnet build --no-restore
 
-    - name: Run Godot editor
-      run: VK_ICD_FILENAMES=/tmp/vk_swiftshader_icd.json DRI_PRIME=0 xvfb-run /tmp/Godot_v4.0-beta6_mono_linux_x86_64/Godot_v4.0-beta6_mono_linux.x86_64 --audio-driver Dummy --editor --quit || true
+      - name: Editor - Import resources
+        run: xvfb-run /tmp/Godot_v4.0-beta6_mono_linux_x86_64/Godot_v4.0-beta6_mono_linux.x86_64 --headless --editor --quit || true
+
+      - name: Editor - Build solutions
+        run: xvfb-run /tmp/Godot_v4.0-beta6_mono_linux_x86_64/Godot_v4.0-beta6_mono_linux.x86_64 --headless --editor --build-solutions --quit || true
