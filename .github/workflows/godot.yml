@@ -29,10 +29,10 @@ jobs:
           archive_output: true
           use_godot_4: true
 
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: upload export
-      #     path: ${{ steps.export.outputs.archive_directory }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: upload export
+          path: ${{ steps.export.outputs.archive_directory }}
 
       - name: test
-        run: find export
+        run: find ${{ steps.export.outputs.archive_directory }}
