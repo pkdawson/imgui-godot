@@ -5,12 +5,12 @@ name: 🐧 Linux
 on:
   push:
     paths:
-      - doc/cpp-demo
+      - "doc/cpp-demo/**"
     branches-ignore:
       - godot3
   pull_request:
     paths:
-      - doc/cpp-demo
+      - "doc/cpp-demo/**"
     branches-ignore:
       - godot3
 
@@ -31,11 +31,11 @@ jobs:
         run: sudo apt-get install ninja-build
 
       - uses: actions/checkout@v3
-      
+
       - name: clang-format
         working-directory: ${{ env.source }}
         run: clang-format --verbose --dry-run --Werror $(git ls-files -- '*.cpp' '*.h')
-        
+
       - name: Get vcpkg
         run: |
           git clone -n https://github.com/microsoft/vcpkg
@@ -45,10 +45,10 @@ jobs:
 
       - name: CMake Configure
         run: cmake --preset ${{ env.preset }} ${{ env.source }}
-        
+
       - name: CMake Build
         run: cmake --build ${{ env.build }} --config ${{ env.config }} --target install
-        
+
       - name: CMake Test
         working-directory: ${{ env.build }}
         run: ctest -C ${{env.config}}

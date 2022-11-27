@@ -5,18 +5,20 @@ name: 🪟 MSVC
 on:
   push:
     paths:
-      - doc/cpp-demo
+      - "doc/cpp-demo/**"
     branches-ignore:
       - godot3
   pull_request:
     paths:
-      - doc/cpp-demo
+      - "doc/cpp-demo/**"
     branches-ignore:
       - godot3
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+  source: "${{ github.workspace }}/doc/cpp-demo"
   build: "${{ github.workspace }}/doc/cpp-demo/msvc.debug"
+  preset: msvc.debug
   config: Debug
 
 jobs:
@@ -25,9 +27,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
+      - uses: actions/checkout@v3
+
       - name: Get vcpkg
         run: |
           git clone -n https://github.com/microsoft/vcpkg
@@ -36,8 +37,8 @@ jobs:
           .\bootstrap-vcpkg.bat
 
       - name: CMake Configure
-        run: cmake --preset msvc.debug doc/cpp-demo
-        
+        run: cmake --preset ${{ env.preset }} doc/cpp-demo
+
       - name: CMake Build
         run: cmake --build ${{ env.build }} --config ${{ env.config }} --target install
 
