@@ -44,7 +44,7 @@ internal class InternalRdRenderer : IRenderer
         // set up everything to match the official Vulkan backend as closely as possible
 
         // compiling from source takes ~400ms, so we use a SPIR-V resource
-        using var spirv = ResourceLoader.Load<RDShaderSPIRV>("res://addons/imgui-godot/ImGuiShaderSPIRV.res");
+        using var spirv = ResourceLoader.Load<RDShaderSPIRV>("res://addons/imgui-godot/ImGuiShaderSPIRV.tres");
         _shader = RD.ShaderCreateFromSpirv(spirv);
 
 #if IMGUI_GODOT_DEV
