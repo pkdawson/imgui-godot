@@ -35,4 +35,4 @@ jobs:
       run: dotnet build --no-restore
 
     - name: Run Godot editor
-      run: /tmp/Godot_v4.0-beta6_mono_linux_x86_64/Godot_v4.0-beta6_mono_linux.x86_64 --headless --editor --quit || true
+      run: DRI_PRIME=0 xvfb-run /tmp/Godot_v4.0-beta6_mono_linux_x86_64/Godot_v4.0-beta6_mono_linux.x86_64 --audio-driver Dummy --rendering-driver opengl3 --editor --quit || true
