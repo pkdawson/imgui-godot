@@ -209,7 +209,7 @@ public partial class ImGuiLayer : CanvasLayer
     {
         if (ImGuiGD.ProcessInput(e))
         {
-            GetViewport().SetInputAsHandled();
+            _window.SetInputAsHandled();
         }
     }
 
