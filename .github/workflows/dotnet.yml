@@ -24,7 +24,7 @@ jobs:
       run: dotnet restore
       
     - name: Format
-      run: dotnet format "${{ env.DemoProj }}" --verify-no-changes || dotnet format "${{ env.DemoProj }}" && git diff --color && exit 1
+      run: dotnet format "${{ env.DemoProj }}" --verify-no-changes || (dotnet format "${{ env.DemoProj }}" && git diff --color && exit 1)
     
     - name: Build
       run: dotnet build --no-restore
