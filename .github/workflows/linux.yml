@@ -30,7 +30,7 @@ jobs:
       
       - name: clang-format
         working-directory: ${{ env.source }}
-        run: clang-format --verbose --dry-run --Werror src/*.cpp src/*.h test/*.cpp
+        run: clang-format --verbose --dry-run --Werror $(find . -name "*.cpp" -o -name "*.h")
         
       - name: Get vcpkg
         run: |
