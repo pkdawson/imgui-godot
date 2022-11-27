@@ -9,7 +9,7 @@ on:
       - godot3
 
 env:
-  VCPKG_ROOT: "${{ runner.temp }}/vcpkg"
+  VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
 
 permissions:
   contents: read
@@ -28,7 +28,6 @@ jobs:
         
       - name: Get vcpkg
         run: |
-          cd ${{ runner.temp }}
           git clone https://github.com/microsoft/vcpkg
           cd vcpkg
           git checkout 2022.11.14
