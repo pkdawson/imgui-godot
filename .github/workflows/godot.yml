@@ -35,4 +35,4 @@ jobs:
           path: ${{ steps.export.outputs.archive_directory }}
 
       - name: test
-        run: find ${{ steps.export.outputs.archive_directory }}
+        run: find .godot
