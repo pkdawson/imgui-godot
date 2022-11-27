@@ -1,5 +1,7 @@
 name: Microsoft C++ Code Analysis
 
+# TODO: upload dlls as artifact
+
 on:
   push:
     branches-ignore:
@@ -28,30 +30,30 @@ jobs:
         
       - name: Get vcpkg
         run: |
-          git clone https://github.com/microsoft/vcpkg
+          git clone -n https://github.com/microsoft/vcpkg
           cd vcpkg
-          git checkout 2022.11.14
+          git switch 2022.11.14
           .\bootstrap-vcpkg.bat
 
       - name: Configure CMake
         run: cmake --preset msvc.debug doc/cpp-demo
+        
+      - name: CMake Build
+        run: cmake --build msvc.debug --config Debug --target install
 
-      - name: Initialize MSVC Code Analysis
+      - name: Run MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@v0.1.1
-        # Provide a unique ID to access the sarif output path
         id: run-analysis
         with:
           cmakeBuildDirectory: doc/cpp-demo/msvc.debug
           buildConfiguration: Debug
           ruleset: NativeRecommendedRules.ruleset
 
-      # Upload SARIF file to GitHub Code Scanning Alerts
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ steps.run-analysis.outputs.sarif }}
 
-      # Upload SARIF file as an Artifact to download and view
       - name: Upload SARIF as an Artifact
         uses: actions/upload-artifact@v2
         with:
