@@ -8,6 +8,8 @@ using namespace godot;
 
 struct MyCppNode::Impl
 {
+    bool show_imgui_demo = true;
+    bool show_implot_demo = true;
 };
 
 MyCppNode::MyCppNode() : impl(std::make_unique<Impl>())
@@ -71,7 +73,11 @@ void MyCppNode::_exit_tree()
 
 void MyCppNode::_process(double delta)
 {
-    ImPlot::ShowDemoWindow();
+    if (impl->show_imgui_demo)
+        ImGui::ShowDemoWindow(&impl->show_imgui_demo);
+
+    if (impl->show_implot_demo)
+        ImPlot::ShowDemoWindow(&impl->show_implot_demo);
 
     ImGui::Begin("Cpp Window");
     ImGui::Text("hello from C++");
