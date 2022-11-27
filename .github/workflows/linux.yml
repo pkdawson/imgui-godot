@@ -32,7 +32,7 @@ jobs:
           ./bootstrap-vcpkg.sh
 
       - name: CMake Configure
-        run: cmake --preset build.debug doc/cpp-demo
+        run: cmake --preset debug doc/cpp-demo
         
       - name: CMake Build
         run: cmake --build ${{ env.build }} --config ${{ env.config }} --target install
