@@ -20,7 +20,6 @@ jobs:
         run: mkdir export
 
       - name: Export
-        id: export
         uses: firebelley/godot-export@v4.4.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip
@@ -38,5 +37,5 @@ jobs:
       # TODO: run tests with the exported binary
       - name: Test
         run: |
-          find ${{ steps.export.outputs.archive_directory }}
+          find export
           "./export/Dear ImGui for Godot Demo.x86_64" --headless --quit
