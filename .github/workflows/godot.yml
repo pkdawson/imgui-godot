@@ -23,7 +23,7 @@ jobs:
         id: export
         uses: firebelley/godot-export@v4.4.0
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux.x86_64.zip
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_linux_x86_64.zip
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.0/beta6/mono/Godot_v4.0-beta6_mono_export_templates.tpz
           relative_project_path: ./
           archive_output: true
