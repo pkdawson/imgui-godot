@@ -1,6 +1,10 @@
-# [Dear ImGui](https://github.com/ocornut/imgui) plugin for [Godot 4](https://github.com/godotengine/godot) (C#)
+# Dear ImGui plugin for Godot 4 (C#)
 
 ![screenshot](doc/screenshot.png)
+
+![](https://img.shields.io/static/v1?label=Godot&message=4.0.beta6&color=blue&logo=godotengine)
+![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
+![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
 Dear ImGui is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/mellinoe/ImGui.NET), allows you to use ImGui in Godot with C#.
 
@@ -19,7 +23,9 @@ public partial class MyNode : Node
 
 ## Getting Started
 
-imgui-godot requires Godot 4.0.beta6 or later, running on a 64-bit platform.
+Download
+
+[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.4.0&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.4.0.zip)
 
 ### Demo
 
