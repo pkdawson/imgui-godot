@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://d02ytucir7qh2"]
+[gd_scene load_steps=2 format=3 uid="uid://d02ytucir7qh2"]
+
+[ext_resource type="Script" path="res://Button1.cs" id="1_sb8ai"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -9,3 +11,10 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MyCppNode" type="MyCppNode" parent="."]
+
+[node name="Button1" type="Button" parent="."]
+layout_mode = 0
+offset_right = 132.0
+offset_bottom = 59.0
+text = "reload font"
+script = ExtResource("1_sb8ai")

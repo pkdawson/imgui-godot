@@ -3,6 +3,7 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <imgui.h>
+#include <imgui_freetype.h>
 #include <implot.h>
 using namespace godot;
 
@@ -62,6 +63,10 @@ void MyCppNode::_ready()
 
     ImGui::SetCurrentContext((ImGuiContext*)ctx);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)mem_alloc, (ImGuiMemFreeFunc)mem_free);
+
+    // will be used in the next RebuildFontAtlas
+    ImGui::GetIO().Fonts->FontBuilderIO = ImGuiFreeType::GetBuilderForFreeType();
+
     ImPlot::CreateContext();
     set_process(true);
 }
