@@ -2,6 +2,8 @@ using Godot;
 using ImGuiGodot;
 using ImGuiNET;
 
+namespace DemoProject;
+
 public partial class MySecondNode : Node
 {
     private Texture2D iconTexture;
@@ -44,13 +46,14 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Connect(_ImGuiLayout);
+        ImGuiLayer.Connect(OnImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         vp = GetNode<SubViewport>("%SubViewport");
         scale = ImGuiGD.Scale;
+        GetNode<Button>("%ShowHideButton").Pressed += OnShowHidePressed;
     }
 
-    private void _ImGuiLayout()
+    private void OnImGuiLayout()
     {
         ImGui.ShowDemoWindow();
 
@@ -118,7 +121,7 @@ public partial class MySecondNode : Node
         ImGui.End();
     }
 
-    private void _on_show_hide()
+    private void OnShowHidePressed()
     {
         ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
         GetNode<Button>("%ShowHideButton").Text = ImGuiLayer.Instance.Visible ? "hide" : "show";

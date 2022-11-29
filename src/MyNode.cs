@@ -1,6 +1,8 @@
 using Godot;
 using ImGuiNET;
 
+namespace DemoProject;
+
 public partial class MyNode : Node
 {
     private Window _window;
@@ -8,6 +10,7 @@ public partial class MyNode : Node
     public override void _Ready()
     {
         _window = (Window)GetViewport();
+        GetNode<Button>("../Button1").Pressed += OnButton1Pressed;
     }
 
     public override void _Process(double delta)
@@ -15,7 +18,7 @@ public partial class MyNode : Node
         ImGui.ShowDemoWindow();
     }
 
-    private void _on_button1_pressed()
+    private void OnButton1Pressed()
     {
         GetTree().ChangeSceneToFile("res://data/demo2.tscn");
     }

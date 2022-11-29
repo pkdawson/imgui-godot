@@ -1,5 +1,7 @@
 using Godot;
 
+namespace DemoProject;
+
 public partial class ViewportArea : Area3D
 {
     private MeshInstance3D piece;

@@ -70,5 +70,3 @@ script = ExtResource("2_btjlu")
 
 [node name="CollisionShape3d" type="CollisionShape3D" parent="SubViewport/Area3d"]
 shape = SubResource("BoxShape3D_6s853")
-
-[connection signal="pressed" from="ShowHideButton" to="MySecondNode" method="_on_show_hide"]

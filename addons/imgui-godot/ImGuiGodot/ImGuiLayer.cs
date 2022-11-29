@@ -2,7 +2,6 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace ImGuiGodot;
 
@@ -215,18 +214,18 @@ public partial class ImGuiLayer : CanvasLayer
 
     public static void Connect(ImGuiLayoutEventHandler d)
     {
-        if (Instance != null)
-        {
-            Instance.ImGuiLayout += d;
+        if (Instance is null)
+            return;
 
-            if (d.Target is Godot.Object obj)
+        Instance.ImGuiLayout += d;
+
+        if (d.Target is Godot.Object obj)
+        {
+            if (_connectedObjects.Count == 0)
             {
-                if (_connectedObjects.Count == 0)
-                {
-                    Instance.GetTree().NodeRemoved += OnNodeRemoved;
-                }
-                _connectedObjects.Add(obj);
+                Instance.GetTree().NodeRemoved += OnNodeRemoved;
             }
+            _connectedObjects.Add(obj);
         }
     }
 
@@ -264,9 +263,8 @@ public partial class ImGuiLayer : CanvasLayer
         // we need to clean up after removed Objects ourselves
 
         if (!_connectedObjects.Contains(node))
-        {
             return;
-        }
+
         _connectedObjects.Remove(node);
 
         // backing_ImGuiLayout is an implementation detail that could change

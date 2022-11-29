@@ -64,7 +64,7 @@ internal static class Internal
         _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
     }
 
-    private static unsafe void _AddFont(FontFile fontData, int fontSize, bool merge)
+    private static unsafe void AddFontToAtlas(FontFile fontData, int fontSize, bool merge)
     {
         ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
         if (merge)
@@ -168,7 +168,7 @@ internal static class Internal
 
         foreach (var fontParams in _fontConfiguration)
         {
-            _AddFont(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
+            AddFontToAtlas(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
         }
 
         io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);

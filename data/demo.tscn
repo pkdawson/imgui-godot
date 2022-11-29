@@ -104,6 +104,5 @@ toggle_mode = true
 button_group = ExtResource("4_7oj01")
 text = "disabled"
 
-[connection signal="pressed" from="Button1" to="MyNode" method="_on_button1_pressed"]
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonCIE" to="MyNode" method="OnContentScaleCIE"]
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonD" to="MyNode" method="OnContentScaleDisabled"]
