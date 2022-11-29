@@ -78,6 +78,7 @@ internal static class InternalViewports
 
         private bool _focused;
         public Window GodotWindow { get; init; }
+        public SubViewport LayerSvp { get; init; }
 
         public GodotImGuiWindow(ImGuiViewportPtr vp)
         {
@@ -110,10 +111,11 @@ internal static class InternalViewports
             // need to do this after AddChild
             GodotWindow.Transparent = true;
 
-            Internal.Renderer.InitViewport(GodotWindow);
-            RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
+            Internal.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
+            LayerSvp = svp;
 
-            //RenderingServer.CanvasItemAddRect(RootCanvasItem, new(0, 0, 100, 100), Colors.Red);
+            Internal.Renderer.InitViewport(LayerSvp);
+            RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
         }
 
         public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
@@ -128,8 +130,6 @@ internal static class InternalViewports
         {
             if (GodotWindow.GetParent() != null)
             {
-                //RenderingServer.FreeRid(RootCanvasItem);
-                //RenderingServer.FreeRid(CanvasRid);
                 GodotWindow.QueueFree();
             }
             _gcHandle.Free();
@@ -238,9 +238,8 @@ internal static class InternalViewports
     public static void Init(ImGuiIOPtr io)
     {
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
 
-        // io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
+        io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
 
         _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetViewport() as Window);
 
@@ -250,7 +249,7 @@ internal static class InternalViewports
 
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
     {
-        new GodotImGuiWindow(vp);
+        _ = new GodotImGuiWindow(vp);
     }
 
     private static void Godot_DestroyWindow(ImGuiViewportPtr vp)
@@ -324,7 +323,7 @@ internal static class InternalViewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            Internal.Renderer.RenderDrawData(window.GodotWindow, vp.DrawData);
+            Internal.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
         }
     }
 }

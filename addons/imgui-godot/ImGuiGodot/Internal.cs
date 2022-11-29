@@ -441,6 +441,29 @@ internal static class Internal
         };
     }
 
+    public static void AddLayerSubViewport(Node parent, out SubViewportContainer subViewportContainer, out SubViewport subViewport)
+    {
+        subViewportContainer = new SubViewportContainer
+        {
+            Name = "ImGuiLayer_SubViewportContainer",
+            AnchorsPreset = 15,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Stretch = true
+        };
+
+        subViewport = new SubViewport
+        {
+            Name = "ImGuiLayer_SubViewport",
+            TransparentBg = true,
+            HandleInputLocally = false,
+            GuiDisableInput = true,
+            RenderTargetUpdateMode = SubViewport.UpdateMode.Always
+        };
+
+        subViewportContainer.AddChild(subViewport);
+        parent.AddChild(subViewportContainer);
+    }
+
     public static void Render(Viewport vp)
     {
         ImGui.Render();

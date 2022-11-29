@@ -48,6 +48,7 @@ internal class InternalRdRenderer : IRenderer
         _shader = RD.ShaderCreateFromSpirv(spirv);
 
 #if IMGUI_GODOT_DEV
+#pragma warning disable CA2201
         using var src = new RDShaderSource()
         {
             SourceFragment = _fragmentShaderSource,
@@ -58,6 +59,7 @@ internal class InternalRdRenderer : IRenderer
             throw new Exception("fragment bytecode mismatch");
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeVertex, freshSpirv.BytecodeVertex))
             throw new Exception("vertex bytecode mismatch");
+#pragma warning restore CA2201
 #endif
 
         // create vertex format
@@ -146,6 +148,9 @@ internal class InternalRdRenderer : IRenderer
     public void Init(ImGuiIOPtr io)
     {
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
+#if IMGUI_GODOT_DEV
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
+#endif
     }
 
     public void InitViewport(Viewport vp)

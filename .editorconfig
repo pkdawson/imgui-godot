@@ -15,6 +15,8 @@ csharp_style_namespace_declarations = file_scoped
 dotnet_style_allow_multiple_blank_lines_experimental = false
 csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
 
+dotnet_analyzer_diagnostic.severity = warning
+
 # don't add _ discards for return values
 dotnet_diagnostic.IDE0058.severity = none
 
@@ -28,7 +30,6 @@ dotnet_diagnostic.IDE0022.severity = none
 dotnet_diagnostic.IDE0010.severity = none
 dotnet_diagnostic.IDE0072.severity = none
 
-dotnet_analyzer_diagnostic.severity = warning
 dotnet_diagnostic.CA1805.severity = none
 dotnet_diagnostic.CA1051.severity = none
 dotnet_diagnostic.CA1001.severity = none

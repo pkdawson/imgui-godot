@@ -2,6 +2,9 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+#if IMGUI_GODOT_DEV
+using System.Runtime.InteropServices;
+#endif
 
 namespace ImGuiGodot;
 
@@ -111,27 +114,9 @@ public partial class ImGuiLayer : CanvasLayer
         }
         ImGuiGD.RebuildFontAtlas();
 
-        _subViewportContainer = new SubViewportContainer
-        {
-            Name = "ImGuiLayer_SubViewportContainer",
-            AnchorsPreset = 15,
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-            Stretch = true
-        };
-
-        _subViewport = new SubViewport
-        {
-            Name = "ImGuiLayer_SubViewport",
-            TransparentBg = true,
-            HandleInputLocally = false,
-            GuiDisableInput = true,
-            RenderTargetUpdateMode = SubViewport.UpdateMode.Always
-        };
-
-        _subViewportContainer.AddChild(_subViewport);
+        Internal.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
 
         Internal.Renderer.InitViewport(_subViewport);
-        AddChild(_subViewportContainer);
 
         _updateFirst = new UpdateFirst
         {
@@ -230,6 +215,7 @@ public partial class ImGuiLayer : CanvasLayer
     }
 
 #if IMGUI_GODOT_DEV
+#pragma warning disable CA1822 // Mark members as static
     // WIP, this will probably be changed or moved
     public long[] GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
     {
@@ -255,6 +241,7 @@ public partial class ImGuiLayer : CanvasLayer
             (long)mem_free
         };
     }
+#pragma warning restore CA1822 // Mark members as static
 #endif
 
     private static void OnNodeRemoved(Node node)
