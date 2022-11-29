@@ -176,7 +176,7 @@ internal static class Internal
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
-        Image img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
+        var img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
         var imgtex = ImageTexture.CreateFromImage(img);
         _fontTexture = imgtex;

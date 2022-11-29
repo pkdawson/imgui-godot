@@ -7,3 +7,18 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 end_of_line = lf
 charset = utf-8
+
+csharp_style_var_when_type_is_apparent = true
+csharp_prefer_braces = when_multiline
+csharp_style_namespace_declarations = file_scoped
+dotnet_style_allow_multiple_blank_lines_experimental = false
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+
+# don't add _ discards for return values
+dotnet_diagnostic.IDE0058.severity = none
+
+# don't change var to explicit type
+dotnet_diagnostic.IDE0008.severity = none
+
+# use expression bodies for methods: when i feel like it
+dotnet_diagnostic.IDE0022.severity = none
