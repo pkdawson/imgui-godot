@@ -31,11 +31,6 @@ Download
 
 Click `Build` in the top right, then run the project.
 
-On macOS, you will need to do something like:
-```
-cp .godot/mono/temp/bin/Debug/runtimes/osx-universal/native/libcimgui.dylib .
-```
-
 ### Your project
 
 1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
