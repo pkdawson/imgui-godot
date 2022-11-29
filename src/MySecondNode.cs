@@ -104,7 +104,7 @@ public partial class MySecondNode : Node
         for (int i = 0; i < 6; ++i)
         {
             float s = 0.75f + (i * 0.25f);
-            if (ImGui.RadioButton(s.ToString("0.00"), scale == s))
+            if (ImGui.RadioButton($"{s:0.00}", scale == s))
             {
                 scale = s;
                 CallDeferred("OnScaleChanged");

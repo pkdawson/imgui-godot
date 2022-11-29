@@ -8,6 +8,7 @@ trim_trailing_whitespace = true
 end_of_line = lf
 charset = utf-8
 
+[*.cs]
 csharp_style_var_when_type_is_apparent = true
 csharp_prefer_braces = when_multiline
 csharp_style_namespace_declarations = file_scoped
@@ -22,3 +23,10 @@ dotnet_diagnostic.IDE0008.severity = none
 
 # use expression bodies for methods: when i feel like it
 dotnet_diagnostic.IDE0022.severity = none
+
+dotnet_analyzer_diagnostic.severity = warning
+dotnet_diagnostic.CA1805.severity = none
+dotnet_diagnostic.CA1051.severity = none
+dotnet_diagnostic.CA1001.severity = none
+dotnet_diagnostic.CA1725.severity = none
+dotnet_diagnostic.CA1707.severity = none
