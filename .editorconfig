@@ -24,9 +24,14 @@ dotnet_diagnostic.IDE0008.severity = none
 # use expression bodies for methods: when i feel like it
 dotnet_diagnostic.IDE0022.severity = none
 
+# incomplete switch statements are fine
+dotnet_diagnostic.IDE0010.severity = none
+dotnet_diagnostic.IDE0072.severity = none
+
 dotnet_analyzer_diagnostic.severity = warning
 dotnet_diagnostic.CA1805.severity = none
 dotnet_diagnostic.CA1051.severity = none
 dotnet_diagnostic.CA1001.severity = none
 dotnet_diagnostic.CA1725.severity = none
 dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1711.severity = none
