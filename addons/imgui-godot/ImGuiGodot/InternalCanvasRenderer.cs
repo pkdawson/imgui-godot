@@ -2,6 +2,7 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ImGuiGodot;
 
@@ -21,9 +22,7 @@ internal class InternalCanvasRenderer : IRenderer
     public void Init(ImGuiIOPtr io)
     {
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-#if IMGUI_GODOT_DEV
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-#endif
     }
 
     public void InitViewport(Viewport vp)
@@ -34,8 +33,6 @@ internal class InternalCanvasRenderer : IRenderer
         RID canvasItem = RenderingServer.CanvasItemCreate();
         RenderingServer.ViewportAttachCanvas(vprid, canvas);
         RenderingServer.CanvasItemSetParent(canvasItem, canvas);
-
-        RenderingServer.CanvasItemAddRect(canvasItem, new(0, 0, 32, 32), Colors.Red);
 
         _vpData[vprid] = new ViewportData()
         {
@@ -48,6 +45,11 @@ internal class InternalCanvasRenderer : IRenderer
     {
         ViewportData vd = _vpData[vp.GetViewportRid()];
         RID parent = vd.RootCanvasItem;
+
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
+        Transform2D transform = Transform2D.Identity;
+        Vector2i windowPos = window.GetWindowPos();
+        transform.origin = new(-windowPos.x, -windowPos.y);
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = new();
@@ -150,6 +152,7 @@ internal class InternalCanvasRenderer : IRenderer
 
                 RID texrid = Internal.ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
+                RenderingServer.CanvasItemSetTransform(child, transform);
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
                     drawCmd.ClipRect.X,

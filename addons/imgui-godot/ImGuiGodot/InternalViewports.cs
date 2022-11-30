@@ -1,4 +1,3 @@
-#if IMGUI_GODOT_DEV
 using Godot;
 using ImGuiNET;
 using System;
@@ -6,6 +5,121 @@ using System.Runtime.InteropServices;
 using Vector2 = System.Numerics.Vector2;
 
 namespace ImGuiGodot;
+
+internal class GodotImGuiWindow : IDisposable
+{
+    private readonly GCHandle _gcHandle;
+    private readonly ImGuiViewportPtr _vp;
+
+    private bool _focused;
+    public Window GodotWindow { get; init; }
+    public SubViewport LayerSvp { get; init; }
+
+    public GodotImGuiWindow(ImGuiViewportPtr vp)
+    {
+        _gcHandle = GCHandle.Alloc(this);
+        _vp = vp;
+        _vp.PlatformHandle = (IntPtr)_gcHandle;
+
+        Rect2i winRect = new(_vp.Pos.ToVector2i(), _vp.Size.ToVector2i());
+        GD.Print(winRect);
+
+        ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
+
+        GodotWindow = new Window()
+        {
+            // Borderless = true,
+            Position = winRect.Position,
+            Size = winRect.Size,
+            Transparent = true,
+            TransparentBg = true
+        };
+
+        GodotWindow.FocusEntered += () => _focused = true;
+        GodotWindow.FocusExited += () => _focused = false;
+        GodotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
+        GodotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
+        GodotWindow.WindowInput += OnWindowInput;
+
+        ImGuiLayer.Instance.AddChild(GodotWindow);
+
+        // need to do this after AddChild
+        GodotWindow.Transparent = true;
+
+        Internal.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
+        LayerSvp = svp;
+
+        Internal.Renderer.InitViewport(LayerSvp);
+        RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
+    }
+
+    public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
+    {
+        _gcHandle = GCHandle.Alloc(this);
+        _vp = vp;
+        _vp.PlatformHandle = (IntPtr)_gcHandle;
+        GodotWindow = gw;
+    }
+
+    public void Dispose()
+    {
+        if (GodotWindow.GetParent() != null)
+        {
+            GodotWindow.QueueFree();
+        }
+        _gcHandle.Free();
+    }
+
+    private void OnWindowInput(InputEvent evt)
+    {
+        Internal.ProcessInput(evt);
+    }
+
+    public void ShowWindow()
+    {
+        GodotWindow.Show();
+    }
+
+    public void SetWindowPos(Vector2i pos)
+    {
+        GodotWindow.Position = pos;
+    }
+
+    public Vector2i GetWindowPos()
+    {
+        return GodotWindow.Position;
+    }
+
+    public void SetWindowSize(Vector2i size)
+    {
+        GodotWindow.Size = size;
+    }
+
+    public Vector2i GetWindowSize()
+    {
+        return GodotWindow.Size;
+    }
+
+    public void SetWindowFocus()
+    {
+        GodotWindow.MoveToForeground();
+    }
+
+    public bool GetWindowFocus()
+    {
+        return _focused;
+    }
+
+    public bool GetWindowMinimized()
+    {
+        return GodotWindow.Mode.HasFlag(Window.ModeEnum.Minimized);
+    }
+
+    public void SetWindowTitle(string title)
+    {
+        GodotWindow.Title = title;
+    }
+}
 
 internal static class InternalViewports
 {
@@ -61,129 +175,14 @@ internal static class InternalViewports
     //private static bool _wantUpdateMonitors = true;
     private static GodotImGuiWindow _mainWindow;
 
-    private static Vector2 ToVec2(this Vector2i v)
+    internal static Vector2 ToImVec2(this Vector2i v)
     {
         return new Vector2(v.x, v.y);
     }
 
-    private static Vector2i ToVector2i(this Vector2 v)
+    internal static Vector2i ToVector2i(this Vector2 v)
     {
         return new Vector2i((int)v.X, (int)v.Y);
-    }
-
-    private class GodotImGuiWindow : IDisposable
-    {
-        private readonly GCHandle _gcHandle;
-        private readonly ImGuiViewportPtr _vp;
-
-        private bool _focused;
-        public Window GodotWindow { get; init; }
-        public SubViewport LayerSvp { get; init; }
-
-        public GodotImGuiWindow(ImGuiViewportPtr vp)
-        {
-            _gcHandle = GCHandle.Alloc(this);
-            _vp = vp;
-            _vp.PlatformHandle = (IntPtr)_gcHandle;
-
-            Rect2i winRect = new(_vp.Pos.ToVector2i(), _vp.Size.ToVector2i());
-            GD.Print(winRect);
-
-            ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
-
-            GodotWindow = new Window()
-            {
-                // Borderless = true,
-                Position = winRect.Position,
-                Size = winRect.Size,
-                Transparent = true,
-                TransparentBg = true
-            };
-
-            GodotWindow.FocusEntered += () => _focused = true;
-            GodotWindow.FocusExited += () => _focused = false;
-            GodotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
-            GodotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
-            GodotWindow.WindowInput += OnWindowInput;
-
-            ImGuiLayer.Instance.AddChild(GodotWindow);
-
-            // need to do this after AddChild
-            GodotWindow.Transparent = true;
-
-            Internal.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
-            LayerSvp = svp;
-
-            Internal.Renderer.InitViewport(LayerSvp);
-            RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
-        }
-
-        public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
-        {
-            _gcHandle = GCHandle.Alloc(this);
-            _vp = vp;
-            _vp.PlatformHandle = (IntPtr)_gcHandle;
-            GodotWindow = gw;
-        }
-
-        public void Dispose()
-        {
-            if (GodotWindow.GetParent() != null)
-            {
-                GodotWindow.QueueFree();
-            }
-            _gcHandle.Free();
-        }
-
-        private void OnWindowInput(InputEvent evt)
-        {
-            Internal.ProcessInput(evt);
-        }
-
-        public void ShowWindow()
-        {
-            GodotWindow.Show();
-        }
-
-        public void SetWindowPos(Vector2i pos)
-        {
-            GodotWindow.Position = pos;
-        }
-
-        public Vector2i GetWindowPos()
-        {
-            return GodotWindow.Position;
-        }
-
-        public void SetWindowSize(Vector2i size)
-        {
-            GodotWindow.Size = size;
-        }
-
-        public Vector2i GetWindowSize()
-        {
-            return GodotWindow.Size;
-        }
-
-        public void SetWindowFocus()
-        {
-            GodotWindow.MoveToForeground();
-        }
-
-        public bool GetWindowFocus()
-        {
-            return _focused;
-        }
-
-        public bool GetWindowMinimized()
-        {
-            return GodotWindow.Mode.HasFlag(Window.ModeEnum.Minimized);
-        }
-
-        public void SetWindowTitle(string title)
-        {
-            GodotWindow.Title = title;
-        }
     }
 
     private static void UpdateMonitors()
@@ -205,13 +204,13 @@ internal static class InternalViewports
         for (int i = 0; i < screenCount; ++i)
         {
             var monitor = pio.Monitors[i];
-            monitor.MainPos = DisplayServer.ScreenGetPosition(i).ToVec2();
-            monitor.MainSize = DisplayServer.ScreenGetSize(i).ToVec2();
+            monitor.MainPos = DisplayServer.ScreenGetPosition(i).ToImVec2();
+            monitor.MainSize = DisplayServer.ScreenGetSize(i).ToImVec2();
             monitor.DpiScale = DisplayServer.ScreenGetScale(i);
 
             var r = DisplayServer.ScreenGetUsableRect(i);
-            monitor.WorkPos = r.Position.ToVec2();
-            monitor.WorkSize = r.Size.ToVec2();
+            monitor.WorkPos = r.Position.ToImVec2();
+            monitor.WorkSize = r.Size.ToImVec2();
         }
     }
 
@@ -277,7 +276,7 @@ internal static class InternalViewports
     private static void Godot_GetWindowPos(ImGuiViewportPtr vp, out Vector2 pos)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        pos = window.GetWindowPos().ToVec2();
+        pos = window.GetWindowPos().ToImVec2();
     }
 
     private static void Godot_SetWindowSize(ImGuiViewportPtr vp, Vector2 size)
@@ -289,7 +288,7 @@ internal static class InternalViewports
     private static void Godot_GetWindowSize(ImGuiViewportPtr vp, out Vector2 size)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        size = window.GetWindowSize().ToVec2();
+        size = window.GetWindowSize().ToImVec2();
     }
 
     private static void Godot_SetWindowFocus(ImGuiViewportPtr vp)
@@ -327,4 +326,3 @@ internal static class InternalViewports
         }
     }
 }
-#endif

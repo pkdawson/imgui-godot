@@ -223,10 +223,7 @@ internal static class Internal
         }
 
         Renderer.Init(io);
-
-#if IMGUI_GODOT_DEV
-        InternalViewports.Init(ImGui.GetIO());
-#endif
+        InternalViewports.Init(io);
     }
 
     public static void ResetFonts()
@@ -292,6 +289,18 @@ internal static class Internal
         ImGui.NewFrame();
     }
 
+    internal static Vector2 ClientToScreen(Window wnd, Vector2 clientPos)
+    {
+        Vector2i windowPos = wnd.Position;
+        return new(windowPos.x + clientPos.x, windowPos.y + clientPos.y);
+    }
+
+    internal static Vector2 ScreenToClient(Window wnd, Vector2 screenPos)
+    {
+        Vector2i windowPos = wnd.Position;
+        return new(screenPos.x - windowPos.x, screenPos.y - windowPos.y);
+    }
+
     public static bool ProcessInput(InputEvent evt)
     {
         if (CurrentSubViewport != null)
@@ -323,6 +332,7 @@ internal static class Internal
             switch (mb.ButtonIndex)
             {
                 case MouseButton.Left:
+                    GD.Print($"io.MousePos = {io.MousePos.X}, {io.MousePos.Y}");
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
                     break;
                 case MouseButton.Right:
@@ -469,14 +479,12 @@ internal static class Internal
         ImGui.Render();
         Renderer.RenderDrawData(vp, ImGui.GetDrawData());
 
-#if IMGUI_GODOT_DEV
         var io = ImGui.GetIO();
         if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
         {
             ImGui.UpdatePlatformWindows();
             InternalViewports.RenderViewports();
         }
-#endif
     }
 
     private static CursorShape ConvertCursorShape(ImGuiMouseCursor cur) => cur switch

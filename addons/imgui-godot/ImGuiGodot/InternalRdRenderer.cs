@@ -148,9 +148,7 @@ internal class InternalRdRenderer : IRenderer
     public void Init(ImGuiIOPtr io)
     {
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-#if IMGUI_GODOT_DEV
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-#endif
     }
 
     public void InitViewport(Viewport vp)
