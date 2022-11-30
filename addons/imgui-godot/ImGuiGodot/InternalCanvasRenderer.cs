@@ -47,9 +47,7 @@ internal class InternalCanvasRenderer : IRenderer
         RID parent = vd.RootCanvasItem;
 
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
-        Transform2D transform = Transform2D.Identity;
-        Vector2i windowPos = window.GetWindowPos();
-        transform.origin = new(-windowPos.x, -windowPos.y);
+        Transform2D transform = window.Xform;
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = new();
