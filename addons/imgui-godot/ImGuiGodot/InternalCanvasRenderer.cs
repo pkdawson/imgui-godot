@@ -48,6 +48,8 @@ internal class InternalCanvasRenderer : IRenderer
 
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
         Transform2D transform = window.Xform;
+        if (transform == Transform2D.Identity)
+            transform = Transform2D.Identity.Translated(window.GetWindowPos()).Inverse(); ;
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = new();

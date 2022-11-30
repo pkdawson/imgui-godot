@@ -301,15 +301,15 @@ internal static class Internal
         return new(screenPos.x - windowPos.x, screenPos.y - windowPos.y);
     }
 
-    public static bool ProcessInput(InputEvent evt)
+    public static bool ProcessInput(InputEvent evt, Window window)
     {
         if (CurrentSubViewport != null)
         {
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
-                    mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
+                mouseEvent.Position = new Vector2(window.Position.x + mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
+                    window.Position.y + mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
@@ -324,7 +324,8 @@ internal static class Internal
 
         if (evt is InputEventMouseMotion mm)
         {
-            io.AddMousePosEvent(mm.GlobalPosition.x, mm.GlobalPosition.y);
+            GD.Print($"{window.Position.x + mm.GlobalPosition.x}, {window.Position.y + mm.GlobalPosition.y}");
+            io.AddMousePosEvent(window.Position.x + mm.GlobalPosition.x, window.Position.y + mm.GlobalPosition.y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)
@@ -332,7 +333,6 @@ internal static class Internal
             switch (mb.ButtonIndex)
             {
                 case MouseButton.Left:
-                    GD.Print($"io.MousePos = {io.MousePos.X}, {io.MousePos.Y}");
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
                     break;
                 case MouseButton.Right:

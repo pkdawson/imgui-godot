@@ -29,7 +29,7 @@ internal class GodotImGuiWindow : IDisposable
 
         GodotWindow = new Window()
         {
-            // Borderless = true,
+            Borderless = true,
             Position = winRect.Position,
             Size = winRect.Size,
             Transparent = true,
@@ -73,7 +73,7 @@ internal class GodotImGuiWindow : IDisposable
 
     private void OnWindowInput(InputEvent evt)
     {
-        Internal.ProcessInput(evt);
+        Internal.ProcessInput(evt, GodotWindow);
     }
 
     public void ShowWindow()

@@ -191,7 +191,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Input(InputEvent e)
     {
-        if (ImGuiGD.ProcessInput(e))
+        if (ImGuiGD.ProcessInput(e, _window))
         {
             _window.SetInputAsHandled();
         }

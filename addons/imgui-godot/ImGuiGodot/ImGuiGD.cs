@@ -121,9 +121,9 @@ public static class ImGuiGD
     /// <returns>
     /// True if the InputEvent was consumed
     /// </returns>
-    public static bool ProcessInput(InputEvent evt)
+    public static bool ProcessInput(InputEvent evt, Window window)
     {
-        return Internal.ProcessInput(evt);
+        return Internal.ProcessInput(evt, window);
     }
 
     /// <summary>
