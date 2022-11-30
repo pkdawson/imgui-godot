@@ -164,55 +164,9 @@ internal class InternalRdRenderer : IRenderer
     {
     }
 
-    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
+    private void SetupBuffers(ImDrawDataPtr drawData)
     {
-#if IMGUI_GODOT_DEV
-        RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
-#endif
-        RID fb = GetFramebuffer(vp);
-
         int vertSize = Marshal.SizeOf<ImDrawVert>();
-
-        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
-        Transform2D transform = window.Xform;
-        if (transform == Transform2D.Identity)
-            transform = Transform2D.Identity.Translated(window.GetWindowPos()).Inverse(); ;
-
-        _scale[0] = 2.0f / drawData.DisplaySize.X;
-        _scale[1] = 2.0f / drawData.DisplaySize.Y;
-
-        _translate[0] = -1.0f - (drawData.DisplayPos.X * _scale[0]);
-        _translate[1] = -1.0f - (drawData.DisplayPos.Y * _scale[1]);
-
-        Buffer.BlockCopy(_scale, 0, _pcbuf, 0, 8);
-        Buffer.BlockCopy(_translate, 0, _pcbuf, 8, 8);
-
-        // allocate merged index and vertex buffers
-        if (_idxBufferSize < drawData.TotalIdxCount)
-        {
-            if (_idxBuffer.Id != 0)
-                RD.FreeRid(_idxBuffer);
-            _idxBuffer = RD.IndexBufferCreate((uint)drawData.TotalIdxCount, RenderingDevice.IndexBufferFormat.Uint16);
-            _idxBufferSize = drawData.TotalIdxCount;
-        }
-
-        if (_vtxBufferSize < drawData.TotalVtxCount)
-        {
-            if (_vtxBuffer.Id != 0)
-                RD.FreeRid(_vtxBuffer);
-            _vtxBuffer = RD.VertexBufferCreate((uint)(drawData.TotalVtxCount * vertSize));
-            _vtxBufferSize = drawData.TotalVtxCount;
-        }
-
-        _usedTextures.Clear();
-
-        // check if our font texture is still valid
-        foreach (var kv in _uniformSets)
-        {
-            if (!RD.UniformSetIsValid(kv.Value))
-                _uniformSets.Remove(kv.Key);
-        }
-
         int globalIdxOffset = 0;
         int globalVtxOffset = 0;
 
@@ -262,6 +216,59 @@ internal class InternalRdRenderer : IRenderer
         _bufPool.Return(idxBuf);
         RD.BufferUpdate(_vtxBuffer, 0, (uint)vertBufSize, vertBuf);
         _bufPool.Return(vertBuf);
+    }
+
+    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
+    {
+#if IMGUI_GODOT_DEV
+        RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
+#endif
+        RID fb = GetFramebuffer(vp);
+
+        int vertSize = Marshal.SizeOf<ImDrawVert>();
+
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
+        Transform2D transform = window.Xform;
+        if (transform == Transform2D.Identity)
+            transform = Transform2D.Identity.Translated(window.GetWindowPos()).Inverse(); ;
+
+        _scale[0] = 2.0f / drawData.DisplaySize.X;
+        _scale[1] = 2.0f / drawData.DisplaySize.Y;
+
+        _translate[0] = -1.0f - (drawData.DisplayPos.X * _scale[0]);
+        _translate[1] = -1.0f - (drawData.DisplayPos.Y * _scale[1]);
+
+        Buffer.BlockCopy(_scale, 0, _pcbuf, 0, 8);
+        Buffer.BlockCopy(_translate, 0, _pcbuf, 8, 8);
+
+        // allocate merged index and vertex buffers
+        if (_idxBufferSize < drawData.TotalIdxCount)
+        {
+            if (_idxBuffer.Id != 0)
+                RD.FreeRid(_idxBuffer);
+            _idxBuffer = RD.IndexBufferCreate((uint)drawData.TotalIdxCount, RenderingDevice.IndexBufferFormat.Uint16);
+            _idxBufferSize = drawData.TotalIdxCount;
+        }
+
+        if (_vtxBufferSize < drawData.TotalVtxCount)
+        {
+            if (_vtxBuffer.Id != 0)
+                RD.FreeRid(_vtxBuffer);
+            _vtxBuffer = RD.VertexBufferCreate((uint)(drawData.TotalVtxCount * vertSize));
+            _vtxBufferSize = drawData.TotalVtxCount;
+        }
+
+        _usedTextures.Clear();
+
+        // check if our font texture is still valid
+        foreach (var kv in _uniformSets)
+        {
+            if (!RD.UniformSetIsValid(kv.Value))
+                _uniformSets.Remove(kv.Key);
+        }
+
+        if (drawData.CmdListsCount > 0)
+            SetupBuffers(drawData);
 
         // draw
         var dl = RD.DrawListBegin(fb,
@@ -271,8 +278,8 @@ internal class InternalRdRenderer : IRenderer
         RD.DrawListBindRenderPipeline(dl, _pipeline);
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 
-        globalIdxOffset = 0;
-        globalVtxOffset = 0;
+        int globalIdxOffset = 0;
+        int globalVtxOffset = 0;
         for (int i = 0; i < drawData.CmdListsCount; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdListsRange[i];
