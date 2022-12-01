@@ -223,7 +223,7 @@ internal static class Internal
         }
 
         Renderer.Init(io);
-        InternalViewports.Init(io);
+        InternalViewports.Init();
     }
 
     public static void ResetFonts()

@@ -234,7 +234,7 @@ internal static class InternalViewports
         ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
     }
 
-    public static void Init(ImGuiIOPtr io)
+    public static void Init()
     {
         _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetViewport() as Window);
 
