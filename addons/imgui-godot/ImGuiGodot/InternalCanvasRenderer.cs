@@ -47,9 +47,6 @@ internal class InternalCanvasRenderer : IRenderer
         RID parent = vd.RootCanvasItem;
 
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
-        Transform2D transform = window.Xform;
-        if (transform == Transform2D.Identity)
-            transform = Transform2D.Identity.Translated(window.GetWindowPos()).Inverse(); ;
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = new();
@@ -152,7 +149,11 @@ internal class InternalCanvasRenderer : IRenderer
 
                 RID texrid = Internal.ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
-                RenderingServer.CanvasItemSetTransform(child, transform);
+                if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
+                {
+                    Transform2D xform = Transform2D.Identity.Translated(drawData.DisplayPos.ToVector2i()).Inverse();
+                    RenderingServer.CanvasItemSetTransform(child, xform);
+                }
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
                     drawCmd.ClipRect.X,

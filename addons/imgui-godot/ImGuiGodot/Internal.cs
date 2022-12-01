@@ -303,13 +303,18 @@ internal static class Internal
 
     public static bool ProcessInput(InputEvent evt, Window window)
     {
+        var io = ImGui.GetIO();
+        var windowPos = Vector2i.Zero;
+        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
+            windowPos = window.Position;
+
         if (CurrentSubViewport != null)
         {
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(window.Position.x + mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
-                    window.Position.y + mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
+                mouseEvent.Position = new Vector2(windowPos.x + mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
+                    windowPos.y + mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
@@ -319,13 +324,12 @@ internal static class Internal
             }
         }
 
-        var io = ImGui.GetIO();
         bool consumed = false;
 
         if (evt is InputEventMouseMotion mm)
         {
-            GD.Print($"{window.Position.x + mm.GlobalPosition.x}, {window.Position.y + mm.GlobalPosition.y}");
-            io.AddMousePosEvent(window.Position.x + mm.GlobalPosition.x, window.Position.y + mm.GlobalPosition.y);
+            GD.Print($"{windowPos.x + mm.GlobalPosition.x}, {windowPos.y + mm.GlobalPosition.y}");
+            io.AddMousePosEvent(windowPos.x + mm.GlobalPosition.x, windowPos.y + mm.GlobalPosition.y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)

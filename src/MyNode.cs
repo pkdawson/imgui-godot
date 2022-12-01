@@ -11,6 +11,7 @@ public partial class MyNode : Node
     {
         _window = (Window)GetViewport();
         GetNode<Button>("../Button1").Pressed += OnButton1Pressed;
+        ImGuiGodot.ImGuiGD.ExperimentalEnableViewports();
     }
 
     public override void _Process(double delta)

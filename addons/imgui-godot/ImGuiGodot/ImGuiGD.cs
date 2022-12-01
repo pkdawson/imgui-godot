@@ -118,6 +118,26 @@ public static class ImGuiGD
             ImGui.DestroyContext();
     }
 
+    /// <summary>
+    /// EXPERIMENTAL! Please report bugs, with steps to reproduce.
+    /// </summary>
+    public static void ExperimentalEnableViewports()
+    {
+        var io = ImGui.GetIO();
+        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
+        io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
+
+        switch (OS.GetName())
+        {
+            case "Windows":
+            case "macOS":
+                break;
+            default:
+                GD.PushWarning("ImGui Viewports are probably broken on Linux/BSD https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
+                break;
+        }
+    }
+
     /// <returns>
     /// True if the InputEvent was consumed
     /// </returns>

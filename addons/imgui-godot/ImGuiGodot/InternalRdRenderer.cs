@@ -227,11 +227,6 @@ internal class InternalRdRenderer : IRenderer
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
-        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
-        Transform2D transform = window.Xform;
-        if (transform == Transform2D.Identity)
-            transform = Transform2D.Identity.Translated(window.GetWindowPos()).Inverse(); ;
-
         _scale[0] = 2.0f / drawData.DisplaySize.X;
         _scale[1] = 2.0f / drawData.DisplaySize.Y;
 
@@ -312,7 +307,7 @@ internal class InternalRdRenderer : IRenderer
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y);
-                clipRect.Position += transform.origin;
+                clipRect.Position -= drawData.DisplayPos.ToVector2i();
                 RD.DrawListEnableScissor(dl, clipRect);
 
                 RD.DrawListDraw(dl, true, 1);

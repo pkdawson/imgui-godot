@@ -14,7 +14,6 @@ internal class GodotImGuiWindow : IDisposable
     private bool _focused;
     public Window GodotWindow { get; init; }
     public SubViewport LayerSvp { get; init; }
-    public Transform2D Xform { get; private set; } = Transform2D.Identity;
 
     public GodotImGuiWindow(ImGuiViewportPtr vp)
     {
@@ -84,7 +83,6 @@ internal class GodotImGuiWindow : IDisposable
     public void SetWindowPos(Vector2i pos)
     {
         GodotWindow.Position = pos;
-        Xform = Transform2D.Identity.Translated(pos).Inverse();
     }
 
     public Vector2i GetWindowPos()
@@ -238,10 +236,6 @@ internal static class InternalViewports
 
     public static void Init(ImGuiIOPtr io)
     {
-        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
-
-        io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
-
         _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetViewport() as Window);
 
         InitPlatformInterface();
