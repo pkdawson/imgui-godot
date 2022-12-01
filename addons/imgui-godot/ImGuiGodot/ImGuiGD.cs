@@ -130,7 +130,9 @@ public static class ImGuiGD
         switch (OS.GetName())
         {
             case "Windows":
+                break;
             case "macOS":
+                GD.PushError("ImGui Viewports are currently very broken on macOS");
                 break;
             default:
                 GD.PushWarning("ImGui Viewports are probably broken on Linux/BSD https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
