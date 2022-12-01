@@ -59,6 +59,8 @@ internal class GodotImGuiWindow : IDisposable
         _vp = vp;
         _vp.PlatformHandle = (IntPtr)_gcHandle;
         GodotWindow = gw;
+        GodotWindow.FocusEntered += () => _focused = true;
+        GodotWindow.FocusExited += () => _focused = false;
     }
 
     public void Dispose()
