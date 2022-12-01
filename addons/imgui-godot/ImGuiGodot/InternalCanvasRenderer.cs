@@ -149,11 +149,12 @@ internal class InternalCanvasRenderer : IRenderer
 
                 RID texrid = Internal.ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
+                Transform2D xform = Transform2D.Identity;
                 if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
                 {
-                    Transform2D xform = Transform2D.Identity.Translated(drawData.DisplayPos.ToVector2i()).Inverse();
-                    RenderingServer.CanvasItemSetTransform(child, xform);
+                    xform = xform.Translated(drawData.DisplayPos.ToVector2i()).Inverse();
                 }
+                RenderingServer.CanvasItemSetTransform(child, xform);
                 RenderingServer.CanvasItemSetClip(child, true);
                 RenderingServer.CanvasItemSetCustomRect(child, true, new Rect2(
                     drawCmd.ClipRect.X,
