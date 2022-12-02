@@ -83,22 +83,22 @@ public static class ImGuiGD
 
     public static void ResetFonts()
     {
-        Internal.State.ResetFonts();
+        Internal.Fonts.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        Internal.State.AddFont(fontData, fontSize, merge);
+        Internal.Fonts.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        Internal.State.AddFont(null, 13, false);
+        Internal.Fonts.AddFont(null, 13, false);
     }
 
     public static void RebuildFontAtlas()
     {
-        Internal.State.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
+        Internal.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
     public static void Update(double delta, Viewport vp)
