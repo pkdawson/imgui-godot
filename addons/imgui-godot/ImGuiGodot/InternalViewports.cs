@@ -11,7 +11,6 @@ internal class GodotImGuiWindow : IDisposable
     private readonly GCHandle _gcHandle;
     private readonly ImGuiViewportPtr _vp;
 
-    private bool _focused;
     public Window GodotWindow { get; init; }
     public SubViewport LayerSvp { get; init; }
 
@@ -35,8 +34,6 @@ internal class GodotImGuiWindow : IDisposable
             TransparentBg = true
         };
 
-        GodotWindow.FocusEntered += () => _focused = true;
-        GodotWindow.FocusExited += () => _focused = false;
         GodotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
         GodotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
         GodotWindow.WindowInput += OnWindowInput;
@@ -59,8 +56,6 @@ internal class GodotImGuiWindow : IDisposable
         _vp = vp;
         _vp.PlatformHandle = (IntPtr)_gcHandle;
         GodotWindow = gw;
-        GodotWindow.FocusEntered += () => _focused = true;
-        GodotWindow.FocusExited += () => _focused = false;
     }
 
     public void Dispose()
@@ -104,12 +99,12 @@ internal class GodotImGuiWindow : IDisposable
 
     public void SetWindowFocus()
     {
-        GodotWindow.MoveToForeground();
+        GodotWindow.GrabFocus();
     }
 
     public bool GetWindowFocus()
     {
-        return _focused;
+        return GodotWindow.HasFocus();
     }
 
     public bool GetWindowMinimized()
