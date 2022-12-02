@@ -103,7 +103,14 @@ public static class ImGuiGD
 
     public static void Update(double delta, Viewport vp)
     {
-        Internal.State.Update(delta, vp);
+        var io = ImGui.GetIO();
+        var vpSize = vp.GetVisibleRect().Size;
+        io.DisplaySize = new(vpSize.x, vpSize.y);
+        io.DeltaTime = (float)delta;
+
+        Internal.Input.Update(io);
+
+        ImGui.NewFrame();
     }
 
     public static void Render(Viewport vp)

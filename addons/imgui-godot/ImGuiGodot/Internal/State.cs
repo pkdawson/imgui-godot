@@ -75,31 +75,6 @@ internal static class State
         }
     }
 
-    public static void Update(double delta, Viewport vp)
-    {
-        var io = ImGui.GetIO();
-        var vpSize = vp.GetVisibleRect().Size;
-        io.DisplaySize = new(vpSize.x, vpSize.y);
-        io.DeltaTime = (float)delta;
-
-        Input.Update(io);
-
-        ImGui.NewFrame();
-    }
-
-    public static void ProcessNotification(long what)
-    {
-        switch (what)
-        {
-            case MainLoop.NotificationApplicationFocusIn:
-                ImGui.GetIO().AddFocusEvent(true);
-                break;
-            case MainLoop.NotificationApplicationFocusOut:
-                ImGui.GetIO().AddFocusEvent(false);
-                break;
-        };
-    }
-
     public static void AddLayerSubViewport(Node parent, out SubViewportContainer subViewportContainer, out SubViewport subViewport)
     {
         subViewportContainer = new SubViewportContainer

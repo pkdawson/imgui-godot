@@ -195,7 +195,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Notification(long what)
     {
-        Internal.State.ProcessNotification(what);
+        Internal.Input.ProcessNotification(what);
     }
 
     public override void _Input(InputEvent e)

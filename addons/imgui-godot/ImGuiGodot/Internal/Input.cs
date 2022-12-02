@@ -189,6 +189,19 @@ internal static class Input
         return consumed;
     }
 
+    public static void ProcessNotification(long what)
+    {
+        switch (what)
+        {
+            case MainLoop.NotificationApplicationFocusIn:
+                ImGui.GetIO().AddFocusEvent(true);
+                break;
+            case MainLoop.NotificationApplicationFocusOut:
+                ImGui.GetIO().AddFocusEvent(false);
+                break;
+        };
+    }
+
     private static void UpdateKeyMods(ImGuiIOPtr io)
     {
         io.AddKeyEvent(ImGuiKey.ModCtrl, Godot.Input.IsKeyPressed(Key.Ctrl));
