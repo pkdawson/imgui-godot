@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using Vector2 = System.Numerics.Vector2;
 
-namespace ImGuiGodot;
+namespace ImGuiGodot.Internal;
 
 internal class GodotImGuiWindow : IDisposable
 {
@@ -42,10 +42,10 @@ internal class GodotImGuiWindow : IDisposable
         // need to do this after AddChild
         GodotWindow.Transparent = true;
 
-        Internal.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
+        Internal.State.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
         LayerSvp = svp;
 
-        Internal.Renderer.InitViewport(LayerSvp);
+        Internal.State.Renderer.InitViewport(LayerSvp);
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
@@ -68,7 +68,7 @@ internal class GodotImGuiWindow : IDisposable
 
     private void OnWindowInput(InputEvent evt)
     {
-        Internal.ProcessInput(evt, GodotWindow);
+        State.ProcessInput(evt, GodotWindow);
     }
 
     public void ShowWindow()
@@ -314,7 +314,7 @@ internal static class InternalViewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            Internal.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
+            State.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
         }
     }
 }

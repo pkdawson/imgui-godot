@@ -5,9 +5,9 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace ImGuiGodot;
+namespace ImGuiGodot.Internal;
 
-internal class InternalRdRenderer : IRenderer
+internal class RdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
     private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
@@ -37,7 +37,7 @@ internal class InternalRdRenderer : IRenderer
 
     public string Name => "imgui_impl_godot4_rd";
 
-    public InternalRdRenderer()
+    public RdRenderer()
     {
         RD = RenderingServer.GetRenderingDevice();
 
@@ -198,7 +198,7 @@ internal class InternalRdRenderer : IRenderer
                 _usedTextures.Add(texid);
                 if (!_uniformSets.ContainsKey(texid))
                 {
-                    RID texrid = RenderingServer.TextureGetRdTexture(Internal.ConstructRID((ulong)texid));
+                    RID texrid = RenderingServer.TextureGetRdTexture(State.ConstructRID((ulong)texid));
                     using RDUniform uniform = new()
                     {
                         Binding = 0,

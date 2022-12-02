@@ -114,9 +114,9 @@ public partial class ImGuiLayer : CanvasLayer
         }
         ImGuiGD.RebuildFontAtlas();
 
-        Internal.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
+        Internal.State.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
 
-        Internal.Renderer.InitViewport(_subViewport);
+        Internal.State.Renderer.InitViewport(_subViewport);
 
         _updateFirst = new UpdateFirst
         {
@@ -163,7 +163,7 @@ public partial class ImGuiLayer : CanvasLayer
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
-            Internal.Renderer.OnHide();
+            Internal.State.Renderer.OnHide();
             //foreach (Node child in GetChildren())
             //{
             //    if (child is Window w)
@@ -195,7 +195,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Notification(long what)
     {
-        Internal.ProcessNotification(what);
+        Internal.State.ProcessNotification(what);
     }
 
     public override void _Input(InputEvent e)

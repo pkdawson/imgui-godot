@@ -30,8 +30,8 @@ public static class Widgets
 
         if (ImGui.IsItemHovered())
         {
-            Internal.CurrentSubViewport = vp;
-            Internal.CurrentSubViewportPos = pos;
+            Internal.State.CurrentSubViewport = vp;
+            Internal.State.CurrentSubViewportPos = pos;
             return true;
         }
         return false;

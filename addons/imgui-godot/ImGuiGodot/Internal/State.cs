@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
-namespace ImGuiGodot;
+namespace ImGuiGodot.Internal;
 
 internal interface IRenderer
 {
@@ -20,7 +20,7 @@ internal interface IRenderer
     public void Shutdown();
 }
 
-internal static class Internal
+internal static class State
 {
     internal static SubViewport CurrentSubViewport { get; set; }
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
@@ -43,7 +43,7 @@ internal static class Internal
 
     internal static readonly Func<ulong, RID> ConstructRID;
 
-    static Internal()
+    static State()
     {
         ConstructorInfo cinfo = typeof(RID).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
         if (cinfo is null)

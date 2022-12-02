@@ -1,9 +1,9 @@
 using Godot;
 using ImGuiNET;
 
-namespace ImGuiGodot;
+namespace ImGuiGodot.Internal;
 
-internal class InternalDummyRenderer : IRenderer
+internal class DummyRenderer : IRenderer
 {
     public string Name => "imgui_impl_godot4_dummy";
 

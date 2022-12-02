@@ -72,48 +72,48 @@ public static class ImGuiGD
             _scale = scale.Value;
         }
 
-        Internal.Init(renderer switch
+        Internal.State.Init(renderer switch
         {
-            RendererType.Dummy => new InternalDummyRenderer(),
-            RendererType.Canvas => new InternalCanvasRenderer(),
-            RendererType.RenderingDevice => new InternalRdRenderer(),
+            RendererType.Dummy => new Internal.DummyRenderer(),
+            RendererType.Canvas => new Internal.CanvasRenderer(),
+            RendererType.RenderingDevice => new Internal.RdRenderer(),
             _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
         });
     }
 
     public static void ResetFonts()
     {
-        Internal.ResetFonts();
+        Internal.State.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        Internal.AddFont(fontData, fontSize, merge);
+        Internal.State.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        Internal.AddFont(null, 13, false);
+        Internal.State.AddFont(null, 13, false);
     }
 
     public static void RebuildFontAtlas()
     {
-        Internal.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
+        Internal.State.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
     public static void Update(double delta, Viewport vp)
     {
-        Internal.Update(delta, vp);
+        Internal.State.Update(delta, vp);
     }
 
     public static void Render(Viewport vp)
     {
-        Internal.Render(vp);
+        Internal.State.Render(vp);
     }
 
     public static void Shutdown()
     {
-        Internal.Renderer.Shutdown();
+        Internal.State.Renderer.Shutdown();
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
             ImGui.DestroyContext();
     }
@@ -145,7 +145,7 @@ public static class ImGuiGD
     /// </returns>
     public static bool ProcessInput(InputEvent evt, Window window)
     {
-        return Internal.ProcessInput(evt, window);
+        return Internal.State.ProcessInput(evt, window);
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this Key key)
     {
-        return Internal.ConvertKey(key);
+        return Internal.State.ConvertKey(key);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this JoyButton button)
     {
-        return Internal.ConvertJoyButton(button);
+        return Internal.State.ConvertJoyButton(button);
     }
 
     /// <summary>
@@ -201,7 +201,7 @@ public static class ImGuiGD
     /// </summary>
     public static void SetIniFilename(this ImGuiIOPtr io, string fileName)
     {
-        Internal.SetIniFilename(io, fileName);
+        Internal.State.SetIniFilename(io, fileName);
     }
 }
 

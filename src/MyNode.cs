@@ -16,12 +16,6 @@ public partial class MyNode : Node
 
     public override void _Process(double delta)
     {
-        ImGui.SetNextWindowPos(new(100, 100), ImGuiCond.Once);
-        ImGui.SetNextWindowSize(new(300, 300));
-        ImGui.Begin("test");
-        ImGui.Text("some text");
-        ImGui.End();
-
         ImGui.ShowDemoWindow();
     }
 

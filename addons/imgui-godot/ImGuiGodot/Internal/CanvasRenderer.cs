@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace ImGuiGodot;
+namespace ImGuiGodot.Internal;
 
-internal class InternalCanvasRenderer : IRenderer
+internal class CanvasRenderer : IRenderer
 {
     private class ViewportData
     {
@@ -147,7 +147,7 @@ internal class InternalCanvasRenderer : IRenderer
 
                 RID child = children[nodeN++];
 
-                RID texrid = Internal.ConstructRID((ulong)drawCmd.GetTexID());
+                RID texrid = State.ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
                 Transform2D xform = Transform2D.Identity;
                 if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
