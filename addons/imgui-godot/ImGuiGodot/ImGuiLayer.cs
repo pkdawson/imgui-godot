@@ -153,13 +153,22 @@ public partial class ImGuiLayer : CanvasLayer
         if (Visible)
         {
             ProcessMode = ProcessModeEnum.Always;
-            // TODO: show all windows
+            // TODO: fix position with multiple monitors
+            //foreach (Node child in GetChildren())
+            //{
+            //    if (child is Window w)
+            //        w.Show();
+            //}
         }
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
             Internal.Renderer.OnHide();
-            // TODO: hide all windows
+            //foreach (Node child in GetChildren())
+            //{
+            //    if (child is Window w)
+            //        w.Hide();
+            //}
         }
     }
 
