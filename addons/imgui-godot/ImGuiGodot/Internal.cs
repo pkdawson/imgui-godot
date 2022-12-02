@@ -259,15 +259,20 @@ internal static class Internal
         io.DisplaySize = new(vpSize.x, vpSize.y);
         io.DeltaTime = (float)delta;
 
-        if (io.WantSetMousePos)
-        {
-            // TODO: get current focused window
-            // Input.WarpMouse(new(io.MousePos.X, io.MousePos.Y));
-        }
-        else
+        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
         {
             var mousePos = DisplayServer.MouseGetPosition();
             io.AddMousePosEvent(mousePos.x, mousePos.y);
+
+            if (io.WantSetMousePos)
+            {
+                // TODO: get current focused window
+            }
+        }
+        else
+        {
+            if (io.WantSetMousePos)
+                Input.WarpMouse(new(io.MousePos.X, io.MousePos.Y));
         }
 
         // scrolling works better if we allow no more than one event per frame
@@ -295,23 +300,13 @@ internal static class Internal
         ImGui.NewFrame();
     }
 
-    internal static Vector2 ClientToScreen(Window wnd, Vector2 clientPos)
-    {
-        Vector2i windowPos = wnd.Position;
-        return new(windowPos.x + clientPos.x, windowPos.y + clientPos.y);
-    }
-
-    internal static Vector2 ScreenToClient(Window wnd, Vector2 screenPos)
-    {
-        Vector2i windowPos = wnd.Position;
-        return new(screenPos.x - windowPos.x, screenPos.y - windowPos.y);
-    }
-
     public static bool ProcessInput(InputEvent evt, Window window)
     {
         var io = ImGui.GetIO();
+        bool viewportsEnable = io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable);
+
         var windowPos = Vector2i.Zero;
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
+        if (viewportsEnable)
             windowPos = window.Position;
 
         if (CurrentSubViewport != null)
@@ -332,8 +327,10 @@ internal static class Internal
 
         bool consumed = false;
 
-        if (evt is InputEventMouseMotion)
+        if (evt is InputEventMouseMotion mm)
         {
+            if (!viewportsEnable)
+                io.AddMousePosEvent(mm.GlobalPosition.x, mm.GlobalPosition.y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)
