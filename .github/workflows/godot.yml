@@ -10,7 +10,7 @@ on:
 
 env:
   gdver: "4.0"
-  gdrel: beta6
+  gdrel: beta7
 
 jobs:
   export_game:
