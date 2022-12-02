@@ -147,7 +147,7 @@ internal class CanvasRenderer : IRenderer
 
                 RID child = children[nodeN++];
 
-                RID texrid = State.ConstructRID((ulong)drawCmd.GetTexID());
+                RID texrid = Util.ConstructRID((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
                 Transform2D xform = Transform2D.Identity;
                 if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
