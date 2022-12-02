@@ -270,13 +270,6 @@ internal static class Internal
             io.AddMousePosEvent(mousePos.x, mousePos.y);
         }
 
-        MouseButton mbs = DisplayServer.MouseGetButtonState();
-        io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mbs.HasFlag(MouseButton.Left));
-        io.AddMouseButtonEvent((int)ImGuiMouseButton.Right, mbs.HasFlag(MouseButton.Right));
-        io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle, mbs.HasFlag(MouseButton.Middle));
-        io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 1, mbs.HasFlag(MouseButton.Xbutton1));
-        io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 2, mbs.HasFlag(MouseButton.Xbutton2));
-
         // scrolling works better if we allow no more than one event per frame
         if (_mouseWheel != Vector2.Zero)
         {
@@ -347,6 +340,21 @@ internal static class Internal
         {
             switch (mb.ButtonIndex)
             {
+                case MouseButton.Left:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
+                    break;
+                case MouseButton.Right:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Right, mb.Pressed);
+                    break;
+                case MouseButton.Middle:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle, mb.Pressed);
+                    break;
+                case MouseButton.Xbutton1:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 1, mb.Pressed);
+                    break;
+                case MouseButton.Xbutton2:
+                    io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 2, mb.Pressed);
+                    break;
                 case MouseButton.WheelUp:
                     _mouseWheel.y = mb.Factor;
                     break;
