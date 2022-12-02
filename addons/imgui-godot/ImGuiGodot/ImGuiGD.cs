@@ -127,16 +127,16 @@ public static class ImGuiGD
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
 
-        switch (OS.GetName())
+        if (OS.GetName() != "Windows")
         {
-            case "Windows":
-                break;
-            case "macOS":
-                GD.PushError("ImGui Viewports are currently very broken on macOS");
-                break;
-            default:
-                GD.PushWarning("ImGui Viewports are probably broken on Linux/BSD https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
-                break;
+            GD.PushWarning("ImGui Viewports have issues on macOS and Linux https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
+        }
+
+        var mainvp = ImGuiLayer.Instance.GetViewport();
+        if (mainvp.GuiEmbedSubwindows)
+        {
+            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            mainvp.GuiEmbedSubwindows = false;
         }
     }
 

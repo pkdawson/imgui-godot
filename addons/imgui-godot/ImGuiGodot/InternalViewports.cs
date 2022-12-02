@@ -21,7 +21,6 @@ internal class GodotImGuiWindow : IDisposable
         _vp.PlatformHandle = (IntPtr)_gcHandle;
 
         Rect2i winRect = new(_vp.Pos.ToVector2i(), _vp.Size.ToVector2i());
-        GD.Print(winRect);
 
         ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
 

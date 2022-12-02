@@ -59,7 +59,8 @@ public partial class MySecondNode : Node
 
         float fh = ImGui.GetFrameHeight();
 
-        ImGui.SetNextWindowPos(new(10, 10));
+        var mainVpPos = ImGui.GetMainViewport().WorkPos;
+        ImGui.SetNextWindowPos(new(mainVpPos.X + 10, mainVpPos.Y + 10));
         ImGui.Begin("change scene window", cswinflags);
         if (ImGui.Button("change scene"))
         {
