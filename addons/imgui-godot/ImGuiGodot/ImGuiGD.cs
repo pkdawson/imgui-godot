@@ -145,7 +145,7 @@ public static class ImGuiGD
     /// </returns>
     public static bool ProcessInput(InputEvent evt, Window window)
     {
-        return Internal.State.ProcessInput(evt, window);
+        return Internal.Input.ProcessInput(evt, window);
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this Key key)
     {
-        return Internal.State.ConvertKey(key);
+        return Internal.Input.ConvertKey(key);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public static class ImGuiGD
     /// </summary>
     public static ImGuiKey ToImGuiKey(this JoyButton button)
     {
-        return Internal.State.ConvertJoyButton(button);
+        return Internal.Input.ConvertJoyButton(button);
     }
 
     /// <summary>

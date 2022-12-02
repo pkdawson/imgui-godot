@@ -68,7 +68,7 @@ internal class GodotImGuiWindow : IDisposable
 
     private void OnWindowInput(InputEvent evt)
     {
-        State.ProcessInput(evt, GodotWindow);
+        Input.ProcessInput(evt, GodotWindow);
     }
 
     public void ShowWindow()
