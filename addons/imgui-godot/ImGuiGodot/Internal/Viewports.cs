@@ -42,7 +42,7 @@ internal class GodotImGuiWindow : IDisposable
         // need to do this after AddChild
         GodotWindow.Transparent = true;
 
-        State.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
+        Util.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
         LayerSvp = svp;
 
         State.Renderer.InitViewport(LayerSvp);

@@ -24,4 +24,27 @@ internal static class Util
         il.Emit(OpCodes.Ret);
         ConstructRID = dm.CreateDelegate<Func<ulong, RID>>();
     }
+
+    public static void AddLayerSubViewport(Node parent, out SubViewportContainer subViewportContainer, out SubViewport subViewport)
+    {
+        subViewportContainer = new SubViewportContainer
+        {
+            Name = "ImGuiLayer_SubViewportContainer",
+            AnchorsPreset = (int)Control.LayoutPreset.FullRect,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Stretch = true
+        };
+
+        subViewport = new SubViewport
+        {
+            Name = "ImGuiLayer_SubViewport",
+            TransparentBg = true,
+            HandleInputLocally = false,
+            GuiDisableInput = true,
+            RenderTargetUpdateMode = SubViewport.UpdateMode.Always
+        };
+
+        subViewportContainer.AddChild(subViewport);
+        parent.AddChild(subViewportContainer);
+    }
 }

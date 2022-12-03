@@ -113,8 +113,7 @@ public partial class ImGuiLayer : CanvasLayer
             ImGuiGD.AddFontDefault();
         }
         ImGuiGD.RebuildFontAtlas();
-
-        Internal.State.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
+        Internal.Util.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
 
         Internal.State.Renderer.InitViewport(_subViewport);
 
