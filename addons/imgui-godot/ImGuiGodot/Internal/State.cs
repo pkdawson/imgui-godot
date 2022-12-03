@@ -54,7 +54,7 @@ internal static class State
         }
 
         Renderer.Init(io);
-        InternalViewports.Init();
+        Viewports.Init();
     }
 
     public static unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
@@ -107,7 +107,7 @@ internal static class State
         if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
         {
             ImGui.UpdatePlatformWindows();
-            InternalViewports.RenderViewports();
+            Viewports.RenderViewports();
         }
     }
 }

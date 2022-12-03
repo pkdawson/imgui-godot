@@ -1,6 +1,6 @@
-using System;
 using Godot;
 using ImGuiNET;
+using System;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot.Internal;

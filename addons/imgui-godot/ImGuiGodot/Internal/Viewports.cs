@@ -117,7 +117,7 @@ internal class GodotImGuiWindow : IDisposable
     }
 }
 
-internal static class InternalViewports
+internal static class Viewports
 {
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern unsafe void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
@@ -238,6 +238,17 @@ internal static class InternalViewports
         UpdateMonitors();
     }
 
+    public static void RenderViewports()
+    {
+        var pio = ImGui.GetPlatformIO();
+        for (int i = 1; i < pio.Viewports.Size; i++)
+        {
+            var vp = pio.Viewports[i];
+            var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
+            State.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
+        }
+    }
+
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
     {
         _ = new GodotImGuiWindow(vp);
@@ -305,16 +316,5 @@ internal static class InternalViewports
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
         window.SetWindowTitle(title);
-    }
-
-    public static void RenderViewports()
-    {
-        var pio = ImGui.GetPlatformIO();
-        for (int i = 1; i < pio.Viewports.Size; i++)
-        {
-            var vp = pio.Viewports[i];
-            var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            State.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
-        }
     }
 }
