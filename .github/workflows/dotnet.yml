@@ -25,7 +25,7 @@ jobs:
 
       - name: Modify .editorconfig
         run: |
-          echo "dotnet_analyzer_diagnostic.severity = error" >> .editorconfig
+          sed -i "s:dotnet_analyzer_diagnostic.severity = warning:dotnet_analyzer_diagnostic.severity = error:" .editorconfig
 
       - name: Restore dependencies
         run: dotnet restore
