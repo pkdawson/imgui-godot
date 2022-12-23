@@ -1,6 +1,7 @@
 .import/
 .mono/
 .vs/
+.vscode/
 *.old
 imgui.ini
 .godot/

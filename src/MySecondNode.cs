@@ -12,6 +12,7 @@ public partial class MySecondNode : Node
     private float scale;
     private ImFontPtr proggy;
     private ColorRect background;
+    private int numClicks = 0;
 
     private static bool fontLoaded = false;
     private static System.Numerics.Vector4 myTextColor = Colors.Aquamarine.ToVector4();
@@ -93,6 +94,15 @@ public partial class MySecondNode : Node
         ImGui.Text("Simple texture");
         Widgets.Image(iconTexture, new(iconSize, iconSize));
         ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
+
+        ImGui.Separator();
+        ImGui.Text("ImageButton");
+        if (Widgets.ImageButton("myimgbtn", iconTexture, new(128, 128)))
+        {
+            ++numClicks;
+        }
+        ImGui.SameLine();
+        ImGui.Text($"{numClicks}");
 
         ImGui.Separator();
         ImGui.Text("Unicode");
