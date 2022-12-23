@@ -1,6 +1,6 @@
 # Dear ImGui plugin for Godot 4 (C#)
 
-![](https://img.shields.io/static/v1?label=Godot%204.0&message=beta8&color=blue&logo=godotengine)
+![](https://img.shields.io/static/v1?label=Godot%204.0&message=beta10&color=blue&logo=godotengine)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 

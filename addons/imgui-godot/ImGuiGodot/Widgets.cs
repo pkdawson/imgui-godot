@@ -62,33 +62,28 @@ public static class Widgets
         ImGuiNative.igImage((IntPtr)tex.GetRid().Id, size, uv0, uv1, tint_col, border_col);
     }
 
-    public static bool ImageButton(Texture2D tex, Vector2 size)
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size)
     {
-        return ImageButton(tex, size, Vector2.Zero, Vector2.One, -1, Vector4.Zero, Vector4.One);
+        return ImageButton(str_id, tex, size, Vector2.Zero, Vector2.One, Vector4.Zero, Vector4.One);
     }
 
-    public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0)
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0)
     {
-        return ImageButton(tex, size, uv0, Vector2.One, -1, Vector4.Zero, Vector4.One);
+        return ImageButton(str_id, tex, size, uv0, Vector2.One, Vector4.Zero, Vector4.One);
     }
 
-    public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1)
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1)
     {
-        return ImageButton(tex, size, uv0, uv1, -1, Vector4.Zero, Vector4.One);
+        return ImageButton(str_id, tex, size, uv0, uv1, Vector4.Zero, Vector4.One);
     }
 
-    public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, int frame_padding)
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 bg_col)
     {
-        return ImageButton(tex, size, uv0, uv1, frame_padding, Vector4.Zero, Vector4.One);
+        return ImageButton(str_id, tex, size, uv0, uv1, bg_col, Vector4.One);
     }
 
-    public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, int frame_padding, Vector4 bg_col)
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 bg_col, Vector4 tint_col)
     {
-        return ImageButton(tex, size, uv0, uv1, frame_padding, bg_col, Vector4.One);
-    }
-
-    public static bool ImageButton(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, int frame_padding, Vector4 bg_col, Vector4 tint_col)
-    {
-        return ImGuiNative.igImageButton((IntPtr)tex.GetRid().Id, size, uv0, uv1, frame_padding, bg_col, tint_col) != 0;
+        return ImGui.ImageButton(str_id, (IntPtr)tex.GetRid().Id, size, uv0, uv1, bg_col, tint_col);
     }
 }
