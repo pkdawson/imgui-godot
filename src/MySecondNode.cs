@@ -66,8 +66,6 @@ public partial class MySecondNode : Node
         if (ImGui.Button("change scene"))
         {
             GetTree().ChangeSceneToFile("res://data/demo.tscn");
-            // return so we don't try to draw a viewport texture after it's deleted
-            return;
         }
         ImGui.End();
 

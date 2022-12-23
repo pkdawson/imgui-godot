@@ -23,7 +23,7 @@ public partial class MyNode : Node
 
 Download
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.5.0&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.5.0.zip)
+[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.5.1&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.5.1.zip)
 
 ## Getting Started
 
@@ -86,7 +86,7 @@ That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "v3.5.0",
+      "checkout": "v3.5.1",
       "subfolder": "addons/imgui-godot"
     }
   }
