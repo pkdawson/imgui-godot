@@ -204,10 +204,10 @@ internal static class Input
 
     private static void UpdateKeyMods(ImGuiIOPtr io)
     {
-        io.AddKeyEvent(ImGuiKey.ImGuiMod_Ctrl, Godot.Input.IsKeyPressed(Key.Ctrl));
-        io.AddKeyEvent(ImGuiKey.ImGuiMod_Shift, Godot.Input.IsKeyPressed(Key.Shift));
-        io.AddKeyEvent(ImGuiKey.ImGuiMod_Alt, Godot.Input.IsKeyPressed(Key.Alt));
-        io.AddKeyEvent(ImGuiKey.ImGuiMod_Super, Godot.Input.IsKeyPressed(Key.SuperL));
+        io.AddKeyEvent(ImGuiKey.ModCtrl, Godot.Input.IsKeyPressed(Key.Ctrl));
+        io.AddKeyEvent(ImGuiKey.ModShift, Godot.Input.IsKeyPressed(Key.Shift));
+        io.AddKeyEvent(ImGuiKey.ModAlt, Godot.Input.IsKeyPressed(Key.Alt));
+        io.AddKeyEvent(ImGuiKey.ModSuper, Godot.Input.IsKeyPressed(Key.SuperL));
     }
 
     private static CursorShape ConvertCursorShape(ImGuiMouseCursor cur) => cur switch
