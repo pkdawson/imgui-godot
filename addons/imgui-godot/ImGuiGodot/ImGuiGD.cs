@@ -72,6 +72,12 @@ public static class ImGuiGD
             _scale = scale.Value;
         }
 
+        // fall back to Canvas in OpenGL compatibility mode
+        if (renderer == RendererType.RenderingDevice && RenderingServer.GetRenderingDevice() == null)
+        {
+            renderer = RendererType.Canvas;
+        }
+
         Internal.State.Init(renderer switch
         {
             RendererType.Dummy => new Internal.DummyRenderer(),

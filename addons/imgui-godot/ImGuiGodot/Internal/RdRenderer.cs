@@ -40,6 +40,10 @@ internal class RdRenderer : IRenderer
     public RdRenderer()
     {
         RD = RenderingServer.GetRenderingDevice();
+        if (RD is null)
+        {
+            throw new PlatformNotSupportedException("failed to get RenderingDevice");
+        }
 
         // set up everything to match the official Vulkan backend as closely as possible
 
