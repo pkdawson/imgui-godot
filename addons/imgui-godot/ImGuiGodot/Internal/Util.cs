@@ -30,6 +30,7 @@ internal static class Util
         subViewportContainer = new SubViewportContainer
         {
             Name = "ImGuiLayer_SubViewportContainer",
+            LayoutMode = 1, // LAYOUT_MODE_ANCHORS
             AnchorsPreset = (int)Control.LayoutPreset.FullRect,
             MouseFilter = Control.MouseFilterEnum.Ignore,
             Stretch = true
