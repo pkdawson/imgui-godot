@@ -207,7 +207,7 @@ internal static class Input
         io.AddKeyEvent(ImGuiKey.ModCtrl, Godot.Input.IsKeyPressed(Key.Ctrl));
         io.AddKeyEvent(ImGuiKey.ModShift, Godot.Input.IsKeyPressed(Key.Shift));
         io.AddKeyEvent(ImGuiKey.ModAlt, Godot.Input.IsKeyPressed(Key.Alt));
-        io.AddKeyEvent(ImGuiKey.ModSuper, Godot.Input.IsKeyPressed(Key.SuperL));
+        io.AddKeyEvent(ImGuiKey.ModSuper, Godot.Input.IsKeyPressed(Key.Meta));
     }
 
     private static CursorShape ConvertCursorShape(ImGuiMouseCursor cur) => cur switch
@@ -263,8 +263,7 @@ internal static class Input
         Key.Ctrl => ImGuiKey.LeftCtrl,
         Key.Shift => ImGuiKey.LeftShift,
         Key.Alt => ImGuiKey.LeftAlt,
-        Key.SuperL => ImGuiKey.LeftSuper,
-        Key.SuperR => ImGuiKey.RightSuper,
+        Key.Meta => ImGuiKey.LeftSuper,
         Key.Menu => ImGuiKey.Menu,
         Key.Key0 => ImGuiKey._0,
         Key.Key1 => ImGuiKey._1,
