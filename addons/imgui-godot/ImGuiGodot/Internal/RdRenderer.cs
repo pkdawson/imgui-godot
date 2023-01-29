@@ -354,8 +354,8 @@ internal class RdRenderer : IRenderer
 
     private Rid GetFramebuffer(Viewport vp)
     {
-        Rid vpRid = vp.GetViewportRid();
-        if (_framebuffers.TryGetValue(vpRid, out Rid fb))
+        Rid vprid = vp.GetViewportRid();
+        if (_framebuffers.TryGetValue(vprid, out Rid fb))
         {
             if (RD.FramebufferIsValid(fb))
                 return fb;
@@ -363,7 +363,7 @@ internal class RdRenderer : IRenderer
 
         Rid vptex = RenderingServer.TextureGetRdTexture(vp.GetTexture().GetRid());
         fb = RD.FramebufferCreate(new() { vptex });
-        _framebuffers[vpRid] = fb;
+        _framebuffers[vprid] = fb;
         return fb;
     }
 

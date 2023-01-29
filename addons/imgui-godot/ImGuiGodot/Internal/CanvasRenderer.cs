@@ -27,14 +27,14 @@ internal class CanvasRenderer : IRenderer
 
     public void InitViewport(Viewport vp)
     {
-        Rid vpRid = vp.GetViewportRid();
+        Rid vprid = vp.GetViewportRid();
 
         Rid canvas = RenderingServer.CanvasCreate();
         Rid canvasItem = RenderingServer.CanvasItemCreate();
-        RenderingServer.ViewportAttachCanvas(vpRid, canvas);
+        RenderingServer.ViewportAttachCanvas(vprid, canvas);
         RenderingServer.CanvasItemSetParent(canvasItem, canvas);
 
-        _vpData[vpRid] = new ViewportData()
+        _vpData[vprid] = new ViewportData()
         {
             Canvas = canvas,
             RootCanvasItem = canvasItem,
