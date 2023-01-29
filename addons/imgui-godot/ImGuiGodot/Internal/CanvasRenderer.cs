@@ -10,12 +10,12 @@ internal class CanvasRenderer : IRenderer
 {
     private class ViewportData
     {
-        public RID Canvas { set; get; }
-        public RID RootCanvasItem { set; get; }
+        public Rid Canvas { set; get; }
+        public Rid RootCanvasItem { set; get; }
     }
 
-    private readonly Dictionary<RID, List<RID>> _canvasItemPools = new();
-    private readonly Dictionary<RID, ViewportData> _vpData = new();
+    private readonly Dictionary<Rid, List<Rid>> _canvasItemPools = new();
+    private readonly Dictionary<Rid, ViewportData> _vpData = new();
 
     public string Name => "imgui_impl_godot4_canvas";
 
@@ -27,14 +27,14 @@ internal class CanvasRenderer : IRenderer
 
     public void InitViewport(Viewport vp)
     {
-        RID vprid = vp.GetViewportRid();
+        Rid vpRid = vp.GetViewportRid();
 
-        RID canvas = RenderingServer.CanvasCreate();
-        RID canvasItem = RenderingServer.CanvasItemCreate();
-        RenderingServer.ViewportAttachCanvas(vprid, canvas);
+        Rid canvas = RenderingServer.CanvasCreate();
+        Rid canvasItem = RenderingServer.CanvasItemCreate();
+        RenderingServer.ViewportAttachCanvas(vpRid, canvas);
         RenderingServer.CanvasItemSetParent(canvasItem, canvas);
 
-        _vpData[vprid] = new ViewportData()
+        _vpData[vpRid] = new ViewportData()
         {
             Canvas = canvas,
             RootCanvasItem = canvasItem,
@@ -44,7 +44,7 @@ internal class CanvasRenderer : IRenderer
     public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
     {
         ViewportData vd = _vpData[vp.GetViewportRid()];
-        RID parent = vd.RootCanvasItem;
+        Rid parent = vd.RootCanvasItem;
 
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
 
@@ -68,7 +68,7 @@ internal class CanvasRenderer : IRenderer
 
         while (children.Count < neededNodes)
         {
-            RID newChild = RenderingServer.CanvasItemCreate();
+            Rid newChild = RenderingServer.CanvasItemCreate();
             RenderingServer.CanvasItemSetParent(newChild, parent);
             RenderingServer.CanvasItemSetDrawIndex(newChild, children.Count);
             children.Add(newChild);
@@ -145,14 +145,14 @@ internal class CanvasRenderer : IRenderer
                     Array.Copy(uvs, drawCmd.VtxOffset, cmduvs, 0, localSize);
                 }
 
-                RID child = children[nodeN++];
+                Rid child = children[nodeN++];
 
-                RID texrid = Util.ConstructRID((ulong)drawCmd.GetTexID());
+                Rid texRid = Util.ConstructRid((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
                 Transform2D xform = Transform2D.Identity;
                 if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
                 {
-                    xform = xform.Translated(drawData.DisplayPos.ToVector2i()).Inverse();
+                    xform = xform.Translated(drawData.DisplayPos.ToVector2I()).Inverse();
                 }
                 RenderingServer.CanvasItemSetTransform(child, xform);
                 RenderingServer.CanvasItemSetClip(child, true);
@@ -163,7 +163,7 @@ internal class CanvasRenderer : IRenderer
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texrid, -1);
+                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texRid, -1);
             }
         }
     }
@@ -191,9 +191,9 @@ internal class CanvasRenderer : IRenderer
         }
     }
 
-    private void ClearCanvasItems(RID rootci)
+    private void ClearCanvasItems(Rid rootci)
     {
-        foreach (RID ci in _canvasItemPools[rootci])
+        foreach (Rid ci in _canvasItemPools[rootci])
         {
             RenderingServer.FreeRid(ci);
         }
@@ -201,7 +201,7 @@ internal class CanvasRenderer : IRenderer
 
     private void ClearCanvasItems()
     {
-        foreach (RID parent in _canvasItemPools.Keys)
+        foreach (Rid parent in _canvasItemPools.Keys)
         {
             ClearCanvasItems(parent);
         }

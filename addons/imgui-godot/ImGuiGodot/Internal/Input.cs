@@ -17,7 +17,7 @@ internal static class Input
         if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
         {
             var mousePos = DisplayServer.MouseGetPosition();
-            io.AddMousePosEvent(mousePos.x, mousePos.y);
+            io.AddMousePosEvent(mousePos.X, mousePos.Y);
 
             if (io.WantSetMousePos)
             {
@@ -33,7 +33,7 @@ internal static class Input
         // scrolling works better if we allow no more than one event per frame
         if (_mouseWheel != Vector2.Zero)
         {
-            io.AddMouseWheelEvent(_mouseWheel.x, _mouseWheel.y);
+            io.AddMouseWheelEvent(_mouseWheel.X, _mouseWheel.Y);
             _mouseWheel = Vector2.Zero;
         }
 
@@ -59,7 +59,7 @@ internal static class Input
         var io = ImGui.GetIO();
         bool viewportsEnable = io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable);
 
-        var windowPos = Vector2i.Zero;
+        var windowPos = Vector2I.Zero;
         if (viewportsEnable)
             windowPos = window.Position;
 
@@ -68,8 +68,8 @@ internal static class Input
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(windowPos.x + mouseEvent.GlobalPosition.x - CurrentSubViewportPos.X,
-                    windowPos.y + mouseEvent.GlobalPosition.y - CurrentSubViewportPos.Y)
+                mouseEvent.Position = new Vector2(windowPos.X + mouseEvent.GlobalPosition.X - CurrentSubViewportPos.X,
+                    windowPos.Y + mouseEvent.GlobalPosition.Y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
@@ -84,7 +84,7 @@ internal static class Input
         if (evt is InputEventMouseMotion mm)
         {
             if (!viewportsEnable)
-                io.AddMousePosEvent(mm.GlobalPosition.x, mm.GlobalPosition.y);
+                io.AddMousePosEvent(mm.GlobalPosition.X, mm.GlobalPosition.Y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)
@@ -107,16 +107,16 @@ internal static class Input
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Middle + 2, mb.Pressed);
                     break;
                 case MouseButton.WheelUp:
-                    _mouseWheel.y = mb.Factor;
+                    _mouseWheel.Y = mb.Factor;
                     break;
                 case MouseButton.WheelDown:
-                    _mouseWheel.y = -mb.Factor;
+                    _mouseWheel.Y = -mb.Factor;
                     break;
                 case MouseButton.WheelLeft:
-                    _mouseWheel.x = -mb.Factor;
+                    _mouseWheel.X = -mb.Factor;
                     break;
                 case MouseButton.WheelRight:
-                    _mouseWheel.x = mb.Factor;
+                    _mouseWheel.X = mb.Factor;
                     break;
             };
             consumed = io.WantCaptureMouse;
@@ -138,7 +138,7 @@ internal static class Input
         }
         else if (evt is InputEventPanGesture pg)
         {
-            _mouseWheel = new(-pg.Delta.x, -pg.Delta.y);
+            _mouseWheel = new(-pg.Delta.X, -pg.Delta.Y);
             consumed = io.WantCaptureMouse;
         }
         else if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))

@@ -19,7 +19,7 @@ public static class Widgets
     /// </returns>
     public static bool SubViewport(SubViewport vp)
     {
-        Vector2 vpSize = new(vp.Size.x, vp.Size.y);
+        Vector2 vpSize = new(vp.Size.X, vp.Size.Y);
         var pos = ImGui.GetCursorScreenPos();
         var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
         ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);

@@ -20,7 +20,7 @@ internal class GodotImGuiWindow : IDisposable
         _vp = vp;
         _vp.PlatformHandle = (IntPtr)_gcHandle;
 
-        Rect2i winRect = new(_vp.Pos.ToVector2i(), _vp.Size.ToVector2i());
+        Rect2I winRect = new(_vp.Pos.ToVector2I(), _vp.Size.ToVector2I());
 
         ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
 
@@ -76,22 +76,22 @@ internal class GodotImGuiWindow : IDisposable
         GodotWindow.Show();
     }
 
-    public void SetWindowPos(Vector2i pos)
+    public void SetWindowPos(Vector2I pos)
     {
         GodotWindow.Position = pos;
     }
 
-    public Vector2i GetWindowPos()
+    public Vector2I GetWindowPos()
     {
         return GodotWindow.Position;
     }
 
-    public void SetWindowSize(Vector2i size)
+    public void SetWindowSize(Vector2I size)
     {
         GodotWindow.Size = size;
     }
 
-    public Vector2i GetWindowSize()
+    public Vector2I GetWindowSize()
     {
         return GodotWindow.Size;
     }
@@ -171,14 +171,14 @@ internal static class Viewports
     //private static bool _wantUpdateMonitors = true;
     private static GodotImGuiWindow _mainWindow;
 
-    internal static Vector2 ToImVec2(this Vector2i v)
+    internal static Vector2 ToImVec2(this Vector2I v)
     {
-        return new Vector2(v.x, v.y);
+        return new Vector2(v.X, v.Y);
     }
 
-    internal static Vector2i ToVector2i(this Vector2 v)
+    internal static Vector2I ToVector2I(this Vector2 v)
     {
-        return new Vector2i((int)v.X, (int)v.Y);
+        return new Vector2I((int)v.X, (int)v.Y);
     }
 
     private static void UpdateMonitors()
@@ -273,7 +273,7 @@ internal static class Viewports
     private static void Godot_SetWindowPos(ImGuiViewportPtr vp, Vector2 pos)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        window.SetWindowPos(pos.ToVector2i());
+        window.SetWindowPos(pos.ToVector2I());
     }
 
     private static void Godot_GetWindowPos(ImGuiViewportPtr vp, out Vector2 pos)
@@ -285,7 +285,7 @@ internal static class Viewports
     private static void Godot_SetWindowSize(ImGuiViewportPtr vp, Vector2 size)
     {
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-        window.SetWindowSize(size.ToVector2i());
+        window.SetWindowSize(size.ToVector2I());
     }
 
     private static void Godot_GetWindowSize(ImGuiViewportPtr vp, out Vector2 size)

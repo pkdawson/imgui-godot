@@ -43,7 +43,7 @@ public partial class ImGuiLayer : CanvasLayer
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
     private UpdateFirst _updateFirst;
-    private static readonly HashSet<Godot.Object> _connectedObjects = new();
+    private static readonly HashSet<GodotObject> _connectedObjects = new();
     private int sizeCheck = 0;
     private bool _headless = false;
 
@@ -188,7 +188,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Process(double delta)
     {
-        EmitSignal(SignalName.ImGuiLayout);
+        //EmitSignal(SignalName.ImGuiLayout);
         ImGuiGD.Render(_subViewport);
     }
 
@@ -205,6 +205,7 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
+    /*
     public static void Connect(ImGuiLayoutEventHandler d)
     {
         if (Instance is null)
@@ -212,7 +213,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         Instance.ImGuiLayout += d;
 
-        if (d.Target is Godot.Object obj)
+        if (d.Target is GodotObject obj)
         {
             if (_connectedObjects.Count == 0)
             {
@@ -221,6 +222,7 @@ public partial class ImGuiLayer : CanvasLayer
             _connectedObjects.Add(obj);
         }
     }
+    */
 
 #if IMGUI_GODOT_DEV
 #pragma warning disable CA1822 // Mark members as static
@@ -262,6 +264,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         _connectedObjects.Remove(node);
 
+        /*
         // backing_ImGuiLayout is an implementation detail that could change
         foreach (Delegate d in Instance.backing_ImGuiLayout.GetInvocationList())
         {
@@ -271,6 +274,7 @@ public partial class ImGuiLayer : CanvasLayer
                 Instance.ImGuiLayout -= (ImGuiLayoutEventHandler)d;
             }
         }
+        */
 
         if (_connectedObjects.Count == 0)
         {
