@@ -67,13 +67,13 @@ internal class RdRenderer : IRenderer
 #endif
 
         // create vertex format
-        uint vtxStRide = (uint)Marshal.SizeOf<ImDrawVert>();
+        uint vtxStride = (uint)Marshal.SizeOf<ImDrawVert>();
 
         using RDVertexAttribute attrPoints = new()
         {
             Location = 0,
             Format = RenderingDevice.DataFormat.R32G32Sfloat,
-            Stride = vtxStRide,
+            Stride = vtxStride,
             Offset = 0
         };
 
@@ -81,7 +81,7 @@ internal class RdRenderer : IRenderer
         {
             Location = 1,
             Format = RenderingDevice.DataFormat.R32G32Sfloat,
-            Stride = vtxStRide,
+            Stride = vtxStride,
             Offset = sizeof(float) * 2
         };
 
@@ -89,7 +89,7 @@ internal class RdRenderer : IRenderer
         {
             Location = 2,
             Format = RenderingDevice.DataFormat.R8G8B8A8Unorm,
-            Stride = vtxStRide,
+            Stride = vtxStride,
             Offset = sizeof(float) * 4
         };
 
