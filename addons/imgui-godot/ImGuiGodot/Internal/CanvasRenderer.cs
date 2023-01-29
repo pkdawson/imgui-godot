@@ -147,7 +147,7 @@ internal class CanvasRenderer : IRenderer
 
                 Rid child = children[nodeN++];
 
-                Rid texRid = Util.ConstructRid((ulong)drawCmd.GetTexID());
+                Rid texrid = Util.ConstructRid((ulong)drawCmd.GetTexID());
                 RenderingServer.CanvasItemClear(child);
                 Transform2D xform = Transform2D.Identity;
                 if (drawData.DisplayPos != System.Numerics.Vector2.Zero)
@@ -163,7 +163,7 @@ internal class CanvasRenderer : IRenderer
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texRid, -1);
+                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texrid, -1);
             }
         }
     }
