@@ -43,7 +43,7 @@ public partial class ImGuiLayer : CanvasLayer
     private SubViewportContainer _subViewportContainer;
     private SubViewport _subViewport;
     private UpdateFirst _updateFirst;
-    private static readonly HashSet<Godot.Object> _connectedObjects = new();
+    private static readonly HashSet<GodotObject> _connectedObjects = new();
     private int sizeCheck = 0;
     private bool _headless = false;
 
@@ -212,7 +212,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         Instance.ImGuiLayout += d;
 
-        if (d.Target is Godot.Object obj)
+        if (d.Target is GodotObject obj)
         {
             if (_connectedObjects.Count == 0)
             {

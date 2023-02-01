@@ -83,7 +83,7 @@ public partial class ImGuiAPI : Godot.Object
 
     public bool Button(string label, Vector2 size)
     {
-        return ImGui.Button(label, new(size.x, size.y));
+        return ImGui.Button(label, new(size.X, size.Y));
     }
 }
 #pragma warning restore CA1822 // Mark members as static

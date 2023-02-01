@@ -111,7 +111,7 @@ public static class ImGuiGD
     {
         var io = ImGui.GetIO();
         var vpSize = vp.GetVisibleRect().Size;
-        io.DisplaySize = new(vpSize.x, vpSize.y);
+        io.DisplaySize = new(vpSize.X, vpSize.Y);
         io.DeltaTime = (float)delta;
 
         Internal.Input.Update(io);
@@ -182,7 +182,7 @@ public static class ImGuiGD
     /// </summary>
     public static Vector4 ToVector4(this Color color)
     {
-        return new Vector4(color.r, color.g, color.b, color.a);
+        return new Vector4(color.R, color.G, color.B, color.A);
     }
 
     /// <summary>
@@ -190,7 +190,7 @@ public static class ImGuiGD
     /// </summary>
     public static Vector3 ToVector3(this Color color)
     {
-        return new Vector3(color.r, color.g, color.b);
+        return new Vector3(color.R, color.G, color.B);
     }
 
     /// <summary>

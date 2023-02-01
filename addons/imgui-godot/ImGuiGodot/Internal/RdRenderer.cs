@@ -11,27 +11,27 @@ internal class RdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
     private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
-    private readonly RID _shader;
-    private readonly RID _pipeline;
-    private readonly RID _sampler;
+    private readonly Rid _shader;
+    private readonly Rid _pipeline;
+    private readonly Rid _sampler;
     private readonly long _vtxFormat;
-    private readonly Dictionary<RID, RID> _framebuffers = new();
+    private readonly Dictionary<Rid, Rid> _framebuffers = new();
     private readonly float[] _scale = new float[2];
     private readonly float[] _translate = new float[2];
     private readonly byte[] _pcbuf = new byte[16];
     private readonly ArrayPool<byte> _bufPool = ArrayPool<byte>.Create();
 
-    private RID _idxBuffer;
+    private Rid _idxBuffer;
     private int _idxBufferSize = 0; // size in indices
-    private RID _vtxBuffer;
+    private Rid _vtxBuffer;
     private int _vtxBufferSize = 0; // size in vertices
 
-    private readonly Dictionary<IntPtr, RID> _uniformSets = new(8);
+    private readonly Dictionary<IntPtr, Rid> _uniformSets = new(8);
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
     private readonly Godot.Collections.Array _storageTextures = new();
-    private readonly Godot.Collections.Array<RID> _srcBuffers = new();
+    private readonly Godot.Collections.Array<Rid> _srcBuffers = new();
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
 
@@ -48,8 +48,8 @@ internal class RdRenderer : IRenderer
         // set up everything to match the official Vulkan backend as closely as possible
 
         // compiling from source takes ~400ms, so we use a SPIR-V resource
-        using var spirv = ResourceLoader.Load<RDShaderSPIRV>("res://addons/imgui-godot/ImGuiShaderSPIRV.tres");
-        _shader = RD.ShaderCreateFromSpirv(spirv);
+        using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/ImGuiShaderSPIRV.tres");
+        _shader = RD.ShaderCreateFromSpirV(spirv);
 
 #if IMGUI_GODOT_DEV
 #pragma warning disable CA2201
@@ -72,7 +72,7 @@ internal class RdRenderer : IRenderer
         using RDVertexAttribute attrPoints = new()
         {
             Location = 0,
-            Format = RenderingDevice.DataFormat.R32g32Sfloat,
+            Format = RenderingDevice.DataFormat.R32G32Sfloat,
             Stride = vtxStride,
             Offset = 0
         };
@@ -80,7 +80,7 @@ internal class RdRenderer : IRenderer
         using RDVertexAttribute attrUvs = new()
         {
             Location = 1,
-            Format = RenderingDevice.DataFormat.R32g32Sfloat,
+            Format = RenderingDevice.DataFormat.R32G32Sfloat,
             Stride = vtxStride,
             Offset = sizeof(float) * 2
         };
@@ -88,7 +88,7 @@ internal class RdRenderer : IRenderer
         using RDVertexAttribute attrColors = new()
         {
             Location = 2,
-            Format = RenderingDevice.DataFormat.R8g8b8a8Unorm,
+            Format = RenderingDevice.DataFormat.R8G8B8A8Unorm,
             Stride = vtxStride,
             Offset = sizeof(float) * 4
         };
@@ -202,7 +202,7 @@ internal class RdRenderer : IRenderer
                 _usedTextures.Add(texid);
                 if (!_uniformSets.ContainsKey(texid))
                 {
-                    RID texrid = RenderingServer.TextureGetRdTexture(Util.ConstructRID((ulong)texid));
+                    Rid texrid = RenderingServer.TextureGetRdTexture(Util.ConstructRid((ulong)texid));
                     using RDUniform uniform = new()
                     {
                         Binding = 0,
@@ -211,7 +211,7 @@ internal class RdRenderer : IRenderer
                     uniform.AddId(_sampler);
                     uniform.AddId(texrid);
                     _uniformArray[0] = uniform;
-                    RID uniformSet = RD.UniformSetCreate(_uniformArray, _shader, 0);
+                    Rid uniformSet = RD.UniformSetCreate(_uniformArray, _shader, 0);
                     _uniformSets[texid] = uniformSet;
                 }
             }
@@ -227,7 +227,7 @@ internal class RdRenderer : IRenderer
 #if IMGUI_GODOT_DEV
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
 #endif
-        RID fb = GetFramebuffer(vp);
+        Rid fb = GetFramebuffer(vp);
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
@@ -289,14 +289,14 @@ internal class RdRenderer : IRenderer
                 if (drawCmd.ElemCount == 0)
                     continue;
 
-                RID idxArray = RD.IndexArrayCreate(_idxBuffer,
+                Rid idxArray = RD.IndexArrayCreate(_idxBuffer,
                     (uint)(drawCmd.IdxOffset + globalIdxOffset),
                     drawCmd.ElemCount);
 
                 long voff = (drawCmd.VtxOffset + globalVtxOffset) * vertSize;
                 _srcBuffers[0] = _srcBuffers[1] = _srcBuffers[2] = _vtxBuffer;
                 _vtxOffsets[0] = _vtxOffsets[1] = _vtxOffsets[2] = voff;
-                RID vtxArray = RD.VertexArrayCreate(
+                Rid vtxArray = RD.VertexArrayCreate(
                     (uint)cmdList.VtxBuffer.Size,
                     _vtxFormat,
                     _srcBuffers,
@@ -311,7 +311,7 @@ internal class RdRenderer : IRenderer
                     drawCmd.ClipRect.Y,
                     drawCmd.ClipRect.Z - drawCmd.ClipRect.X,
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y);
-                clipRect.Position -= drawData.DisplayPos.ToVector2i();
+                clipRect.Position -= drawData.DisplayPos.ToVector2I();
                 RD.DrawListEnableScissor(dl, clipRect);
 
                 RD.DrawListDraw(dl, true, 1);
@@ -352,16 +352,16 @@ internal class RdRenderer : IRenderer
             RD.FreeRid(_vtxBuffer);
     }
 
-    private RID GetFramebuffer(Viewport vp)
+    private Rid GetFramebuffer(Viewport vp)
     {
-        RID vprid = vp.GetViewportRid();
-        if (_framebuffers.TryGetValue(vprid, out RID fb))
+        Rid vprid = vp.GetViewportRid();
+        if (_framebuffers.TryGetValue(vprid, out Rid fb))
         {
             if (RD.FramebufferIsValid(fb))
                 return fb;
         }
 
-        RID vptex = RenderingServer.TextureGetRdTexture(vp.GetTexture().GetRid());
+        Rid vptex = RenderingServer.TextureGetRdTexture(vp.GetTexture().GetRid());
         fb = RD.FramebufferCreate(new() { vptex });
         _framebuffers[vprid] = fb;
         return fb;

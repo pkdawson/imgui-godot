@@ -7,22 +7,22 @@ namespace ImGuiGodot.Internal;
 
 internal static class Util
 {
-    public static readonly Func<ulong, RID> ConstructRID;
+    public static readonly Func<ulong, Rid> ConstructRid;
 
     static Util()
     {
-        ConstructorInfo cinfo = typeof(RID).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
+        ConstructorInfo cinfo = typeof(Rid).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) });
         if (cinfo is null)
         {
-            throw new PlatformNotSupportedException("failed to get RID constructor");
+            throw new PlatformNotSupportedException("failed to get Rid constructor");
         }
 
-        DynamicMethod dm = new("ConstructRID", typeof(RID), new[] { typeof(ulong) });
+        DynamicMethod dm = new("ConstructRid", typeof(Rid), new[] { typeof(ulong) });
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Newobj, cinfo);
         il.Emit(OpCodes.Ret);
-        ConstructRID = dm.CreateDelegate<Func<ulong, RID>>();
+        ConstructRid = dm.CreateDelegate<Func<ulong, Rid>>();
     }
 
     public static void AddLayerSubViewport(Node parent, out SubViewportContainer subViewportContainer, out SubViewport subViewport)
