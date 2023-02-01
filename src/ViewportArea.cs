@@ -15,7 +15,7 @@ public partial class ViewportArea : Area3D
         decalTexture = GD.Load<Texture2D>("res://data/icon.svg");
     }
 
-    public override void _InputEvent(Camera3D cam, InputEvent evt, Vector3 pos, Vector3 normal, long shapeIdx)
+    public override void _InputEvent(Camera3D cam, InputEvent evt, Vector3 pos, Vector3 normal, int shapeIdx)
     {
         if (evt is InputEventMouseMotion)
         {

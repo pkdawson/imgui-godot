@@ -43,7 +43,7 @@ offset_top = -64.0
 grow_horizontal = 0
 grow_vertical = 0
 texture = ExtResource("1_c7hdb")
-ignore_texture_size = true
+expand_mode = 1
 
 [node name="Button1" type="Button" parent="."]
 layout_mode = 0
@@ -56,6 +56,7 @@ theme_override_font_sizes/font_size = 24
 text = "Switch scene"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -66,28 +67,17 @@ grow_vertical = 0
 
 [node name="CenterContainer" type="CenterContainer" parent="PanelContainer"]
 layout_mode = 2
-offset_right = 256.0
-offset_bottom = 143.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/CenterContainer"]
 layout_mode = 2
-offset_left = 40.0
-offset_top = 23.0
-offset_right = 215.0
-offset_bottom = 119.0
 
 [node name="Label" type="Label" parent="PanelContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
-offset_right = 175.0
-offset_bottom = 26.0
 text = "Content scale mode"
 horizontal_alignment = 1
 
 [node name="ButtonCIE" type="Button" parent="PanelContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
-offset_top = 30.0
-offset_right = 175.0
-offset_bottom = 61.0
 focus_mode = 0
 toggle_mode = true
 button_pressed = true
@@ -96,9 +86,6 @@ text = "canvas_items/expand"
 
 [node name="ButtonD" type="Button" parent="PanelContainer/CenterContainer/VBoxContainer"]
 layout_mode = 2
-offset_top = 65.0
-offset_right = 175.0
-offset_bottom = 96.0
 focus_mode = 0
 toggle_mode = true
 button_group = ExtResource("4_7oj01")

@@ -136,7 +136,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     private void OnWindowSizeChanged()
     {
-        _subViewport.Size = _window.Size;
+        //_subViewport.Size = _window.Size;
     }
 
     public override void _ExitTree()
@@ -175,15 +175,15 @@ public partial class ImGuiLayer : CanvasLayer
     {
         // workaround for missing size change signal
         // TODO: debug this in Godot
-        if (++sizeCheck == 30)
-        {
-            sizeCheck = 0;
-            var winSize = _window.Size;
-            if (_subViewport.Size != winSize)
-            {
-                _subViewport.Size = winSize;
-            }
-        }
+        //if (++sizeCheck == 30)
+        //{
+        //    sizeCheck = 0;
+        //    var winSize = _window.Size;
+        //    if (_subViewport.Size != winSize)
+        //    {
+        //        _subViewport.Size = winSize;
+        //    }
+        //}
     }
 
     public override void _Process(double delta)
@@ -192,7 +192,7 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.Render(_subViewport);
     }
 
-    public override void _Notification(long what)
+    public override void _Notification(int what)
     {
         Internal.Input.ProcessNotification(what);
     }
