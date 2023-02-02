@@ -9,7 +9,7 @@ public partial class MyNode : Node
 
     public override void _Ready()
     {
-        _window = (Window)GetViewport();
+        _window = GetWindow();
         GetNode<Button>("../Button1").Pressed += OnButton1Pressed;
     }
 

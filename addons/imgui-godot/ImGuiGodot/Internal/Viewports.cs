@@ -241,8 +241,9 @@ internal static partial class Viewports
 
     public static void Init()
     {
-        _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetViewport() as Window);
+        _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetWindow());
 
+        ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         InitPlatformInterface();
         UpdateMonitors();
     }

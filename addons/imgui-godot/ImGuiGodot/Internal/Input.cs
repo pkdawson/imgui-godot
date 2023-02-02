@@ -1,16 +1,33 @@
 using Godot;
 using ImGuiNET;
 using System;
+using System.Runtime.InteropServices;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot.Internal;
 
-internal static class Input
+internal static partial class Input
 {
     internal static SubViewport CurrentSubViewport { get; set; }
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
+
+#if GODOT_WINDOWS
+#if NET7_0_OR_GREATER
+    [LibraryImport("user32.dll", EntryPoint = "PostMessageA")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    [LibraryImport("user32.dll")]
+    private static partial IntPtr GetCapture();
+#else
+    [DllImport("user32.dll", EntryPoint = "PostMessageA")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetCapture();
+#endif
+#endif
 
     public static void Update(ImGuiIOPtr io)
     {
@@ -93,6 +110,15 @@ internal static class Input
             {
                 case MouseButton.Left:
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
+#if GODOT_WINDOWS
+                    if (viewportsEnable && !mb.Pressed)
+                    {
+                        // if the left mouse button is released, the mouse almost certainly should not be captured
+                        IntPtr hwnd = GetCapture();
+                        if (hwnd != IntPtr.Zero)
+                            PostMessage(hwnd, 0x202 /* WM_LBUTTONUP */, 0, 0);
+                    }
+#endif
                     break;
                 case MouseButton.Right:
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Right, mb.Pressed);

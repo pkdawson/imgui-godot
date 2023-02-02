@@ -85,7 +85,7 @@ public partial class ImGuiLayer : CanvasLayer
     {
         Instance = this;
         _headless = DisplayServer.GetName() == "headless";
-        _window = (Window)GetViewport();
+        _window = GetWindow();
 
         CheckContentScale();
 
