@@ -1,8 +1,11 @@
 using Godot;
 using ImGuiNET;
 using System;
-using System.Runtime.InteropServices;
 using CursorShape = Godot.DisplayServer.CursorShape;
+
+#pragma warning disable IDE0005
+using System.Runtime.InteropServices;
+#pragma warning restore IDE0005
 
 namespace ImGuiGodot.Internal;
 
