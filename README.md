@@ -1,6 +1,6 @@
 # Dear ImGui plugin for Godot 4 (C#)
 
-![](https://img.shields.io/static/v1?label=Godot%204.0&message=beta15&color=blue&logo=godotengine)
+![](https://img.shields.io/static/v1?label=Godot%204.0&message=beta17&color=blue&logo=godotengine)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
@@ -23,7 +23,7 @@ public partial class MyNode : Node
 
 Download
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.5.4&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.5.4.zip)
+[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.5.5&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.5.5.zip)
 
 ## Getting Started
 
@@ -86,7 +86,7 @@ That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "v3.5.4",
+      "checkout": "v3.5.5",
       "subfolder": "addons/imgui-godot"
     }
   }
