@@ -47,7 +47,7 @@ public partial class ImGuiLayer : CanvasLayer
     private int sizeCheck = 0;
     private bool _headless = false;
 
-    private partial class UpdateFirst : Node
+    private sealed partial class UpdateFirst : Node
     {
         public Viewport GuiViewport { get; set; }
         private uint _counter = 0;

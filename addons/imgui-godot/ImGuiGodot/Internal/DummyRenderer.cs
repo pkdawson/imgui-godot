@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace ImGuiGodot.Internal;
 
-internal class DummyRenderer : IRenderer
+internal sealed class DummyRenderer : IRenderer
 {
     public string Name => "imgui_impl_godot4_dummy";
 

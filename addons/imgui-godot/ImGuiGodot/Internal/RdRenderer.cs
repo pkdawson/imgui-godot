@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal class RdRenderer : IRenderer
+internal sealed class RdRenderer : IRenderer
 {
     private readonly RenderingDevice RD;
     private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };

@@ -11,6 +11,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet: ["6.0.x", "7.0.x"]
+
+    name: .NET ${{ matrix.dotnet }}
 
     env:
       DemoProj: Dear ImGui for Godot Demo.csproj
@@ -21,7 +26,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: ${{ matrix.dotnet }}
 
       - name: Modify .editorconfig
         run: |

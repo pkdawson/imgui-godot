@@ -10,7 +10,7 @@ internal static class Fonts
 {
     private static Texture2D _fontTexture;
 
-    private class FontParams
+    private sealed class FontParams
     {
         public FontFile Font { get; init; }
         public int FontSize { get; init; }

@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal class CanvasRenderer : IRenderer
+internal sealed class CanvasRenderer : IRenderer
 {
-    private class ViewportData
+    private sealed class ViewportData
     {
         public Rid Canvas { set; get; }
         public Rid RootCanvasItem { set; get; }

@@ -6,7 +6,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace ImGuiGodot.Internal;
 
-internal class GodotImGuiWindow : IDisposable
+internal sealed class GodotImGuiWindow : IDisposable
 {
     private readonly GCHandle _gcHandle;
     private readonly ImGuiViewportPtr _vp;
@@ -117,12 +117,21 @@ internal class GodotImGuiWindow : IDisposable
     }
 }
 
-internal static class Viewports
+internal static partial class Viewports
 {
+#if NET7_0_OR_GREATER
+    [LibraryImport("cimgui")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
+    [LibraryImport("cimgui")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowSize(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
+#else
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern unsafe void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern unsafe void ImGuiPlatformIO_Set_Platform_GetWindowSize(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
+#endif
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void Platform_CreateWindow(ImGuiViewportPtr vp);
