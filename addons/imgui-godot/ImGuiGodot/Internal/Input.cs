@@ -3,10 +3,6 @@ using ImGuiNET;
 using System;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
-#pragma warning disable IDE0005
-using System.Runtime.InteropServices;
-#pragma warning restore IDE0005
-
 namespace ImGuiGodot.Internal;
 
 internal static partial class Input
@@ -15,22 +11,6 @@ internal static partial class Input
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-
-#if GODOT_WINDOWS
-#if NET7_0_OR_GREATER
-    [LibraryImport("user32.dll", EntryPoint = "PostMessageA")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
-    [LibraryImport("user32.dll")]
-    private static partial IntPtr GetCapture();
-#else
-    [DllImport("user32.dll", EntryPoint = "PostMessageA")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetCapture();
-#endif
-#endif
 
     public static void Update(ImGuiIOPtr io)
     {
@@ -114,13 +94,9 @@ internal static partial class Input
                 case MouseButton.Left:
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
 #if GODOT_WINDOWS
+                    // if the left mouse button is released, the mouse almost certainly should not be captured
                     if (viewportsEnable && !mb.Pressed)
-                    {
-                        // if the left mouse button is released, the mouse almost certainly should not be captured
-                        IntPtr hwnd = GetCapture();
-                        if (hwnd != IntPtr.Zero)
-                            PostMessage(hwnd, 0x202 /* WM_LBUTTONUP */, 0, 0);
-                    }
+                        Viewports.MouseCaptureWorkaround();
 #endif
                     break;
                 case MouseButton.Right:

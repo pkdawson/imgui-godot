@@ -120,6 +120,12 @@ internal sealed class GodotImGuiWindow : IDisposable
 internal static partial class Viewports
 {
 #if NET7_0_OR_GREATER
+    [LibraryImport("user32.dll", EntryPoint = "PostMessageA")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    [LibraryImport("user32.dll")]
+    private static partial IntPtr GetCapture();
+
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
     private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
@@ -127,6 +133,12 @@ internal static partial class Viewports
     [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
     private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowSize(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
 #else
+    [DllImport("user32.dll", EntryPoint = "PostMessageA")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PostMessage(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetCapture();
+
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern unsafe void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
@@ -179,6 +191,15 @@ internal static partial class Viewports
 
     //private static bool _wantUpdateMonitors = true;
     private static GodotImGuiWindow _mainWindow;
+
+#if GODOT_WINDOWS
+    public static void MouseCaptureWorkaround()
+    {
+        IntPtr hwnd = GetCapture();
+        if (hwnd != IntPtr.Zero)
+            PostMessage(hwnd, 0x202 /* WM_LBUTTONUP */, 0, 0);
+    }
+#endif
 
     internal static Vector2 ToImVec2(this Vector2I v)
     {
