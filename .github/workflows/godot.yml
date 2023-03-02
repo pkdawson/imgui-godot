@@ -10,7 +10,7 @@ on:
 
 env:
   gdver: "4.0"
-  gdrel: rc3
+  gdrel: stable
 
 jobs:
   export_game:
@@ -31,7 +31,7 @@ jobs:
       - name: Download Godot
         run: |
           cd $HOME
-          wget https://downloads.tuxfamily.org/godotengine/${{ env.gdver }}/${{ env.gdrel }}/mono/Godot_v${{ env.gdver }}-${{ env.gdrel }}_mono_linux_x86_64.zip
+          wget https://downloads.tuxfamily.org/godotengine/${{ env.gdver }}/mono/Godot_v${{ env.gdver }}-${{ env.gdrel }}_mono_linux_x86_64.zip
           unzip Godot_v${{ env.gdver }}-${{ env.gdrel }}_mono_linux_x86_64.zip
 
       # HACK: no better solution for now
