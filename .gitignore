@@ -16,3 +16,4 @@ msvc.*/
 *.dll
 *.pdb
 doc/cpp-demo/MyGame/addons
+*.old.*

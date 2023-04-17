@@ -136,9 +136,11 @@ public partial class ImGuiLayer : CanvasLayer
 
     private void OnWindowSizeChanged()
     {
+        _subViewport.SizeChanged -= OnWindowSizeChanged;
         _subViewportContainer.Stretch = false;
         _subViewport.Size = _window.Size;
         _subViewportContainer.Stretch = true;
+        _subViewport.SizeChanged += OnWindowSizeChanged;
     }
 
     public override void _ExitTree()
