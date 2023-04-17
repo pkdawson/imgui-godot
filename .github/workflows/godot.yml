@@ -9,7 +9,7 @@ on:
       - godot3
 
 env:
-  gdver: "4.0"
+  gdver: "4.0.2"
   gdrel: stable
 
 jobs:
