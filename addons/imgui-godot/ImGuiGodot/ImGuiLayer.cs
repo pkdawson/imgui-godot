@@ -125,22 +125,11 @@ public partial class ImGuiLayer : CanvasLayer
             ProcessMode = ProcessModeEnum.Always,
         };
         AddChild(_updateFirst);
-
-        _subViewport.SizeChanged += OnWindowSizeChanged;
     }
 
     public override void _Ready()
     {
         OnChangeVisibility();
-    }
-
-    private void OnWindowSizeChanged()
-    {
-        _subViewport.SizeChanged -= OnWindowSizeChanged;
-        _subViewportContainer.Stretch = false;
-        _subViewport.Size = _window.Size;
-        _subViewportContainer.Stretch = true;
-        _subViewport.SizeChanged += OnWindowSizeChanged;
     }
 
     public override void _ExitTree()
@@ -175,25 +164,16 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
-    public override void _PhysicsProcess(double delta)
-    {
-        // workaround for missing size change signal
-        // TODO: debug this in Godot
-        if (++sizeCheck == 30)
-        {
-            sizeCheck = 0;
-            var winSize = _window.Size;
-            if (_subViewport.Size != winSize)
-            {
-                _subViewportContainer.Stretch = false;
-                _subViewport.Size = winSize;
-                _subViewportContainer.Stretch = true;
-            }
-        }
-    }
-
     public override void _Process(double delta)
     {
+        var winSize = _window.Size;
+        if (_subViewport.Size != winSize)
+        {
+            _subViewportContainer.Stretch = false;
+            _subViewport.Size = winSize;
+            _subViewportContainer.Stretch = true;
+        }
+
         EmitSignal(SignalName.ImGuiLayout);
         ImGuiGD.Render(_subViewport);
     }
