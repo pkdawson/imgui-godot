@@ -40,8 +40,10 @@ public partial class ImGuiLayer : CanvasLayer
     [Signal] public delegate void ImGuiLayoutEventHandler();
 
     private Window _window;
-    private SubViewportContainer _subViewportContainer;
-    private SubViewport _subViewport;
+    private Rid _subViewportRid;
+    private Vector2I _subViewportSize = Vector2I.Zero;
+    private Rid _ci;
+    private Transform2D _finalTransform = Transform2D.Identity;
     private UpdateFirst _updateFirst;
     private static readonly HashSet<GodotObject> _connectedObjects = new();
     private int sizeCheck = 0;
@@ -49,13 +51,14 @@ public partial class ImGuiLayer : CanvasLayer
 
     private sealed partial class UpdateFirst : Node
     {
-        public Viewport GuiViewport { get; set; }
         private uint _counter = 0;
         private ImGuiLayer _parent;
+        private Window _window;
 
         public override void _Ready()
         {
             _parent = (ImGuiLayer)GetParent();
+            _window = GetWindow();
             _parent.VisibilityChanged += OnChangeVisibility;
             OnChangeVisibility();
         }
@@ -69,7 +72,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, GuiViewport.GetVisibleRect().Size);
+            ImGuiGD.Update(delta, _window.Size);
         }
 
         private void OnChangeVisibility()
@@ -113,15 +116,16 @@ public partial class ImGuiLayer : CanvasLayer
             ImGuiGD.AddFontDefault();
         }
         ImGuiGD.RebuildFontAtlas();
-        Internal.Util.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
+        _subViewportRid = Internal.Util.AddLayerSubViewport(this);
+        _ci = RenderingServer.CanvasItemCreate();
+        RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
-        Internal.State.Renderer.InitViewport(_subViewport.GetViewportRid());
+        Internal.State.Renderer.InitViewport(_subViewportRid);
 
         _updateFirst = new UpdateFirst
         {
             Name = "ImGuiLayer_UpdateFirst",
             ProcessPriority = int.MinValue,
-            GuiViewport = _subViewport,
             ProcessMode = ProcessModeEnum.Always,
         };
         AddChild(_updateFirst);
@@ -135,6 +139,8 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _ExitTree()
     {
         ImGuiGD.Shutdown();
+        RenderingServer.FreeRid(_ci);
+        RenderingServer.FreeRid(_subViewportRid);
 #if IMGUI_GODOT_DEV
         API.Free();
 #endif
@@ -156,6 +162,8 @@ public partial class ImGuiLayer : CanvasLayer
         {
             ProcessMode = ProcessModeEnum.Disabled;
             Internal.State.Renderer.OnHide();
+            _subViewportSize = Vector2I.Zero;
+            RenderingServer.CanvasItemClear(_ci);
             //foreach (Node child in GetChildren())
             //{
             //    if (child is Window w)
@@ -167,15 +175,21 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _Process(double delta)
     {
         var winSize = _window.Size;
-        if (_subViewport.Size != winSize)
+        var ft = _window.GetFinalTransform();
+        if (_subViewportSize != winSize || _finalTransform != ft)
         {
-            _subViewportContainer.Stretch = false;
-            _subViewport.Size = winSize;
-            _subViewportContainer.Stretch = true;
+            // this is more or less how SubViewportContainer works
+            _subViewportSize = winSize;
+            _finalTransform = ft;
+            RenderingServer.ViewportSetSize(_subViewportRid, _subViewportSize.X, _subViewportSize.Y);
+            Rid vptex = RenderingServer.ViewportGetTexture(_subViewportRid);
+            RenderingServer.CanvasItemClear(_ci);
+            RenderingServer.CanvasItemSetTransform(_ci, ft.AffineInverse());
+            RenderingServer.CanvasItemAddTextureRect(_ci, new(0, 0, _subViewportSize.X, _subViewportSize.Y), vptex);
         }
 
         EmitSignal(SignalName.ImGuiLayout);
-        ImGuiGD.Render(_subViewport.GetViewportRid());
+        ImGuiGD.Render(_subViewportRid);
     }
 
     public override void _Notification(int what)
@@ -269,12 +283,7 @@ public partial class ImGuiLayer : CanvasLayer
         switch (_window.ContentScaleMode)
         {
             case Window.ContentScaleModeEnum.Disabled:
-                break;
             case Window.ContentScaleModeEnum.CanvasItems:
-                if (_window.ContentScaleAspect != Window.ContentScaleAspectEnum.Expand)
-                {
-                    PrintErrContentScale();
-                }
                 break;
             case Window.ContentScaleModeEnum.Viewport:
                 PrintErrContentScale();
@@ -285,7 +294,7 @@ public partial class ImGuiLayer : CanvasLayer
     private void PrintErrContentScale()
     {
         GD.PrintErr($"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}" +
-            $" or {Window.ContentScaleModeEnum.CanvasItems}/{Window.ContentScaleAspectEnum.Expand}");
+            $" or {Window.ContentScaleModeEnum.CanvasItems}");
         GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }

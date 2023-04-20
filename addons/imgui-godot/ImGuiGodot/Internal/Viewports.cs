@@ -12,8 +12,9 @@ internal sealed class GodotImGuiWindow : IDisposable
     private readonly ImGuiViewportPtr _vp;
 
     public Window GodotWindow { get; init; }
-    public SubViewport LayerSvp { get; init; }
+    public Rid ViewportRid { get; init; }
 
+    // sub window
     public GodotImGuiWindow(ImGuiViewportPtr vp)
     {
         _gcHandle = GCHandle.Alloc(this);
@@ -42,13 +43,14 @@ internal sealed class GodotImGuiWindow : IDisposable
         // need to do this after AddChild
         GodotWindow.Transparent = true;
 
-        Util.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
-        LayerSvp = svp;
+        // it's our window, so just draw directly to the root viewport
+        ViewportRid = GodotWindow.GetViewportRid();
 
-        State.Renderer.InitViewport(LayerSvp.GetViewportRid());
+        State.Renderer.InitViewport(ViewportRid);
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
+    // main window
     public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
     {
         _gcHandle = GCHandle.Alloc(this);
@@ -276,7 +278,7 @@ internal static partial class Viewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            State.Renderer.RenderDrawData(window.LayerSvp.GetViewportRid(), vp.DrawData);
+            State.Renderer.RenderDrawData(window.ViewportRid, vp.DrawData);
         }
     }
 

@@ -25,27 +25,14 @@ internal static class Util
         ConstructRid = dm.CreateDelegate<Func<ulong, Rid>>();
     }
 
-    public static void AddLayerSubViewport(Node parent, out SubViewportContainer subViewportContainer, out SubViewport subViewport)
+    public static Rid AddLayerSubViewport(Node parent)
     {
-        subViewportContainer = new SubViewportContainer
-        {
-            Name = "ImGuiLayer_SubViewportContainer",
-            LayoutMode = 1, // LAYOUT_MODE_ANCHORS
-            AnchorsPreset = (int)Control.LayoutPreset.FullRect,
-            MouseFilter = Control.MouseFilterEnum.Ignore,
-            Stretch = true
-        };
-
-        subViewport = new SubViewport
-        {
-            Name = "ImGuiLayer_SubViewport",
-            TransparentBg = true,
-            HandleInputLocally = false,
-            GuiDisableInput = true,
-            RenderTargetUpdateMode = SubViewport.UpdateMode.Always
-        };
-
-        subViewportContainer.AddChild(subViewport);
-        parent.AddChild(subViewportContainer);
+        Rid svp = RenderingServer.ViewportCreate();
+        RenderingServer.ViewportSetTransparentBackground(svp, true);
+        RenderingServer.ViewportSetUpdateMode(svp, RenderingServer.ViewportUpdateMode.Always);
+        RenderingServer.ViewportSetClearMode(svp, RenderingServer.ViewportClearMode.Always);
+        RenderingServer.ViewportSetActive(svp, true);
+        RenderingServer.ViewportSetParentViewport(svp, parent.GetWindow().GetViewportRid());
+        return svp;
     }
 }

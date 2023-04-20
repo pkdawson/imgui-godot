@@ -56,7 +56,6 @@ theme_override_font_sizes/font_size = 24
 text = "Switch scene"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
