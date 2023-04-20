@@ -155,16 +155,13 @@ internal sealed class RdRenderer : IRenderer
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
     }
 
-    public void InitViewport(Viewport vp)
+    public void InitViewport(Rid vprid)
     {
-        if (vp is SubViewport svp)
-        {
-            svp.RenderTargetUpdateMode = SubViewport.UpdateMode.Disabled;
-            svp.RenderTargetClearMode = SubViewport.ClearMode.Never;
-        }
+        RenderingServer.ViewportSetUpdateMode(vprid, RenderingServer.ViewportUpdateMode.Disabled);
+        RenderingServer.ViewportSetClearMode(vprid, RenderingServer.ViewportClearMode.Never);
     }
 
-    public void CloseViewport(Viewport vp)
+    public void CloseViewport(Rid vprid)
     {
     }
 
@@ -222,12 +219,12 @@ internal sealed class RdRenderer : IRenderer
         _bufPool.Return(vertBuf);
     }
 
-    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
+    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
     {
 #if IMGUI_GODOT_DEV
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
 #endif
-        Rid fb = GetFramebuffer(vp);
+        Rid fb = GetFramebuffer(vprid);
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
@@ -352,16 +349,15 @@ internal sealed class RdRenderer : IRenderer
             RD.FreeRid(_vtxBuffer);
     }
 
-    private Rid GetFramebuffer(Viewport vp)
+    private Rid GetFramebuffer(Rid vprid)
     {
-        Rid vprid = vp.GetViewportRid();
         if (_framebuffers.TryGetValue(vprid, out Rid fb))
         {
             if (RD.FramebufferIsValid(fb))
                 return fb;
         }
 
-        Rid vptex = RenderingServer.TextureGetRdTexture(vp.GetTexture().GetRid());
+        Rid vptex = RenderingServer.TextureGetRdTexture(RenderingServer.ViewportGetTexture(vprid));
         fb = RD.FramebufferCreate(new() { vptex });
         _framebuffers[vprid] = fb;
         return fb;

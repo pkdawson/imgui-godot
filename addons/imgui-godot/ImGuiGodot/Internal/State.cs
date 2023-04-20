@@ -9,9 +9,9 @@ internal interface IRenderer
 {
     public string Name { get; }
     public void Init(ImGuiIOPtr io);
-    public void InitViewport(Viewport vp);
-    public void CloseViewport(Viewport vp);
-    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData);
+    public void InitViewport(Rid vprid);
+    public void CloseViewport(Rid vprid);
+    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData);
     public void OnHide();
     public void Shutdown();
 }
@@ -75,10 +75,10 @@ internal static class State
         }
     }
 
-    public static void Render(Viewport vp)
+    public static void Render(Rid vprid)
     {
         ImGui.Render();
-        Renderer.RenderDrawData(vp, ImGui.GetDrawData());
+        Renderer.RenderDrawData(vprid, ImGui.GetDrawData());
 
         var io = ImGui.GetIO();
         if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))

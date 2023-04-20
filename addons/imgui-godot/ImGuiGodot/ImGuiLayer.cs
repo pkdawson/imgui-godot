@@ -69,7 +69,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, GuiViewport);
+            ImGuiGD.Update(delta, GuiViewport.GetVisibleRect().Size);
         }
 
         private void OnChangeVisibility()
@@ -115,7 +115,7 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.RebuildFontAtlas();
         Internal.Util.AddLayerSubViewport(this, out _subViewportContainer, out _subViewport);
 
-        Internal.State.Renderer.InitViewport(_subViewport);
+        Internal.State.Renderer.InitViewport(_subViewport.GetViewportRid());
 
         _updateFirst = new UpdateFirst
         {
@@ -175,7 +175,7 @@ public partial class ImGuiLayer : CanvasLayer
         }
 
         EmitSignal(SignalName.ImGuiLayout);
-        ImGuiGD.Render(_subViewport);
+        ImGuiGD.Render(_subViewport.GetViewportRid());
     }
 
     public override void _Notification(int what)

@@ -45,7 +45,7 @@ internal sealed class GodotImGuiWindow : IDisposable
         Util.AddLayerSubViewport(GodotWindow, out SubViewportContainer svpContainer, out SubViewport svp);
         LayerSvp = svp;
 
-        State.Renderer.InitViewport(LayerSvp);
+        State.Renderer.InitViewport(LayerSvp.GetViewportRid());
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
@@ -276,7 +276,7 @@ internal static partial class Viewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            State.Renderer.RenderDrawData(window.LayerSvp, vp.DrawData);
+            State.Renderer.RenderDrawData(window.LayerSvp.GetViewportRid(), vp.DrawData);
         }
     }
 

@@ -11,11 +11,11 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void InitViewport(Viewport vp)
+    public void InitViewport(Rid vprid)
     {
     }
 
-    public void CloseViewport(Viewport vp)
+    public void CloseViewport(Rid vprid)
     {
     }
 
@@ -23,7 +23,7 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
+    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
     {
     }
 

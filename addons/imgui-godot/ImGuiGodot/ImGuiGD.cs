@@ -107,11 +107,10 @@ public static class ImGuiGD
         Internal.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
-    public static void Update(double delta, Viewport vp)
+    public static void Update(double delta, Vector2 displaySize)
     {
         var io = ImGui.GetIO();
-        var vpSize = vp.GetVisibleRect().Size;
-        io.DisplaySize = new(vpSize.X, vpSize.Y);
+        io.DisplaySize = new(displaySize.X, displaySize.Y);
         io.DeltaTime = (float)delta;
 
         Internal.Input.Update(io);
@@ -119,9 +118,9 @@ public static class ImGuiGD
         ImGui.NewFrame();
     }
 
-    public static void Render(Viewport vp)
+    public static void Render(Rid vprid)
     {
-        Internal.State.Render(vp);
+        Internal.State.Render(vprid);
     }
 
     public static void Shutdown()

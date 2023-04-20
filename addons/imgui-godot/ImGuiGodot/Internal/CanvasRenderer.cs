@@ -25,10 +25,8 @@ internal sealed class CanvasRenderer : IRenderer
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
     }
 
-    public void InitViewport(Viewport vp)
+    public void InitViewport(Rid vprid)
     {
-        Rid vprid = vp.GetViewportRid();
-
         Rid canvas = RenderingServer.CanvasCreate();
         Rid canvasItem = RenderingServer.CanvasItemCreate();
         RenderingServer.ViewportAttachCanvas(vprid, canvas);
@@ -41,9 +39,9 @@ internal sealed class CanvasRenderer : IRenderer
         };
     }
 
-    public void RenderDrawData(Viewport vp, ImDrawDataPtr drawData)
+    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
     {
-        ViewportData vd = _vpData[vp.GetViewportRid()];
+        ViewportData vd = _vpData[vprid];
         Rid parent = vd.RootCanvasItem;
 
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target;
@@ -168,9 +166,9 @@ internal sealed class CanvasRenderer : IRenderer
         }
     }
 
-    public void CloseViewport(Viewport vp)
+    public void CloseViewport(Rid vprid)
     {
-        ViewportData vd = _vpData[vp.GetViewportRid()];
+        ViewportData vd = _vpData[vprid];
         ClearCanvasItems(vd.RootCanvasItem);
         RenderingServer.FreeRid(vd.RootCanvasItem);
         RenderingServer.FreeRid(vd.Canvas);
