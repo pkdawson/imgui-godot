@@ -96,6 +96,7 @@ public partial class ImGuiLayer : CanvasLayer
         VisibilityChanged += OnChangeVisibility;
 
         ImGuiGD.ScaleToDpi = ScaleToDpi;
+        Internal.Input.Init(_window);
         ImGuiGD.Init(Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
         ImGui.GetIO().SetIniFilename(IniFilename);
         if (Font is not null)

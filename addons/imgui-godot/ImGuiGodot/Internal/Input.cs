@@ -11,23 +11,40 @@ internal static partial class Input
     internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private static Vector2 _mouseWheel = Vector2.Zero;
     private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
+    private static Window _mainWindow;
+
+    public static void Init(Window mainWindow)
+    {
+        // TODO: refactor class to non-static, make this a constructor
+        _mainWindow = mainWindow;
+    }
 
     public static void Update(ImGuiIOPtr io)
     {
+        var mousePos = DisplayServer.MouseGetPosition();
+
         if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
         {
-            var mousePos = DisplayServer.MouseGetPosition();
-            io.AddMousePosEvent(mousePos.X, mousePos.Y);
-
             if (io.WantSetMousePos)
             {
                 // TODO: get current focused window
+            }
+            else
+            {
+                io.AddMousePosEvent(mousePos.X, mousePos.Y);
             }
         }
         else
         {
             if (io.WantSetMousePos)
+            {
                 Godot.Input.WarpMouse(new(io.MousePos.X, io.MousePos.Y));
+            }
+            else
+            {
+                var winPos = _mainWindow.Position;
+                io.AddMousePosEvent(mousePos.X - winPos.X, mousePos.Y - winPos.Y);
+            }
         }
 
         // scrolling works better if we allow no more than one event per frame
@@ -83,8 +100,6 @@ internal static partial class Input
 
         if (evt is InputEventMouseMotion mm)
         {
-            if (!viewportsEnable)
-                io.AddMousePosEvent(mm.GlobalPosition.X, mm.GlobalPosition.Y);
             consumed = io.WantCaptureMouse;
         }
         else if (evt is InputEventMouseButton mb)
