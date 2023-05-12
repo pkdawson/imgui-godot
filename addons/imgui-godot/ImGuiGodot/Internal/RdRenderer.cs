@@ -4,6 +4,10 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Reflection;
+
+using FuncDrawListBegin = System.Func<Godot.Rid, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.Color[], float, uint, Godot.Rect2?, Godot.Collections.Array<Godot.Rid>, long>;
+using FuncDrawListBegin40 = System.Func<Godot.Rid, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.Color[], float, uint, Godot.Rect2?, Godot.Collections.Array, long>;
 
 namespace ImGuiGodot.Internal;
 
@@ -30,10 +34,13 @@ internal sealed class RdRenderer : IRenderer
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
-    private readonly Godot.Collections.Array _storageTextures = new();
+    private readonly Godot.Collections.Array<Rid> _storageTextures = new();
     private readonly Godot.Collections.Array<Rid> _srcBuffers = new();
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
+
+    private readonly FuncDrawListBegin _drawListBegin = null;
+    private readonly FuncDrawListBegin40 _drawListBegin40 = null;
 
     public string Name => "imgui_impl_godot4_rd";
 
@@ -43,6 +50,17 @@ internal sealed class RdRenderer : IRenderer
         if (RD is null)
         {
             throw new PlatformNotSupportedException("failed to get RenderingDevice");
+        }
+
+        // maintain compatibility with Godot 4.0
+        MethodInfo mi = typeof(RenderingDevice).GetMethod("DrawListBegin");
+        try
+        {
+            _drawListBegin = (FuncDrawListBegin)Delegate.CreateDelegate(typeof(FuncDrawListBegin), RD, mi);
+        }
+        catch
+        {
+            _drawListBegin40 = (FuncDrawListBegin40)Delegate.CreateDelegate(typeof(FuncDrawListBegin40), RD, mi);
         }
 
         // set up everything to match the official Vulkan backend as closely as possible
@@ -267,10 +285,15 @@ internal sealed class RdRenderer : IRenderer
             SetupBuffers(drawData);
 
         // draw
-        var dl = RD.DrawListBegin(fb,
-            RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
-            RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
-            _clearColors, 1f, 0, _zeroRect, _storageTextures);
+        long dl = _drawListBegin != null
+            ? _drawListBegin(fb,
+                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
+                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
+                _clearColors, 1f, 0, _zeroRect, _storageTextures)
+            : _drawListBegin40(fb,
+                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
+                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
+                _clearColors, 1f, 0, _zeroRect, (Godot.Collections.Array)_storageTextures);
         RD.DrawListBindRenderPipeline(dl, _pipeline);
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
 
