@@ -46,7 +46,7 @@ internal sealed class GodotImGuiWindow : IDisposable
         // it's our window, so just draw directly to the root viewport
         ViewportRid = GodotWindow.GetViewportRid();
 
-        State.Renderer.InitViewport(ViewportRid);
+        State.Instance.Renderer.InitViewport(ViewportRid);
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
@@ -70,7 +70,7 @@ internal sealed class GodotImGuiWindow : IDisposable
 
     private void OnWindowInput(InputEvent evt)
     {
-        Input.ProcessInput(evt, GodotWindow);
+        State.Instance.Input.ProcessInput(evt, GodotWindow);
     }
 
     public void ShowWindow()
@@ -119,7 +119,20 @@ internal sealed class GodotImGuiWindow : IDisposable
     }
 }
 
-internal static partial class Viewports
+internal static class ViewportsExts
+{
+    internal static Vector2 ToImVec2(this Vector2I v)
+    {
+        return new Vector2(v.X, v.Y);
+    }
+
+    internal static Vector2I ToVector2I(this Vector2 v)
+    {
+        return new Vector2I((int)v.X, (int)v.Y);
+    }
+}
+
+internal sealed partial class Viewports
 {
 #if NET7_0_OR_GREATER
     [LibraryImport("user32.dll", EntryPoint = "PostMessageA")]
@@ -192,7 +205,7 @@ internal static partial class Viewports
     private static readonly Platform_SetWindowTitle _setWindowTitle = Godot_SetWindowTitle;
 
     //private static bool _wantUpdateMonitors = true;
-    private static GodotImGuiWindow _mainWindow;
+    private readonly GodotImGuiWindow _mainWindow;
 
 #if GODOT_WINDOWS
     public static void MouseCaptureWorkaround()
@@ -202,16 +215,6 @@ internal static partial class Viewports
             PostMessage(hwnd, 0x202 /* WM_LBUTTONUP */, 0, 0);
     }
 #endif
-
-    internal static Vector2 ToImVec2(this Vector2I v)
-    {
-        return new Vector2(v.X, v.Y);
-    }
-
-    internal static Vector2I ToVector2I(this Vector2 v)
-    {
-        return new Vector2I((int)v.X, (int)v.Y);
-    }
 
     private static void UpdateMonitors()
     {
@@ -262,7 +265,7 @@ internal static partial class Viewports
         ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
     }
 
-    public static void Init()
+    public Viewports()
     {
         _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetWindow());
 
@@ -278,7 +281,7 @@ internal static partial class Viewports
         {
             var vp = pio.Viewports[i];
             var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            State.Renderer.RenderDrawData(window.ViewportRid, vp.DrawData);
+            State.Instance.Renderer.RenderDrawData(window.ViewportRid, vp.DrawData);
         }
     }
 

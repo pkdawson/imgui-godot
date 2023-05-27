@@ -86,6 +86,12 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _EnterTree()
     {
+        //var ctx = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
+        //ctx.Unloading += context =>
+        //{
+        //    GD.Print("unloading");
+        //};
+
         Instance = this;
         _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
@@ -96,8 +102,7 @@ public partial class ImGuiLayer : CanvasLayer
         VisibilityChanged += OnChangeVisibility;
 
         ImGuiGD.ScaleToDpi = ScaleToDpi;
-        Internal.Input.Init(_window);
-        ImGuiGD.Init(Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
+        ImGuiGD.Init(_window, Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
         ImGui.GetIO().SetIniFilename(IniFilename);
         if (Font is not null)
         {
@@ -121,7 +126,7 @@ public partial class ImGuiLayer : CanvasLayer
         _ci = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
-        Internal.State.Renderer.InitViewport(_subViewportRid);
+        Internal.State.Instance.Renderer.InitViewport(_subViewportRid);
 
         _updateFirst = new UpdateFirst
         {
@@ -162,7 +167,7 @@ public partial class ImGuiLayer : CanvasLayer
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
-            Internal.State.Renderer.OnHide();
+            Internal.State.Instance.Renderer.OnHide();
             _subViewportSize = Vector2I.Zero;
             RenderingServer.CanvasItemClear(_ci);
             //foreach (Node child in GetChildren())

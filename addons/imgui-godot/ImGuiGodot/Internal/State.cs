@@ -16,17 +16,23 @@ internal interface IRenderer
     public void Shutdown();
 }
 
-internal static class State
+internal sealed class State : IDisposable
 {
     private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
     private static IntPtr _rendererName = IntPtr.Zero;
-    private static IntPtr _iniFilenameBuffer = IntPtr.Zero;
-    internal static IRenderer Renderer { get; private set; }
+    private IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
-    public static void Init(IRenderer renderer)
+    internal Viewports Viewports { get; private set; }
+    internal Fonts Fonts { get; private set; }
+    internal Input Input { get; private set; }
+    internal IRenderer Renderer { get; private set; }
+    internal static State Instance { get; set; }
+
+    public State(Window mainWindow, IRenderer renderer)
     {
         Renderer = renderer;
-        Fonts.Init();
+        Input = new Input(mainWindow);
+        Fonts = new Fonts();
 
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
         {
@@ -54,10 +60,18 @@ internal static class State
         }
 
         Renderer.Init(io);
-        Viewports.Init();
+        Viewports = new Viewports();
     }
 
-    public static unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
+    public void Dispose()
+    {
+        if (ImGui.GetCurrentContext() != IntPtr.Zero)
+        {
+            ImGui.DestroyContext();
+        }
+    }
+
+    public unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
     {
         io.NativePtr->IniFilename = null;
 
@@ -75,7 +89,7 @@ internal static class State
         }
     }
 
-    public static void Render(Rid vprid)
+    public void Render(Rid vprid)
     {
         ImGui.Render();
         Renderer.RenderDrawData(vprid, ImGui.GetDrawData());

@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal static class Fonts
+internal sealed class Fonts
 {
-    private static Texture2D _fontTexture;
+    private Texture2D _fontTexture;
 
     private sealed class FontParams
     {
@@ -16,14 +16,14 @@ internal static class Fonts
         public int FontSize { get; init; }
         public bool Merge { get; init; }
     }
-    private static readonly List<FontParams> _fontConfiguration = new();
+    private readonly List<FontParams> _fontConfiguration = new();
 
-    public static void Init()
+    public Fonts()
     {
         _fontConfiguration.Clear();
     }
 
-    public static void ResetFonts()
+    public void ResetFonts()
     {
         var io = ImGui.GetIO();
         io.Fonts.Clear();
@@ -31,7 +31,7 @@ internal static class Fonts
         _fontConfiguration.Clear();
     }
 
-    public static void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile fontData, int fontSize, bool merge)
     {
         _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
     }
@@ -120,7 +120,7 @@ internal static class Fonts
         defaultStyle.Destroy();
     }
 
-    public static unsafe void RebuildFontAtlas(float scale)
+    public unsafe void RebuildFontAtlas(float scale)
     {
         var io = ImGui.GetIO();
         int fontIndex = -1;

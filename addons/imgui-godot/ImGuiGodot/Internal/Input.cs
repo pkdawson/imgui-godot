@@ -5,21 +5,20 @@ using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot.Internal;
 
-internal static partial class Input
+internal sealed class Input
 {
-    internal static SubViewport CurrentSubViewport { get; set; }
-    internal static System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
-    private static Vector2 _mouseWheel = Vector2.Zero;
-    private static ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private static Window _mainWindow;
+    internal SubViewport CurrentSubViewport { get; set; }
+    internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
+    private Vector2 _mouseWheel = Vector2.Zero;
+    private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
+    private readonly Window _mainWindow;
 
-    public static void Init(Window mainWindow)
+    public Input(Window mainWindow)
     {
-        // TODO: refactor class to non-static, make this a constructor
         _mainWindow = mainWindow;
     }
 
-    public static void Update(ImGuiIOPtr io)
+    public void Update(ImGuiIOPtr io)
     {
         var mousePos = DisplayServer.MouseGetPosition();
 
@@ -71,7 +70,7 @@ internal static partial class Input
         CurrentSubViewport = null;
     }
 
-    public static bool ProcessInput(InputEvent evt, Window window)
+    public bool ProcessInput(InputEvent evt, Window window)
     {
         var io = ImGui.GetIO();
         bool viewportsEnable = io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable);

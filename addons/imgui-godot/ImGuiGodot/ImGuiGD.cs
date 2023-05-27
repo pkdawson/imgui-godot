@@ -60,7 +60,7 @@ public static class ImGuiGD
     {
     }
 
-    public static void Init(float? scale = null, RendererType renderer = RendererType.RenderingDevice)
+    public static void Init(Window mainWindow, float? scale = null, RendererType renderer = RendererType.RenderingDevice)
     {
         if (IntPtr.Size != sizeof(ulong))
         {
@@ -78,7 +78,7 @@ public static class ImGuiGD
             renderer = RendererType.Canvas;
         }
 
-        Internal.State.Init(renderer switch
+        Internal.State.Instance = new(mainWindow, renderer switch
         {
             RendererType.Dummy => new Internal.DummyRenderer(),
             RendererType.Canvas => new Internal.CanvasRenderer(),
@@ -89,22 +89,22 @@ public static class ImGuiGD
 
     public static void ResetFonts()
     {
-        Internal.Fonts.ResetFonts();
+        Internal.State.Instance.Fonts.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        Internal.Fonts.AddFont(fontData, fontSize, merge);
+        Internal.State.Instance.Fonts.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        Internal.Fonts.AddFont(null, 13, false);
+        Internal.State.Instance.Fonts.AddFont(null, 13, false);
     }
 
     public static void RebuildFontAtlas()
     {
-        Internal.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
+        Internal.State.Instance.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
     public static void Update(double delta, Vector2 displaySize)
@@ -113,19 +113,19 @@ public static class ImGuiGD
         io.DisplaySize = new(displaySize.X, displaySize.Y);
         io.DeltaTime = (float)delta;
 
-        Internal.Input.Update(io);
+        Internal.State.Instance.Input.Update(io);
 
         ImGui.NewFrame();
     }
 
     public static void Render(Rid vprid)
     {
-        Internal.State.Render(vprid);
+        Internal.State.Instance.Render(vprid);
     }
 
     public static void Shutdown()
     {
-        Internal.State.Renderer.Shutdown();
+        Internal.State.Instance.Renderer.Shutdown();
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
             ImGui.DestroyContext();
     }
@@ -157,7 +157,7 @@ public static class ImGuiGD
     /// </returns>
     public static bool ProcessInput(InputEvent evt, Window window)
     {
-        return Internal.Input.ProcessInput(evt, window);
+        return Internal.State.Instance.Input.ProcessInput(evt, window);
     }
 
     /// <summary>
@@ -213,7 +213,7 @@ public static class ImGuiGD
     /// </summary>
     public static void SetIniFilename(this ImGuiIOPtr io, string fileName)
     {
-        Internal.State.SetIniFilename(io, fileName);
+        Internal.State.Instance.SetIniFilename(io, fileName);
     }
 }
 

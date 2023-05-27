@@ -53,6 +53,7 @@ public partial class ViewportArea : Area3D
                 foreach (var child in board.GetChildren())
                 {
                     board.RemoveChild(child);
+                    child.QueueFree();
                 }
             }
         }
