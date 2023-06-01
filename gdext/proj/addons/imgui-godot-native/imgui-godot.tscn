@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://b4ye4lwk30rew"]
+
+[node name="imgui-godot" type="ImGuiGodot"]
+process_priority = -2147483648

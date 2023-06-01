@@ -1,0 +1,6 @@
+[submodule "gdext/godot-cpp"]
+	path = gdext/godot-cpp
+	url = https://github.com/godotengine/godot-cpp
+[submodule "gdext/imgui"]
+	path = gdext/imgui
+	url = https://github.com/ocornut/imgui

@@ -17,3 +17,10 @@ msvc.*/
 *.pdb
 doc/cpp-demo/MyGame/addons
 *.old.*
+gdext/vcpkg_installed/
+.sconsign.dblite
+gdext/x64/
+*.exp
+*.obj
+*.lib
+*.os

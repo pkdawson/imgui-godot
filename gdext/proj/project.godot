@@ -1,0 +1,28 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="proj"
+run/main_scene="res://control.tscn"
+config/features=PackedStringArray("4.0", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+imgui_godot_native="*res://addons/imgui-godot-native/imgui-godot.tscn"
+
+[dotnet]
+
+project/assembly_name="proj"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/imgui-godot-native/plugin.cfg")
