@@ -54,6 +54,7 @@ void ImGuiGodot::_ready()
 
 void ImGuiGodot::_exit_tree()
 {
+    ImGui::Godot::Shutdown();
 }
 
 void ImGuiGodot::_process(double delta)
