@@ -7,6 +7,8 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 {
+    public new string Name => "imgui_impl_godot4_rd_mt";
+
     private readonly object _sharedDataLock = new();
     private Tuple<Rid, ImDrawDataPtr>[] _dataToDraw = null;
 

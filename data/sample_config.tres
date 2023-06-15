@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ImGuiConfig" load_steps=7 format=3 uid="uid://bm0qxspuntbpl"]
+
+[ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="1_0g12f"]
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiConfig.gd" id="1_n8f18"]
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiFont.gd" id="2_etwwr"]
+[ext_resource type="FontFile" uid="uid://bk0s2hduow46m" path="res://data/MPLUS2-Regular.ttf" id="3_qqkxo"]
+
+[sub_resource type="Resource" id="Resource_df4vj"]
+script = ExtResource("2_etwwr")
+FontData = ExtResource("1_0g12f")
+FontSize = 18
+
+[sub_resource type="Resource" id="Resource_kiahq"]
+script = ExtResource("2_etwwr")
+FontData = ExtResource("3_qqkxo")
+FontSize = 22
+
+[resource]
+script = ExtResource("1_n8f18")
+Fonts = Array[ExtResource("2_etwwr")]([SubResource("Resource_df4vj"), SubResource("Resource_kiahq")])
+MergeFonts = true
+AddDefaultFont = true
+Scale = 1.0
+ScaleToDpi = true
+IniFilename = "user://imgui.ini"
+Renderer = "RenderingDevice"
+Layer = 100

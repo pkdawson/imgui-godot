@@ -16,23 +16,8 @@ public partial class ImGuiLayer : CanvasLayer
     public ImGuiAPI API = new();
 #endif
 
-    [Export] public FontFile Font = null;
-    [Export] public int FontSize = 16;
-    [Export] public FontFile ExtraFont1 = null;
-    [Export] public int ExtraFont1Size = 16;
-    [Export] public FontFile ExtraFont2 = null;
-    [Export] public int ExtraFont2Size = 16;
-    [Export] public bool MergeFonts = true;
-    [Export] public bool AddDefaultFont = true;
-
-    [Export(PropertyHint.Range, "0.25,4.0,or_greater")]
-    public new float Scale = 1.0f;
-    [Export] public bool ScaleToDpi = true;
-
-    [Export] public string IniFilename = "user://imgui.ini";
-
-    [Export(PropertyHint.Enum, "RenderingDevice,Canvas,Dummy")]
-    public string Renderer = "RenderingDevice";
+    [Export(PropertyHint.ResourceType, "ImGuiConfig")]
+    public GodotObject Config = null;
 
     /// <summary>
     /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
@@ -86,12 +71,6 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _EnterTree()
     {
-        //var ctx = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
-        //ctx.Unloading += context =>
-        //{
-        //    GD.Print("unloading");
-        //};
-
         Instance = this;
         _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
@@ -105,24 +84,29 @@ public partial class ImGuiLayer : CanvasLayer
         _ci = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
-        ImGuiGD.ScaleToDpi = ScaleToDpi;
-        ImGuiGD.Init(_window, _subViewportRid, Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
+        Resource cfg = Config as Resource ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        Layer = (int)cfg.Get("Layer");
 
-        ImGui.GetIO().SetIniFilename(IniFilename);
+        ImGuiGD.ScaleToDpi = (bool)cfg.Get("ScaleToDpi");
+        ImGuiGD.Init(_window, _subViewportRid, (float)cfg.Get("Scale"),
+            _headless ? RendererType.Dummy : Enum.Parse<RendererType>((string)cfg.Get("Renderer")));
 
-        if (Font is not null)
+        ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
+
+        var fonts = (Godot.Collections.Array)cfg.Get("Fonts");
+        bool merge = (bool)cfg.Get("MergeFonts");
+
+        for (int i = 0; i < fonts.Count; ++i)
         {
-            ImGuiGD.AddFont(Font, FontSize);
-            if (ExtraFont1 is not null)
-            {
-                ImGuiGD.AddFont(ExtraFont1, ExtraFont1Size, MergeFonts);
-            }
-            if (ExtraFont2 is not null)
-            {
-                ImGuiGD.AddFont(ExtraFont2, ExtraFont2Size, MergeFonts);
-            }
+            var fontres = (Resource)fonts[i];
+            var font = (FontFile)fontres.Get("FontData");
+            int fontSize = (int)fontres.Get("FontSize");
+            if (i == 0)
+                ImGuiGD.AddFont(font, fontSize);
+            else
+                ImGuiGD.AddFont(font, fontSize, merge);
         }
-        if (AddDefaultFont)
+        if ((bool)cfg.Get("AddDefaultFont"))
         {
             ImGuiGD.AddFontDefault();
         }
