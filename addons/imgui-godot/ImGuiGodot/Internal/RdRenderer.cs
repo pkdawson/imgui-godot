@@ -267,10 +267,6 @@ internal class RdRenderer : IRenderer
         }
     }
 
-    public void OnFramePreDraw()
-    {
-    }
-
     protected void RenderOne(Rid fb, ImDrawDataPtr drawData)
     {
 #if IMGUI_GODOT_DEV

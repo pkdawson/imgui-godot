@@ -78,7 +78,6 @@ public static class ImGuiGD
             _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
         });
         Internal.State.Instance.Renderer.InitViewport(mainSubViewport);
-        RenderingServer.FramePreDraw += Internal.State.Instance.Renderer.OnFramePreDraw;
     }
 
     public static void ResetFonts()

@@ -14,6 +14,13 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 
     public RdRendererThreadSafe() : base()
     {
+        // draw on the renderer thread to avoid conflicts
+        RenderingServer.FramePreDraw += OnFramePreDraw;
+    }
+
+    ~RdRendererThreadSafe()
+    {
+        RenderingServer.FramePreDraw -= OnFramePreDraw;
     }
 
     private static unsafe ImDrawDataPtr CopyDrawData(ImDrawDataPtr drawData)
@@ -71,7 +78,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         }
     }
 
-    public new void OnFramePreDraw()
+    private void OnFramePreDraw()
     {
         Tuple<Rid, ImDrawDataPtr>[] dataArray = null;
         lock (_sharedDataLock)

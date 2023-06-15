@@ -12,7 +12,6 @@ internal interface IRenderer
     public void InitViewport(Rid vprid);
     public void CloseViewport(Rid vprid);
     public void RenderDrawData();
-    public void OnFramePreDraw();
     public void OnHide();
     public void Shutdown();
 }

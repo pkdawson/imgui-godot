@@ -178,10 +178,6 @@ internal sealed class CanvasRenderer : IRenderer
         }
     }
 
-    public void OnFramePreDraw()
-    {
-    }
-
     public void CloseViewport(Rid vprid)
     {
         ViewportData vd = _vpData[vprid];

@@ -27,10 +27,6 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void OnFramePreDraw()
-    {
-    }
-
     public void Shutdown()
     {
     }
