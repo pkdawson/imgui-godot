@@ -85,7 +85,8 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 
         foreach (var kv in dataArray)
         {
-            RenderOne(kv.Item1, kv.Item2);
+            if (RD.FramebufferIsValid(kv.Item1))
+                RenderOne(kv.Item1, kv.Item2);
         }
         FreeAll(dataArray);
     }

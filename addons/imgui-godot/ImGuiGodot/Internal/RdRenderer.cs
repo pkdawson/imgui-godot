@@ -13,7 +13,7 @@ namespace ImGuiGodot.Internal;
 
 internal class RdRenderer : IRenderer
 {
-    private readonly RenderingDevice RD;
+    protected readonly RenderingDevice RD;
     private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
     private readonly Rid _shader;
     private readonly Rid _pipeline;
@@ -289,7 +289,6 @@ internal class RdRenderer : IRenderer
         }
         if (!fb.IsValid)
             return;
-        // we could also call RD.FramebufferIsValid to be extra safe
 
         _scale[0] = 2.0f / drawData.DisplaySize.X;
         _scale[1] = 2.0f / drawData.DisplaySize.Y;
