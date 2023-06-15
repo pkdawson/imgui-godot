@@ -76,7 +76,7 @@ public partial class MySecondNode : Node
             var size = ImGui.GetContentRegionAvail();
             if (size.X > 5 && size.Y > 5)
             {
-                vp.Size = new((int)size.X - 5, (int)size.Y - 5);
+                vp.CallDeferred(SubViewport.MethodName.SetSize, new Vector2I((int)size.X - 5, (int)size.Y - 5));
                 Widgets.SubViewport(vp);
             }
         }
