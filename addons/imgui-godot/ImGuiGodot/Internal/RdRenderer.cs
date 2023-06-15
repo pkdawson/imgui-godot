@@ -282,6 +282,15 @@ internal class RdRenderer : IRenderer
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
+        unsafe
+        {
+            if (drawData.NativePtr == null)
+                return;
+        }
+        if (!fb.IsValid)
+            return;
+        // we could also call RD.FramebufferIsValid to be extra safe
+
         _scale[0] = 2.0f / drawData.DisplaySize.X;
         _scale[1] = 2.0f / drawData.DisplaySize.Y;
 
@@ -412,6 +421,9 @@ internal class RdRenderer : IRenderer
 
     protected Rid GetFramebuffer(Rid vprid)
     {
+        if (!vprid.IsValid)
+            return new Rid();
+
         if (_framebuffers.TryGetValue(vprid, out Rid fb))
         {
             if (RD.FramebufferIsValid(fb))
