@@ -258,20 +258,17 @@ internal class RdRenderer : IRenderer
         for (int i = 0; i < pio.Viewports.Size; ++i)
         {
             var vp = pio.Viewports[i];
-            ReplaceTextureRids(vp.DrawData);
+            if (!vp.Flags.HasFlag(ImGuiViewportFlags.IsMinimized))
+            {
+                ReplaceTextureRids(vp.DrawData);
+                Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
+                RenderOne(GetFramebuffer(vprid), vp.DrawData);
+            }
         }
     }
 
     public void OnFramePreDraw()
     {
-        var pio = ImGui.GetPlatformIO();
-        for (int vpidx = 0; vpidx < pio.Viewports.Size; vpidx++)
-        {
-            var vp = pio.Viewports[vpidx];
-            Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
-
-            RenderOne(GetFramebuffer(vprid), vp.DrawData);
-        }
     }
 
     protected void RenderOne(Rid fb, ImDrawDataPtr drawData)
@@ -280,15 +277,10 @@ internal class RdRenderer : IRenderer
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
 #endif
 
-        int vertSize = Marshal.SizeOf<ImDrawVert>();
-
-        unsafe
-        {
-            if (drawData.NativePtr == null)
-                return;
-        }
         if (!fb.IsValid)
             return;
+
+        int vertSize = Marshal.SizeOf<ImDrawVert>();
 
         _scale[0] = 2.0f / drawData.DisplaySize.X;
         _scale[1] = 2.0f / drawData.DisplaySize.Y;

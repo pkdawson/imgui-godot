@@ -55,6 +55,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 
         for (int i = 0; i < pio.Viewports.Size; ++i)
         {
+            // TODO: skip minimized windows
             var vp = pio.Viewports[i];
             ReplaceTextureRids(vp.DrawData);
             Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
