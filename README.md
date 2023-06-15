@@ -1,6 +1,7 @@
 # Dear ImGui plugin for Godot 4 (C#)
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.0&color=blue&logo=godotengine)
+![](https://img.shields.io/static/v1?label=Godot&message=4.1&color=blue&logo=godotengine)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
@@ -23,7 +24,7 @@ public partial class MyNode : Node
 
 Download
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=3.5.9&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v3.5.9.zip)
+[![](https://img.shields.io/static/v1?label=imgui-godot&message=4.0.0&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v4.0.0.zip)
 
 ## Getting Started
 
@@ -51,16 +52,14 @@ Click `Build` in the top right, then run the project.
 
 In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
 
-You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal:
+You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using thread groups in Godot 4.1 or later.
 ```csharp
 ImGuiLayer.Connect(OnImGuiLayout);
 ```
 
 ### ImGuiLayer
 
-If you want to customize fonts or other settings, open the scene `res://addons/imgui-godot/ImGuiLayer.tscn`
-
-Use the `Font` and `FontSize` properties to add custom fonts. Use the `Visible` property to show/hide the GUI as needed (when not visible, it uses almost zero resources). Change the `Layer` if you need to render anything on top of the GUI.
+If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the scene `res://addons/imgui-godot/ImGuiLayer.tscn` and set its `Config` property.
 
 ### Widgets
 
