@@ -101,9 +101,15 @@ public partial class ImGuiLayer : CanvasLayer
         ProcessPriority = int.MaxValue;
         VisibilityChanged += OnChangeVisibility;
 
+        _subViewportRid = Internal.Util.AddLayerSubViewport(this);
+        _ci = RenderingServer.CanvasItemCreate();
+        RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
+
         ImGuiGD.ScaleToDpi = ScaleToDpi;
-        ImGuiGD.Init(_window, Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
+        ImGuiGD.Init(_window, _subViewportRid, Scale, _headless ? RendererType.Dummy : Enum.Parse<RendererType>(Renderer));
+
         ImGui.GetIO().SetIniFilename(IniFilename);
+
         if (Font is not null)
         {
             ImGuiGD.AddFont(Font, FontSize);
@@ -116,17 +122,11 @@ public partial class ImGuiLayer : CanvasLayer
                 ImGuiGD.AddFont(ExtraFont2, ExtraFont2Size, MergeFonts);
             }
         }
-
         if (AddDefaultFont)
         {
             ImGuiGD.AddFontDefault();
         }
         ImGuiGD.RebuildFontAtlas();
-        _subViewportRid = Internal.Util.AddLayerSubViewport(this);
-        _ci = RenderingServer.CanvasItemCreate();
-        RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
-
-        Internal.State.Instance.Renderer.InitViewport(_subViewportRid);
 
         _updateFirst = new UpdateFirst
         {
@@ -195,7 +195,7 @@ public partial class ImGuiLayer : CanvasLayer
         }
 
         EmitSignal(SignalName.ImGuiLayout);
-        ImGuiGD.Render(_subViewportRid);
+        ImGuiGD.Render();
     }
 
     public override void _Notification(int what)
