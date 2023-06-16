@@ -91,7 +91,9 @@ internal sealed class Input
             CurrentSubViewport.PushInput(vpEvent, true);
             if (!CurrentSubViewport.IsInputHandled())
             {
+#pragma warning disable CS0618 // deprecated for Godot 4.1, but still required for Godot 4.0
                 CurrentSubViewport.PushUnhandledInput(vpEvent, true);
+#pragma warning restore CS0618
             }
         }
 

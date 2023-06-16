@@ -31,20 +31,6 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_c7hdb")
 
-[node name="TextureRect2" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -64.0
-offset_top = -64.0
-grow_horizontal = 0
-grow_vertical = 0
-texture = ExtResource("1_c7hdb")
-expand_mode = 1
-
 [node name="Button1" type="Button" parent="."]
 layout_mode = 0
 offset_left = 16.0
@@ -89,6 +75,22 @@ focus_mode = 0
 toggle_mode = true
 button_group = ExtResource("4_7oj01")
 text = "disabled"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 120
+
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -64.0
+offset_top = -64.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = ExtResource("1_c7hdb")
+expand_mode = 1
 
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonCIE" to="MyNode" method="OnContentScaleCIE"]
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonD" to="MyNode" method="OnContentScaleDisabled"]

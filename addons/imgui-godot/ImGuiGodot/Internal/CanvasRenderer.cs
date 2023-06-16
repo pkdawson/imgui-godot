@@ -39,7 +39,19 @@ internal sealed class CanvasRenderer : IRenderer
         };
     }
 
-    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
+    public void RenderDrawData()
+    {
+        var pio = ImGui.GetPlatformIO();
+        for (int vpidx = 0; vpidx < pio.Viewports.Size; vpidx++)
+        {
+            var vp = pio.Viewports[vpidx];
+            Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
+
+            RenderOne(vprid, vp.DrawData);
+        }
+    }
+
+    private void RenderOne(Rid vprid, ImDrawDataPtr drawData)
     {
         ViewportData vd = _vpData[vprid];
         Rid parent = vd.RootCanvasItem;

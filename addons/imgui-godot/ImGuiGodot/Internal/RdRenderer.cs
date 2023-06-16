@@ -11,9 +11,9 @@ using FuncDrawListBegin40 = System.Func<Godot.Rid, Godot.RenderingDevice.Initial
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class RdRenderer : IRenderer
+internal class RdRenderer : IRenderer
 {
-    private readonly RenderingDevice RD;
+    protected readonly RenderingDevice RD;
     private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
     private readonly Rid _shader;
     private readonly Rid _pipeline;
@@ -66,7 +66,7 @@ internal sealed class RdRenderer : IRenderer
         // set up everything to match the official Vulkan backend as closely as possible
 
         // compiling from source takes ~400ms, so we use a SPIR-V resource
-        using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/ImGuiShaderSPIRV.tres");
+        using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
         _shader = RD.ShaderCreateFromSpirV(spirv);
 
 #if IMGUI_GODOT_DEV
@@ -213,11 +213,13 @@ internal sealed class RdRenderer : IRenderer
                 IntPtr texid = drawCmd.GetTexID();
                 if (texid == IntPtr.Zero)
                     continue;
+                Rid texrid = Util.ConstructRid((ulong)texid);
+                if (!RD.TextureIsValid(texrid))
+                    continue;
 
                 _usedTextures.Add(texid);
                 if (!_uniformSets.ContainsKey(texid))
                 {
-                    Rid texrid = RenderingServer.TextureGetRdTexture(Util.ConstructRid((ulong)texid));
                     using RDUniform uniform = new()
                     {
                         Binding = 0,
@@ -237,12 +239,42 @@ internal sealed class RdRenderer : IRenderer
         _bufPool.Return(vertBuf);
     }
 
-    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
+    protected static void ReplaceTextureRids(ImDrawDataPtr drawData)
+    {
+        for (int i = 0; i < drawData.CmdListsCount; ++i)
+        {
+            ImDrawListPtr cmdList = drawData.CmdListsRange[i];
+            for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
+            {
+                ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
+                drawCmd.TextureId = (IntPtr)RenderingServer.TextureGetRdTexture(Util.ConstructRid((ulong)drawCmd.TextureId)).Id;
+            }
+        }
+    }
+
+    public void RenderDrawData()
+    {
+        var pio = ImGui.GetPlatformIO();
+        for (int i = 0; i < pio.Viewports.Size; ++i)
+        {
+            var vp = pio.Viewports[i];
+            if (!vp.Flags.HasFlag(ImGuiViewportFlags.IsMinimized))
+            {
+                ReplaceTextureRids(vp.DrawData);
+                Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
+                RenderOne(GetFramebuffer(vprid), vp.DrawData);
+            }
+        }
+    }
+
+    protected void RenderOne(Rid fb, ImDrawDataPtr drawData)
     {
 #if IMGUI_GODOT_DEV
         RD.DrawCommandBeginLabel("ImGui", Colors.Purple);
 #endif
-        Rid fb = GetFramebuffer(vprid);
+
+        if (!fb.IsValid)
+            return;
 
         int vertSize = Marshal.SizeOf<ImDrawVert>();
 
@@ -308,6 +340,8 @@ internal sealed class RdRenderer : IRenderer
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
                 if (drawCmd.ElemCount == 0)
                     continue;
+                if (!_uniformSets.ContainsKey(drawCmd.GetTexID()))
+                    continue;
 
                 Rid idxArray = RD.IndexArrayCreate(_idxBuffer,
                     (uint)(drawCmd.IdxOffset + globalIdxOffset),
@@ -372,8 +406,11 @@ internal sealed class RdRenderer : IRenderer
             RD.FreeRid(_vtxBuffer);
     }
 
-    private Rid GetFramebuffer(Rid vprid)
+    protected Rid GetFramebuffer(Rid vprid)
     {
+        if (!vprid.IsValid)
+            return new Rid();
+
         if (_framebuffers.TryGetValue(vprid, out Rid fb))
         {
             if (RD.FramebufferIsValid(fb))

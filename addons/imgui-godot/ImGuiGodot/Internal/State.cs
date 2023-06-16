@@ -11,7 +11,7 @@ internal interface IRenderer
     public void Init(ImGuiIOPtr io);
     public void InitViewport(Rid vprid);
     public void CloseViewport(Rid vprid);
-    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData);
+    public void RenderDrawData();
     public void OnHide();
     public void Shutdown();
 }
@@ -28,7 +28,7 @@ internal sealed class State : IDisposable
     internal IRenderer Renderer { get; private set; }
     internal static State Instance { get; set; }
 
-    public State(Window mainWindow, IRenderer renderer)
+    public State(Window mainWindow, Rid mainSubViewport, IRenderer renderer)
     {
         Renderer = renderer;
         Input = new Input(mainWindow);
@@ -60,7 +60,7 @@ internal sealed class State : IDisposable
         }
 
         Renderer.Init(io);
-        Viewports = new Viewports();
+        Viewports = new Viewports(mainWindow, mainSubViewport);
     }
 
     public void Dispose()
@@ -86,19 +86,6 @@ internal sealed class State : IDisposable
             fileName = ProjectSettings.GlobalizePath(fileName);
             _iniFilenameBuffer = Marshal.StringToCoTaskMemUTF8(fileName);
             io.NativePtr->IniFilename = (byte*)_iniFilenameBuffer;
-        }
-    }
-
-    public void Render(Rid vprid)
-    {
-        ImGui.Render();
-        Renderer.RenderDrawData(vprid, ImGui.GetDrawData());
-
-        var io = ImGui.GetIO();
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-        {
-            ImGui.UpdatePlatformWindows();
-            Viewports.RenderViewports();
         }
     }
 }

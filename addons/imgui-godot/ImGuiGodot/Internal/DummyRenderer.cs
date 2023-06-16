@@ -23,7 +23,7 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void RenderDrawData(Rid vprid, ImDrawDataPtr drawData)
+    public void RenderDrawData()
     {
     }
 

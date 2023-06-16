@@ -12,7 +12,6 @@ internal sealed class GodotImGuiWindow : IDisposable
     private readonly ImGuiViewportPtr _vp;
 
     public Window GodotWindow { get; init; }
-    public Rid ViewportRid { get; init; }
 
     // sub window
     public GodotImGuiWindow(ImGuiViewportPtr vp)
@@ -44,19 +43,21 @@ internal sealed class GodotImGuiWindow : IDisposable
         GodotWindow.Transparent = true;
 
         // it's our window, so just draw directly to the root viewport
-        ViewportRid = GodotWindow.GetViewportRid();
+        var vprid = GodotWindow.GetViewportRid();
+        _vp.RendererUserData = (IntPtr)vprid.Id;
 
-        State.Instance.Renderer.InitViewport(ViewportRid);
+        State.Instance.Renderer.InitViewport(vprid);
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
     // main window
-    public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw)
+    public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw, Rid mainSubViewport)
     {
         _gcHandle = GCHandle.Alloc(this);
         _vp = vp;
         _vp.PlatformHandle = (IntPtr)_gcHandle;
         GodotWindow = gw;
+        _vp.RendererUserData = (IntPtr)mainSubViewport.Id;
     }
 
     public void Dispose()
@@ -265,24 +266,13 @@ internal sealed partial class Viewports
         ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
     }
 
-    public Viewports()
+    public Viewports(Window mainWindow, Rid mainSubViewport)
     {
-        _mainWindow = new(ImGui.GetMainViewport(), ImGuiLayer.Instance.GetWindow());
+        _mainWindow = new(ImGui.GetMainViewport(), mainWindow, mainSubViewport);
 
         ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         InitPlatformInterface();
         UpdateMonitors();
-    }
-
-    public static void RenderViewports()
-    {
-        var pio = ImGui.GetPlatformIO();
-        for (int i = 1; i < pio.Viewports.Size; i++)
-        {
-            var vp = pio.Viewports[i];
-            var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformHandle).Target;
-            State.Instance.Renderer.RenderDrawData(window.ViewportRid, vp.DrawData);
-        }
     }
 
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
