@@ -2,23 +2,21 @@
 #include "RdRenderer.h"
 #include <imgui.h>
 
-static_assert(sizeof(RID) == 8);
-static_assert(sizeof(void*) == 8);
+using ImGui::Godot::RdRenderer;
+using godot::Window;
 
 namespace {
 
 struct Context
 {
     Window* mainWindow = nullptr;
-    std::unique_ptr<ImGui::Godot::RdRenderer> renderer;
+    std::unique_ptr<RdRenderer> renderer;
 };
 
 std::unique_ptr<Context> ctx;
 } // namespace
 
-namespace ImGui::Godot {
-
-void Init(Window* window)
+void IGN_API ImGuiGodot_Init(Window* window)
 {
     ctx = std::make_unique<Context>();
     ctx->mainWindow = window;
@@ -31,7 +29,7 @@ void Init(Window* window)
     ctx->renderer = std::make_unique<RdRenderer>();
 }
 
-void Update(double delta)
+void IGN_API ImGuiGodot_Update(double delta)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ctx->mainWindow->get_size();
@@ -40,17 +38,15 @@ void Update(double delta)
     ImGui::NewFrame();
 }
 
-void Render()
+void IGN_API ImGuiGodot_Render()
 {
     ImGui::Render();
     ctx->renderer->RenderDrawData(ctx->mainWindow->get_viewport_rid(), ImGui::GetDrawData());
 }
 
-void Shutdown()
+void IGN_API ImGuiGodot_Shutdown()
 {
     ctx.reset();
     if (ImGui::GetCurrentContext())
         ImGui::DestroyContext();
 }
-
-} // namespace ImGui::Godot

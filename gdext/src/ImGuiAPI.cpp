@@ -47,5 +47,27 @@ void ImGui::_bind_methods()
     ClassDB::bind_static_method("ImGui", D_METHOD("Text", "text"), &ImGui::Text);
 }
 
+void ImGuiIOPtr::_bind_methods()
+{
+    ClassDB::bind_method(D_METHOD("_set_ConfigFlags", "flags"), &ImGuiIOPtr::_set_ConfigFlags);
+    ClassDB::bind_method(D_METHOD("_get_ConfigFlags"), &ImGuiIOPtr::_get_ConfigFlags);
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "ConfigFlags"), "_set_ConfigFlags", "_get_ConfigFlags");
+}
+
+void ImGuiIOPtr::_set_io(ImGuiIO* p_io)
+{
+    io = p_io;
+}
+
+void ImGuiIOPtr::_set_ConfigFlags(int32_t flags)
+{
+    io->ConfigFlags = flags;
+}
+
+int32_t ImGuiIOPtr::_get_ConfigFlags()
+{
+    return io->ConfigFlags;
+}
+
 
 } // namespace ImGui::Godot

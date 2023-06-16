@@ -1,13 +1,14 @@
 extends Node
 
-
-# Called when the node enters the scene tree for the first time.
 func _ready():
-    pass # Replace with function body.
+    $/root/imgui_godot.imgui_layout.connect(_on_imgui_layout)
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
     ImGui.Begin("gds")
     ImGui.Text("hello")
+    ImGui.End()
+    
+func _on_imgui_layout():
+    ImGui.Begin("signal")
+    ImGui.Text("from signal")
     ImGui.End()

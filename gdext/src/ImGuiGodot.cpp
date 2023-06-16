@@ -29,11 +29,12 @@ ImGuiGodot::~ImGuiGodot()
 
 void ImGuiGodot::_bind_methods()
 {
+    ADD_SIGNAL(MethodInfo("imgui_layout"));
 }
 
 void ImGuiGodot::_enter_tree()
 {
-    ImGui::Godot::Init(get_window());
+    ImGuiGodot_Init(get_window());
 
     impl->helper = memnew(ImGuiGodotHelper);
     add_child(impl->helper);
@@ -50,16 +51,19 @@ void ImGuiGodot::_ready()
 #endif
 
     set_process(true);
+    impl->helper->set_process_priority(std::numeric_limits<int32_t>::max());
 }
 
 void ImGuiGodot::_exit_tree()
 {
-    ImGui::Godot::Shutdown();
+    ImGuiGodot_Shutdown();
 }
 
 void ImGuiGodot::_process(double delta)
 {
-    ImGui::Godot::Update(delta);
+    ImGuiGodot_Update(delta);
+
+    emit_signal("imgui_layout");
 
     if (impl->show_imgui_demo)
         ImGui::ShowDemoWindow(&impl->show_imgui_demo);

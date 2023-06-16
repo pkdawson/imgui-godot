@@ -29,10 +29,9 @@ void uninitialize_ign_module(ModuleInitializationLevel p_level)
 }
 
 extern "C" {
-GDExtensionBool GDE_EXPORT ign_init(const GDExtensionInterface* p_interface, GDExtensionClassLibraryPtr p_library,
-                                    GDExtensionInitialization* r_initialization)
+GDExtensionBool GDE_EXPORT ign_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization)
 {
-    godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
+	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
     init_obj.register_initializer(initialize_ign_module);
     init_obj.register_terminator(uninitialize_ign_module);

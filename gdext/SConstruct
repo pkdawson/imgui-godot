@@ -3,15 +3,15 @@ from glob import glob
 from pathlib import Path
 
 env = SConscript("godot-cpp/SConstruct")
+env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', 'IGN_EXPORT'])
+env.Append(CPPPATH=["src/", "imgui/", "include/"])
+env.Replace(CXXFLAGS=str(env['CXXFLAGS']).replace("c++17", "c++20"))
 
-env.Append(CPPPATH=["src/", "imgui/"])
 sources = Glob("src/*.cpp") + Glob("imgui/*.cpp")
 
 (extension_path,) = glob("proj/addons/*/*.gdextension")
 addon_path = Path(extension_path).parent
 project_name = Path(extension_path).stem
-
-env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
 
 config = "release" if env["target"] == "template_release" else "debug"
 if env["platform"] == "macos":

@@ -35,7 +35,7 @@ void ImGuiGodotHelper::_enter_tree()
 void ImGuiGodotHelper::_ready()
 {
     set_process(false);
-    set_process_priority(std::numeric_limits<int32_t>::max());
+    //set_process_priority(std::numeric_limits<int32_t>::max());
 
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
@@ -51,7 +51,7 @@ void ImGuiGodotHelper::_exit_tree()
 
 void ImGuiGodotHelper::_process(double delta)
 {
-    ImGui::Godot::Render();
+    ImGuiGodot_Render();
 }
 
 } // namespace ImGui::Godot

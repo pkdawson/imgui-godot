@@ -207,6 +207,7 @@ RdRenderer::~RdRenderer()
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
     RD->free_rid(impl->shader);
+    RD->free_rid(impl->sampler);
 }
 
 void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
