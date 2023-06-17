@@ -42,7 +42,6 @@ void IGN_API ImGuiGodot_Init(Window* window, CanvasLayer* layer)
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->Build();
     io.DisplaySize = ctx->mainWindow->get_size();
 
     ctx->renderer = std::make_unique<RdRenderer>();
@@ -58,6 +57,7 @@ void IGN_API ImGuiGodot_Init(Window* window, CanvasLayer* layer)
     ctx->ci = RS->canvas_item_create();
     RS->canvas_item_set_parent(ctx->ci, ctx->layer->get_canvas());
 
+    io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 16.0f);
     uint8_t* pixels = nullptr;
     int width = 0, height = 0, bytes_per_pixel = 0;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);

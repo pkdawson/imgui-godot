@@ -14,6 +14,22 @@ addon_path = Path(extension_path).parent
 project_name = Path(extension_path).stem
 
 config = "release" if env["target"] == "template_release" else "debug"
+
+libpath = env['LIBPATH']
+libs = [env['LIBS']]
+
+windows = env["platform"] == "windows"
+linux = env["platform"] == "linux"
+
+if windows or linux:
+    triplet = "x64-windows-static-md" if windows else "x64-linux"
+    env.Append(CPPPATH=["imgui/misc/freetype/"])
+    env.Append(CPPPATH=[f"vcpkg_installed/{triplet}/include"])
+    env.Append(CPPDEFINES=['IMGUI_ENABLE_FREETYPE'])
+    sources += Glob("imgui/misc/freetype/*.cpp")
+    libpath += [f'vcpkg_installed/{triplet}/lib']
+    libs += ["freetype", "bz2", "libpng16" if windows else "png16", "zlib", "brotlidec-static", "brotlicommon-static"]
+
 if env["platform"] == "macos":
     library = env.SharedLibrary(
         "{0}/bin/lib{1}.{2}.{3}.framework/{1}.{2}.{3}".format(
@@ -35,6 +51,8 @@ else:
             env["SHLIBSUFFIX"],
         ),
         source=sources,
+        LIBPATH = libpath,
+        LIBS = libs,
     )
 
 Default(library)
