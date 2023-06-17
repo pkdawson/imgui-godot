@@ -160,37 +160,38 @@ jobs:
     needs: [windows, linux, macos]
 
     steps:
-    - uses: actions/download-artifact@v3
-      with:
-        path: gdext/proj/addons/imgui-godot-native/bin
+      - uses: actions/checkout@v3
 
-    - run: ls -R
-      working-directory: gdext/proj/addons/imgui-godot-native/bin
+      - uses: actions/download-artifact@v3
+        with:
+          path: gdext/proj/addons/imgui-godot-native/bin
 
-    - name: Extract
-      run: |
-        cd gdext/proj/addons/imgui-godot-native/bin
-        mv gdext-*/* .
-        rmdir gdext-*
-        rm *.exp
-        rm *.lib
+      - run: ls -R
+        working-directory: gdext/proj/addons/imgui-godot-native/bin
 
-    - name: Upload PDBs
-      uses: actions/upload-artifact@v3
-      with:
-        name: pdbs
-        path: gdext/proj/addons/imgui-godot-native/bin/*.pdb
+      - name: Extract
+        run: |
+          cd gdext/proj/addons/imgui-godot-native/bin
+          mv gdext-*/* .
+          rmdir gdext-*
+          rm *.exp
+          rm *.lib
 
-    - name: Prepare files
-      run: |
-        ls -R
-        mkdir addons/imgui-godot-native
-        mv gdext/proj/addons/imgui-godot-native/* addons/imgui-godot-native
-        ls -R
-        rm addons/imgui-godot-native/bin/*.pdb
+      - name: Upload PDBs
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdbs
+          path: gdext/proj/addons/imgui-godot-native/bin/*.pdb
 
-    - name: Upload package
-      uses: actions/upload-artifact@v3
-      with:
-        name: imgui-godot-native
-        path: .
+      - name: Prepare files
+        run: |
+          ls -R
+          mv gdext/proj/addons/imgui-godot-native addons/
+          ls -R
+          rm addons/imgui-godot-native/bin/*.pdb
+
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: imgui-godot-native
+          path: .
