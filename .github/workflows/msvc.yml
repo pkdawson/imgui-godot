@@ -12,7 +12,6 @@ on:
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
-  VCPKG_TARGET_TRIPLET: "x64-windows-static-md"
 
 jobs:
   analyze:
@@ -44,7 +43,7 @@ jobs:
       - name: vcpkg install
         run: |
           cd gdext
-          ${{ env.VCPKG_ROOT }}\vcpkg install
+          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static-md
 
       - name: Build debug
         run: |
