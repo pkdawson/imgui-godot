@@ -28,7 +28,10 @@ if windows or linux:
     env.Append(CPPDEFINES=['IMGUI_ENABLE_FREETYPE'])
     sources += Glob("imgui/misc/freetype/*.cpp")
     libpath += [f'vcpkg_installed/{triplet}/lib']
-    libs += ["freetype", "bz2", "libpng16" if windows else "png16", "zlib", "brotlidec-static", "brotlicommon-static"]
+    libs += ["freetype", "bz2",
+             "libpng16" if windows else "png16",
+             "zlib" if windows else "z",
+             "brotlidec-static", "brotlicommon-static"]
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

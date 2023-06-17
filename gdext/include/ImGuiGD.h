@@ -6,6 +6,8 @@
 #else
 #define IGN_API __declspec(dllimport)
 #endif
+#else
+#define IGN_API
 #endif
 
 #pragma warning(push, 0)
