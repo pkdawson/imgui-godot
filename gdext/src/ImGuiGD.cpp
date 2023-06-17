@@ -23,6 +23,12 @@ struct Context
     RID svp;
     RID ci;
     Ref<ImageTexture> fontTexture;
+
+    ~Context()
+    {
+        RenderingServer::get_singleton()->free_rid(ci);
+        RenderingServer::get_singleton()->free_rid(svp);
+    }
 };
 
 std::unique_ptr<Context> ctx;
