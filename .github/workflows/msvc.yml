@@ -12,6 +12,7 @@ on:
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+  VCPKG_TARGET_TRIPLET: "x64-windows-static-md"
 
 jobs:
   analyze:
@@ -43,14 +44,20 @@ jobs:
       - name: vcpkg install
         run: |
           cd gdext
-          vcpkg install --triplet x64-windows-static-md
+          ${{ env.VCPKG_ROOT }}\vcpkg install
 
       - name: Build debug
         run: |
           cd gdext
-          scons
+          scons debug_symbols=yes
 
       - name: Build release
         run: |
           cd gdext
-          scons target=template_release
+          scons debug_symbols=yes target=template_release
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: gdext-windows
+          path: gdext/proj/addons/imgui-godot-native/bin
