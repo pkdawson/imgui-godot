@@ -183,7 +183,7 @@ jobs:
 
     - name: Prepare files
       run: |
-        mv gdext/proj/addons/imgui-godot-native addons/
+        mv gdext/proj/addons/imgui-godot-native addons/imgui-godot-native
         ls -R
         rm addons/imgui-godot-native/bin/*.pdb
 
