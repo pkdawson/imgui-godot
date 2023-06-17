@@ -184,7 +184,8 @@ jobs:
     - name: Prepare files
       run: |
         mv gdext/proj/addons/imgui-godot-native addons/
-        rm addons/imgui-godot-native/*.pdb
+        ls -R
+        rm addons/imgui-godot-native/bin/*.pdb
 
     - name: Upload package
       uses: actions/upload-artifact@v3
