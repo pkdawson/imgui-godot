@@ -194,4 +194,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: imgui-godot-native
-          path: .
+          path: |
+            .
+            !.git*
