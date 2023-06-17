@@ -164,8 +164,30 @@ jobs:
       with:
         path: gdext/proj/addons/imgui-godot-native/bin
 
-    - name: look
-      run: |
-        ls -al gdext/proj/addons/imgui-godot-native/bin
+    - run: ls -R
+      working-directory: gdext/proj/addons/imgui-godot-native/bin
 
-    # TODO: finish, and upload .pdbs separately
+    - name: Extract
+      run: |
+        cd gdext/proj/addons/imgui-godot-native/bin
+        mv gdext-*/* .
+        rmdir gdext-*
+        rm *.exp
+        rm *.lib
+
+    - name: Upload PDBs
+      uses: actions/upload-artifact@v3
+      with:
+        name: pdbs
+        path: gdext/proj/addons/imgui-godot-native/bin/*.pdb
+
+    - name: Prepare files
+      run: |
+        mv gdext/proj/addons/imgui-godot-native addons/
+        rm addons/imgui-godot-native/*.pdb
+
+    - name: Upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: imgui-godot-native
+        path: .
