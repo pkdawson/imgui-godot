@@ -17,6 +17,7 @@ struct ImGuiGodot::Impl
 {
     bool show_imgui_demo = true;
     ImGuiGodotHelper* helper = nullptr;
+    CanvasLayer* layer = nullptr;
 };
 
 ImGuiGodot::ImGuiGodot() : impl(std::make_unique<Impl>())
@@ -34,7 +35,11 @@ void ImGuiGodot::_bind_methods()
 
 void ImGuiGodot::_enter_tree()
 {
-    ImGuiGodot_Init(get_window());
+    impl->layer = memnew(CanvasLayer);
+    add_child(impl->layer);
+    impl->layer->set_layer(128);
+
+    ImGuiGodot_Init(get_window(), impl->layer);
 
     impl->helper = memnew(ImGuiGodotHelper);
     add_child(impl->helper);
@@ -42,16 +47,15 @@ void ImGuiGodot::_enter_tree()
 
 void ImGuiGodot::_ready()
 {
-    set_process(false);
-    set_process_priority(std::numeric_limits<int32_t>::min());
+    set_process_mode(PROCESS_MODE_DISABLED);
+    set_process_priority(std::numeric_limits<int32_t>::max());
 
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
         return;
 #endif
 
-    set_process(true);
-    impl->helper->set_process_priority(std::numeric_limits<int32_t>::max());
+    set_process_mode(PROCESS_MODE_ALWAYS);
 }
 
 void ImGuiGodot::_exit_tree()
@@ -61,16 +65,16 @@ void ImGuiGodot::_exit_tree()
 
 void ImGuiGodot::_process(double delta)
 {
-    ImGuiGodot_Update(delta);
-
     emit_signal("imgui_layout");
 
-    if (impl->show_imgui_demo)
-        ImGui::ShowDemoWindow(&impl->show_imgui_demo);
+    //if (impl->show_imgui_demo)
+    //    ImGui::ShowDemoWindow(&impl->show_imgui_demo);
 
-    ImGui::Begin("Cpp Window");
-    ImGui::Text("hello from C++");
-    ImGui::End();
+    //ImGui::Begin("Cpp Window");
+    //ImGui::Text("hello from C++");
+    //ImGui::End();
+
+    ImGuiGodot_Render();
 }
 
 } // namespace ImGui::Godot

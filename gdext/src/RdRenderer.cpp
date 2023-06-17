@@ -53,13 +53,19 @@ struct RdRenderer::Impl
     RID sampler;
     TypedArray<RID> srcBuffers;
     TypedArray<RDUniform> uniforms;
-    TypedArray<RID> storageTextures;
+    // TypedArray<RID> storageTextures;
+    godot::PackedColorArray clearColors;
 
-    std::unordered_map<RID, RID> frameBuffers;
+    std::unordered_map<RID, RID> framebuffers;
     std::unordered_map<ImTextureID, RID> uniformSets;
     std::unordered_set<ImTextureID> usedTextures;
 
-    std::array<long, 3> vtxOffsets;
+    godot::PackedInt64Array vtxOffsets;
+
+    RID idxBuffer;
+    int idxBufferSize = 0; // size in indices
+    RID vtxBuffer;
+    int vtxBufferSize = 0; // size in vertices
 
     RID make_rid(ImTextureID id)
     {
@@ -71,11 +77,62 @@ struct RdRenderer::Impl
     }
 
     void SetupBuffers(ImDrawData* drawData);
+    RID GetFramebuffer(RID vprid);
+
+    Impl()
+    {
+        clearColors.push_back(godot::Color(0, 0, 0, 0));
+        srcBuffers.resize(3);
+        vtxOffsets.resize(3);
+    }
 };
+
+RID RdRenderer::Impl::GetFramebuffer(RID vprid)
+{
+    if (!vprid.is_valid())
+        return RID();
+
+    RenderingServer* RS = RenderingServer::get_singleton();
+    RenderingDevice* RD = RS->get_rendering_device();
+    auto it = framebuffers.find(vprid);
+    if (it != framebuffers.end())
+    {
+        RID fb = it->second;
+        if (RD->framebuffer_is_valid(fb))
+            return fb;
+    }
+
+    RID vptex = RS->texture_get_rd_texture(RS->viewport_get_texture(vprid));
+    godot::TypedArray<godot::RID> arr;
+    arr.push_back(vptex);
+    RID fb = RD->framebuffer_create(arr);
+    framebuffers[vprid] = fb;
+    return fb;
+}
 
 void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
+
+    // allocate merged index and vertex buffers
+    if (idxBufferSize < drawData->TotalIdxCount)
+    {
+        if (idxBuffer.get_id() != 0)
+            RD->free_rid(idxBuffer);
+        idxBuffer = RD->index_buffer_create(drawData->TotalIdxCount, RenderingDevice::INDEX_BUFFER_FORMAT_UINT16);
+        idxBufferSize = drawData->TotalIdxCount;
+    }
+
+    if (vtxBufferSize < drawData->TotalVtxCount)
+    {
+        if (vtxBuffer.get_id() != 0)
+            RD->free_rid(vtxBuffer);
+        vtxBuffer = RD->vertex_buffer_create(drawData->TotalVtxCount * sizeof(ImDrawVert));
+        vtxBufferSize = drawData->TotalVtxCount;
+    }
+
+    if (drawData->TotalIdxCount == 0)
+        return;
 
     int globalIdxOffset = 0;
     int globalVtxOffset = 0;
@@ -110,7 +167,7 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
                 continue;
 
             usedTextures.insert(texid);
-            if (uniformSets.contains(texid))
+            if (!uniformSets.contains(texid))
             {
                 RID texrid = RenderingServer::get_singleton()->texture_get_rd_texture(make_rid(texid));
                 Ref<RDUniform> uniform = memnew(RDUniform);
@@ -127,7 +184,8 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
         }
     }
 
-    // RD->buffer_update()
+    RD->buffer_update(idxBuffer, 0, idxBuf.size(), idxBuf);
+    RD->buffer_update(vtxBuffer, 0, vertBuf.size(), vertBuf);
 }
 
 RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
@@ -208,11 +266,79 @@ RdRenderer::~RdRenderer()
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
     RD->free_rid(impl->shader);
     RD->free_rid(impl->sampler);
+    RD->free_rid(impl->idxBuffer);
+    RD->free_rid(impl->vtxBuffer);
 }
 
 void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
 {
+    RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
+
     impl->SetupBuffers(drawData);
+
+    RID fb = impl->GetFramebuffer(vprid);
+
+    godot::PackedFloat32Array pcfloats;
+    pcfloats.resize(4);
+    pcfloats[0] = 2.0f / drawData->DisplaySize.x;
+    pcfloats[1] = 2.0f / drawData->DisplaySize.y;
+    pcfloats[2] = -1.0f - (drawData->DisplayPos.x * pcfloats[0]);
+    pcfloats[3] = -1.0f - (drawData->DisplayPos.y * pcfloats[1]);
+    godot::PackedByteArray pcbuf = pcfloats.to_byte_array();
+
+    int64_t dl = RD->draw_list_begin(fb,
+                                     RenderingDevice::INITIAL_ACTION_CLEAR,
+                                     RenderingDevice::FINAL_ACTION_READ,
+                                     RenderingDevice::INITIAL_ACTION_CLEAR,
+                                     RenderingDevice::FINAL_ACTION_READ,
+                                     impl->clearColors);
+
+    RD->draw_list_bind_render_pipeline(dl, impl->pipeline);
+    RD->draw_list_set_push_constant(dl, pcbuf, pcbuf.size());
+
+    int globalIdxOffset = 0;
+    int globalVtxOffset = 0;
+    for (int i = 0; i < drawData->CmdListsCount; ++i)
+    {
+        ImDrawList* cmdList = drawData->CmdLists[i];
+
+        for (int cmdi = 0; cmdi < cmdList->CmdBuffer.Size; ++cmdi)
+        {
+            ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
+            if (drawCmd.ElemCount == 0)
+                continue;
+            if (!impl->uniformSets.contains(drawCmd.GetTexID()))
+                continue;
+
+            RID idxArray =
+                RD->index_array_create(impl->idxBuffer, drawCmd.IdxOffset + globalIdxOffset, drawCmd.ElemCount);
+
+            int64_t voff = (drawCmd.VtxOffset + globalVtxOffset) * sizeof(ImDrawVert);
+            impl->srcBuffers[0] = impl->srcBuffers[1] = impl->srcBuffers[2] = impl->vtxBuffer;
+            impl->vtxOffsets[0] = impl->vtxOffsets[1] = impl->vtxOffsets[2] = voff;
+            RID vtxArray =
+                RD->vertex_array_create(cmdList->VtxBuffer.Size, impl->vtxFormat, impl->srcBuffers, impl->vtxOffsets);
+
+            RD->draw_list_bind_uniform_set(dl, impl->uniformSets[drawCmd.GetTexID()], 0);
+            RD->draw_list_bind_index_array(dl, idxArray);
+            RD->draw_list_bind_vertex_array(dl, vtxArray);
+
+            godot::Rect2 clipRect = {drawCmd.ClipRect.x,
+                                     drawCmd.ClipRect.y,
+                                     drawCmd.ClipRect.z - drawCmd.ClipRect.x,
+                                     drawCmd.ClipRect.w - drawCmd.ClipRect.y};
+            clipRect.position -= godot::Vector2i(drawData->DisplayPos.x, drawData->DisplayPos.y);
+            RD->draw_list_enable_scissor(dl, clipRect);
+
+            RD->draw_list_draw(dl, true, 1);
+
+            RD->free_rid(idxArray);
+            RD->free_rid(vtxArray);
+        }
+        globalIdxOffset += cmdList->IdxBuffer.Size;
+        globalVtxOffset += cmdList->VtxBuffer.Size;
+    }
+    RD->draw_list_end();
 }
 
 } // namespace ImGui::Godot

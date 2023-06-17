@@ -10,10 +10,33 @@
 
 using godot::Array;
 using godot::Object;
-using godot::String;
+using godot::Ref;
 using godot::RefCounted;
+using godot::String;
 
 namespace ImGui::Godot {
+
+enum ConfigFlags
+{
+    ConfigFlags_ViewportsEnable = ImGuiConfigFlags_ViewportsEnable,
+};
+
+class ImGuiIOPtr : public RefCounted
+{
+    GDCLASS(ImGuiIOPtr, RefCounted);
+
+protected:
+    static void _bind_methods();
+
+public:
+    ImGuiIOPtr();
+
+    void _set_ConfigFlags(int32_t flags);
+    int32_t _get_ConfigFlags();
+
+private:
+    ImGuiIO* io = nullptr;
+};
 
 class ImGui : public Object
 {
@@ -26,31 +49,19 @@ public:
     ImGui();
     ~ImGui();
 
+    static void SetNextWindowPos(godot::Vector2i pos);
     static bool Begin(String name, Array p_open);
     static void End();
 
     static void Text(String text);
+
+    static Ref<ImGuiIOPtr> GetIO();
 
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
 
-class ImGuiIOPtr : public RefCounted
-{
-    GDCLASS(ImGuiIOPtr, RefCounted);
-
-protected:
-    static void _bind_methods();
-
-public:
-    void _set_io(ImGuiIO* p_io);
-
-    void _set_ConfigFlags(int32_t flags);
-    int32_t _get_ConfigFlags();
-
-private:
-    ImGuiIO* io = nullptr;
-};
-
 } // namespace ImGui::Godot
+
+VARIANT_BITFIELD_CAST(ImGui::Godot::ConfigFlags);

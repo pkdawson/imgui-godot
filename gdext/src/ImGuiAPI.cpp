@@ -16,12 +16,30 @@ struct ImGui::Impl
     bool show_imgui_demo = true;
 };
 
+void ImGui::_bind_methods()
+{
+    ClassDB::bind_static_method("ImGui", D_METHOD("SetNextWindowPos", "pos"), &ImGui::SetNextWindowPos);
+    ClassDB::bind_static_method("ImGui", D_METHOD("Begin", "name", "p_open"), &ImGui::Begin, DEFVAL(godot::Array()));
+    ClassDB::bind_static_method("ImGui", D_METHOD("End"), &ImGui::End);
+
+    ClassDB::bind_static_method("ImGui", D_METHOD("Text", "text"), &ImGui::Text);
+
+    ClassDB::bind_static_method("ImGui", D_METHOD("GetIO"), &ImGui::GetIO);
+
+    BIND_ENUM_CONSTANT(ConfigFlags_ViewportsEnable);
+}
+
 ImGui::ImGui() : impl(std::make_unique<Impl>())
 {
 }
 
 ImGui::~ImGui()
 {
+}
+
+void ImGui::SetNextWindowPos(godot::Vector2i pos)
+{
+    ::ImGui::SetNextWindowPos(pos);
 }
 
 bool ImGui::Begin(String name, Array p_open)
@@ -39,12 +57,11 @@ void ImGui::Text(String text)
     ::ImGui::Text(text.utf8().get_data());
 }
 
-void ImGui::_bind_methods()
+Ref<ImGuiIOPtr> ImGui::GetIO()
 {
-    ClassDB::bind_static_method("ImGui", D_METHOD("Begin", "name", "p_open"), &ImGui::Begin, DEFVAL(godot::Array()));
-    ClassDB::bind_static_method("ImGui", D_METHOD("End"), &ImGui::End);
-
-    ClassDB::bind_static_method("ImGui", D_METHOD("Text", "text"), &ImGui::Text);
+    Ref<ImGuiIOPtr> rv;
+    rv.instantiate();
+    return rv;
 }
 
 void ImGuiIOPtr::_bind_methods()
@@ -54,9 +71,9 @@ void ImGuiIOPtr::_bind_methods()
     ADD_PROPERTY(PropertyInfo(Variant::INT, "ConfigFlags"), "_set_ConfigFlags", "_get_ConfigFlags");
 }
 
-void ImGuiIOPtr::_set_io(ImGuiIO* p_io)
+ImGuiIOPtr::ImGuiIOPtr()
 {
-    io = p_io;
+    io = &(::ImGui::GetIO());
 }
 
 void ImGuiIOPtr::_set_ConfigFlags(int32_t flags)
@@ -68,6 +85,5 @@ int32_t ImGuiIOPtr::_get_ConfigFlags()
 {
     return io->ConfigFlags;
 }
-
 
 } // namespace ImGui::Godot

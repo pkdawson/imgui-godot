@@ -10,6 +10,7 @@
 
 #pragma warning(push, 0)
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/canvas_layer.hpp>
 #pragma warning(pop)
 
 #ifdef __cplusplus
@@ -18,7 +19,7 @@ static_assert(sizeof(void*) == 8);
 #endif
 
 extern "C" {
-void IGN_API ImGuiGodot_Init(godot::Window* window);
+void IGN_API ImGuiGodot_Init(godot::Window* window, godot::CanvasLayer* layer);
 void IGN_API ImGuiGodot_Update(double delta);
 void IGN_API ImGuiGodot_Render();
 void IGN_API ImGuiGodot_Shutdown();
