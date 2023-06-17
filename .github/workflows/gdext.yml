@@ -105,3 +105,67 @@ jobs:
         with:
           name: gdext-linux
           path: gdext/proj/addons/imgui-godot-native/bin
+
+  macos:
+    name: 🍎macOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Setup scons
+        run: |
+          python -m pip install scons
+          scons --version
+
+      - name: Get vcpkg
+        run: |
+          git clone -n https://github.com/microsoft/vcpkg
+          cd vcpkg
+          git checkout 2023.04.15
+          ./bootstrap-vcpkg.sh
+
+      # TODO: build and lipo x64-osx libs, to support freetype
+      - name: vcpkg install
+        run: |
+          cd gdext
+          ${{ env.VCPKG_ROOT }}/vcpkg install --triplet arm64-osx
+
+      - name: Build debug
+        run: |
+          cd gdext
+          scons
+
+      - name: Build release
+        run: |
+          cd gdext
+          scons target=template_release
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: gdext-macos
+          path: gdext/proj/addons/imgui-godot-native/bin
+
+  package:
+    name: 📦Package
+    runs-on: ubuntu-latest
+    needs: [windows, linux, macos]
+
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        path: gdext/proj/addons/imgui-godot-native/bin
+
+    - name: look
+      run: |
+        ls -al gdext/proj/addons/imgui-godot-native/bin
+
+    # TODO: finish, and upload .pdbs separately
