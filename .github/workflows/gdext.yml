@@ -189,6 +189,7 @@ jobs:
           mv gdext/proj/addons/imgui-godot-native addons/
           ls -R
           rm addons/imgui-godot-native/bin/*.pdb
+          cp -r gdext/include/*.h addons/imgui-godot-native/include/
 
       - name: Upload package
         uses: actions/upload-artifact@v3
