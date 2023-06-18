@@ -1,5 +1,6 @@
 #include "ImGuiGD.h"
 #include "RdRenderer.h"
+#include "common.h"
 #include <imgui.h>
 
 #pragma warning(push, 0)
@@ -18,7 +19,6 @@ namespace {
 struct Context
 {
     Window* mainWindow = nullptr;
-    CanvasLayer* layer = nullptr;
     std::unique_ptr<RdRenderer> renderer;
     RID svp;
     RID ci;
@@ -34,11 +34,12 @@ struct Context
 std::unique_ptr<Context> ctx;
 } // namespace
 
-void IGN_API ImGuiGodot_Init(Window* window, CanvasLayer* layer)
+namespace ImGui::Godot {
+void Init(godot::Window* mainWindow, RID canvasItem)
 {
     ctx = std::make_unique<Context>();
-    ctx->mainWindow = window;
-    ctx->layer = layer;
+    ctx->mainWindow = mainWindow;
+    ctx->ci = canvasItem;
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -52,12 +53,9 @@ void IGN_API ImGuiGodot_Init(Window* window, CanvasLayer* layer)
     RS->viewport_set_update_mode(ctx->svp, RenderingServer::VIEWPORT_UPDATE_ALWAYS);
     RS->viewport_set_clear_mode(ctx->svp, RenderingServer::VIEWPORT_CLEAR_NEVER);
     RS->viewport_set_active(ctx->svp, true);
-    RS->viewport_set_parent_viewport(ctx->svp, window->get_viewport_rid());
+    RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
-    ctx->ci = RS->canvas_item_create();
-    RS->canvas_item_set_parent(ctx->ci, ctx->layer->get_canvas());
-
-    io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 16.0f);
     uint8_t* pixels = nullptr;
     int width = 0, height = 0, bytes_per_pixel = 0;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);
@@ -65,14 +63,14 @@ void IGN_API ImGuiGodot_Init(Window* window, CanvasLayer* layer)
     PackedByteArray data;
     data.resize(width * height * bytes_per_pixel);
     memcpy(data.ptrw(), pixels, data.size());
-    Ref<Image> img = Image::create_from_data(width, height, false, Image::FORMAT_RGBA8, data);
+    Ref<godot::Image> img = Image::create_from_data(width, height, false, Image::FORMAT_RGBA8, data);
     ctx->fontTexture = ImageTexture::create_from_image(img);
     ImTextureID texid = (ImTextureID)ctx->fontTexture->get_rid().get_id();
     io.Fonts->SetTexID(texid);
     io.Fonts->ClearTexData();
 }
 
-void IGN_API ImGuiGodot_Update(double delta)
+void Update(double delta)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ctx->mainWindow->get_size();
@@ -81,7 +79,7 @@ void IGN_API ImGuiGodot_Update(double delta)
     ImGui::NewFrame();
 }
 
-void IGN_API ImGuiGodot_Render()
+void Render()
 {
     RenderingServer* RS = RenderingServer::get_singleton();
     godot::Vector2i winSize = ctx->mainWindow->get_size();
@@ -95,9 +93,39 @@ void IGN_API ImGuiGodot_Render()
     ctx->renderer->RenderDrawData(ctx->svp, ImGui::GetDrawData());
 }
 
-void IGN_API ImGuiGodot_Shutdown()
+void Shutdown()
 {
     ctx.reset();
     if (ImGui::GetCurrentContext())
         ImGui::DestroyContext();
+}
+
+void Connect(godot::Callable& callable)
+{
+}
+} // namespace ImGui::Godot
+
+void IGN_API ImGuiGodot_Init(godot::Window* mainWindow, int64_t canvasItemRID)
+{
+    ImGui::Godot::Init(mainWindow, ImGui::Godot::make_rid(canvasItemRID));
+}
+
+void IGN_API ImGuiGodot_Update(double delta)
+{
+    ImGui::Godot::Update(delta);
+}
+
+void IGN_API ImGuiGodot_Render()
+{
+    ImGui::Godot::Render();
+}
+
+void IGN_API ImGuiGodot_Shutdown()
+{
+    ImGui::Godot::Shutdown();
+}
+
+void IGN_API ImGuiGodot_Connect(godot::Callable* callable)
+{
+    ImGui::Godot::Connect(*callable);
 }

@@ -29,12 +29,13 @@ public partial class ImGuiLayer : CanvasLayer
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _ci;
     private Transform2D _finalTransform = Transform2D.Identity;
-    private UpdateFirst _updateFirst;
+    private ImGuiHelper _helper;
     private static readonly HashSet<GodotObject> _connectedObjects = new();
     private int sizeCheck = 0;
     private bool _headless = false;
+    public readonly bool UseNative = ProjectSettings.HasSetting("autoload/imgui_godot");
 
-    private sealed partial class UpdateFirst : Node
+    private sealed partial class ImGuiHelper : Node
     {
         private uint _counter = 0;
         private ImGuiLayer _parent;
@@ -67,6 +68,11 @@ public partial class ImGuiLayer : CanvasLayer
             SetProcess(vis);
             SetPhysicsProcess(!vis);
         }
+
+        public override void _Notification(int what)
+        {
+            Internal.Input.ProcessNotification(what);
+        }
     }
 
     public override void _EnterTree()
@@ -74,6 +80,14 @@ public partial class ImGuiLayer : CanvasLayer
         Instance = this;
         _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
+
+        // check for imgui-godot-native
+        if (UseNative)
+        {
+            GD.Print("UseNative");
+            ProcessMode = ProcessModeEnum.Disabled;
+            return;
+        }
 
         CheckContentScale();
 
@@ -112,22 +126,31 @@ public partial class ImGuiLayer : CanvasLayer
         }
         ImGuiGD.RebuildFontAtlas();
 
-        _updateFirst = new UpdateFirst
+        _helper = new ImGuiHelper
         {
-            Name = "ImGuiLayer_UpdateFirst",
+            Name = "ImGuiHelper",
             ProcessPriority = int.MinValue,
             ProcessMode = ProcessModeEnum.Always,
         };
-        AddChild(_updateFirst);
+        AddChild(_helper);
     }
 
     public override void _Ready()
     {
+        if (UseNative)
+        {
+            SetProcess(false);
+            SetProcessInput(false);
+            SetProcessUnhandledInput(false);
+            SetProcessUnhandledKeyInput(false);
+            return;
+        }
         OnChangeVisibility();
     }
 
     public override void _ExitTree()
     {
+        if (UseNative) return;
         ImGuiGD.Shutdown();
         RenderingServer.FreeRid(_ci);
         RenderingServer.FreeRid(_subViewportRid);
@@ -182,11 +205,6 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.Render();
     }
 
-    public override void _Notification(int what)
-    {
-        Internal.Input.ProcessNotification(what);
-    }
-
     public override void _Input(InputEvent e)
     {
         if (ImGuiGD.ProcessInput(e, _window))
@@ -199,6 +217,12 @@ public partial class ImGuiLayer : CanvasLayer
     {
         if (Instance is null)
             return;
+
+        if (Instance.UseNative)
+        {
+            // TODO: use native signal
+            return;
+        }
 
         Instance.ImGuiLayout += d;
 

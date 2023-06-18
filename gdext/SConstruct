@@ -21,6 +21,9 @@ libs = [env['LIBS']]
 windows = env["platform"] == "windows"
 linux = env["platform"] == "linux"
 
+if config == "release" and windows:
+    env.Append(CPPDEFINES=['NDEBUG'])
+
 if windows or linux:
     triplet = "x64-windows-static-md" if windows else "x64-linux"
     env.Append(CPPPATH=["imgui/misc/freetype/"])

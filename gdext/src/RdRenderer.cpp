@@ -1,4 +1,5 @@
 #include "RdRenderer.h"
+#include "common.h"
 #include <array>
 #include <imgui.h>
 #include <unordered_map>
@@ -66,15 +67,6 @@ struct RdRenderer::Impl
     int idxBufferSize = 0; // size in indices
     RID vtxBuffer;
     int vtxBufferSize = 0; // size in vertices
-
-    RID make_rid(ImTextureID id)
-    {
-        // ugly, may break in the future
-        RID rv;
-        *(int64_t*)(rv._native_ptr()) = (int64_t)id;
-        assert(rv.get_id() == (int64_t)id);
-        return rv;
-    }
 
     void SetupBuffers(ImDrawData* drawData);
     RID GetFramebuffer(RID vprid);

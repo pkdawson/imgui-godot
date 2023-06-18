@@ -9,6 +9,8 @@
 using godot::InputEvent;
 using godot::Node;
 using godot::Ref;
+using godot::PackedInt64Array;
+using godot::String;
 
 namespace ImGui::Godot {
 
@@ -27,6 +29,8 @@ public:
 
     ImGuiGodot();
     ~ImGuiGodot();
+
+    PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize);
 
 private:
     struct Impl;

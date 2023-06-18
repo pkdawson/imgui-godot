@@ -1,6 +1,7 @@
 #pragma once
 
 #pragma warning(push, 0)
+#include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 #include <godot_cpp/variant/vector4.hpp>
@@ -29,4 +30,11 @@
     operator godot::Vector4() const                                            \
     {                                                                          \
         return godot::Vector4(x, y, z, w);                                     \
+    }                                                                          \
+    constexpr ImVec4(const godot::Color& c) : x(c.r), y(c.g), z(c.b), w(c.a)   \
+    {                                                                          \
+    }                                                                          \
+    operator godot::Color() const                                              \
+    {                                                                          \
+        return godot::Color(x, y, z, w);                                       \
     }

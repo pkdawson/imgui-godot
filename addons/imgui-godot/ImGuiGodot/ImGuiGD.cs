@@ -130,6 +130,19 @@ public static class ImGuiGD
             ImGui.DestroyContext();
     }
 
+    public static void Connect(Callable callable)
+    {
+    }
+
+    public static void Connect(Action action)
+    {
+        Connect(Callable.From(action));
+    }
+
+    public static void UseNativePtrs()
+    {
+    }
+
     /// <summary>
     /// EXPERIMENTAL! Please report bugs, with steps to reproduce.
     /// </summary>

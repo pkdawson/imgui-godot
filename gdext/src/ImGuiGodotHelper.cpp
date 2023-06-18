@@ -51,7 +51,7 @@ void ImGuiGodotHelper::_exit_tree()
 
 void ImGuiGodotHelper::_process(double delta)
 {
-    ImGuiGodot_Update(delta);
+    ImGui::Godot::Update(delta);
 }
 
 } // namespace ImGui::Godot
