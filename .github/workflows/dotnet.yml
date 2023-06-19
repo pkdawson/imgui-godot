@@ -2,8 +2,9 @@ name: 🦖 .NET Checks
 
 on:
   push:
-    branches-ignore:
-      - godot3
+    branches:
+      - master
+      - godot-4.*
   pull_request:
     branches-ignore:
       - godot3

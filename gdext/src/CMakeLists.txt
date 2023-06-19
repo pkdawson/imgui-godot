@@ -10,4 +10,6 @@ target_sources(imgui-godot-native PRIVATE
     ImGuiGodotHelper.h
     RdRenderer.cpp
     RdRenderer.h
+    Input.cpp
+    Input.h
 )

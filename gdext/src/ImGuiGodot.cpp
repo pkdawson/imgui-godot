@@ -3,6 +3,7 @@
 #include "ImGuiGodotHelper.h"
 
 #pragma warning(push, 0)
+#include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
@@ -19,6 +20,7 @@ struct ImGuiGodot::Impl
     bool show_imgui_demo = true;
     ImGuiGodotHelper* helper = nullptr;
     CanvasLayer* layer = nullptr;
+    Window* window = nullptr;
     RID canvasItem;
 };
 
@@ -42,6 +44,7 @@ void ImGuiGodot::_bind_methods()
 
 void ImGuiGodot::_enter_tree()
 {
+    impl->window = get_window();
     impl->layer = memnew(CanvasLayer);
     add_child(impl->layer);
     impl->layer->set_layer(128);
@@ -87,6 +90,23 @@ void ImGuiGodot::_process(double delta)
     // ImGui::End();
 
     ImGui::Godot::Render();
+}
+
+void ImGuiGodot::_input(const Ref<InputEvent>& event)
+{
+    if (ImGui::Godot::ProcessInput(event, impl->window))
+    {
+        impl->window->set_input_as_handled();
+    }
+}
+
+void ImGuiGodot::_notification(int p_what)
+{
+    // quick filter
+    if (p_what > 2000)
+    {
+        ImGui::Godot::ProcessNotification(p_what);
+    }
 }
 
 PackedInt64Array ImGuiGodot::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize)

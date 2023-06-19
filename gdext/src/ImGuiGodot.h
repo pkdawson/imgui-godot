@@ -2,6 +2,7 @@
 
 #pragma warning(push, 0)
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/input_event.hpp>
 #pragma warning(pop)
 
 #include <memory>
@@ -22,13 +23,15 @@ protected:
     static void _bind_methods();
 
 public:
+    ImGuiGodot();
+    ~ImGuiGodot();
+
     void _ready() override;
     void _enter_tree() override;
     void _exit_tree() override;
     void _process(double delta) override;
-
-    ImGuiGodot();
-    ~ImGuiGodot();
+    void _input(const Ref<InputEvent>& event) override;
+    void _notification(int p_what);
 
     PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize);
 

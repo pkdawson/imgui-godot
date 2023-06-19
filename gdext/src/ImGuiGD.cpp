@@ -1,4 +1,5 @@
 #include "ImGuiGD.h"
+#include "Input.h"
 #include "RdRenderer.h"
 #include "common.h"
 #include <imgui.h>
@@ -12,14 +13,15 @@
 #pragma warning(pop)
 
 using namespace godot;
-using ImGui::Godot::RdRenderer;
+
+namespace ImGui::Godot {
 
 namespace {
-
 struct Context
 {
     Window* mainWindow = nullptr;
     std::unique_ptr<RdRenderer> renderer;
+    std::unique_ptr<Input> input;
     RID svp;
     RID ci;
     Ref<ImageTexture> fontTexture;
@@ -32,18 +34,29 @@ struct Context
 };
 
 std::unique_ptr<Context> ctx;
+
+const char* PlatformName = "godot4";
+const char* RendererName = "godot4_rd";
 } // namespace
 
-namespace ImGui::Godot {
-void Init(godot::Window* mainWindow, RID canvasItem)
+void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
 {
     ctx = std::make_unique<Context>();
     ctx->mainWindow = mainWindow;
     ctx->ci = canvasItem;
+    ctx->input = std::make_unique<Input>(ctx->mainWindow);
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ctx->mainWindow->get_size();
+
+    io.BackendPlatformName = PlatformName;
+    io.BackendRendererName = RendererName;
+
+    if (config)
+    {
+
+    }
 
     ctx->renderer = std::make_unique<RdRenderer>();
 
@@ -76,7 +89,19 @@ void Update(double delta)
     io.DisplaySize = ctx->mainWindow->get_size();
     io.DeltaTime = static_cast<float>(delta);
 
+    ctx->input->Update();
+
     ImGui::NewFrame();
+}
+
+bool ProcessInput(const Ref<InputEvent>& evt, Window* window)
+{
+    return ctx->input->ProcessInput(evt, window);
+}
+
+void ProcessNotification(int what)
+{
+    return ctx->input->ProcessNotification(what);
 }
 
 void Render()
@@ -105,27 +130,3 @@ void Connect(godot::Callable& callable)
 }
 } // namespace ImGui::Godot
 
-void IGN_API ImGuiGodot_Init(godot::Window* mainWindow, int64_t canvasItemRID)
-{
-    ImGui::Godot::Init(mainWindow, ImGui::Godot::make_rid(canvasItemRID));
-}
-
-void IGN_API ImGuiGodot_Update(double delta)
-{
-    ImGui::Godot::Update(delta);
-}
-
-void IGN_API ImGuiGodot_Render()
-{
-    ImGui::Godot::Render();
-}
-
-void IGN_API ImGuiGodot_Shutdown()
-{
-    ImGui::Godot::Shutdown();
-}
-
-void IGN_API ImGuiGodot_Connect(godot::Callable* callable)
-{
-    ImGui::Godot::Connect(*callable);
-}
