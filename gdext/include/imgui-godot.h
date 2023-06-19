@@ -165,14 +165,14 @@ inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size,
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
-    ImGui::ImageButton(str_id, BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+    return ImGui::ImageButton(str_id, BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
-inline bool ImageButton(CharString str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+inline bool ImageButton(const godot::String& str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
-    ImGui::ImageButton(str_id.get_data(), BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+    return ImGui::ImageButton(str_id.utf8().get_data(), BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
 inline ImGuiKey ToImGuiKey(Key key)

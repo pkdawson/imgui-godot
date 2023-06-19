@@ -60,15 +60,15 @@ void ImGuiLayer::_enter_tree()
 
 void ImGuiLayer::_ready()
 {
-    set_process_mode(PROCESS_MODE_DISABLED);
     set_process_priority(std::numeric_limits<int32_t>::max());
+    set_process(false);
 
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
         return;
 #endif
 
-    set_process_mode(PROCESS_MODE_ALWAYS);
+    set_process(true);
 }
 
 void ImGuiLayer::_exit_tree()

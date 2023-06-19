@@ -1,5 +1,7 @@
 extends Node
 
+@onready var tex: Texture2D = preload("res://icon.svg")
+
 func _ready():
     ImGuiGD.Connect(_on_imgui_layout)
     var io = ImGui.GetIO()
@@ -8,6 +10,8 @@ func _ready():
 func _process(_delta):
     ImGui.Begin("gds")
     ImGui.Text("hello")
+    ImGuiGD.Image(tex, Vector2(128, 128))
+    ImGuiGD.ImageButton("mybtn", tex, Vector2(128, 128))
     ImGui.End()
 
 func _on_imgui_layout():
