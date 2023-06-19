@@ -18,7 +18,6 @@ config/icon="res://data/icon.svg"
 [autoload]
 
 ImGuiLayer="*res://addons/imgui-godot/ImGuiLayer.tscn"
-imgui_godot="*res://addons/imgui-godot-native/imgui-godot.tscn"
 
 [display]
 
@@ -34,4 +33,4 @@ project/assembly_name="Dear ImGui for Godot Demo"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/imgui-godot-native/plugin.cfg", "res://addons/imgui-godot/plugin.cfg")
+enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")

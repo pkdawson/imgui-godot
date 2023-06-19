@@ -132,6 +132,7 @@ public static class ImGuiGD
 
     public static void Connect(Callable callable)
     {
+        ImGuiLayer.Connect(() => { callable.Call(); });
     }
 
     public static void Connect(Action action)

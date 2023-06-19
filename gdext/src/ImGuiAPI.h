@@ -3,18 +3,42 @@
 #pragma warning(push, 0)
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/variant/variant.hpp>
 #pragma warning(pop)
 
 #include <imgui.h>
 #include <memory>
 
-using godot::Array;
-using godot::Object;
-using godot::Ref;
-using godot::RefCounted;
-using godot::String;
+using namespace godot;
 
 namespace ImGui::Godot {
+
+template <class T>
+struct GdsPtr
+{
+    // TypedArray<T>& arr;
+    Array& arr;
+    T val;
+
+    GdsPtr(Array& x) : arr(x), val()
+    {
+        if (arr.size() > 0)
+            val = arr[0];
+    }
+
+    ~GdsPtr()
+    {
+        if (arr.size() > 0)
+            arr[0] = val;
+    }
+
+    operator T*()
+    {
+        if (arr.size() > 0)
+            return &val;
+        return nullptr;
+    }
+};
 
 enum ConfigFlags
 {
@@ -46,11 +70,17 @@ protected:
     static void _bind_methods();
 
 public:
+    enum WindowFlags
+    {
+        WindowFlags_None = ImGuiWindowFlags_None,
+        WindowFlags_NoTitleBar = ImGuiWindowFlags_NoTitleBar,
+    };
+
     ImGui();
     ~ImGui();
 
     static void SetNextWindowPos(godot::Vector2i pos);
-    static bool Begin(String name, Array p_open);
+    static bool Begin(String name, Array p_open, BitField<WindowFlags> flags);
     static void End();
 
     static void Text(String text);
@@ -64,4 +94,5 @@ private:
 
 } // namespace ImGui::Godot
 
+VARIANT_BITFIELD_CAST(ImGui::Godot::ImGui::WindowFlags);
 VARIANT_BITFIELD_CAST(ImGui::Godot::ConfigFlags);

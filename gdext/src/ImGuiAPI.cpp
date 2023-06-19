@@ -19,14 +19,20 @@ struct ImGui::Impl
 void ImGui::_bind_methods()
 {
     ClassDB::bind_static_method("ImGui", D_METHOD("SetNextWindowPos", "pos"), &ImGui::SetNextWindowPos);
-    ClassDB::bind_static_method("ImGui", D_METHOD("Begin", "name", "p_open"), &ImGui::Begin, DEFVAL(godot::Array()));
+    ClassDB::bind_static_method("ImGui",
+                                D_METHOD("Begin", "name", "p_open", "flags"),
+                                &ImGui::Begin,
+                                DEFVAL(godot::Array()),
+                                DEFVAL(WindowFlags_None));
     ClassDB::bind_static_method("ImGui", D_METHOD("End"), &ImGui::End);
 
     ClassDB::bind_static_method("ImGui", D_METHOD("Text", "text"), &ImGui::Text);
 
     ClassDB::bind_static_method("ImGui", D_METHOD("GetIO"), &ImGui::GetIO);
 
-    BIND_ENUM_CONSTANT(ConfigFlags_ViewportsEnable);
+    BIND_BITFIELD_FLAG(ConfigFlags_ViewportsEnable);
+
+    BIND_BITFIELD_FLAG(WindowFlags_NoTitleBar);
 }
 
 ImGui::ImGui() : impl(std::make_unique<Impl>())
@@ -42,9 +48,9 @@ void ImGui::SetNextWindowPos(godot::Vector2i pos)
     ::ImGui::SetNextWindowPos(pos);
 }
 
-bool ImGui::Begin(String name, Array p_open)
+bool ImGui::Begin(String name, Array p_open, BitField<WindowFlags> flags)
 {
-    return ::ImGui::Begin(name.utf8().get_data());
+    return ::ImGui::Begin(name.utf8().get_data(), GdsPtr<bool>(p_open), flags);
 }
 
 void ImGui::End()
