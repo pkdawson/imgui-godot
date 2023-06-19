@@ -15,16 +15,16 @@ using godot::String;
 
 namespace ImGui::Godot {
 
-class ImGuiGodot : public Node
+class ImGuiLayer : public Node
 {
-    GDCLASS(ImGuiGodot, Node);
+    GDCLASS(ImGuiLayer, Node);
 
 protected:
     static void _bind_methods();
 
 public:
-    ImGuiGodot();
-    ~ImGuiGodot();
+    ImGuiLayer();
+    ~ImGuiLayer();
 
     void _ready() override;
     void _enter_tree() override;

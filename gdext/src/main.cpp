@@ -7,8 +7,9 @@
 #include <imgui.h>
 
 #include "ImGuiAPI.h"
-#include "ImGuiGodot.h"
+#include "ImGuiGD.h"
 #include "ImGuiGodotHelper.h"
+#include "ImGuiLayer.h"
 
 using namespace godot;
 
@@ -18,8 +19,9 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
         return;
 
     ClassDB::register_class<ImGui::Godot::ImGui>();
-    ClassDB::register_class<ImGui::Godot::ImGuiGodot>();
+    ClassDB::register_class<ImGui::Godot::ImGuiLayer>();
     ClassDB::register_class<ImGui::Godot::ImGuiGodotHelper>();
+    ClassDB::register_class<ImGui::Godot::ImGuiGD>();
     ClassDB::register_class<ImGui::Godot::ImGuiIOPtr>();
 }
 
@@ -30,9 +32,10 @@ void uninitialize_ign_module(ModuleInitializationLevel p_level)
 }
 
 extern "C" {
-GDExtensionBool GDE_EXPORT ign_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization)
+GDExtensionBool GDE_EXPORT ign_init(GDExtensionInterfaceGetProcAddress p_get_proc_address,
+                                    GDExtensionClassLibraryPtr p_library, GDExtensionInitialization* r_initialization)
 {
-	GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
+    GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
     init_obj.register_initializer(initialize_ign_module);
     init_obj.register_terminator(uninitialize_ign_module);

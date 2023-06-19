@@ -43,7 +43,7 @@ target_sources(imgui-godot-native PRIVATE
     imgui/misc/freetype/imgui_freetype.cpp
     imgui/misc/freetype/imgui_freetype.h
     include/imconfig-godot.h
-    include/ImGuiGD.h
+    include/imgui-godot.h
     )
 
 target_link_libraries(imgui-godot-native PUBLIC
@@ -52,7 +52,7 @@ target_link_libraries(imgui-godot-native PUBLIC
     )
 
 target_include_directories(imgui-godot-native PRIVATE src imgui PUBLIC include)
-set_target_properties(imgui-godot-native PROPERTIES PUBLIC_HEADER "include/imconfig-godot.h;include/ImGuiGD.h")
+set_target_properties(imgui-godot-native PROPERTIES PUBLIC_HEADER "include/imconfig-godot.h;include/imgui-godot.h")
 
 set_property(TARGET imgui-godot-native PROPERTY OUTPUT_NAME "libimgui-godot-native.windows.$<IF:$<CONFIG:Debug>,debug,release>.x86_64")
 

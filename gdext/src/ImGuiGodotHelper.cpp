@@ -1,5 +1,5 @@
 #include "ImGuiGodotHelper.h"
-#include "ImGuiGD.h"
+#include "imgui-godot.h"
 
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>

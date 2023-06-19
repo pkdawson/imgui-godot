@@ -1,5 +1,5 @@
 #include "Input.h"
-#include "ImGuiGD.h"
+#include "imgui-godot.h"
 
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/input.hpp>

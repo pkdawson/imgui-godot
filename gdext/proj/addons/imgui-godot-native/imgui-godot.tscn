@@ -1,5 +1,5 @@
 [gd_scene format=3 uid="uid://b4ye4lwk30rew"]
 
-[node name="imgui_godot" type="ImGuiGodot"]
+[node name="ImGuiLayerNative" type="ImGuiLayer"]
 process_mode = 4
 process_priority = 2147483647

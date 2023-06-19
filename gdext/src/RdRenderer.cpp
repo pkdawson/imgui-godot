@@ -258,8 +258,10 @@ RdRenderer::~RdRenderer()
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
     RD->free_rid(impl->shader);
     RD->free_rid(impl->sampler);
-    RD->free_rid(impl->idxBuffer);
-    RD->free_rid(impl->vtxBuffer);
+    if (impl->idxBuffer.is_valid())
+        RD->free_rid(impl->idxBuffer);
+    if (impl->vtxBuffer.is_valid())
+        RD->free_rid(impl->vtxBuffer);
 }
 
 void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)

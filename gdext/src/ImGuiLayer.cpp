@@ -1,6 +1,6 @@
-#include "ImGuiGodot.h"
-#include "ImGuiGD.h"
+#include "ImGuiLayer.h"
 #include "ImGuiGodotHelper.h"
+#include "imgui-godot.h"
 
 #pragma warning(push, 0)
 #include <godot_cpp/classes/canvas_layer.hpp>
@@ -15,7 +15,7 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-struct ImGuiGodot::Impl
+struct ImGuiLayer::Impl
 {
     bool show_imgui_demo = true;
     ImGuiGodotHelper* helper = nullptr;
@@ -24,26 +24,25 @@ struct ImGuiGodot::Impl
     RID canvasItem;
 };
 
-ImGuiGodot::ImGuiGodot() : impl(std::make_unique<Impl>())
+ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
 {
-    Engine::get_singleton()->register_singleton("ImGuiGodot", this);
 }
 
-ImGuiGodot::~ImGuiGodot()
+ImGuiLayer::~ImGuiLayer()
 {
-    Engine::get_singleton()->unregister_singleton("ImGuiGodot");
 }
 
-void ImGuiGodot::_bind_methods()
+void ImGuiLayer::_bind_methods()
 {
     ADD_SIGNAL(MethodInfo("imgui_layout"));
 
     ClassDB::bind_method(D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize"),
-                         &ImGuiGodot::GetImGuiPtrs);
+                         &ImGuiLayer::GetImGuiPtrs);
 }
 
-void ImGuiGodot::_enter_tree()
+void ImGuiLayer::_enter_tree()
 {
+    Engine::get_singleton()->register_singleton("ImGuiLayer", this);
     impl->window = get_window();
     impl->layer = memnew(CanvasLayer);
     add_child(impl->layer);
@@ -59,7 +58,7 @@ void ImGuiGodot::_enter_tree()
     add_child(impl->helper);
 }
 
-void ImGuiGodot::_ready()
+void ImGuiLayer::_ready()
 {
     set_process_mode(PROCESS_MODE_DISABLED);
     set_process_priority(std::numeric_limits<int32_t>::max());
@@ -72,13 +71,14 @@ void ImGuiGodot::_ready()
     set_process_mode(PROCESS_MODE_ALWAYS);
 }
 
-void ImGuiGodot::_exit_tree()
+void ImGuiLayer::_exit_tree()
 {
+    Engine::get_singleton()->unregister_singleton("ImGuiLayer");
     ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);
 }
 
-void ImGuiGodot::_process(double delta)
+void ImGuiLayer::_process(double delta)
 {
     emit_signal("imgui_layout");
 
@@ -92,7 +92,7 @@ void ImGuiGodot::_process(double delta)
     ImGui::Godot::Render();
 }
 
-void ImGuiGodot::_input(const Ref<InputEvent>& event)
+void ImGuiLayer::_input(const Ref<InputEvent>& event)
 {
     if (ImGui::Godot::ProcessInput(event, impl->window))
     {
@@ -100,7 +100,7 @@ void ImGuiGodot::_input(const Ref<InputEvent>& event)
     }
 }
 
-void ImGuiGodot::_notification(int p_what)
+void ImGuiLayer::_notification(int p_what)
 {
     // quick filter
     if (p_what > 2000)
@@ -109,7 +109,7 @@ void ImGuiGodot::_notification(int p_what)
     }
 }
 
-PackedInt64Array ImGuiGodot::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize)
+PackedInt64Array ImGuiLayer::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize)
 {
     if (version != String(ImGui::GetVersion()) || ioSize != sizeof(ImGuiIO) || vertSize != sizeof(ImDrawVert) ||
         idxSize != sizeof(ImDrawIdx))

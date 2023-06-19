@@ -55,7 +55,7 @@ bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
 void ProcessNotification(int what);
 void Render();
 void Shutdown();
-void Connect(Callable& callable);
+void Connect(const Callable& callable);
 
 bool SubViewport(SubViewport* svp);
 
@@ -71,7 +71,7 @@ inline bool GET_IMGUIGD()
 {
     if (ImGuiGD)
         return true;
-    ImGuiGD = Engine::get_singleton()->get_singleton("ImGuiGodot");
+    ImGuiGD = Engine::get_singleton()->get_singleton("ImGuiGD");
     return ImGuiGD != nullptr;
 }
 } // namespace detail
@@ -100,7 +100,7 @@ inline void Shutdown()
     detail::ImGuiGD->call("Shutdown");
 }
 
-inline void Connect(Callable& callable)
+inline void Connect(const Callable& callable)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     detail::ImGuiGD->call("Connect", callable);

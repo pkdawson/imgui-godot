@@ -1,7 +1,7 @@
 extends Node
 
 func _ready():
-    $/root/imgui_godot.imgui_layout.connect(_on_imgui_layout)
+    ImGuiGD.Connect(_on_imgui_layout)
     var io = ImGui.GetIO()
     io.ConfigFlags |= ImGui.ConfigFlags_ViewportsEnable
 

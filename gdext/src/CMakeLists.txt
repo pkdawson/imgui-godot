@@ -1,11 +1,13 @@
 target_sources(imgui-godot-native PRIVATE
     main.cpp
     common.h
+    imgui-godot.cpp
     ImGuiAPI.cpp
     ImGuiAPI.h
     ImGuiGD.cpp
-    ImGuiGodot.cpp
-    ImGuiGodot.h
+    ImGuiGD.h
+    ImGuiLayer.cpp
+    ImGuiLayer.h
     ImGuiGodotHelper.cpp
     ImGuiGodotHelper.h
     RdRenderer.cpp
