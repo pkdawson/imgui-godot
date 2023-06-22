@@ -3,10 +3,13 @@
 
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/input.hpp>
+#include <godot_cpp/classes/input_event_joypad_button.hpp>
+#include <godot_cpp/classes/input_event_joypad_motion.hpp>
 #include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/input_event_mouse.hpp>
 #include <godot_cpp/classes/input_event_mouse_button.hpp>
 #include <godot_cpp/classes/input_event_mouse_motion.hpp>
+#include <godot_cpp/classes/input_event_pan_gesture.hpp>
 #include <godot_cpp/classes/main_loop.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
@@ -31,7 +34,7 @@ struct Input::Impl
 };
 
 namespace {
-DisplayServer::CursorShape ConvertCursorShape(ImGuiMouseCursor cur)
+DisplayServer::CursorShape ToCursorShape(ImGuiMouseCursor cur)
 {
     switch (cur)
     {
@@ -120,7 +123,7 @@ void Input::Update()
         ImGuiMouseCursor newCursor = ImGui::GetMouseCursor();
         if (newCursor != impl->currentCursor)
         {
-            DS->cursor_set_shape(ConvertCursorShape(newCursor));
+            DS->cursor_set_shape(ToCursorShape(newCursor));
         }
     }
     else
@@ -172,15 +175,31 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
             }
 #endif
             break;
-
+        case MOUSE_BUTTON_RIGHT:
+            io.AddMouseButtonEvent(ImGuiMouseButton_Right, pressed);
+            break;
+        case MOUSE_BUTTON_MIDDLE:
+            io.AddMouseButtonEvent(ImGuiMouseButton_Middle, pressed);
+            break;
+        case MOUSE_BUTTON_XBUTTON1:
+            io.AddMouseButtonEvent(ImGuiMouseButton_Middle + 1, pressed);
+            break;
+        case MOUSE_BUTTON_XBUTTON2:
+            io.AddMouseButtonEvent(ImGuiMouseButton_Middle + 2, pressed);
         case MOUSE_BUTTON_WHEEL_UP:
             impl->mouseWheel.y = mb->get_factor();
             break;
         case MOUSE_BUTTON_WHEEL_DOWN:
             impl->mouseWheel.y = -mb->get_factor();
             break;
+        case MOUSE_BUTTON_WHEEL_LEFT:
+            impl->mouseWheel.x = -mb->get_factor();
+            break;
+        case MOUSE_BUTTON_WHEEL_RIGHT:
+            impl->mouseWheel.x = mb->get_factor();
+            break;
         }
-        consumed = true;
+        consumed = io.WantCaptureMouse;
     }
     else if (Ref<InputEventKey> k = evt; k.is_valid())
     {
@@ -196,6 +215,57 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
             }
         }
         consumed = io.WantCaptureKeyboard || io.WantTextInput;
+    }
+    else if (Ref<InputEventPanGesture> pg = evt; pg.is_valid())
+    {
+        impl->mouseWheel = Vector2(-pg->get_delta().x, -pg->get_delta().y);
+        consumed = io.WantCaptureMouse;
+    }
+    else if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad)
+    {
+        if (Ref<InputEventJoypadButton> jb = evt; jb.is_valid())
+        {
+            ImGuiKey igk = ToImGuiKey(jb->get_button_index());
+            if (igk != ImGuiKey_None)
+            {
+                io.AddKeyEvent(igk, jb->is_pressed());
+                consumed = true;
+            }
+        }
+        else if (Ref<InputEventJoypadMotion> jm = evt; jm.is_valid())
+        {
+            bool pressed = true;
+            float v = jm->get_axis_value();
+            if (std::abs(v) < 0.15f) // TODO: set dead zone
+            {
+                v = 0;
+                pressed = false;
+            }
+
+            switch (jm->get_axis())
+            {
+            case JOY_AXIS_LEFT_X:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickRight, pressed, v);
+                break;
+            case JOY_AXIS_LEFT_Y:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickDown, pressed, v);
+                break;
+            case JOY_AXIS_RIGHT_X:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickRight, pressed, v);
+                break;
+            case JOY_AXIS_RIGHT_Y:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickDown, pressed, v);
+                break;
+            case JOY_AXIS_TRIGGER_LEFT:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadL2, pressed, v);
+                break;
+            case JOY_AXIS_TRIGGER_RIGHT:
+                io.AddKeyAnalogEvent(ImGuiKey_GamepadR2, pressed, v);
+                break;
+            };
+
+            consumed = true;
+        }
     }
 
     return consumed;

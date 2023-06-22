@@ -4,10 +4,14 @@
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 #pragma warning(pop)
 
-#include <imgui.h>
+#include <cimgui.h>
 #include <memory>
+
+#include "imgui_enums.gen.h"
+#include "imgui_funcs.gen.h"
 
 using namespace godot;
 
@@ -20,30 +24,22 @@ struct GdsPtr
     Array& arr;
     T val;
 
-    GdsPtr(Array& x) : arr(x), val()
+    GdsPtr(Array& x) : arr(x), val(arr[0])
     {
-        if (arr.size() > 0)
-            val = arr[0];
     }
 
     ~GdsPtr()
     {
-        if (arr.size() > 0)
-            arr[0] = val;
+        arr[0] = val;
     }
 
     operator T*()
     {
-        if (arr.size() > 0)
-            return &val;
-        return nullptr;
+        return &val;
     }
 };
 
-enum ConfigFlags
-{
-    ConfigFlags_ViewportsEnable = ImGuiConfigFlags_ViewportsEnable,
-};
+#define GDS_PTR(T, a) a.size() == 0 ? nullptr : GdsPtr<T>(a)
 
 class ImGuiIOPtr : public RefCounted
 {
@@ -70,20 +66,12 @@ protected:
     static void _bind_methods();
 
 public:
-    enum WindowFlags
-    {
-        WindowFlags_None = ImGuiWindowFlags_None,
-        WindowFlags_NoTitleBar = ImGuiWindowFlags_NoTitleBar,
-    };
-
     ImGui();
     ~ImGui();
 
-    static void SetNextWindowPos(godot::Vector2i pos);
     static bool Begin(String name, Array p_open, BitField<WindowFlags> flags);
-    static void End();
 
-    static void Text(String text);
+    DECLARE_IMGUI_FUNCS()
 
     static Ref<ImGuiIOPtr> GetIO();
 
@@ -94,5 +82,3 @@ private:
 
 } // namespace ImGui::Godot
 
-VARIANT_BITFIELD_CAST(ImGui::Godot::ImGui::WindowFlags);
-VARIANT_BITFIELD_CAST(ImGui::Godot::ConfigFlags);

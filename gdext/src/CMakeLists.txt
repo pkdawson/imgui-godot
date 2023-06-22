@@ -2,6 +2,8 @@ target_sources(imgui-godot-native PRIVATE
     main.cpp
     common.h
     imgui-godot.cpp
+    ImGuiGodot.cpp
+    ImGuiGodot.h
     ImGuiAPI.cpp
     ImGuiAPI.h
     ImGuiGD.cpp

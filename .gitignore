@@ -25,3 +25,4 @@ gdext/x64/
 *.lib
 *.os
 gdext/proj/addons/imgui-godot-native/include/*.h
+gdext/gen/

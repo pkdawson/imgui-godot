@@ -54,6 +54,13 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     io.BackendPlatformName = PlatformName;
     io.BackendRendererName = RendererName;
 
+    io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+    io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
+    //io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+    //io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+
     if (config)
     {
     }
@@ -129,6 +136,22 @@ void Connect(const godot::Callable& callable)
 {
     Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
     igl->connect("imgui_layout", callable);
+}
+
+void ResetFonts()
+{
+}
+
+void AddFont(FontFile* font_file, int font_size, bool merge)
+{
+}
+
+void AddFontDefault()
+{
+}
+
+void RebuildFontAtlas()
+{
 }
 
 } // namespace ImGui::Godot

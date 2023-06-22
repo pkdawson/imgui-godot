@@ -26,10 +26,12 @@ struct ImGuiLayer::Impl
 
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
 {
+    UtilityFunctions::print("ImGuiLayer()");
 }
 
 ImGuiLayer::~ImGuiLayer()
 {
+    UtilityFunctions::print("~ImGuiLayer()");
 }
 
 void ImGuiLayer::_bind_methods()
@@ -42,7 +44,20 @@ void ImGuiLayer::_bind_methods()
 
 void ImGuiLayer::_enter_tree()
 {
+    UtilityFunctions::print("igl ET");
+    Node* parent = get_parent();
+    UtilityFunctions::print("parent = ", parent);
+    if (!parent)
+        return;
+    UtilityFunctions::print("parent class = ", parent->get_class());
+    if (parent->get_class() != "Window")
+        return;
+    UtilityFunctions::print(Engine::get_singleton()->has_singleton("ImGuiLayer"));
+    if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
+        return;
+
     Engine::get_singleton()->register_singleton("ImGuiLayer", this);
+    UtilityFunctions::print(Engine::get_singleton()->has_singleton("ImGuiLayer"));
     impl->window = get_window();
     impl->layer = memnew(CanvasLayer);
     add_child(impl->layer);
@@ -54,6 +69,7 @@ void ImGuiLayer::_enter_tree()
 
     ImGui::Godot::Init(get_window(), impl->canvasItem);
 
+    UtilityFunctions::print("add igh");
     impl->helper = memnew(ImGuiGodotHelper);
     add_child(impl->helper);
 }
@@ -73,9 +89,11 @@ void ImGuiLayer::_ready()
 
 void ImGuiLayer::_exit_tree()
 {
+    UtilityFunctions::print("exit tree");
     Engine::get_singleton()->unregister_singleton("ImGuiLayer");
     ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);
+    //impl->helper->queue_free();
 }
 
 void ImGuiLayer::_process(double delta)

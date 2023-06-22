@@ -1,13 +1,17 @@
 #pragma warning(push, 0)
+#include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/main_loop.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
-
-#include <imgui.h>
 
 #include "ImGuiAPI.h"
 #include "ImGuiGD.h"
+#include "ImGuiGodot.h"
 #include "ImGuiGodotHelper.h"
 #include "ImGuiLayer.h"
 
@@ -19,6 +23,7 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
         return;
 
     ClassDB::register_class<ImGui::Godot::ImGui>();
+    ClassDB::register_class<ImGui::Godot::ImGuiGodot>();
     ClassDB::register_class<ImGui::Godot::ImGuiLayer>();
     ClassDB::register_class<ImGui::Godot::ImGuiGodotHelper>();
     ClassDB::register_class<ImGui::Godot::ImGuiGD>();

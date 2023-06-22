@@ -15,6 +15,7 @@
 #if __has_include("godot_cpp/classes/engine.hpp")
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/font_file.hpp>
 #include <godot_cpp/classes/input_event.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
@@ -26,6 +27,7 @@ using godot::Callable;
 using godot::CharString;
 using godot::Color;
 using godot::Engine;
+using godot::FontFile;
 using godot::InputEvent;
 using godot::JoyButton;
 using godot::Key;
@@ -56,6 +58,10 @@ void ProcessNotification(int what);
 void Render();
 void Shutdown();
 void Connect(const Callable& callable);
+void ResetFonts();
+void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
+void AddFontDefault();
+void RebuildFontAtlas();
 
 bool SubViewport(SubViewport* svp);
 
@@ -143,10 +149,15 @@ inline void SetJoyButtonSwapAB(bool swap)
 inline void SetScale(float scale)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    //if (scale != detail::Scale && scale >= 0.25f)
+    // if (scale != detail::Scale && scale >= 0.25f)
     //{
-    //    // TODO: ...
-    //}
+    //     // TODO: ...
+    // }
+}
+
+inline void SyncImGuiPtrs()
+{
+
 }
 #endif
 

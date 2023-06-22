@@ -44,6 +44,10 @@ target_sources(imgui-godot-native PRIVATE
     imgui/misc/freetype/imgui_freetype.h
     include/imconfig-godot.h
     include/imgui-godot.h
+    gen/imgui_enums.gen.h
+    gen/imgui_funcs.gen.h
+    dear_bindings/cimgui.cpp
+    dear_bindings/cimgui.h
     )
 
 target_link_libraries(imgui-godot-native PUBLIC
@@ -51,7 +55,7 @@ target_link_libraries(imgui-godot-native PUBLIC
     freetype
     )
 
-target_include_directories(imgui-godot-native PRIVATE src imgui PUBLIC include)
+target_include_directories(imgui-godot-native PRIVATE src imgui gen dear_bindings PUBLIC include)
 set_target_properties(imgui-godot-native PROPERTIES PUBLIC_HEADER "include/imconfig-godot.h;include/imgui-godot.h")
 
 set_property(TARGET imgui-godot-native PROPERTY OUTPUT_NAME "libimgui-godot-native.windows.$<IF:$<CONFIG:Debug>,debug,release>.x86_64")

@@ -6,8 +6,19 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
 
-#include <imgui.h>
 using namespace godot;
+
+namespace {
+inline Vector2 ToVector2(ImVec2 v)
+{
+    return Vector2(v.x, v.y);
+}
+
+inline Color ToColor(ImVec4 v)
+{
+    return Color(v.x, v.y, v.z, v.w);
+}
+} // namespace
 
 namespace ImGui::Godot {
 
@@ -18,21 +29,16 @@ struct ImGui::Impl
 
 void ImGui::_bind_methods()
 {
-    ClassDB::bind_static_method("ImGui", D_METHOD("SetNextWindowPos", "pos"), &ImGui::SetNextWindowPos);
     ClassDB::bind_static_method("ImGui",
                                 D_METHOD("Begin", "name", "p_open", "flags"),
                                 &ImGui::Begin,
                                 DEFVAL(godot::Array()),
                                 DEFVAL(WindowFlags_None));
-    ClassDB::bind_static_method("ImGui", D_METHOD("End"), &ImGui::End);
-
-    ClassDB::bind_static_method("ImGui", D_METHOD("Text", "text"), &ImGui::Text);
 
     ClassDB::bind_static_method("ImGui", D_METHOD("GetIO"), &ImGui::GetIO);
 
-    BIND_BITFIELD_FLAG(ConfigFlags_ViewportsEnable);
-
-    BIND_BITFIELD_FLAG(WindowFlags_NoTitleBar);
+    REGISTER_IMGUI_ENUMS();
+    BIND_IMGUI_FUNCS();
 }
 
 ImGui::ImGui() : impl(std::make_unique<Impl>())
@@ -43,24 +49,9 @@ ImGui::~ImGui()
 {
 }
 
-void ImGui::SetNextWindowPos(godot::Vector2i pos)
-{
-    ::ImGui::SetNextWindowPos(pos);
-}
-
 bool ImGui::Begin(String name, Array p_open, BitField<WindowFlags> flags)
 {
-    return ::ImGui::Begin(name.utf8().get_data(), GdsPtr<bool>(p_open), flags);
-}
-
-void ImGui::End()
-{
-    ::ImGui::End();
-}
-
-void ImGui::Text(String text)
-{
-    ::ImGui::Text(text.utf8().get_data());
+    return ImGui_Begin(name.utf8().get_data(), GDS_PTR(bool, p_open), flags);
 }
 
 Ref<ImGuiIOPtr> ImGui::GetIO()
@@ -79,7 +70,7 @@ void ImGuiIOPtr::_bind_methods()
 
 ImGuiIOPtr::ImGuiIOPtr()
 {
-    io = &(::ImGui::GetIO());
+    io = ImGui_GetIO();
 }
 
 void ImGuiIOPtr::_set_ConfigFlags(int32_t flags)
@@ -91,5 +82,7 @@ int32_t ImGuiIOPtr::_get_ConfigFlags()
 {
     return io->ConfigFlags;
 }
+
+DEFINE_IMGUI_FUNCS()
 
 } // namespace ImGui::Godot
