@@ -223,7 +223,7 @@ def main():
         parser.load(jdat)
     parser.write()
 
-    subprocess.call('clang-format -i gen/*.h')
+    subprocess.call(['clang-format', '-i', 'gen/*.h'])
     #subprocess.call('clang-format -i gen/*.cpp')
 
 if __name__ == '__main__':
