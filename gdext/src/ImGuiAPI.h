@@ -54,7 +54,7 @@ struct GdsPtr<String>
         if (!strbufs.contains(hash))
             strbufs[hash] = std::vector<char>();
         strbufs[hash].resize(s);
-        UtilityFunctions::print((size_t)strbufs[hash].data());
+        UtilityFunctions::print((int64_t)strbufs[hash].data());
     }
 
     ~GdsPtr()

@@ -172,6 +172,7 @@ class JsonParser:
                         dv = dv.replace('ImVec2', 'Vector2')
                         dv = dv.replace('ImVec4', 'Color')
                         dv = dv.replace('FLT_MIN', 'std::numeric_limits<float>::min()')
+                        dv = dv.replace('NULL', 'Variant()')
                         defvals.append(dv)
 
             for n in argnames:
