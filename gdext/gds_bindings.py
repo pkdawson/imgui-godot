@@ -171,6 +171,7 @@ class JsonParser:
                         dv = arg['default_value']
                         dv = dv.replace('ImVec2', 'Vector2')
                         dv = dv.replace('ImVec4', 'Color')
+                        dv = dv.replace('FLT_MIN', 'std::numeric_limits<float>::min()')
                         defvals.append(dv)
 
             for n in argnames:
@@ -194,7 +195,7 @@ class JsonParser:
                     call_args.append(f'{{{an}.r, {an}.g, {an}.b, {an}.a}}')
                 elif at == 'Array':
                     t = self.array_types[origtypes[i]]
-                    call_args.append(f'GDS_PTR({t}, {an}')
+                    call_args.append(f'{an}.size() == 0 ? nullptr : ({origtypes[i]})GdsPtr<{t}>({an}')
                     if t == 'String':
                         call_args[-1] += ', buf_size, label'
                     call_args[-1] += ")"

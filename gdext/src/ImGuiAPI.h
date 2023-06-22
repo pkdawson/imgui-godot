@@ -68,7 +68,7 @@ struct GdsPtr<String>
     }
 };
 
-#define GDS_PTR(T, a, ...) a.size() == 0 ? nullptr : GdsPtr<T>(a, __VA_ARGS__)
+//#define GDS_PTR(T, a, ...) a.size() == 0 ? nullptr : GdsPtr<T>(a, __VA_ARGS__)
 
 class ImGuiIOPtr : public RefCounted
 {
