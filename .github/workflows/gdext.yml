@@ -101,6 +101,7 @@ jobs:
         run: |
           cd gdext
           pip install ply
+          apt install clang-format
           python gds_bindings.py
 
       - name: Build debug
@@ -155,6 +156,7 @@ jobs:
         run: |
           cd gdext
           pip install ply
+          brew install clang-format
           python gds_bindings.py
   
       - name: Build debug
