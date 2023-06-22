@@ -12,6 +12,10 @@
 
 #include <imgui.h>
 
+#ifndef IMGUI_HAS_VIEWPORT
+#error use ImGui docking branch
+#endif
+
 #if __has_include("godot_cpp/classes/engine.hpp")
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>

@@ -29,12 +29,6 @@ struct ImGui::Impl
 
 void ImGui::_bind_methods()
 {
-    ClassDB::bind_static_method("ImGui",
-                                D_METHOD("Begin", "name", "p_open", "flags"),
-                                &ImGui::Begin,
-                                DEFVAL(godot::Array()),
-                                DEFVAL(WindowFlags_None));
-
     ClassDB::bind_static_method("ImGui", D_METHOD("GetIO"), &ImGui::GetIO);
 
     REGISTER_IMGUI_ENUMS();
@@ -47,11 +41,6 @@ ImGui::ImGui() : impl(std::make_unique<Impl>())
 
 ImGui::~ImGui()
 {
-}
-
-bool ImGui::Begin(String name, Array p_open, BitField<WindowFlags> flags)
-{
-    return ImGui_Begin(name.utf8().get_data(), GDS_PTR(bool, p_open), flags);
 }
 
 Ref<ImGuiIOPtr> ImGui::GetIO()

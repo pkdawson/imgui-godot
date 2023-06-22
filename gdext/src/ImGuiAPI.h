@@ -3,8 +3,9 @@
 #pragma warning(push, 0)
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
-#include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
 
 #include <cimgui.h>
@@ -39,7 +40,35 @@ struct GdsPtr
     }
 };
 
-#define GDS_PTR(T, a) a.size() == 0 ? nullptr : GdsPtr<T>(a)
+template <>
+struct GdsPtr<String>
+{
+    inline static std::unordered_map<int64_t, std::vector<char>> strbufs;
+
+    Array& arr;
+    int64_t hash;
+
+    GdsPtr(Array& x, size_t s, const String& label) : arr(x)
+    {
+        hash = label.hash();
+        if (!strbufs.contains(hash))
+            strbufs[hash] = std::vector<char>();
+        strbufs[hash].resize(s);
+        UtilityFunctions::print((size_t)strbufs[hash].data());
+    }
+
+    ~GdsPtr()
+    {
+        arr[0] = String(strbufs[hash].data());
+    }
+
+    operator char*()
+    {
+        return strbufs[hash].data();
+    }
+};
+
+#define GDS_PTR(T, a, ...) a.size() == 0 ? nullptr : GdsPtr<T>(a, __VA_ARGS__)
 
 class ImGuiIOPtr : public RefCounted
 {
@@ -69,8 +98,6 @@ public:
     ImGui();
     ~ImGui();
 
-    static bool Begin(String name, Array p_open, BitField<WindowFlags> flags);
-
     DECLARE_IMGUI_FUNCS()
 
     static Ref<ImGuiIOPtr> GetIO();
@@ -81,4 +108,3 @@ private:
 };
 
 } // namespace ImGui::Godot
-

@@ -6,6 +6,10 @@ import subprocess
 sys.path += ['dear_bindings']
 import dear_bindings
 
+class Type:
+    def __init__(self, t, is_array):
+        pass
+
 class JsonParser:
     type_map = {
         'const char*' : 'String',
@@ -28,7 +32,31 @@ class JsonParser:
         'ImGuiKey' : 'Key',
         'ImGuiPopupFlags' : 'BitField<PopupFlags>',
         'ImGuiTableFlags' : 'BitField<TableFlags>',
+        'ImGuiInputTextFlags' : 'BitField<InputTextFlags>',
         'ImGuiCond' : 'Cond',
+        'ImGuiDir' : 'Dir',
+        'ImGuiTabBarFlags' : 'BitField<TabBarFlags>',
+        'ImGuiTabItemFlags' : 'BitField<TabItemFlags>',
+        'ImGuiComboFlags' : 'BitField<ComboFlags>',
+        'ImGuiButtonFlags' : 'BitField<ButtonFlags>',
+        'ImGuiTableColumnFlags' : 'BitField<TableColumnFlags>',
+        'ImGuiTableRowFlags' : 'BitField<TableRowFlags>',
+        'ImGuiDataType' : 'DataType',
+        'ImGuiColorEditFlags' : 'BitField<ColorEditFlags>',
+        'ImGuiStyleVar' : 'StyleVar',
+        'bool*' : 'Array',
+        'char*' : 'Array',
+        'int*' : 'Array',
+        'float*' : 'Array',
+        'double*' : 'Array',
+    }
+
+    array_types = {
+        'bool*' : 'bool',
+        'char*' : 'String',
+        'int*' : 'int',
+        'float*' : 'float',
+        'double*' : 'double',
     }
 
     def __init__(self):
@@ -125,13 +153,17 @@ class JsonParser:
             argnames = []
             argtypes = []
             defvals = []
+            origtypes = []
             for arg in j['arguments']:
                 if arg.get('type') is not None:
                     an = arg['name']
                     at = arg['type']['declaration']
                     atv = self.type_map.get(at)
                     if atv is None or arg['is_array']:
+                        if not arg['is_array']:
+                            print(j['name'])
                         return
+                    origtypes.append(at)
                     argsout.append(f'{atv} {an}')
                     argnames.append(an)
                     argtypes.append(atv)
@@ -160,6 +192,12 @@ class JsonParser:
                     call_args.append(f'(ImTextureID){an}->get_rid().get_id()')
                 elif at == 'Color':
                     call_args.append(f'{{{an}.r, {an}.g, {an}.b, {an}.a}}')
+                elif at == 'Array':
+                    t = self.array_types[origtypes[i]]
+                    call_args.append(f'GDS_PTR({t}, {an}')
+                    if t == 'String':
+                        call_args[-1] += ', buf_size, label'
+                    call_args[-1] += ")"
                 else:
                     call_args.append(an)
 
