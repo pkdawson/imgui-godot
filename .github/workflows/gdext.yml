@@ -216,7 +216,7 @@ jobs:
           ls -R
           rm addons/imgui-godot-native/bin/*.pdb
           cp -r gdext/include/*.h addons/imgui-godot-native/include/
-          cat .git/modules/gdext/imgui/HEAD > addons/imgui-godot-native/include/imgui-git-commit.txt
+          git submodule status gdext/imgui | awk '{print substr($1,2)}' > addons/imgui-godot-native/include/imgui-git-commit.txt
 
       - name: Upload package
         uses: actions/upload-artifact@v3
