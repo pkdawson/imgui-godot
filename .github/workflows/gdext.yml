@@ -8,6 +8,8 @@ on:
   pull_request:
     branches-ignore:
       - godot3
+  release:
+    types: [created]
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
@@ -225,3 +227,35 @@ jobs:
           path: |
             .
             !.git*
+
+
+  # TODO: tests?
+
+  attach:
+    name: 📎Attach
+    # if: github.event_name == 'release' && github.event.action == 'created'
+    needs: [package]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: imgui-godot-native
+          path: ~/pkg
+
+      - name: check
+        run: |
+          ls -R ~/pkg
+
+      - name: zip
+        run: |
+          imgui_ver=$(cat gdext/imgui/imgui.h | grep -m 1 "^#define IMGUI_VERSION " | awk '{ print $3 }' | sed 's/"//g')
+          godot_ver="4.1"
+          vtag=$(git describe --abbrev=0)
+          pkgfn=imgui-godot-native-${vtag:1}-godot-$godot_ver-imgui-$imgui_ver.zip
+          echo $pkgfn
+
+      # TODO: svenstaro/upload-release-action@v2
