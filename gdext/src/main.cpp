@@ -11,9 +11,9 @@
 
 #include "ImGuiAPI.h"
 #include "ImGuiGD.h"
-#include "ImGuiGodot.h"
 #include "ImGuiGodotHelper.h"
 #include "ImGuiLayer.h"
+#include "ImGuiRoot.h"
 
 using namespace godot;
 
@@ -23,11 +23,10 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
         return;
 
     ClassDB::register_class<ImGui::Godot::ImGui>();
-    ClassDB::register_class<ImGui::Godot::ImGuiGodot>();
+    ClassDB::register_class<ImGui::Godot::ImGuiRoot>();
     ClassDB::register_class<ImGui::Godot::ImGuiLayer>();
     ClassDB::register_class<ImGui::Godot::ImGuiGodotHelper>();
     ClassDB::register_class<ImGui::Godot::ImGuiGD>();
-    ClassDB::register_class<ImGui::Godot::ImGuiIOPtr>();
 }
 
 void uninitialize_ign_module(ModuleInitializationLevel p_level)

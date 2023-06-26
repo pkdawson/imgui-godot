@@ -10,17 +10,17 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-class ImGuiGodot : public Node
+class ImGuiRoot : public Node
 {
-    GDCLASS(ImGuiGodot, Node);
+    GDCLASS(ImGuiRoot, Node);
 
 protected:
     static void _bind_methods();
     void _get_property_list(List<PropertyInfo>* p_list) const;
 
 public:
-    ImGuiGodot();
-    ~ImGuiGodot();
+    ImGuiRoot();
+    ~ImGuiRoot();
 
     void _enter_tree() override;
 

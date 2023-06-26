@@ -44,8 +44,7 @@ target_sources(imgui-godot-native PRIVATE
     imgui/misc/freetype/imgui_freetype.h
     include/imconfig-godot.h
     include/imgui-godot.h
-    gen/imgui_enums.gen.h
-    gen/imgui_funcs.gen.h
+    gen/imgui_bindings.gen.h
     dear_bindings/cimgui.cpp
     dear_bindings/cimgui.h
     )

@@ -27,6 +27,7 @@ struct ImGuiLayer::Impl
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
 {
     UtilityFunctions::print("ImGuiLayer()");
+    UtilityFunctions::print(get_parent());
 }
 
 ImGuiLayer::~ImGuiLayer()
@@ -50,7 +51,7 @@ void ImGuiLayer::_enter_tree()
     if (!parent)
         return;
     UtilityFunctions::print("parent class = ", parent->get_class());
-    if (parent->get_class() != "Window")
+    if (parent->get_class() != "ImGuiRoot")
         return;
     UtilityFunctions::print(Engine::get_singleton()->has_singleton("ImGuiLayer"));
     if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
@@ -81,7 +82,11 @@ void ImGuiLayer::_ready()
 
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
-        return;
+    {
+        // skip a frame so tool scripts don't start on exactly frame 1
+        ImGui::NewFrame();
+        ImGui::Render();
+    }
 #endif
 
     set_process(true);
@@ -93,7 +98,7 @@ void ImGuiLayer::_exit_tree()
     Engine::get_singleton()->unregister_singleton("ImGuiLayer");
     ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);
-    //impl->helper->queue_free();
+    // impl->helper->queue_free();
 }
 
 void ImGuiLayer::_process(double delta)
@@ -107,6 +112,7 @@ void ImGuiLayer::_process(double delta)
     // ImGui::Text("hello from C++");
     // ImGui::End();
 
+    // UtilityFunctions::print("render");
     ImGui::Godot::Render();
 }
 

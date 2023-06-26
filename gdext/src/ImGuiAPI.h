@@ -4,15 +4,16 @@
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
-#include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/variant.hpp>
 #pragma warning(pop)
 
 #include <cimgui.h>
 #include <memory>
+#include <string_view>
 
-#include "imgui_enums.gen.h"
-#include "imgui_funcs.gen.h"
+#include "ShortTermCache.h"
+#include "imgui_bindings.gen.h"
 
 using namespace godot;
 
@@ -43,49 +44,107 @@ struct GdsPtr
 template <>
 struct GdsPtr<String>
 {
-    inline static std::unordered_map<int64_t, std::vector<char>> strbufs;
-
     Array& arr;
-    int64_t hash;
+    std::vector<char>& buf;
+    int64_t bufhash;
 
-    GdsPtr(Array& x, size_t s, const String& label) : arr(x)
+    GdsPtr(Array& x, size_t s, const StringName& label) : arr(x), buf(gdscache->GetTextBuf(label, s, x))
     {
-        hash = label.hash();
-        if (!strbufs.contains(hash))
-            strbufs[hash] = std::vector<char>();
-        strbufs[hash].resize(s);
-        UtilityFunctions::print((int64_t)strbufs[hash].data());
+        bufhash = std::hash<std::string_view>{}({buf.begin(), buf.end()});
     }
 
     ~GdsPtr()
     {
-        arr[0] = String(strbufs[hash].data());
+        if (bufhash != std::hash<std::string_view>{}({buf.begin(), buf.end()}))
+        {
+            arr[0] = String(buf.data());
+        }
     }
 
     operator char*()
     {
-        return strbufs[hash].data();
+        return buf.data();
     }
 };
 
-//#define GDS_PTR(T, a, ...) a.size() == 0 ? nullptr : GdsPtr<T>(a, __VA_ARGS__)
-
-class ImGuiIOPtr : public RefCounted
+template <class T>
+struct GdsArray
 {
-    GDCLASS(ImGuiIOPtr, RefCounted);
+    Array& arr;
+    std::vector<T> buf;
 
-protected:
-    static void _bind_methods();
+    GdsArray(Array& a) : arr(a), buf(a.size())
+    {
+        for (int i = 0; i < arr.size(); ++i)
+        {
+            buf[i] = arr[i];
+        }
+    }
 
-public:
-    ImGuiIOPtr();
+    ~GdsArray()
+    {
+        for (int i = 0; i < arr.size(); ++i)
+        {
+            arr[i] = buf[i];
+        }
+    }
 
-    void _set_ConfigFlags(int32_t flags);
-    int32_t _get_ConfigFlags();
-
-private:
-    ImGuiIO* io = nullptr;
+    operator T*()
+    {
+        return buf.data();
+    }
 };
+
+template <>
+struct GdsArray<const char* const>
+{
+    Array& arr;
+    std::vector<CharString> buf;
+    std::vector<const char*> ptrs;
+
+    GdsArray(Array& a) : arr(a), buf(a.size())
+    {
+        for (int i = 0; i < arr.size(); ++i)
+        {
+            buf[i] = String(arr[i]).utf8();
+            ptrs[i] = buf[i].get_data();
+        }
+    }
+
+    ~GdsArray()
+    {
+        for (int i = 0; i < arr.size(); ++i)
+        {
+            arr[i] = buf[i].get_data();
+        }
+    }
+
+    operator const char* const*()
+    {
+        return ptrs.data();
+    }
+};
+
+struct GdsZeroArray
+{
+    const std::vector<char>& buf;
+
+    GdsZeroArray(const Array& a) : buf(gdscache->GetZeroArray(a))
+    {
+    }
+
+    operator const char*()
+    {
+        return buf.data();
+    }
+};
+
+#define VARIANT_CSTR(v) v.get_type() == Variant::STRING ? static_cast<String>(v).utf8().get_data() : nullptr
+
+#define GDS_PTR(T, a) a.size() == 0 ? nullptr : (T*)GdsPtr<T>(a)
+// #define GDS_PTR_STR(a, len, label) a.size() == 0 ? nullptr : (char*)GdsPtr<String>(a, len, label)
+
+DECLARE_IMGUI_STRUCTS()
 
 class ImGui : public Object
 {
@@ -99,8 +158,6 @@ public:
     ~ImGui();
 
     DECLARE_IMGUI_FUNCS()
-
-    static Ref<ImGuiIOPtr> GetIO();
 
 private:
     struct Impl;

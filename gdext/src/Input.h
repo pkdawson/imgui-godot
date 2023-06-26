@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <godot_cpp/classes/window.hpp>
-#include <godot_cpp/classes/sub_viewport.hpp>
 #include <godot_cpp/classes/input_event.hpp>
+#include <godot_cpp/classes/sub_viewport.hpp>
+#include <godot_cpp/classes/window.hpp>
+#include <memory>
 
 namespace ImGui::Godot {
 class Input

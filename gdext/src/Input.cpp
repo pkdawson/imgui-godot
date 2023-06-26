@@ -155,7 +155,7 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
 
     if (Ref<InputEventMouseMotion> mm = evt; mm.is_valid())
     {
-        consumed = true;
+        consumed = io.WantCaptureMouse;
     }
     else if (Ref<InputEventMouseButton> mb = evt; mb.is_valid())
     {

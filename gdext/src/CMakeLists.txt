@@ -1,9 +1,11 @@
 target_sources(imgui-godot-native PRIVATE
     main.cpp
     common.h
+    ShortTermCache.cpp
+    ShortTermCache.h
     imgui-godot.cpp
-    ImGuiGodot.cpp
-    ImGuiGodot.h
+    ImGuiRoot.cpp
+    ImGuiRoot.h
     ImGuiAPI.cpp
     ImGuiAPI.h
     ImGuiGD.cpp

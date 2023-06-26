@@ -2,6 +2,7 @@
 #include "ImGuiGD.h"
 #include "Input.h"
 #include "RdRenderer.h"
+#include "ShortTermCache.h"
 #include "common.h"
 #include <imgui.h>
 
@@ -58,8 +59,8 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
-    //io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
-    //io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+    // io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+    // io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 
     if (config)
     {
@@ -98,6 +99,7 @@ void Update(double delta)
 
     ctx->input->Update();
 
+    gdscache->OnNewFrame();
     ImGui::NewFrame();
 }
 

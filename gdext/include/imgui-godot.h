@@ -25,6 +25,7 @@
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
 #pragma warning(pop)
 
 using godot::Callable;
@@ -42,6 +43,7 @@ using godot::SubViewport;
 using godot::Texture2D;
 using godot::Vector2;
 using godot::Window;
+using godot::TypedArray;
 #else
 #include "core/config/engine.h"
 #include "core/variant/callable.h"
@@ -66,6 +68,7 @@ void ResetFonts();
 void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
 void RebuildFontAtlas();
+TypedArray<int64_t> GetFonts();
 
 bool SubViewport(SubViewport* svp);
 
@@ -161,7 +164,6 @@ inline void SetScale(float scale)
 
 inline void SyncImGuiPtrs()
 {
-
 }
 #endif
 

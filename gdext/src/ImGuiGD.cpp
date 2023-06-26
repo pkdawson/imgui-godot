@@ -1,7 +1,8 @@
 #include "ImGuiGD.h"
+#include "ImGuiLayer.h"
+#include "ImGuiRoot.h"
 #include "common.h"
 #include "imgui-godot.h"
-#include "ImGuiLayer.h"
 #include <godot_cpp/variant/utility_functions.hpp>
 
 namespace ImGui::Godot {
@@ -43,8 +44,8 @@ void ImGuiGD::InitEditor(Node* root)
         return;
 
     UtilityFunctions::print("ie ", root);
-    ImGuiLayer* igl = memnew(ImGuiLayer);
-    root->call_deferred("add_child", igl);
+    ImGuiRoot* igr = memnew(ImGuiRoot);
+    root->call_deferred("add_child", igr);
 #endif
 }
 
