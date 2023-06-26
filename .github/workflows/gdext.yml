@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - godot-4.*
+      - godot-4.1
   pull_request:
     branches-ignore:
       - godot3
@@ -250,12 +250,23 @@ jobs:
         run: |
           ls -R ~/pkg
 
-      - name: zip
+      - name: Create .zip
+        id: zip
         run: |
           imgui_ver=$(cat gdext/imgui/imgui.h | grep -m 1 "^#define IMGUI_VERSION " | awk '{ print $3 }' | sed 's/"//g')
           godot_ver="4.1"
-          vtag=$(git describe --abbrev=0)
-          pkgfn=imgui-godot-native-${vtag:1}-godot-$godot_ver-imgui-$imgui_ver.zip
+          pkgfn=imgui-godot-native-$GITHUB_REF-godot-$godot_ver-imgui-$imgui_ver.zip
           echo $pkgfn
+          echo "PKGFN=$pkgfn" >> $GITHUB_OUTPUT
+          outpath="$(pwd)/$pkgfn"
+          cd ~/pkg
+          zip -r $outpath *
+          ls -al $outpath
+          env
 
-      # TODO: svenstaro/upload-release-action@v2
+      # - name: Upload to release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     tag: ${{ github.ref }}
+      #     file: ${{ steps.zip.outputs.PKGFN }}

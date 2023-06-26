@@ -68,7 +68,6 @@ void ResetFonts();
 void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
 void RebuildFontAtlas();
-TypedArray<int64_t> GetFonts();
 
 bool SubViewport(SubViewport* svp);
 

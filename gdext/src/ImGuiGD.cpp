@@ -18,6 +18,7 @@ void ImGuiGD::_bind_methods()
                                 DEFVAL(false));
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("AddFontDefault"), &ImGuiGD::AddFontDefault);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("RebuildFontAtlas"), &ImGuiGD::RebuildFontAtlas);
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
 
     ClassDB::bind_static_method("ImGuiGD",
                                 D_METHOD("Image", "tex", "size", "uv0", "uv1", "tint_col", "border_col"),
@@ -68,6 +69,18 @@ void ImGuiGD::AddFontDefault()
 
 void ImGuiGD::RebuildFontAtlas()
 {
+}
+
+TypedArray<int64_t> ImGuiGD::GetFontPtrs()
+{
+    TypedArray<int64_t> rv;
+    ImGuiIO& io = ImGui::GetIO();
+    rv.resize(io.Fonts->Fonts.Size);
+    for (int i = 0; i < io.Fonts->Fonts.Size; ++i)
+    {
+        rv[i] = (int64_t)io.Fonts->Fonts[i];
+    }
+    return rv;
 }
 
 void ImGuiGD::Image(Texture2D* tex, const Vector2& size, const Vector2& uv0, const Vector2& uv1, const Color& tint_col,

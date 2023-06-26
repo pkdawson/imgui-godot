@@ -28,6 +28,7 @@ public:
     static void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
     static void AddFontDefault();
     static void RebuildFontAtlas();
+    static TypedArray<int64_t> GetFontPtrs();
 
     static void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
                       const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0});
