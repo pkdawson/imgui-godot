@@ -257,7 +257,7 @@ jobs:
           imgui_ver=$(cat gdext/imgui/imgui.h | grep -m 1 "^#define IMGUI_VERSION " | awk '{ print $3 }' | sed 's/"//g')
           godot_ver="4.1"
           plugin_ver=$(cat addons/imgui-godot/plugin.cfg | grep -m 1 "version=" | sed 's/version=//' | sed 's/"//g')
-          pkgfn=imgui-godot-native-$plugin_ver_godot-$godot_ver_imgui-$imgui_ver.zip
+          pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}.zip
           echo $pkgfn
           echo "PKGFN=$pkgfn" >> $GITHUB_OUTPUT
           outpath="$(pwd)/$pkgfn"
