@@ -184,6 +184,8 @@ class Param:
             dv = dv.replace("ImVec2", "Vector2")
             dv = dv.replace("ImVec4", "Color")
             dv = dv.replace("FLT_MIN", "std::numeric_limits<float>::min()")
+            dv = dv.replace("FLT_MAX", "std::numeric_limits<float>::max()")
+            dv = dv.replace("sizeof", "(uint64_t)sizeof")
             if self.gdtype is not None:
                 dv = dv.replace("NULL", f"{self.gdtype}()")
         self.dv = dv
