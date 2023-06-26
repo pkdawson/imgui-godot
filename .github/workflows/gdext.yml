@@ -253,16 +253,17 @@ jobs:
       - name: Create .zip
         id: zip
         run: |
+          env
           imgui_ver=$(cat gdext/imgui/imgui.h | grep -m 1 "^#define IMGUI_VERSION " | awk '{ print $3 }' | sed 's/"//g')
           godot_ver="4.1"
-          pkgfn=imgui-godot-native-$GITHUB_REF-godot-$godot_ver-imgui-$imgui_ver.zip
+          plugin_ver=$(cat addons/imgui-godot/plugin.cfg | grep -m 1 "version=" | sed 's/version=//' | sed 's/"//g')
+          pkgfn=imgui-godot-native-$plugin_ver_godot-$godot_ver_imgui-$imgui_ver.zip
           echo $pkgfn
           echo "PKGFN=$pkgfn" >> $GITHUB_OUTPUT
           outpath="$(pwd)/$pkgfn"
           cd ~/pkg
           zip -r $outpath *
           ls -al $outpath
-          env
 
       # - name: Upload to release
       #   uses: svenstaro/upload-release-action@v2
