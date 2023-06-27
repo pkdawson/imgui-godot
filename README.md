@@ -24,7 +24,7 @@ public partial class MyNode : Node
 
 Download
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=4.0.0&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v4.0.0.zip)
+[![](https://img.shields.io/static/v1?label=imgui-godot&message=4.0.1&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/archive/refs/tags/v4.0.1.zip)
 
 ## Getting Started
 
