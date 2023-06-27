@@ -51,7 +51,10 @@ void ImGuiGodotHelper::_exit_tree()
 
 void ImGuiGodotHelper::_process(double delta)
 {
-    // UtilityFunctions::print("update");
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+        return;
+#endif
     ImGui::Godot::Update(delta);
 }
 

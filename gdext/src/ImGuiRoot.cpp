@@ -13,7 +13,6 @@ struct ImGuiRoot::Impl
 
 ImGuiRoot::ImGuiRoot() : impl(std::make_unique<Impl>())
 {
-    UtilityFunctions::print("ImGuiRoot()");
 }
 
 ImGuiRoot::~ImGuiRoot()
@@ -36,17 +35,11 @@ void ImGuiRoot::_get_property_list(List<PropertyInfo>* p_list) const
 
 void ImGuiRoot::_enter_tree()
 {
-    UtilityFunctions::print("igr ", get_path());
     if (get_parent() == get_window())
     {
-        UtilityFunctions::print("igg ET root");
+        Engine::get_singleton()->register_singleton("ImGuiRoot", this);
         ImGuiLayer* igl = memnew(ImGuiLayer);
         add_child(igl);
-        UtilityFunctions::print("frames = ", Engine::get_singleton()->get_frames_drawn());
-    }
-    else
-    {
-        UtilityFunctions::print("igg ET pass");
     }
 }
 

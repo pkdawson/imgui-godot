@@ -33,7 +33,7 @@ public partial class ImGuiLayer : CanvasLayer
     private static readonly HashSet<GodotObject> _connectedObjects = new();
     private int sizeCheck = 0;
     private bool _headless = false;
-    public readonly bool UseNative = ProjectSettings.HasSetting("autoload/imgui_godot");
+    public readonly bool UseNative = Engine.HasSingleton("ImGuiRoot");
 
     private sealed partial class ImGuiHelper : Node
     {

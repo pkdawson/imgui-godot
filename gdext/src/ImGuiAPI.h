@@ -154,14 +154,7 @@ protected:
     static void _bind_methods();
 
 public:
-    ImGui();
-    ~ImGui();
-
     DECLARE_IMGUI_FUNCS()
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> impl;
 };
 
 } // namespace ImGui::Godot

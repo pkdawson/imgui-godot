@@ -233,7 +233,7 @@ jobs:
 
   attach:
     name: 📎Attach
-    # if: github.event_name == 'release' && github.event.action == 'created'
+    if: github.event_name == 'release' && github.event.action == 'created'
     needs: [package]
     runs-on: ubuntu-latest
     steps:
@@ -254,9 +254,9 @@ jobs:
         id: zip
         run: |
           env
-          imgui_ver=$(cat gdext/imgui/imgui.h | grep -m 1 "^#define IMGUI_VERSION " | awk '{ print $3 }' | sed 's/"//g')
-          godot_ver="4.1"
-          plugin_ver=$(cat addons/imgui-godot/plugin.cfg | grep -m 1 "version=" | sed 's/version=//' | sed 's/"//g')
+          imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
+          godot_ver=$(grep -m 1 compatibility_minimum < gdext/proj/addons/imgui-godot-native/imgui-godot-native.gdextension | sed 's/compatibility_minimum = //')
+          plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
           pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}.zip
           echo $pkgfn
           echo "PKGFN=$pkgfn" >> $GITHUB_OUTPUT
@@ -265,9 +265,9 @@ jobs:
           zip -r $outpath *
           ls -al $outpath
 
-      # - name: Upload to release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     tag: ${{ github.ref }}
-      #     file: ${{ steps.zip.outputs.PKGFN }}
+      - name: Upload to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: ${{ steps.zip.outputs.PKGFN }}

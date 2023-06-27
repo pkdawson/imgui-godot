@@ -32,32 +32,12 @@ const char* sn_to_cstr(const StringName& sn)
 
 namespace ImGui::Godot {
 
-struct ImGui::Impl
-{
-    bool show_imgui_demo = true;
-};
-
 void ImGui::_bind_methods()
 {
     REGISTER_IMGUI_ENUMS();
     BIND_IMGUI_STRUCTS();
     BIND_IMGUI_FUNCS();
 }
-
-ImGui::ImGui() : impl(std::make_unique<Impl>())
-{
-}
-
-ImGui::~ImGui()
-{
-}
-
-//void ImGuiIOPtr::_bind_methods()
-//{
-//    //ClassDB::bind_method(D_METHOD("_set_ConfigFlags", "flags"), &ImGuiIOPtr::_set_ConfigFlags);
-//    //ClassDB::bind_method(D_METHOD("_get_ConfigFlags"), &ImGuiIOPtr::_get_ConfigFlags);
-//    //ADD_PROPERTY(PropertyInfo(Variant::INT, "ConfigFlags"), "_set_ConfigFlags", "_get_ConfigFlags");
-//}
 
 DEFINE_IMGUI_STRUCTS()
 

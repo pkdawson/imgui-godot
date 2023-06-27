@@ -103,6 +103,10 @@ void ImGuiLayer::_exit_tree()
 
 void ImGuiLayer::_process(double delta)
 {
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+        return;
+#endif
     emit_signal("imgui_layout");
 
     if (impl->show_imgui_demo)

@@ -136,8 +136,10 @@ void Shutdown()
 
 void Connect(const godot::Callable& callable)
 {
+    UtilityFunctions::print("connect");
     Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
-    igl->connect("imgui_layout", callable);
+    if (igl)
+        igl->connect("imgui_layout", callable);
 }
 
 void ResetFonts()
