@@ -4,10 +4,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Reflection;
-
-using FuncDrawListBegin = System.Func<Godot.Rid, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.Color[], float, uint, Godot.Rect2?, Godot.Collections.Array<Godot.Rid>, long>;
-using FuncDrawListBegin40 = System.Func<Godot.Rid, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.RenderingDevice.InitialAction, Godot.RenderingDevice.FinalAction, Godot.Color[], float, uint, Godot.Rect2?, Godot.Collections.Array, long>;
 
 namespace ImGuiGodot.Internal;
 
