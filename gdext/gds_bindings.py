@@ -334,7 +334,11 @@ class Property:
             fcall = f"ToVector2({fcall})"
         elif self.orig_type in ["ImFont*"]:
             fcall = f"(int64_t){fcall}"
-        rv += f"return {fcall}; \\\n"
+
+        dv = "{}"
+        if self.gdtype.startswith("BitField"):
+            dv = "0"
+        rv += f"if (ptr) return {fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
         rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
