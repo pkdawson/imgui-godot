@@ -501,7 +501,7 @@ def main():
         parser.load(jdat)
     parser.write()
 
-    subprocess.call(["clang-format", "-i", "gen/*.h"])
+    subprocess.call("clang-format -i gen/*.h", shell=True)
 
 
 if __name__ == "__main__":

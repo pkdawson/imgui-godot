@@ -57,10 +57,25 @@ target_link_libraries(imgui-godot-native PUBLIC
 target_include_directories(imgui-godot-native PRIVATE src imgui gen dear_bindings PUBLIC include)
 set_target_properties(imgui-godot-native PROPERTIES PUBLIC_HEADER "include/imconfig-godot.h;include/imgui-godot.h")
 
-set_property(TARGET imgui-godot-native PROPERTY OUTPUT_NAME "libimgui-godot-native.windows.$<IF:$<CONFIG:Debug>,debug,release>.x86_64")
+if(WIN32)
+    set_property(TARGET imgui-godot-native
+        PROPERTY OUTPUT_NAME "libimgui-godot-native.windows.$<IF:$<CONFIG:Debug>,debug,release>.x86_64")
+elseif(APPLE)
+    set_property(TARGET imgui-godot-native
+        PROPERTY OUTPUT_NAME "imgui-godot-native.macos.$<IF:$<CONFIG:Debug>,debug,release>")
+    set_target_properties(imgui-godot-native PROPERTIES SUFFIX "")
+endif()
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/proj/addons/imgui-godot-native")
-install(TARGETS imgui-godot-native
-    RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include
+
+if(WIN32)
+    install(TARGETS imgui-godot-native
+        RUNTIME DESTINATION bin
+        PUBLIC_HEADER DESTINATION include
+        )
+elseif(APPLE)
+    install(TARGETS imgui-godot-native
+        DESTINATION bin/libimgui-godot-native.macos.$<IF:$<CONFIG:Debug>,debug,release>.framework
+        PUBLIC_HEADER DESTINATION include
     )
+endif()
