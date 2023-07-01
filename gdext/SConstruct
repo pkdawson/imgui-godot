@@ -3,9 +3,9 @@ from glob import glob
 from pathlib import Path
 
 env = SConscript("godot-cpp/SConstruct")
-env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', 'IGN_EXPORT'])
+env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', "IGN_EXPORT"])
 env.Append(CPPPATH=["src/", "imgui/", "include/", "gen/", "dear_bindings/"])
-env.Replace(CXXFLAGS=str(env['CXXFLAGS']).replace("c++17", "c++20"))
+env.Replace(CXXFLAGS=str(env["CXXFLAGS"]).replace("c++17", "c++20"))
 
 sources = Glob("src/*.cpp") + Glob("imgui/*.cpp") + Glob("dear_bindings/*.cpp")
 
@@ -15,14 +15,14 @@ project_name = Path(extension_path).stem
 
 config = "release" if env["target"] == "template_release" else "debug"
 
-libpath = env['LIBPATH']
-libs = [env['LIBS']]
+libpath = env["LIBPATH"]
+libs = [env["LIBS"]]
 
 windows = env["platform"] == "windows"
 linux = env["platform"] == "linux"
 
 if config == "release" and windows:
-    env.Append(CPPDEFINES=['NDEBUG'])
+    env.Append(CPPDEFINES=["NDEBUG"])
 
 if windows:
     triplet = "x64-windows-static-md"
@@ -33,13 +33,17 @@ else:
 
 env.Append(CPPPATH=["imgui/misc/freetype/"])
 env.Append(CPPPATH=[f"vcpkg_installed/{triplet}/include"])
-env.Append(CPPDEFINES=['IMGUI_ENABLE_FREETYPE'])
+env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE"])
 sources += Glob("imgui/misc/freetype/*.cpp")
-libpath += [f'vcpkg_installed/{triplet}/lib']
-libs += ["freetype", "bz2",
-            "libpng16" if windows else "png16",
-            "zlib" if windows else "z",
-            "brotlidec-static", "brotlicommon-static"]
+libpath += [f"vcpkg_installed/{triplet}/lib"]
+libs += [
+    "freetype",
+    "bz2",
+    "libpng16" if windows else "png16",
+    "zlib" if windows else "z",
+    "brotlidec-static",
+    "brotlicommon-static",
+]
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
@@ -50,8 +54,8 @@ if env["platform"] == "macos":
             config,
         ),
         source=sources,
-        LIBPATH = libpath,
-        LIBS = libs,
+        LIBPATH=libpath,
+        LIBS=libs,
     )
 else:
     library = env.SharedLibrary(
@@ -64,8 +68,8 @@ else:
             env["SHLIBSUFFIX"],
         ),
         source=sources,
-        LIBPATH = libpath,
-        LIBS = libs,
+        LIBPATH=libpath,
+        LIBS=libs,
     )
 
 Default(library)
