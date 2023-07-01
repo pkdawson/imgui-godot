@@ -148,11 +148,10 @@ jobs:
           git checkout 2023.04.15
           ./bootstrap-vcpkg.sh
 
-      # TODO: build and lipo x64-osx libs, to support freetype
       - name: vcpkg install
         run: |
           cd gdext
-          ${{ env.VCPKG_ROOT }}/vcpkg install --triplet arm64-osx
+          zsh vcpkg-macos.sh
 
       - name: GDScript bindings
         run: |
@@ -160,7 +159,7 @@ jobs:
           pip install ply
           brew install clang-format
           python gds_bindings.py
-  
+
       - name: Build debug
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
