@@ -1,4 +1,5 @@
 using Godot;
+using ImGuiGodot.Internal;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -31,9 +32,8 @@ public partial class ImGuiLayer : CanvasLayer
     private Transform2D _finalTransform = Transform2D.Identity;
     private ImGuiHelper _helper;
     private static readonly HashSet<GodotObject> _connectedObjects = new();
-    private int sizeCheck = 0;
     private bool _headless = false;
-    public readonly bool UseNative = Engine.HasSingleton("ImGuiRoot");
+    public readonly bool UseNative = ProjectSettings.HasSetting("autoload/imgui_godot_native");
 
     private sealed partial class ImGuiHelper : Node
     {
@@ -85,7 +85,7 @@ public partial class ImGuiLayer : CanvasLayer
         if (UseNative)
         {
             GD.Print("UseNative");
-            ProcessMode = ProcessModeEnum.Disabled;
+            QueueFree();
             return;
         }
 
@@ -94,7 +94,7 @@ public partial class ImGuiLayer : CanvasLayer
         ProcessPriority = int.MaxValue;
         VisibilityChanged += OnChangeVisibility;
 
-        _subViewportRid = Internal.Util.AddLayerSubViewport(this);
+        _subViewportRid = Util.AddLayerSubViewport(this);
         _ci = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
@@ -174,7 +174,7 @@ public partial class ImGuiLayer : CanvasLayer
         else
         {
             ProcessMode = ProcessModeEnum.Disabled;
-            Internal.State.Instance.Renderer.OnHide();
+            State.Instance.Renderer.OnHide();
             _subViewportSize = Vector2I.Zero;
             RenderingServer.CanvasItemClear(_ci);
             //foreach (Node child in GetChildren())

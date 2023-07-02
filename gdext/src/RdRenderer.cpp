@@ -184,7 +184,7 @@ RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
     Ref<RDShaderSPIRV> spirv =
-        ResourceLoader::get_singleton()->load("res://addons/imgui-godot-native/ImGuiShaderSPIRV.tres");
+        ResourceLoader::get_singleton()->load("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
 
     impl->shader = RD->shader_create_from_spirv(spirv);
 

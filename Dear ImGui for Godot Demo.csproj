@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.1.0-beta.2">
+<Project Sdk="Godot.NET.Sdk/4.1.0-rc.2">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="doc\**" />
+    <Compile Remove="gdext\**" />
     <EmbeddedResource Remove="doc\**" />
   </ItemGroup>
   <ItemGroup>

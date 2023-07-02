@@ -7,3 +7,4 @@
 [submodule "gdext/dear_bindings"]
 	path = gdext/dear_bindings
 	url = https://github.com/dearimgui/dear_bindings
+    ignore = dirty

@@ -13,6 +13,7 @@ on:
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
+  vcpkg_tag: 2023.06.20
 
 jobs:
   windows:
@@ -38,7 +39,7 @@ jobs:
         run: |
           git clone -n https://github.com/microsoft/vcpkg
           cd vcpkg
-          git checkout 2023.04.15
+          git checkout ${{ env.vcpkg_tag }}
           .\bootstrap-vcpkg.bat
 
       - name: vcpkg install
@@ -91,7 +92,7 @@ jobs:
         run: |
           git clone -n https://github.com/microsoft/vcpkg
           cd vcpkg
-          git checkout 2023.04.15
+          git checkout ${{ env.vcpkg_tag }}
           ./bootstrap-vcpkg.sh
 
       - name: vcpkg install
@@ -145,7 +146,7 @@ jobs:
         run: |
           git clone -n https://github.com/microsoft/vcpkg
           cd vcpkg
-          git checkout 2023.04.15
+          git checkout ${{ env.vcpkg_tag }}
           ./bootstrap-vcpkg.sh
 
       - name: vcpkg install
