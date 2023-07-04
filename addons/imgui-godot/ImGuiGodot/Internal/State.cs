@@ -16,9 +16,16 @@ internal interface IRenderer
     public void Shutdown();
 }
 
+internal enum RendererType
+{
+    Dummy,
+    Canvas,
+    RenderingDevice
+}
+
 internal sealed class State : IDisposable
 {
-    private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("imgui_impl_godot4_net");
+    private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("godot4_net");
     private static IntPtr _rendererName = IntPtr.Zero;
     private IntPtr _iniFilenameBuffer = IntPtr.Zero;
 

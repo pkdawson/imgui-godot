@@ -47,7 +47,7 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Connect(OnImGuiLayout);
+        ImGuiGD.Connect(OnImGuiLayout);
         iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         vp = GetNode<SubViewport>("%SubViewport");
         scale = ImGuiGD.Scale;

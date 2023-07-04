@@ -11,12 +11,30 @@ public static class ImGuiGD
     /// <summary>
     /// Deadzone for all axes
     /// </summary>
-    public static float JoyAxisDeadZone { get; set; } = 0.15f;
+    public static float JoyAxisDeadZone
+    {
+        get => _deadZone;
+        set
+        {
+            _gd.SetJoyAxisDeadZone(value);
+            _deadZone = value;
+        }
+    }
+    private static float _deadZone = 0.15f;
 
     /// <summary>
     /// Swap the functionality of the activate (face down) and cancel (face right) buttons
     /// </summary>
-    public static bool JoyButtonSwapAB { get; set; } = false;
+    public static bool JoyButtonSwapAB
+    {
+        get => _swapAB;
+        set
+        {
+            _gd.SetJoyButtonSwapAB(value);
+            _swapAB = value;
+        }
+    }
+    private static bool _swapAB = false;
 
     /// <summary>
     /// Try to calculate how many pixels squared per point. Should be 1 or 2 on non-mobile displays
@@ -26,7 +44,7 @@ public static class ImGuiGD
     /// <summary>
     /// Adjust the scale based on <see cref="DpiFactor"/>
     /// </summary>
-    public static bool ScaleToDpi { get; set; } = true;
+    public static bool ScaleToDpi { get; } = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
 
     /// <summary>
     /// Setting this property will reload fonts and modify the ImGuiStyle
@@ -45,125 +63,70 @@ public static class ImGuiGD
     }
     private static float _scale = 1.0f;
 
+    private static readonly Internal.IPublicInterface _gd;
+
+    static ImGuiGD()
+    {
+        bool useNative = ProjectSettings.HasSetting("autoload/imgui_godot_native");
+        _gd = useNative ? new Internal.PublicInterfaceNative() : new Internal.PublicInterfaceNet();
+    }
+
     public static IntPtr BindTexture(Texture2D tex)
     {
         return (IntPtr)tex.GetRid().Id;
     }
 
-    public static void Init(Window mainWindow, Rid mainSubViewport, float? scale = null, RendererType renderer = RendererType.RenderingDevice)
+    public static void Init(Window mainWindow, Rid mainSubViewport, Resource configResource = null)
     {
-        if (IntPtr.Size != sizeof(ulong))
-        {
-            throw new PlatformNotSupportedException("imgui-godot requires 64-bit pointers");
-        }
-
-        if (scale != null)
-        {
-            _scale = scale.Value;
-        }
-
-        // fall back to Canvas in OpenGL compatibility mode
-        if (renderer == RendererType.RenderingDevice && RenderingServer.GetRenderingDevice() == null)
-        {
-            renderer = RendererType.Canvas;
-        }
-
-        int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
-
-        Internal.State.Instance = new(mainWindow, mainSubViewport, renderer switch
-        {
-            RendererType.Dummy => new Internal.DummyRenderer(),
-            RendererType.Canvas => new Internal.CanvasRenderer(),
-            RendererType.RenderingDevice => threadModel == 2 ? new Internal.RdRendererThreadSafe() : new Internal.RdRenderer(),
-            _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
-        });
-        Internal.State.Instance.Renderer.InitViewport(mainSubViewport);
+        configResource ??= (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        _gd.Init(mainWindow, mainSubViewport, configResource);
     }
 
     public static void ResetFonts()
     {
-        Internal.State.Instance.Fonts.ResetFonts();
+        _gd.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        Internal.State.Instance.Fonts.AddFont(fontData, fontSize, merge);
+        _gd.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        Internal.State.Instance.Fonts.AddFont(null, 13, false);
+        _gd.AddFont(null, 13, false);
     }
 
     public static void RebuildFontAtlas()
     {
-        Internal.State.Instance.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
+        _gd.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
     public static void Update(double delta, Vector2 displaySize)
     {
-        var io = ImGui.GetIO();
-        io.DisplaySize = new(displaySize.X, displaySize.Y);
-        io.DeltaTime = (float)delta;
-
-        Internal.State.Instance.Input.Update(io);
-
-        ImGui.NewFrame();
+        _gd.Update(delta, displaySize);
     }
 
     public static void Render()
     {
-        ImGui.Render();
-
-        var io = ImGui.GetIO();
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-        {
-            ImGui.UpdatePlatformWindows();
-        }
-        Internal.State.Instance.Renderer.RenderDrawData();
+        _gd.Render();
     }
 
     public static void Shutdown()
     {
-        Internal.State.Instance.Renderer.Shutdown();
-        if (ImGui.GetCurrentContext() != IntPtr.Zero)
-            ImGui.DestroyContext();
+        _gd.Shutdown();
     }
 
     public static void Connect(Callable callable)
     {
-        ImGuiLayer.Connect(() => { callable.Call(); });
+        // if (UseNative)
+        //     Engine.GetSingleton("ImGuiGD").Call("Connect", callable);
+        _gd.Connect(callable);
     }
 
     public static void Connect(Action action)
     {
         Connect(Callable.From(action));
-    }
-
-    public static void UseNativePtrs()
-    {
-    }
-
-    /// <summary>
-    /// EXPERIMENTAL! Please report bugs, with steps to reproduce.
-    /// </summary>
-    public static void ExperimentalEnableViewports()
-    {
-        var io = ImGui.GetIO();
-        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
-        io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
-
-        if (OS.GetName() != "Windows")
-        {
-            GD.PushWarning("ImGui Viewports have issues on macOS and Linux https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
-        }
-
-        var mainvp = ImGuiLayer.Instance.GetViewport();
-        if (mainvp.GuiEmbedSubwindows)
-        {
-            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
-            mainvp.GuiEmbedSubwindows = false;
-        }
     }
 
     /// <returns>
@@ -227,13 +190,6 @@ public static class ImGuiGD
     /// </summary>
     public static void SetIniFilename(this ImGuiIOPtr io, string fileName)
     {
-        Internal.State.Instance.SetIniFilename(io, fileName);
+        _gd.SetIniFilename(io, fileName);
     }
-}
-
-public enum RendererType
-{
-    Dummy,
-    Canvas,
-    RenderingDevice
 }

@@ -35,7 +35,7 @@ internal class RdRenderer : IRenderer
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
 
-    public string Name => "imgui_impl_godot4_rd";
+    public string Name => "godot4_net_rd";
 
     public RdRenderer()
     {

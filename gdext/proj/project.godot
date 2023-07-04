@@ -17,7 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-ImGuiGodot="*res://addons/imgui-godot-native/ImGuiGodot.tscn"
+imgui_godot_native="*res://addons/imgui-godot-native/ImGuiGodot.tscn"
+imgui_godot="*res://addons/imgui-godot/ImGuiLayer.tscn"
 
 [dotnet]
 
@@ -25,4 +26,4 @@ project/assembly_name="proj"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/imgui-godot-native/plugin.cfg")
+enabled=PackedStringArray("res://addons/imgui-godot-native/plugin.cfg", "res://addons/imgui-godot/plugin.cfg")

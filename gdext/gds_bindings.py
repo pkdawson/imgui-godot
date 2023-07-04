@@ -490,10 +490,9 @@ class JsonParser:
 
 
 def main():
-    if not os.path.exists("dear_bindings/cimgui.json"):
-        dear_bindings.convert_header(
-            "imgui/imgui.h", "dear_bindings/cimgui", "dear_bindings/src/templates"
-        )
+    dear_bindings.convert_header(
+        "imgui/imgui.h", "dear_bindings/cimgui", "dear_bindings/src/templates"
+    )
 
     parser = JsonParser()
     with open("dear_bindings/cimgui.json") as jfi:

@@ -7,6 +7,8 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class Input
 {
+    internal static float JoyAxisDeadZone { get; set; } = 0.15f;
+    internal static bool JoyButtonSwapAB { get; set; } = false;
     internal SubViewport CurrentSubViewport { get; set; }
     internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private Vector2 _mouseWheel = Vector2.Zero;
@@ -188,7 +190,7 @@ internal sealed class Input
             {
                 bool pressed = true;
                 float v = jm.AxisValue;
-                if (Math.Abs(v) < ImGuiGD.JoyAxisDeadZone)
+                if (Math.Abs(v) < JoyAxisDeadZone)
                 {
                     v = 0f;
                     pressed = false;
@@ -261,9 +263,9 @@ internal sealed class Input
         JoyButton.Start => ImGuiKey.GamepadStart,
         JoyButton.Back => ImGuiKey.GamepadBack,
         JoyButton.Y => ImGuiKey.GamepadFaceUp,
-        JoyButton.A => ImGuiGD.JoyButtonSwapAB ? ImGuiKey.GamepadFaceRight : ImGuiKey.GamepadFaceDown,
+        JoyButton.A => JoyButtonSwapAB ? ImGuiKey.GamepadFaceRight : ImGuiKey.GamepadFaceDown,
         JoyButton.X => ImGuiKey.GamepadFaceLeft,
-        JoyButton.B => ImGuiGD.JoyButtonSwapAB ? ImGuiKey.GamepadFaceDown : ImGuiKey.GamepadFaceRight,
+        JoyButton.B => JoyButtonSwapAB ? ImGuiKey.GamepadFaceDown : ImGuiKey.GamepadFaceRight,
         JoyButton.DpadUp => ImGuiKey.GamepadDpadUp,
         JoyButton.DpadDown => ImGuiKey.GamepadDpadDown,
         JoyButton.DpadLeft => ImGuiKey.GamepadDpadLeft,

@@ -17,7 +17,7 @@ internal sealed class CanvasRenderer : IRenderer
     private readonly Dictionary<Rid, List<Rid>> _canvasItemPools = new();
     private readonly Dictionary<Rid, ViewportData> _vpData = new();
 
-    public string Name => "imgui_impl_godot4_canvas";
+    public string Name => "godot4_net_canvas";
 
     public void Init(ImGuiIOPtr io)
     {

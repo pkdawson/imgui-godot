@@ -2,7 +2,6 @@ using Godot;
 using ImGuiGodot.Internal;
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
 #if IMGUI_GODOT_DEV
 using System.Runtime.InteropServices;
 #endif
@@ -20,20 +19,14 @@ public partial class ImGuiLayer : CanvasLayer
     [Export(PropertyHint.ResourceType, "ImGuiConfig")]
     public GodotObject Config = null;
 
-    /// <summary>
-    /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
-    /// </summary>
-    [Signal] public delegate void ImGuiLayoutEventHandler();
-
     private Window _window;
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _ci;
     private Transform2D _finalTransform = Transform2D.Identity;
     private ImGuiHelper _helper;
-    private static readonly HashSet<GodotObject> _connectedObjects = new();
-    private bool _headless = false;
-    public readonly bool UseNative = ProjectSettings.HasSetting("autoload/imgui_godot_native");
+    private bool _useNative = ProjectSettings.HasSetting("autoload/imgui_godot_native");
+    public Node Signaler { get; private set; }
 
     private sealed partial class ImGuiHelper : Node
     {
@@ -78,13 +71,14 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _EnterTree()
     {
         Instance = this;
-        _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
 
         // check for imgui-godot-native
-        if (UseNative)
+        if (_useNative)
         {
             GD.Print("UseNative");
+            // TODO: set up pointers, etc
+            Instance = null;
             QueueFree();
             return;
         }
@@ -101,30 +95,8 @@ public partial class ImGuiLayer : CanvasLayer
         Resource cfg = Config as Resource ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
         Layer = (int)cfg.Get("Layer");
 
-        ImGuiGD.ScaleToDpi = (bool)cfg.Get("ScaleToDpi");
-        ImGuiGD.Init(_window, _subViewportRid, (float)cfg.Get("Scale"),
-            _headless ? RendererType.Dummy : Enum.Parse<RendererType>((string)cfg.Get("Renderer")));
-
-        ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
-
-        var fonts = (Godot.Collections.Array)cfg.Get("Fonts");
-        bool merge = (bool)cfg.Get("MergeFonts");
-
-        for (int i = 0; i < fonts.Count; ++i)
-        {
-            var fontres = (Resource)fonts[i];
-            var font = (FontFile)fontres.Get("FontData");
-            int fontSize = (int)fontres.Get("FontSize");
-            if (i == 0)
-                ImGuiGD.AddFont(font, fontSize);
-            else
-                ImGuiGD.AddFont(font, fontSize, merge);
-        }
-        if ((bool)cfg.Get("AddDefaultFont"))
-        {
-            ImGuiGD.AddFontDefault();
-        }
-        ImGuiGD.RebuildFontAtlas();
+        // TODO: call Init with just config resource
+        ImGuiGD.Init(_window, _subViewportRid, cfg);
 
         _helper = new ImGuiHelper
         {
@@ -133,11 +105,14 @@ public partial class ImGuiLayer : CanvasLayer
             ProcessMode = ProcessModeEnum.Always,
         };
         AddChild(_helper);
+
+        Signaler = (Node)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiSignaler.gd")).New();
+        AddChild(Signaler);
     }
 
     public override void _Ready()
     {
-        if (UseNative)
+        if (_useNative)
         {
             SetProcess(false);
             SetProcessInput(false);
@@ -150,7 +125,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _ExitTree()
     {
-        if (UseNative) return;
+        if (_useNative) return;
         ImGuiGD.Shutdown();
         RenderingServer.FreeRid(_ci);
         RenderingServer.FreeRid(_subViewportRid);
@@ -201,7 +176,7 @@ public partial class ImGuiLayer : CanvasLayer
             RenderingServer.CanvasItemAddTextureRect(_ci, new(0, 0, _subViewportSize.X, _subViewportSize.Y), vptex);
         }
 
-        EmitSignal(SignalName.ImGuiLayout);
+        Instance.Signaler.EmitSignal("imgui_layout");
         ImGuiGD.Render();
     }
 
@@ -213,27 +188,10 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
-    public static void Connect(ImGuiLayoutEventHandler d)
+    [Obsolete("use ImGuiGD.Connect instead")]
+    public static void Connect(Action d)
     {
-        if (Instance is null)
-            return;
-
-        if (Instance.UseNative)
-        {
-            // TODO: use native signal
-            return;
-        }
-
-        Instance.ImGuiLayout += d;
-
-        if (d.Target is GodotObject obj)
-        {
-            if (_connectedObjects.Count == 0)
-            {
-                Instance.GetTree().NodeRemoved += OnNodeRemoved;
-            }
-            _connectedObjects.Add(obj);
-        }
+        ImGuiGD.Connect(d);
     }
 
 #if IMGUI_GODOT_DEV
@@ -265,32 +223,6 @@ public partial class ImGuiLayer : CanvasLayer
     }
 #pragma warning restore CA1822 // Mark members as static
 #endif
-
-    private static void OnNodeRemoved(Node node)
-    {
-        // signals declared in C# don't (yet?) work like normal Godot signals,
-        // we need to clean up after removed Objects ourselves
-
-        if (!_connectedObjects.Contains(node))
-            return;
-
-        _connectedObjects.Remove(node);
-
-        // backing_ImGuiLayout is an implementation detail that could change
-        foreach (Delegate d in Instance.backing_ImGuiLayout.GetInvocationList())
-        {
-            // remove ALL delegates with the removed Node as a target
-            if (d.Target == node)
-            {
-                Instance.ImGuiLayout -= (ImGuiLayoutEventHandler)d;
-            }
-        }
-
-        if (_connectedObjects.Count == 0)
-        {
-            Instance.GetTree().NodeRemoved -= OnNodeRemoved;
-        }
-    }
 
     private void CheckContentScale()
     {
