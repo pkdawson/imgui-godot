@@ -34,6 +34,10 @@ jobs:
         run: |
             echo '{"sdk":{"version": "${{ steps.dotnet_setup.outputs.dotnet-version }}"}}' > ./global.json
 
+      - name: Change project framework
+        if: matrix.dotnet == '6.0.x'
+        run: sed -i 's:net7.0:net6.0:' "${{ env.DemoProj }}"
+
       - name: Modify .editorconfig
         run: |
           sed -i "s:dotnet_analyzer_diagnostic.severity = warning:dotnet_analyzer_diagnostic.severity = error:" .editorconfig
