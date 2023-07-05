@@ -32,7 +32,7 @@ ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
 
 ImGuiLayer::~ImGuiLayer()
 {
-    UtilityFunctions::print("~ImGuiLayer()");
+    // UtilityFunctions::print("~ImGuiLayer()");
 }
 
 void ImGuiLayer::_bind_methods()
@@ -94,7 +94,7 @@ void ImGuiLayer::_ready()
 
 void ImGuiLayer::_exit_tree()
 {
-    UtilityFunctions::print("exit tree");
+    // UtilityFunctions::print("exit tree");
     Engine::get_singleton()->unregister_singleton("ImGuiLayer");
     ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);

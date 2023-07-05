@@ -20,10 +20,37 @@ using namespace ImGui::Godot;
 
 ImGuiGD* gd = nullptr;
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+void sync_modules()
+{
+    typedef void (*pmodinit)(ImGuiContext*, ImGuiMemAllocFunc, ImGuiMemFreeFunc);
+#ifdef _WIN32
+    pmodinit mod_init = (pmodinit)GetProcAddress(GetModuleHandle(nullptr), "imgui_godot_module_init");
+#else
+    pmodinit mod_init = (pmodinit)dlsym(dlopen(nullptr, RTLD_LAZY), "imgui_godot_module_init");
+#endif
+    if (mod_init)
+    {
+        ImGuiMemAllocFunc afunc;
+        ImGuiMemFreeFunc ffunc;
+        void* ud;
+        ImGui_GetAllocatorFunctions(&afunc, &ffunc, &ud);
+        mod_init(ImGui_GetCurrentContext(), afunc, ffunc);
+    }
+}
+
 void initialize_ign_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
+
+    ImGui_CreateContext(nullptr);
 
     ClassDB::register_class<::ImGui::Godot::ImGui>();
     ClassDB::register_class<ImGuiRoot>();
@@ -33,6 +60,7 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
 
     gd = memnew(ImGuiGD);
     Engine::get_singleton()->register_singleton("ImGuiGD", gd);
+    sync_modules();
 }
 
 void uninitialize_ign_module(ModuleInitializationLevel p_level)

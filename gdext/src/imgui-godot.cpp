@@ -48,7 +48,6 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     ctx->ci = canvasItem;
     ctx->input = std::make_unique<Input>(ctx->mainWindow);
 
-    ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ctx->mainWindow->get_size();
 
@@ -76,7 +75,7 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     RS->viewport_set_active(ctx->svp, true);
     RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
-    // io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 16.0f);
+    io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 36.0f);
     uint8_t* pixels = nullptr;
     int width = 0, height = 0, bytes_per_pixel = 0;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);
