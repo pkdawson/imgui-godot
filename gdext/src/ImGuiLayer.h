@@ -33,8 +33,6 @@ public:
     void _input(const Ref<InputEvent>& event) override;
     void _notification(int p_what);
 
-    PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize);
-
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

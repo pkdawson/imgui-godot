@@ -8,4 +8,5 @@ class AnotherNode : public Node
 protected:
     static void _bind_methods();
     void _notification(int p_what);
+    void imgui_layout();
 };

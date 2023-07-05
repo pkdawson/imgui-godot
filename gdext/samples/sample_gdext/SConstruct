@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+import os
+import sys
+
+env = SConscript("../../godot-cpp/SConstruct")
+env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
+env.Append(CPPPATH=["src/", "../../include/", "../../imgui"])
+sources = Glob("src/*.cpp") + Glob("../../imgui/*.cpp")
+
+if env["platform"] == "macos":
+    library = env.SharedLibrary(
+        "../project/bin/libgdexample.{}.{}.framework/libgdexample.{}.{}".format(
+            env["platform"], env["target"], env["platform"], env["target"]
+        ),
+        source=sources,
+    )
+else:
+    library = env.SharedLibrary(
+        "../project/bin/libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        source=sources,
+    )
+
+Default(library)

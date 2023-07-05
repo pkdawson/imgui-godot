@@ -3,13 +3,15 @@
 #include "ImGuiRoot.h"
 #include "common.h"
 #include "imgui-godot.h"
+#include <godot_cpp/classes/main_loop.hpp>
+#include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 namespace ImGui::Godot {
 
 void ImGuiGD::_bind_methods()
 {
-    ClassDB::bind_static_method("ImGuiGD", D_METHOD("InitEditor", "root"), &ImGuiGD::InitEditor);
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("InitEditor"), &ImGuiGD::InitEditor);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("ResetFonts"), &ImGuiGD::ResetFonts);
     ClassDB::bind_static_method("ImGuiGD",
@@ -42,15 +44,19 @@ void ImGuiGD::_bind_methods()
                                 &ImGuiGD::GetImGuiPtrs);
 }
 
-void ImGuiGD::InitEditor(Node* root)
+void ImGuiGD::InitEditor()
 {
 #ifdef DEBUG_ENABLED
     if (!Engine::get_singleton()->is_editor_hint())
         return;
 
-    UtilityFunctions::print("ie ", root);
-    ImGuiRoot* igr = memnew(ImGuiRoot);
-    root->call_deferred("add_child", igr);
+    MainLoop* ml = Engine::get_singleton()->get_main_loop();
+    SceneTree* st = Object::cast_to<SceneTree>(ml);
+    if (st && !Engine::get_singleton()->has_singleton("ImGuiRoot"))
+    {
+        ImGuiRoot* igr = memnew(ImGuiRoot);
+        st->get_root()->call_deferred("add_child", igr);
+    }
 #endif
 }
 
@@ -75,10 +81,10 @@ void ImGuiGD::RebuildFontAtlas()
 {
 }
 
-TypedArray<int64_t> ImGuiGD::GetFontPtrs()
+PackedInt64Array ImGuiGD::GetFontPtrs()
 {
-    TypedArray<int64_t> rv;
     ImGuiIO& io = ImGui::GetIO();
+    PackedInt64Array rv;
     rv.resize(io.Fonts->Fonts.Size);
     for (int i = 0; i < io.Fonts->Fonts.Size; ++i)
     {
@@ -87,29 +93,26 @@ TypedArray<int64_t> ImGuiGD::GetFontPtrs()
     return rv;
 }
 
-TypedArray<int64_t> ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize)
+PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize)
 {
-    UtilityFunctions::print("GetImGuiPtrs");
-    bool ok = version == ImGui::GetVersion() && ioSize == sizeof(ImGuiIO) && vertSize == sizeof(ImDrawVert) &&
-              idxSize == sizeof(ImDrawIdx) && charSize == sizeof(ImWchar);
-
-    if (!ok)
+    if (version != String(ImGui::GetVersion()) || ioSize != sizeof(ImGuiIO) || vertSize != sizeof(ImDrawVert) ||
+        idxSize != sizeof(ImDrawIdx) || charSize != sizeof(ImWchar))
     {
-        UtilityFunctions::printerr("ImGui version mismatch");
+        UtilityFunctions::printerr("ImGui version mismatch, use ", ImGui::GetVersion(), "-docking");
         return {};
     }
 
-    TypedArray<int64_t> rv;
+    ImGuiMemAllocFunc alloc_func = nullptr;
+    ImGuiMemFreeFunc free_func = nullptr;
+    void* user_data = nullptr;
+
+    ImGui::GetAllocatorFunctions(&alloc_func, &free_func, &user_data);
+
+    PackedInt64Array rv;
     rv.resize(3);
-
-    ImGuiMemAllocFunc p_alloc_func;
-    ImGuiMemFreeFunc p_free_func;
-    void* p_user_data;
-
-    ImGui::GetAllocatorFunctions(&p_alloc_func, &p_free_func, &p_user_data);
     rv[0] = reinterpret_cast<int64_t>(ImGui::GetCurrentContext());
-    rv[1] = reinterpret_cast<int64_t>(p_alloc_func);
-    rv[2] = reinterpret_cast<int64_t>(p_free_func);
+    rv[1] = reinterpret_cast<int64_t>(alloc_func);
+    rv[2] = reinterpret_cast<int64_t>(free_func);
     return rv;
 }
 

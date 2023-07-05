@@ -75,7 +75,7 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     RS->viewport_set_active(ctx->svp, true);
     RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
-    io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 36.0f);
+    // io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 36.0f);
     uint8_t* pixels = nullptr;
     int width = 0, height = 0, bytes_per_pixel = 0;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);
@@ -135,7 +135,6 @@ void Shutdown()
 
 void Connect(const godot::Callable& callable)
 {
-    UtilityFunctions::print("connect");
     Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
     if (igl)
         igl->connect("imgui_layout", callable);

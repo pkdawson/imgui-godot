@@ -74,10 +74,6 @@ void RebuildFontAtlas();
 
 bool SubViewport(SubViewport* svp);
 
-namespace detail {
-inline static float Scale = 1.0f;
-} // namespace detail
-
 #else
 namespace detail {
 inline static Object* ImGuiGD = nullptr;
@@ -150,22 +146,19 @@ inline bool SubViewport(SubViewport* svp)
 inline void SetJoyAxisDeadZone(float deadZone)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    // TODO: set in Input
+    detail::ImGuiGD->call("SetJoyAxisDeadZone", deadZone);
 }
 
 inline void SetJoyButtonSwapAB(bool swap)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    // TODO: set in Input
+    detail::ImGuiGD->call("SetJoyButtonSwapAB", swap);
 }
 
 inline void SetScale(float scale)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    // if (scale != detail::Scale && scale >= 0.25f)
-    //{
-    //     // TODO: ...
-    // }
+    detail::ImGuiGD->call("SetScale", scale);
 }
 
 inline void SyncImGuiPtrs()
@@ -180,9 +173,9 @@ inline void SyncImGuiPtrs()
 
     ERR_FAIL_COND(ptrs.size() != 3);
 
+    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>((int64_t)ptrs[0]));
     ImGuiMemAllocFunc alloc_func = reinterpret_cast<ImGuiMemAllocFunc>((int64_t)ptrs[1]);
     ImGuiMemFreeFunc free_func = reinterpret_cast<ImGuiMemFreeFunc>((int64_t)ptrs[2]);
-    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>((int64_t)ptrs[0]));
     ImGui::SetAllocatorFunctions(alloc_func, free_func, nullptr);
 }
 #endif

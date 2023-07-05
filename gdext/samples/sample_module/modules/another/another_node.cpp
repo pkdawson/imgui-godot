@@ -1,9 +1,11 @@
 #include "another_node.h"
 #include "core/config/engine.h"
+#include "imgui-godot.h"
 #include <imgui.h>
 
 void AnotherNode::_bind_methods()
 {
+    ClassDB::bind_method(D_METHOD("imgui_layout"), &AnotherNode::imgui_layout);
 }
 
 void AnotherNode::_notification(int p_what)
@@ -16,12 +18,14 @@ void AnotherNode::_notification(int p_what)
     switch (p_what)
     {
     case NOTIFICATION_READY:
-        set_process(true);
-        break;
-    case NOTIFICATION_PROCESS:
-        ImGui::Begin("AnotherNode");
-        ImGui::Text("another C++ module");
-        ImGui::End();
+        ImGui::Godot::Connect(Callable(this, "imgui_layout"));
         break;
     }
+}
+
+void AnotherNode::imgui_layout()
+{
+    ImGui::Begin("AnotherNode signal");
+    ImGui::Text("another C++ module");
+    ImGui::End();
 }
