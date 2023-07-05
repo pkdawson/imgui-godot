@@ -2,7 +2,12 @@
 extends EditorPlugin
 
 func _enter_tree():
-    ImGuiGD.InitEditor()
+    if not ClassDB.class_exists("ImGuiGD"):
+        print("restarting editor")
+        get_editor_interface().restart_editor()
+        return
+    var igd = Engine.get_singleton("ImGuiGD")
+    igd.InitEditor()
     add_autoload_singleton("imgui_godot_native", "res://addons/imgui-godot-native/ImGuiGodot.tscn")
 
 func _exit_tree():
