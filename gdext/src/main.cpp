@@ -69,7 +69,7 @@ void uninitialize_ign_module(ModuleInitializationLevel p_level)
         return;
 
     Engine::get_singleton()->unregister_singleton("ImGuiGD");
-    memfree(gd);
+    memdelete(gd);
 }
 
 extern "C" {

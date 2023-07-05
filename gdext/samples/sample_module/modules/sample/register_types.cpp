@@ -2,6 +2,7 @@
 #include "core/object/class_db.h"
 #include "sample_node.h"
 
+// put this in only one .cpp file in one module
 #include "imgui-godot.h"
 IMGUI_GODOT_MODULE_INIT()
 
