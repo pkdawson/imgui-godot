@@ -26,3 +26,5 @@ gdext/x64/
 *.os
 gdext/proj/addons/imgui-godot-native/include/*.h
 gdext/gen/
+*.o
+*.pyc

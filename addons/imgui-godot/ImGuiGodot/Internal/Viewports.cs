@@ -22,7 +22,12 @@ internal sealed class GodotImGuiWindow : IDisposable
 
         Rect2I winRect = new(_vp.Pos.ToVector2I(), _vp.Size.ToVector2I());
 
-        ImGuiLayer.Instance.GetViewport().GuiEmbedSubwindows = false;
+        Window mainWindow = ImGuiLayer.Instance.GetWindow();
+        if (mainWindow.GuiEmbedSubwindows)
+        {
+            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            mainWindow.GuiEmbedSubwindows = false;
+        }
 
         GodotWindow = new Window()
         {
@@ -268,12 +273,6 @@ internal sealed partial class Viewports
 
     public Viewports(Window mainWindow, Rid mainSubViewport)
     {
-        if (mainWindow.GuiEmbedSubwindows)
-        {
-            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
-            mainWindow.GuiEmbedSubwindows = false;
-        }
-
         _mainWindow = new(ImGui.GetMainViewport(), mainWindow, mainSubViewport);
 
         ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;

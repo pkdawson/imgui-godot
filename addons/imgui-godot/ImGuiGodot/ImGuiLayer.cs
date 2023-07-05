@@ -95,7 +95,6 @@ public partial class ImGuiLayer : CanvasLayer
         Resource cfg = Config as Resource ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
         Layer = (int)cfg.Get("Layer");
 
-        // TODO: call Init with just config resource
         ImGuiGD.Init(_window, _subViewportRid, cfg);
 
         _helper = new ImGuiHelper

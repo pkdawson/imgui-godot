@@ -16,23 +16,32 @@
 #include "ImGuiRoot.h"
 
 using namespace godot;
+using namespace ImGui::Godot;
+
+ImGuiGD* gd = nullptr;
 
 void initialize_ign_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
 
-    ClassDB::register_class<ImGui::Godot::ImGui>();
-    ClassDB::register_class<ImGui::Godot::ImGuiRoot>();
-    ClassDB::register_class<ImGui::Godot::ImGuiLayer>();
-    ClassDB::register_class<ImGui::Godot::ImGuiGodotHelper>();
-    ClassDB::register_class<ImGui::Godot::ImGuiGD>();
+    ClassDB::register_class<::ImGui::Godot::ImGui>();
+    ClassDB::register_class<ImGuiRoot>();
+    ClassDB::register_class<ImGuiLayer>();
+    ClassDB::register_class<ImGuiGodotHelper>();
+    ClassDB::register_class<ImGuiGD>();
+
+    gd = memnew(ImGuiGD);
+    Engine::get_singleton()->register_singleton("ImGuiGD", gd);
 }
 
 void uninitialize_ign_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
+
+    Engine::get_singleton()->unregister_singleton("ImGuiGD");
+    memfree(gd);
 }
 
 extern "C" {

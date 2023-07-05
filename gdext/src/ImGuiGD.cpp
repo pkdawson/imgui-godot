@@ -36,6 +36,10 @@ void ImGuiGD::_bind_methods()
         DEFVAL(Vector2(1, 1)),
         DEFVAL(Color(0, 0, 0, 0)),
         DEFVAL(Color(1, 1, 1, 1)));
+
+    ClassDB::bind_static_method("ImGuiGD",
+                                D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
+                                &ImGuiGD::GetImGuiPtrs);
 }
 
 void ImGuiGD::InitEditor(Node* root)
@@ -80,6 +84,32 @@ TypedArray<int64_t> ImGuiGD::GetFontPtrs()
     {
         rv[i] = (int64_t)io.Fonts->Fonts[i];
     }
+    return rv;
+}
+
+TypedArray<int64_t> ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize)
+{
+    UtilityFunctions::print("GetImGuiPtrs");
+    bool ok = version == ImGui::GetVersion() && ioSize == sizeof(ImGuiIO) && vertSize == sizeof(ImDrawVert) &&
+              idxSize == sizeof(ImDrawIdx) && charSize == sizeof(ImWchar);
+
+    if (!ok)
+    {
+        UtilityFunctions::printerr("ImGui version mismatch");
+        return {};
+    }
+
+    TypedArray<int64_t> rv;
+    rv.resize(3);
+
+    ImGuiMemAllocFunc p_alloc_func;
+    ImGuiMemFreeFunc p_free_func;
+    void* p_user_data;
+
+    ImGui::GetAllocatorFunctions(&p_alloc_func, &p_free_func, &p_user_data);
+    rv[0] = reinterpret_cast<int64_t>(ImGui::GetCurrentContext());
+    rv[1] = reinterpret_cast<int64_t>(p_alloc_func);
+    rv[2] = reinterpret_cast<int64_t>(p_free_func);
     return rv;
 }
 

@@ -1,40 +1,51 @@
 #pragma once
 
+#if __has_include("godot_cpp/classes/engine.hpp")
 #pragma warning(push, 0)
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
 #include <godot_cpp/variant/vector4.hpp>
+using godot::Color;
+using godot::Vector2;
+using godot::Vector2i;
+using godot::Vector4;
 #pragma warning(pop)
+#else
+#include "core/math/color.h"
+#include "core/math/vector2.h"
+#include "core/math/vector2i.h"
+#include "core/math/vector4.h"
+#endif
 
-#define IM_VEC2_CLASS_EXTRA                                                                             \
-    constexpr ImVec2(const godot::Vector2& f) : x(f.x), y(f.y)                                          \
-    {                                                                                                   \
-    }                                                                                                   \
-    operator godot::Vector2() const                                                                     \
-    {                                                                                                   \
-        return godot::Vector2(x, y);                                                                    \
-    }                                                                                                   \
-    constexpr ImVec2(const godot::Vector2i& f) : x(static_cast<float>(f.x)), y(static_cast<float>(f.y)) \
-    {                                                                                                   \
-    }                                                                                                   \
-    operator godot::Vector2i() const                                                                    \
-    {                                                                                                   \
-        return godot::Vector2i(static_cast<int32_t>(x), static_cast<int32_t>(y));                       \
+#define IM_VEC2_CLASS_EXTRA                                                                      \
+    constexpr ImVec2(const Vector2& f) : x(f.x), y(f.y)                                          \
+    {                                                                                            \
+    }                                                                                            \
+    operator Vector2() const                                                                     \
+    {                                                                                            \
+        return Vector2(x, y);                                                                    \
+    }                                                                                            \
+    constexpr ImVec2(const Vector2i& f) : x(static_cast<float>(f.x)), y(static_cast<float>(f.y)) \
+    {                                                                                            \
+    }                                                                                            \
+    operator Vector2i() const                                                                    \
+    {                                                                                            \
+        return Vector2i(static_cast<int32_t>(x), static_cast<int32_t>(y));                       \
     }
 
-#define IM_VEC4_CLASS_EXTRA                                                    \
-    constexpr ImVec4(const godot::Vector4& f) : x(f.x), y(f.y), z(f.z), w(f.w) \
-    {                                                                          \
-    }                                                                          \
-    operator godot::Vector4() const                                            \
-    {                                                                          \
-        return godot::Vector4(x, y, z, w);                                     \
-    }                                                                          \
-    constexpr ImVec4(const godot::Color& c) : x(c.r), y(c.g), z(c.b), w(c.a)   \
-    {                                                                          \
-    }                                                                          \
-    operator godot::Color() const                                              \
-    {                                                                          \
-        return godot::Color(x, y, z, w);                                       \
+#define IM_VEC4_CLASS_EXTRA                                             \
+    constexpr ImVec4(const Vector4& f) : x(f.x), y(f.y), z(f.z), w(f.w) \
+    {                                                                   \
+    }                                                                   \
+    operator Vector4() const                                            \
+    {                                                                   \
+        return Vector4(x, y, z, w);                                     \
+    }                                                                   \
+    constexpr ImVec4(const Color& c) : x(c.r), y(c.g), z(c.b), w(c.a)   \
+    {                                                                   \
+    }                                                                   \
+    operator Color() const                                              \
+    {                                                                   \
+        return Color(x, y, z, w);                                       \
     }

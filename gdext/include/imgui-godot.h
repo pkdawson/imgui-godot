@@ -39,11 +39,12 @@ using godot::Key;
 using godot::Object;
 using godot::Ref;
 using godot::RID;
+using godot::String;
 using godot::SubViewport;
 using godot::Texture2D;
+using godot::TypedArray;
 using godot::Vector2;
 using godot::Window;
-using godot::TypedArray;
 #else
 #include "core/config/engine.h"
 #include "core/variant/callable.h"
@@ -54,6 +55,8 @@ using godot::TypedArray;
 
 static_assert(sizeof(RID) == 8);
 static_assert(sizeof(void*) == 8);
+static_assert(sizeof(ImDrawIdx) == 2);
+static_assert(sizeof(ImWchar) == 2);
 
 namespace ImGui::Godot {
 #ifdef IGN_EXPORT
@@ -83,7 +86,11 @@ inline bool GET_IMGUIGD()
 {
     if (ImGuiGD)
         return true;
+#if __has_include("godot_cpp/classes/engine.hpp")
     ImGuiGD = Engine::get_singleton()->get_singleton("ImGuiGD");
+#else
+    ImGuiGD = Engine::get_singleton()->get_singleton_object("ImGuiGD");
+#endif
     return ImGuiGD != nullptr;
 }
 } // namespace detail
@@ -163,6 +170,20 @@ inline void SetScale(float scale)
 
 inline void SyncImGuiPtrs()
 {
+    ERR_FAIL_COND(!detail::GET_IMGUIGD());
+    TypedArray<int64_t> ptrs = detail::ImGuiGD->call("GetImGuiPtrs",
+                                                     String(ImGui::GetVersion()),
+                                                     (int32_t)sizeof(ImGuiIO),
+                                                     (int32_t)sizeof(ImDrawVert),
+                                                     (int32_t)sizeof(ImDrawIdx),
+                                                     (int32_t)sizeof(ImWchar));
+
+    ERR_FAIL_COND(ptrs.size() != 3);
+
+    ImGuiMemAllocFunc alloc_func = reinterpret_cast<ImGuiMemAllocFunc>((int64_t)ptrs[1]);
+    ImGuiMemFreeFunc free_func = reinterpret_cast<ImGuiMemFreeFunc>((int64_t)ptrs[2]);
+    ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>((int64_t)ptrs[0]));
+    ImGui::SetAllocatorFunctions(alloc_func, free_func, nullptr);
 }
 #endif
 
@@ -184,13 +205,14 @@ inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size,
     return ImGui::ImageButton(str_id, BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
-inline bool ImageButton(const godot::String& str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+inline bool ImageButton(const String& str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
     return ImGui::ImageButton(str_id.utf8().get_data(), BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
+#if __has_include("godot_cpp/classes/engine.hpp")
 inline ImGuiKey ToImGuiKey(Key key)
 {
     switch (key)
@@ -436,5 +458,6 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
         return ImGuiKey_None;
     };
 }
+#endif
 
 } // namespace ImGui::Godot

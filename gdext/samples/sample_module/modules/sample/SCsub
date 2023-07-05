@@ -1,0 +1,11 @@
+Import("env")
+
+imgui_path = "../../../../imgui"
+inc_path = "../../../../include"
+
+menv = env.Clone()
+menv.Append(CPPPATH=[inc_path])
+menv.Append(CPPPATH=[imgui_path])
+menv.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
+menv.add_source_files(env.modules_sources, "*.cpp")
+menv.add_source_files(env.modules_sources, f"{imgui_path}/*.cpp")

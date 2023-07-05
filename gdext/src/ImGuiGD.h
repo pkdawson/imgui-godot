@@ -29,6 +29,7 @@ public:
     static void AddFontDefault();
     static void RebuildFontAtlas();
     static TypedArray<int64_t> GetFontPtrs();
+    static TypedArray<int64_t> GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);
 
     static void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
                       const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0});

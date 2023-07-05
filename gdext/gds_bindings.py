@@ -200,12 +200,16 @@ class Param:
     def gen_def(self):
         return f"{self.gdtype} {self.name}"
 
-    def gen_arg(self):
+    def gen_arg(self, safe_fmt=True):
         if self.gdtype == "String":
             if self.dv is not None:
                 return f"{self.name}.ptr() ? {self.name}.utf8().get_data() : nullptr"
             else:
-                return f"{self.name}.utf8().get_data()"
+                rv = f"{self.name}.utf8().get_data()"
+                if safe_fmt and self.name == "fmt":
+                    return f'"%s", {rv}'
+                else:
+                    return rv
         elif self.gdtype == "Vector2":
             return f"{{{self.name}.x, {self.name}.y}}"
         elif self.gdtype == "Ref<Texture2D>":
@@ -269,9 +273,11 @@ class Function:
 
     def gen_def(self):
         fname = self.orig_name
+        safe_fmt = True
         if fname == "ImGui_Text":
+            safe_fmt = False
             fname = "ImGui_TextUnformatted"  # do your own formatting
-        fcall = f'::{fname}({", ".join(p.gen_arg() for p in self.params)})'
+        fcall = f'::{fname}({", ".join(p.gen_arg(safe_fmt) for p in self.params)})'
         if self.rt.gdtype in ("Vector2", "Color"):
             fcall = f"To{self.rt.gdtype}({fcall})"
         elif self.rt.orig_type in ["ImFont*"]:
