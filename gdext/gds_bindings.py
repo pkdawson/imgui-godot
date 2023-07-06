@@ -18,28 +18,28 @@ type_map = {
     "double*": "Array",
     "float": "float",
     "float*": "Array",
-    "ImGuiButtonFlags": "BitField<ButtonFlags>",
+    "ImGuiButtonFlags": "BitField<ImGui::ButtonFlags>",
     "ImGuiCol": "Col",
-    "ImGuiColorEditFlags": "BitField<ColorEditFlags>",
-    "ImGuiComboFlags": "BitField<ComboFlags>",
+    "ImGuiColorEditFlags": "BitField<ImGui::ColorEditFlags>",
+    "ImGuiComboFlags": "BitField<ImGui::ComboFlags>",
     "ImGuiCond": "Cond",
     "ImGuiDataType": "DataType",
     "ImGuiDir": "Dir",
-    "ImGuiFocusedFlags": "BitField<FocusedFlags>",
-    "ImGuiHoveredFlags": "BitField<HoveredFlags>",
+    "ImGuiFocusedFlags": "BitField<ImGui::FocusedFlags>",
+    "ImGuiHoveredFlags": "BitField<ImGui::HoveredFlags>",
     "ImGuiID": "uint32_t",
-    "ImGuiInputTextFlags": "BitField<InputTextFlags>",
+    "ImGuiInputTextFlags": "BitField<ImGui::InputTextFlags>",
     "ImGuiIO*": "Ref<ImGuiIOPtr>",
     "ImGuiKey": "Key",
     "ImGuiMouseButton": "MouseButton",
-    "ImGuiPopupFlags": "BitField<PopupFlags>",
+    "ImGuiPopupFlags": "BitField<ImGui::PopupFlags>",
     "ImGuiStyleVar": "StyleVar",
-    "ImGuiTabBarFlags": "BitField<TabBarFlags>",
-    "ImGuiTabItemFlags": "BitField<TabItemFlags>",
-    "ImGuiTableColumnFlags": "BitField<TableColumnFlags>",
-    "ImGuiTableFlags": "BitField<TableFlags>",
-    "ImGuiTableRowFlags": "BitField<TableRowFlags>",
-    "ImGuiWindowFlags": "BitField<WindowFlags>",
+    "ImGuiTabBarFlags": "BitField<ImGui::TabBarFlags>",
+    "ImGuiTabItemFlags": "BitField<ImGui::TabItemFlags>",
+    "ImGuiTableColumnFlags": "BitField<ImGui::TableColumnFlags>",
+    "ImGuiTableFlags": "BitField<ImGui::TableFlags>",
+    "ImGuiTableRowFlags": "BitField<ImGui::TableRowFlags>",
+    "ImGuiWindowFlags": "BitField<ImGui::WindowFlags>",
     "ImTextureID": "Ref<Texture2D>",
     "ImU32": "uint32_t",
     "ImVec2": "Vector2",
@@ -48,11 +48,11 @@ type_map = {
     "int*": "Array",
     "size_t": "int64_t",
     "void": "void",
-    "ImGuiConfigFlags": "BitField<ConfigFlags>",
-    "ImGuiBackendFlags": "BitField<BackendFlags>",
+    "ImGuiConfigFlags": "BitField<ImGui::ConfigFlags>",
+    "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
     "ImU16": "uint16_t",
-    "ImGuiViewportFlags": "BitField<ViewportFlags>",
-    "ImGuiDockNodeFlags": "BitField<DockNodeFlags>",
+    "ImGuiViewportFlags": "BitField<ImGui::ViewportFlags>",
+    "ImGuiDockNodeFlags": "BitField<ImGui::DockNodeFlags>",
     "char": "char",
     "ImS16": "int16_t",
     "ImGuiSortDirection": "SortDirection",
@@ -135,15 +135,15 @@ class Enum:
                 self.vals.append((gdname, name))
 
     def gen_def(self):
-        rv = f"enum {self.name} {{\n"
+        rv = f"enum {self.name} {{ \\\n"
         for kv in self.vals:
-            rv += f"{kv[0]} = {kv[1]},"
-        rv += "};\n\n"
+            rv += f"{kv[0]} = {kv[1]}, "
+        rv += "}; \\\n"
         return rv
 
     def gen_cast(self):
         macro = "VARIANT_BITFIELD_CAST" if self.bitfield else "VARIANT_ENUM_CAST"
-        return f"{macro}(ImGui::Godot::{self.name});\n"
+        return f"{macro}(ImGui::Godot::ImGui::{self.name}); \\\n"
 
     def gen_bindings(self):
         macro = "BIND_BITFIELD_FLAG" if self.bitfield else "BIND_ENUM_CONSTANT"
@@ -426,10 +426,9 @@ class JsonParser:
         self.enums = []
         self.structs = []
         self.funcs = []
-        self.enum_defs = """#include <cimgui.h>
-
-        """
-        self.enum_binds = "#define REGISTER_IMGUI_ENUMS() { \\\n"
+        self.enum_defs = "#define DEFINE_IMGUI_ENUMS() \\\n"
+        self.enum_casts = "#define CAST_IMGUI_ENUMS() \\\n"
+        self.enum_binds = "#define REGISTER_IMGUI_ENUMS() \\\n"
         self.func_decls = "#define DECLARE_IMGUI_FUNCS() \\\n"
         self.func_binds = "#define BIND_IMGUI_FUNCS() \\\n"
         self.func_defs = "#define DEFINE_IMGUI_FUNCS() \\\n"
@@ -444,8 +443,10 @@ class JsonParser:
             pass
 
         with open("gen/imgui_bindings.gen.h", "w") as fi:
+            fi.write("#include <cimgui.h>\n\n")
             fi.write(self.enum_defs)
             fi.write(self.enum_binds)
+            fi.write(self.enum_casts)
             fi.write(self.struct_decls)
             fi.write(self.struct_defs)
             fi.write(self.struct_binds)
@@ -454,18 +455,17 @@ class JsonParser:
             fi.write(self.func_defs)
 
     def load(self, jdat):
-        self.enum_defs += "namespace ImGui::Godot {\n"
         enums = []
         for je in jdat["enums"]:
             e = Enum(je)
             if e.orig_name.startswith("ImGui"):
                 self.enum_defs += e.gen_def()
+                self.enum_casts += e.gen_cast()
                 self.enum_binds += e.gen_bindings()
                 enums.append(e)
-        self.enum_defs += "}\n\n"
-        self.enum_binds += "}\n"
-        for e in enums:
-            self.enum_defs += e.gen_cast()
+        self.enum_defs += "\n\n"
+        self.enum_binds += "\n\n"
+        self.enum_casts += "\n\n"
 
         for js in jdat["structs"]:
             s = Struct(js)

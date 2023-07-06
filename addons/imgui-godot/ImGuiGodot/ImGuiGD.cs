@@ -153,7 +153,7 @@ public static class ImGuiGD
         _gd.SyncImGuiPtrs();
     }
 
-    public static bool SubViewport(SubViewport vp)
+    public static bool SubViewportWidget(SubViewport vp)
     {
         return _gd.SubViewport(vp);
     }

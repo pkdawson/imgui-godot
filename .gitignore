@@ -28,3 +28,6 @@ gdext/proj/addons/imgui-godot-native/include/*.h
 gdext/gen/
 *.o
 *.pyc
+gdext/proj/doc/
+gdext/proj/modules/
+gdext/proj/platform/

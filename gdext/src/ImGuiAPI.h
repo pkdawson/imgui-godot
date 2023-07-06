@@ -144,7 +144,7 @@ struct GdsZeroArray
 #define GDS_PTR(T, a) a.size() == 0 ? nullptr : (T*)GdsPtr<T>(a)
 // #define GDS_PTR_STR(a, len, label) a.size() == 0 ? nullptr : (char*)GdsPtr<String>(a, len, label)
 
-DECLARE_IMGUI_STRUCTS()
+class ImGuiIOPtr;
 
 class ImGui : public Object
 {
@@ -154,7 +154,12 @@ protected:
     static void _bind_methods();
 
 public:
+    DEFINE_IMGUI_ENUMS()
     DECLARE_IMGUI_FUNCS()
 };
 
+DECLARE_IMGUI_STRUCTS()
+
 } // namespace ImGui::Godot
+
+CAST_IMGUI_ENUMS()

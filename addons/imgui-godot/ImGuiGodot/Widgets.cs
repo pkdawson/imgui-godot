@@ -19,7 +19,7 @@ public static class Widgets
     /// </returns>
     public static bool SubViewport(SubViewport vp)
     {
-        return ImGuiGD.SubViewport(vp);
+        return ImGuiGD.SubViewportWidget(vp);
     }
 
     public static void Image(Texture2D tex, Vector2 size)
