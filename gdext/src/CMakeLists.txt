@@ -1,6 +1,8 @@
 target_sources(imgui-godot-native PRIVATE
     common.h
     DummyRenderer.h
+    Fonts.cpp
+    Fonts.h
     imgui-godot.cpp
     ImGuiAPI.cpp
     ImGuiAPI.h

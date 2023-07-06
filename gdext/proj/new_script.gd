@@ -9,6 +9,9 @@ func _ready():
     var io = ImGui.GetIO()
     io.ConfigFlags |= ImGui.ConfigFlags_NavEnableKeyboard
 
+func _process(_delta):
+    ImGui.ShowDemoWindow()
+
 func _on_imgui_layout():
     ImGui.SetNextWindowPos(Vector2i(200, 200), ImGui.Cond_Once)
     ImGui.Begin("signal")

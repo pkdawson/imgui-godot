@@ -1,5 +1,6 @@
 #include "imgui-godot.h"
 #include "DummyRenderer.h"
+#include "Fonts.h"
 #include "ImGuiGD.h"
 #include "Input.h"
 #include "RdRenderer.h"
@@ -29,6 +30,7 @@ struct Context
     Window* mainWindow = nullptr;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<Input> input;
+    std::unique_ptr<Fonts> fonts;
     RID svp;
     RID ci;
     Ref<ImageTexture> fontTexture;
@@ -89,19 +91,9 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     RS->viewport_set_active(ctx->svp, true);
     RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
-    // io.Fonts->AddFontFromFileTTF("../../data/Hack-Regular.ttf", 36.0f);
-    uint8_t* pixels = nullptr;
-    int width = 0, height = 0, bytes_per_pixel = 0;
-    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel);
-
-    PackedByteArray data;
-    data.resize(width * height * bytes_per_pixel);
-    memcpy(data.ptrw(), pixels, data.size());
-    Ref<godot::Image> img = Image::create_from_data(width, height, false, Image::FORMAT_RGBA8, data);
-    ctx->fontTexture = ImageTexture::create_from_image(img);
-    ImTextureID texid = (ImTextureID)ctx->fontTexture->get_rid().get_id();
-    io.Fonts->SetTexID(texid);
-    io.Fonts->ClearTexData();
+    ctx->fonts = std::make_unique<Fonts>();
+    ctx->fonts->Add(nullptr, 16, false);
+    ctx->fonts->RebuildFontAtlas(2.0f);
 }
 
 void Update(double delta)
