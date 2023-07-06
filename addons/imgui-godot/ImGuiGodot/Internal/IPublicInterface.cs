@@ -8,6 +8,7 @@ public interface IPublicInterface
     public void SetJoyAxisDeadZone(float zone);
     public void SetJoyButtonSwapAB(bool swap);
     public void SetScale(float scale);
+    public void SetVisible(bool visible);
 
     public void Init(Window mainWindow, Rid mainSubViewport, Resource cfg);
     public void Update(double delta, Vector2 displaySize);
@@ -22,4 +23,6 @@ public interface IPublicInterface
     public void RebuildFontAtlas(float scale);
 
     public void SetIniFilename(ImGuiIOPtr io, string fileName);
+    public void SyncImGuiPtrs();
+    public bool SubViewport(SubViewport vp);
 }

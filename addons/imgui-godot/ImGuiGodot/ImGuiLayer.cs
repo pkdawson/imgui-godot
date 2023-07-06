@@ -77,7 +77,7 @@ public partial class ImGuiLayer : CanvasLayer
         if (_useNative)
         {
             GD.Print("UseNative");
-            // TODO: set up pointers, etc
+            ImGuiGD.SyncImGuiPtrs();
             Instance = null;
             QueueFree();
             return;

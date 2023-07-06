@@ -132,8 +132,8 @@ public partial class MySecondNode : Node
 
     private void OnShowHidePressed()
     {
-        ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
-        GetNode<Button>("%ShowHideButton").Text = ImGuiLayer.Instance.Visible ? "hide" : "show";
+        ImGuiGD.Visible = !ImGuiGD.Visible;
+        GetNode<Button>("%ShowHideButton").Text = ImGuiGD.Visible ? "hide" : "show";
     }
 
     private void OnScaleChanged()

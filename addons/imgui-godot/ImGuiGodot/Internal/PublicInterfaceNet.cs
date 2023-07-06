@@ -113,11 +113,40 @@ public class PublicInterfaceNet : IPublicInterface
         throw new NotImplementedException();
     }
 
+    public void SetVisible(bool visible)
+    {
+        ImGuiLayer.Instance.Visible = visible;
+    }
+
     public void Shutdown()
     {
         State.Instance.Renderer.Shutdown();
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
             ImGui.DestroyContext();
+    }
+
+    public bool SubViewport(SubViewport vp)
+    {
+        System.Numerics.Vector2 vpSize = new(vp.Size.X, vp.Size.Y);
+        var pos = ImGui.GetCursorScreenPos();
+        var pos_max = new System.Numerics.Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
+        ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);
+
+        ImGui.PushID(vp.NativeInstance);
+        ImGui.InvisibleButton("godot_subviewport", vpSize);
+        ImGui.PopID();
+
+        if (ImGui.IsItemHovered())
+        {
+            State.Instance.Input.CurrentSubViewport = vp;
+            State.Instance.Input.CurrentSubViewportPos = pos;
+            return true;
+        }
+        return false;
+    }
+
+    public void SyncImGuiPtrs()
+    {
     }
 
     public void Update(double delta, Vector2 displaySize)

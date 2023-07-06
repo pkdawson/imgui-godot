@@ -19,22 +19,7 @@ public static class Widgets
     /// </returns>
     public static bool SubViewport(SubViewport vp)
     {
-        Vector2 vpSize = new(vp.Size.X, vp.Size.Y);
-        var pos = ImGui.GetCursorScreenPos();
-        var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
-        ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);
-
-        ImGui.PushID(vp.NativeInstance);
-        ImGui.InvisibleButton("godot_subviewport", vpSize);
-        ImGui.PopID();
-
-        if (ImGui.IsItemHovered())
-        {
-            Internal.State.Instance.Input.CurrentSubViewport = vp;
-            Internal.State.Instance.Input.CurrentSubViewportPos = pos;
-            return true;
-        }
-        return false;
+        return ImGuiGD.SubViewport(vp);
     }
 
     public static void Image(Texture2D tex, Vector2 size)

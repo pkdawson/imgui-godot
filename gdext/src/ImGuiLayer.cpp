@@ -17,7 +17,6 @@ namespace ImGui::Godot {
 
 struct ImGuiLayer::Impl
 {
-    bool show_imgui_demo = true;
     ImGuiGodotHelper* helper = nullptr;
     CanvasLayer* layer = nullptr;
     Window* window = nullptr;
@@ -95,9 +94,6 @@ void ImGuiLayer::_process(double delta)
         return;
 #endif
     emit_signal("imgui_layout");
-
-    if (impl->show_imgui_demo)
-        ImGui::ShowDemoWindow(&impl->show_imgui_demo);
 
     ImGui::Godot::Render();
 }

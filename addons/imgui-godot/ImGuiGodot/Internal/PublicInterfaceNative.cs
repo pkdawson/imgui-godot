@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using Godot;
 using ImGuiNET;
 
@@ -10,66 +12,94 @@ public class PublicInterfaceNative : IPublicInterface
     public void AddFont(FontFile fontData, int fontSize, bool merge)
     {
         _gd.Call("AddFont", fontData, fontSize, merge);
-        throw new System.NotImplementedException();
     }
 
     public void Connect(Callable callable)
     {
-        throw new System.NotImplementedException();
+        _gd.Call("Connect", callable);
     }
 
     public void Init(Window mainWindow, Rid mainSubViewport, Resource cfg)
     {
-        throw new System.NotImplementedException();
+        _gd.Call("Init", mainWindow, mainSubViewport, cfg);
     }
 
     public bool ProcessInput(InputEvent evt, Window window)
     {
-        throw new System.NotImplementedException();
+        return (bool)_gd.Call("ProcessInput", evt, window);
     }
 
     public void RebuildFontAtlas(float scale)
     {
-        throw new System.NotImplementedException();
+        _gd.Call("RebuildFontAtlas");
     }
 
     public void Render()
     {
-        throw new System.NotImplementedException();
+        _gd.Call("Render");
     }
 
     public void ResetFonts()
     {
-        throw new System.NotImplementedException();
+        _gd.Call("ResetFonts");
     }
 
     public void SetIniFilename(ImGuiIOPtr io, string fileName)
     {
-        throw new System.NotImplementedException();
+        _gd.Call("SetIniFilename", fileName);
     }
 
     public void SetJoyAxisDeadZone(float zone)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public void SetJoyButtonSwapAB(bool swap)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public void SetScale(float scale)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
+    }
+
+    public void SetVisible(bool visible)
+    {
+        _gd.Call("SetVisible", visible);
     }
 
     public void Shutdown()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
+    }
+
+    public bool SubViewport(SubViewport vp)
+    {
+        return (bool)_gd.Call("SubViewport", vp);
+    }
+
+    public void SyncImGuiPtrs()
+    {
+        long[] ptrs = (long[])_gd.Call("GetImGuiPtrs",
+            ImGui.GetVersion(),
+            Marshal.SizeOf<ImGuiIO>(),
+            Marshal.SizeOf<ImDrawVert>(),
+            sizeof(ushort),
+            sizeof(ushort)
+            );
+
+        if (ptrs.Length != 3)
+        {
+            return;
+        }
+
+        ImGui.SetCurrentContext((IntPtr)ptrs[0]);
+        ImGui.SetAllocatorFunctions((IntPtr)ptrs[1], (IntPtr)ptrs[2]);
     }
 
     public void Update(double delta, Vector2 displaySize)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

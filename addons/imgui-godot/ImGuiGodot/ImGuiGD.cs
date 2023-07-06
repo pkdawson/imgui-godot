@@ -63,6 +63,17 @@ public static class ImGuiGD
     }
     private static float _scale = 1.0f;
 
+    public static bool Visible
+    {
+        get => _visible;
+        set
+        {
+            _visible = value;
+            _gd.SetVisible(_visible);
+        }
+    }
+    private static bool _visible = true;
+
     private static readonly Internal.IPublicInterface _gd;
 
     static ImGuiGD()
@@ -135,6 +146,16 @@ public static class ImGuiGD
     public static bool ProcessInput(InputEvent evt, Window window)
     {
         return Internal.State.Instance.Input.ProcessInput(evt, window);
+    }
+
+    public static void SyncImGuiPtrs()
+    {
+        _gd.SyncImGuiPtrs();
+    }
+
+    public static bool SubViewport(SubViewport vp)
+    {
+        return _gd.SubViewport(vp);
     }
 
     /// <summary>
