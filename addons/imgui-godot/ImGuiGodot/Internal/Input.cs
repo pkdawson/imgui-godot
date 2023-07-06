@@ -89,12 +89,12 @@ internal sealed class Input
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
+#if !GODOT4_1_OR_GREATER
             if (!CurrentSubViewport.IsInputHandled())
             {
-#pragma warning disable CS0618 // deprecated for Godot 4.1, but still required for Godot 4.0
                 CurrentSubViewport.PushUnhandledInput(vpEvent, true);
-#pragma warning restore CS0618
             }
+#endif
         }
 
         bool consumed = false;
