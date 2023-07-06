@@ -19,21 +19,10 @@
 #include <godot_cpp/classes/rendering_device.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
 
-using godot::Color;
-using godot::RDPipelineColorBlendState;
-using godot::RDPipelineColorBlendStateAttachment;
-using godot::RDPipelineRasterizationState;
-using godot::RDSamplerState;
-using godot::RDShaderSPIRV;
-using godot::RDUniform;
-using godot::RDVertexAttribute;
-using godot::Ref;
-using godot::RenderingDevice;
-using godot::RenderingServer;
-using godot::ResourceLoader;
-using godot::TypedArray;
+using namespace godot;
 
 template <>
 struct std::hash<RID>
@@ -106,6 +95,15 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
 
+    // clean out invalidated uniform sets so they can be refreshed
+    for (auto it = uniformSets.begin(); it != uniformSets.end();)
+    {
+        if (!RD->uniform_set_is_valid(it->second))
+            it = uniformSets.erase(it);
+        else
+            ++it;
+    }
+
     // allocate merged index and vertex buffers
     if (idxBufferSize < drawData->TotalIdxCount)
     {
@@ -162,7 +160,8 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
             if (!uniformSets.contains(texid))
             {
                 RID texrid = RenderingServer::get_singleton()->texture_get_rd_texture(make_rid(texid));
-                Ref<RDUniform> uniform = memnew(RDUniform);
+                Ref<RDUniform> uniform;
+                uniform.instantiate();
                 uniform->set_binding(0);
                 uniform->set_uniform_type(RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
                 uniform->add_id(sampler);
@@ -223,11 +222,13 @@ RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
     bsa.set_dst_alpha_blend_factor(RenderingDevice::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
     bsa.set_alpha_blend_op(RenderingDevice::BLEND_OP_ADD);
 
-    Ref<RDPipelineColorBlendState> blend = memnew(RDPipelineColorBlendState);
+    Ref<RDPipelineColorBlendState> blend;
+    blend.instantiate();
     blend->set_blend_constant(Color(0.0f, 0.0f, 0.0f, 0.0f));
     blend->get_attachments().append(&bsa);
 
-    Ref<RDPipelineRasterizationState> raster_state = memnew(RDPipelineRasterizationState);
+    Ref<RDPipelineRasterizationState> raster_state;
+    raster_state.instantiate();
     raster_state->set_front_face(RenderingDevice::POLYGON_FRONT_FACE_COUNTER_CLOCKWISE);
 
     impl->pipeline = RD->render_pipeline_create(impl->shader,

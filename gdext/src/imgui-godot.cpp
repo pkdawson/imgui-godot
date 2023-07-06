@@ -10,6 +10,8 @@
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
+#include <godot_cpp/classes/sub_viewport.hpp>
+#include <godot_cpp/classes/viewport_texture.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
@@ -154,6 +156,25 @@ void AddFontDefault()
 
 void RebuildFontAtlas()
 {
+}
+
+bool SubViewport(godot::SubViewport* svp)
+{
+    ImVec2 vpSize = svp->get_size();
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImVec2 pos_max = {pos.x + vpSize.x, pos.y + vpSize.y};
+    ImGui::GetWindowDrawList()->AddImage((ImTextureID)svp->get_texture()->get_rid().get_id(), pos, pos_max);
+
+    ImGui::PushID(svp->get_instance_id());
+    ImGui::InvisibleButton("godot_subviewport", vpSize);
+    ImGui::PopID();
+
+    if (ImGui::IsItemHovered())
+    {
+        ctx->input->SetActiveSubViewport(svp, pos);
+        return true;
+    }
+    return false;
 }
 
 } // namespace ImGui::Godot

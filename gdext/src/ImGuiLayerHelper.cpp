@@ -1,4 +1,4 @@
-#include "ImGuiGodotHelper.h"
+#include "ImGuiLayerHelper.h"
 #include "imgui-godot.h"
 
 #pragma warning(push, 0)
@@ -12,27 +12,27 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-struct ImGuiGodotHelper::Impl
+struct ImGuiLayerHelper::Impl
 {
 };
 
-ImGuiGodotHelper::ImGuiGodotHelper() : impl(std::make_unique<Impl>())
+ImGuiLayerHelper::ImGuiLayerHelper() : impl(std::make_unique<Impl>())
 {
 }
 
-ImGuiGodotHelper::~ImGuiGodotHelper()
+ImGuiLayerHelper::~ImGuiLayerHelper()
 {
 }
 
-void ImGuiGodotHelper::_bind_methods()
+void ImGuiLayerHelper::_bind_methods()
 {
 }
 
-void ImGuiGodotHelper::_enter_tree()
+void ImGuiLayerHelper::_enter_tree()
 {
 }
 
-void ImGuiGodotHelper::_ready()
+void ImGuiLayerHelper::_ready()
 {
     set_process_priority(std::numeric_limits<int32_t>::min());
     set_process(false);
@@ -45,11 +45,11 @@ void ImGuiGodotHelper::_ready()
     set_process(true);
 }
 
-void ImGuiGodotHelper::_exit_tree()
+void ImGuiLayerHelper::_exit_tree()
 {
 }
 
-void ImGuiGodotHelper::_process(double delta)
+void ImGuiLayerHelper::_process(double delta)
 {
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())

@@ -148,7 +148,12 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
 
         if (Ref<InputEventMouse> me = vpevt; me.is_valid())
         {
+            Vector2 gpos = me->get_global_position();
+            me->set_position(Vector2(windowPos.x + gpos.x - impl->currentSubViewportPos.x,
+                                     windowPos.y + gpos.y - impl->currentSubViewportPos.y)
+                                 .clamp(Vector2(0, 0), impl->currentSubViewport->get_size()));
         }
+        impl->currentSubViewport->push_input(vpevt, true);
     }
 
     bool consumed = false;
@@ -164,16 +169,6 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         {
         case MOUSE_BUTTON_LEFT:
             io.AddMouseButtonEvent(ImGuiMouseButton_Left, pressed);
-#ifdef _WIN32
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable && !pressed)
-            {
-                HWND hwnd = GetCapture();
-                if (hwnd != nullptr)
-                {
-                    PostMessageW(hwnd, WM_LBUTTONUP, 0, 0);
-                }
-            }
-#endif
             break;
         case MOUSE_BUTTON_RIGHT:
             io.AddMouseButtonEvent(ImGuiMouseButton_Right, pressed);
@@ -282,6 +277,12 @@ void Input::ProcessNotification(int what)
         ImGui::GetIO().AddFocusEvent(false);
         break;
     };
+}
+
+void Input::SetActiveSubViewport(godot::SubViewport* svp, Vector2 pos)
+{
+    impl->currentSubViewport = svp;
+    impl->currentSubViewportPos = pos;
 }
 
 } // namespace ImGui::Godot

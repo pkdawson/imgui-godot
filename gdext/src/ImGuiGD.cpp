@@ -39,6 +39,8 @@ void ImGuiGD::_bind_methods()
         DEFVAL(Color(0, 0, 0, 0)),
         DEFVAL(Color(1, 1, 1, 1)));
 
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("SubViewport", "svp"), &ImGuiGD::SubViewport);
+
     ClassDB::bind_static_method("ImGuiGD",
                                 D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
                                 &ImGuiGD::GetImGuiPtrs);
@@ -127,6 +129,11 @@ bool ImGuiGD::ImageButton(const String& str_id, Texture2D* tex, const Vector2& s
 
 {
     return ImGui::Godot::ImageButton(str_id, tex, size, uv0, uv1, bg_col, tint_col);
+}
+
+bool ImGuiGD::SubViewport(godot::SubViewport* svp)
+{
+    return ImGui::Godot::SubViewport(svp);
 }
 
 } // namespace ImGui::Godot

@@ -12,8 +12,8 @@ target_sources(imgui-godot-native PRIVATE
     ImGuiGD.h
     ImGuiLayer.cpp
     ImGuiLayer.h
-    ImGuiGodotHelper.cpp
-    ImGuiGodotHelper.h
+    ImGuiLayerHelper.cpp
+    ImGuiLayerHelper.h
     RdRenderer.cpp
     RdRenderer.h
     Input.cpp

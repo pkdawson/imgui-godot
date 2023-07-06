@@ -11,7 +11,7 @@
 
 #include "ImGuiAPI.h"
 #include "ImGuiGD.h"
-#include "ImGuiGodotHelper.h"
+#include "ImGuiLayerHelper.h"
 #include "ImGuiLayer.h"
 #include "ImGuiRoot.h"
 
@@ -55,7 +55,7 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
     ClassDB::register_class<::ImGui::Godot::ImGui>();
     ClassDB::register_class<ImGuiRoot>();
     ClassDB::register_class<ImGuiLayer>();
-    ClassDB::register_class<ImGuiGodotHelper>();
+    ClassDB::register_class<ImGuiLayerHelper>();
     ClassDB::register_class<ImGuiGD>();
 
     gd = memnew(ImGuiGD);

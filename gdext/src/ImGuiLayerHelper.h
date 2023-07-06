@@ -12,9 +12,9 @@ using godot::Ref;
 
 namespace ImGui::Godot {
 
-class ImGuiGodotHelper : public Node
+class ImGuiLayerHelper : public Node
 {
-    GDCLASS(ImGuiGodotHelper, Node);
+    GDCLASS(ImGuiLayerHelper, Node);
 
 protected:
     static void _bind_methods();
@@ -25,8 +25,8 @@ public:
     void _exit_tree() override;
     void _process(double delta) override;
 
-    ImGuiGodotHelper();
-    ~ImGuiGodotHelper();
+    ImGuiLayerHelper();
+    ~ImGuiLayerHelper();
 
 private:
     struct Impl;

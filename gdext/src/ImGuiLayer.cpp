@@ -1,5 +1,5 @@
 #include "ImGuiLayer.h"
-#include "ImGuiGodotHelper.h"
+#include "ImGuiLayerHelper.h"
 #include "imgui-godot.h"
 
 #pragma warning(push, 0)
@@ -17,7 +17,7 @@ namespace ImGui::Godot {
 
 struct ImGuiLayer::Impl
 {
-    ImGuiGodotHelper* helper = nullptr;
+    ImGuiLayerHelper* helper = nullptr;
     CanvasLayer* layer = nullptr;
     Window* window = nullptr;
     RID canvasItem;
@@ -58,7 +58,7 @@ void ImGuiLayer::_enter_tree()
 
     ImGui::Godot::Init(get_window(), impl->canvasItem);
 
-    impl->helper = memnew(ImGuiGodotHelper);
+    impl->helper = memnew(ImGuiLayerHelper);
     add_child(impl->helper);
 }
 
