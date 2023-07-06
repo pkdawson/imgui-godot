@@ -7,7 +7,7 @@ namespace ImGuiGodot.Internal;
 
 public class PublicInterfaceNative : IPublicInterface
 {
-    private readonly GodotObject _gd = (GodotObject)ClassDB.Instantiate("ImGuiGD");
+    private readonly GodotObject _gd = Engine.GetSingleton("ImGuiGD");
 
     public void AddFont(FontFile fontData, int fontSize, bool merge)
     {
@@ -94,8 +94,11 @@ public class PublicInterfaceNative : IPublicInterface
             return;
         }
 
-        ImGui.SetCurrentContext((IntPtr)ptrs[0]);
-        ImGui.SetAllocatorFunctions((IntPtr)ptrs[1], (IntPtr)ptrs[2]);
+        checked
+        {
+            ImGui.SetCurrentContext((IntPtr)ptrs[0]);
+            ImGui.SetAllocatorFunctions((IntPtr)ptrs[1], (IntPtr)ptrs[2]);
+        }
     }
 
     public void Update(double delta, Vector2 displaySize)
