@@ -1,12 +1,15 @@
 #include "imgui-godot.h"
+#include "DummyRenderer.h"
 #include "ImGuiGD.h"
 #include "Input.h"
 #include "RdRenderer.h"
+#include "Renderer.h"
 #include "ShortTermCache.h"
 #include "common.h"
 #include <imgui.h>
 
 #pragma warning(push, 0)
+#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
@@ -24,11 +27,12 @@ namespace {
 struct Context
 {
     Window* mainWindow = nullptr;
-    std::unique_ptr<RdRenderer> renderer;
+    std::unique_ptr<Renderer> renderer;
     std::unique_ptr<Input> input;
     RID svp;
     RID ci;
     Ref<ImageTexture> fontTexture;
+    bool headless = false;
 
     ~Context()
     {
@@ -40,7 +44,6 @@ struct Context
 std::unique_ptr<Context> ctx;
 
 const char* PlatformName = "godot4";
-const char* RendererName = "godot4_rd";
 } // namespace
 
 void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
@@ -54,7 +57,6 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     io.DisplaySize = ctx->mainWindow->get_size();
 
     io.BackendPlatformName = PlatformName;
-    io.BackendRendererName = RendererName;
 
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
@@ -65,9 +67,19 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
 
     if (config)
     {
+        // TODO:
     }
 
-    ctx->renderer = std::make_unique<RdRenderer>();
+    ctx->headless = DisplayServer::get_singleton()->get_name() == "headless";
+    if (ctx->headless)
+    {
+        ctx->renderer = std::make_unique<DummyRenderer>();
+    }
+    else
+    {
+        ctx->renderer = std::make_unique<RdRenderer>();
+    }
+    io.BackendRendererName = ctx->renderer->Name();
 
     RenderingServer* RS = RenderingServer::get_singleton();
     ctx->svp = RS->viewport_create();
@@ -98,7 +110,8 @@ void Update(double delta)
     io.DisplaySize = ctx->mainWindow->get_size();
     io.DeltaTime = static_cast<float>(delta);
 
-    ctx->input->Update();
+    if (!ctx->headless)
+        ctx->input->Update();
 
     gdscache->OnNewFrame();
     ImGui::NewFrame();

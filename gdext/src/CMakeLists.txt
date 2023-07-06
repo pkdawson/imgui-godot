@@ -1,11 +1,7 @@
 target_sources(imgui-godot-native PRIVATE
-    main.cpp
     common.h
-    ShortTermCache.cpp
-    ShortTermCache.h
+    DummyRenderer.h
     imgui-godot.cpp
-    ImGuiRoot.cpp
-    ImGuiRoot.h
     ImGuiAPI.cpp
     ImGuiAPI.h
     ImGuiGD.cpp
@@ -14,8 +10,14 @@ target_sources(imgui-godot-native PRIVATE
     ImGuiLayer.h
     ImGuiLayerHelper.cpp
     ImGuiLayerHelper.h
-    RdRenderer.cpp
-    RdRenderer.h
+    ImGuiRoot.cpp
+    ImGuiRoot.h
     Input.cpp
     Input.h
+    main.cpp
+    RdRenderer.cpp
+    RdRenderer.h
+    Renderer.h
+    ShortTermCache.cpp
+    ShortTermCache.h
 )

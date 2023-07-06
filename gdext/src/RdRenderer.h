@@ -1,4 +1,5 @@
 #pragma once
+#include "Renderer.h"
 #include <imgui.h>
 #include <memory>
 
@@ -10,13 +11,18 @@ using godot::RID;
 
 namespace ImGui::Godot {
 
-class RdRenderer
+class RdRenderer : public Renderer
 {
 public:
     RdRenderer();
     ~RdRenderer();
 
-    void RenderDrawData(RID vprid, ImDrawData* drawData);
+    const char* Name() override
+    {
+        return "godot4_rd";
+    }
+
+    void RenderDrawData(RID vprid, ImDrawData* drawData) override;
 
 private:
     struct Impl;
