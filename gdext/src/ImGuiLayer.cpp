@@ -22,6 +22,8 @@ struct ImGuiLayer::Impl
     ImGuiLayerHelper* helper = nullptr;
     Window* window = nullptr;
     RID canvasItem;
+    bool runInEditor = false;
+    bool running = true;
 };
 
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
@@ -102,10 +104,21 @@ void ImGuiLayer::_process(double delta)
 {
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
-        return;
+    {
+        if (!impl->runInEditor)
+        {
+            ImGui::EndFrame();
+            return;
+        }
+    }
 #endif
-    emit_signal("imgui_layout");
+    if (!impl->running)
+    {
+        ImGui::EndFrame();
+        return;
+    }
 
+    emit_signal("imgui_layout");
     ImGui::Godot::Render();
 }
 
@@ -128,21 +141,42 @@ void ImGuiLayer::_notification(int p_what)
 
 void ImGuiLayer::on_visibility_changed()
 {
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-        return;
-#endif
     if (is_visible())
     {
-        set_process(true);
+        impl->running = true;
         impl->helper->set_process(true);
     }
     else
     {
-        set_process(false);
-        impl->helper->set_process(false);
+        impl->running = false;
         RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
     }
+}
+
+void ImGuiLayer::NewFrame(double delta)
+{
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+    {
+        if (!impl->runInEditor)
+        {
+            ImGui::NewFrame();
+            return;
+        }
+    }
+#endif
+    if (!impl->running)
+    {
+        ImGui::NewFrame();
+        return;
+    }
+
+    ImGui::Godot::Update(delta);
+}
+
+void ImGuiLayer::ToolInit()
+{
+    impl->runInEditor = true;
 }
 
 } // namespace ImGui::Godot

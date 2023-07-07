@@ -23,6 +23,7 @@ protected:
 
 public:
     static void InitEditor();
+    static void ToolInit();
 
     static void Connect(const Callable& cb);
 

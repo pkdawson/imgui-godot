@@ -143,6 +143,12 @@ public static class ImGuiGD
         _gd.SyncImGuiPtrs();
     }
 
+    public static void ToolInit()
+    {
+        SyncImGuiPtrs();
+        _gd.ToolInit();
+    }
+
     public static bool SubViewportWidget(SubViewport vp)
     {
         return _gd.SubViewport(vp);

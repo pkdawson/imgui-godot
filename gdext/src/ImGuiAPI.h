@@ -26,8 +26,12 @@ struct GdsPtr
     Array& arr;
     T val;
 
-    GdsPtr(Array& x) : arr(x), val(arr[0])
+    GdsPtr(Array& x) : arr(x)
     {
+        // safety for tool script reload, and programming errors
+        if (arr.size() == 0)
+            arr.append(T());
+        val = arr[0];
     }
 
     ~GdsPtr()

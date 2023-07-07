@@ -28,9 +28,6 @@ public:
     void SetConfig(Ref<Resource> cfg);
     Ref<Resource> GetConfig();
 
-    void SetRunInEditor(bool on);
-    bool GetRunInEditor();
-
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

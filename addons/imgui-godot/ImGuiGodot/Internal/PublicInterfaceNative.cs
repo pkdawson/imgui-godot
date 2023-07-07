@@ -96,6 +96,11 @@ public class PublicInterfaceNative : IPublicInterface
         }
     }
 
+    public void ToolInit()
+    {
+        _gd.Call("ToolInit");
+    }
+
     public void Update(double delta, Vector2 displaySize)
     {
         throw new NotImplementedException();

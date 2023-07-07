@@ -76,7 +76,6 @@ public partial class ImGuiLayer : CanvasLayer
         // check for imgui-godot-native
         if (_useNative)
         {
-            GD.Print("UseNative");
             ImGuiGD.SyncImGuiPtrs();
             Instance = null;
             QueueFree();

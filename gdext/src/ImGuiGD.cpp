@@ -4,6 +4,8 @@
 #include "common.h"
 #include "imgui-godot.h"
 #include <godot_cpp/classes/main_loop.hpp>
+#include <godot_cpp/classes/packed_scene.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
@@ -12,6 +14,7 @@ namespace ImGui::Godot {
 void ImGuiGD::_bind_methods()
 {
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("InitEditor"), &ImGuiGD::InitEditor);
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("ToolInit"), &ImGuiGD::ToolInit);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("ResetFonts"), &ImGuiGD::ResetFonts);
     ClassDB::bind_static_method("ImGuiGD",
@@ -61,9 +64,21 @@ void ImGuiGD::InitEditor()
     SceneTree* st = Object::cast_to<SceneTree>(ml);
     if (st && !Engine::get_singleton()->has_singleton("ImGuiRoot"))
     {
-        ImGuiRoot* igr = memnew(ImGuiRoot);
-        st->get_root()->call_deferred("add_child", igr);
+        Ref<PackedScene> scene =
+            ResourceLoader::get_singleton()->load("res://addons/imgui-godot-native/ImGuiGodot.tscn");
+        st->get_root()->call_deferred("add_child", scene->instantiate());
     }
+#endif
+}
+
+void ImGuiGD::ToolInit()
+{
+#ifdef DEBUG_ENABLED
+    if (!Engine::get_singleton()->is_editor_hint())
+        return;
+    ImGuiLayer* igl = Object::cast_to<ImGuiLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    if (igl)
+        igl->ToolInit();
 #endif
 }
 

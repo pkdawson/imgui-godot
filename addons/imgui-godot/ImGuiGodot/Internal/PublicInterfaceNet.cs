@@ -13,7 +13,7 @@ public class PublicInterfaceNet : IPublicInterface
 
     public void Connect(Callable callable)
     {
-        ImGuiLayer.Instance.Signaler.Connect("imgui_layout", callable);
+        ImGuiLayer.Instance?.Signaler.Connect("imgui_layout", callable);
     }
 
     public void Init(Window mainWindow, Rid mainSubViewport, Resource cfg)
@@ -141,6 +141,11 @@ public class PublicInterfaceNet : IPublicInterface
 
     public void SyncImGuiPtrs()
     {
+    }
+
+    public void ToolInit()
+    {
+        GD.PrintErr("ImGui tool scripts require imgui-godot-native");
     }
 
     public void Update(double delta, Vector2 displaySize)

@@ -23,5 +23,6 @@ public interface IPublicInterface
 
     public void SetIniFilename(ImGuiIOPtr io, string fileName);
     public void SyncImGuiPtrs();
+    public void ToolInit();
     public bool SubViewport(SubViewport vp);
 }

@@ -39,7 +39,7 @@ struct Context
     bool headless = false;
     int dpiFactor = 1;
     bool scaleToDPI = false;
-    std::string iniFilename;
+    std::vector<char> iniFilename;
 
     ~Context()
     {
@@ -191,11 +191,15 @@ void RebuildFontAtlas(float scale)
 
 void SetIniFilename(const String& fn)
 {
-    ctx->iniFilename = ProjectSettings::get_singleton()->globalize_path(fn).utf8().get_data();
-
     ImGuiIO& io = ImGui::GetIO();
-    if (ctx->iniFilename.length() > 0)
-        io.IniFilename = ctx->iniFilename.c_str();
+    if (fn.length() > 0)
+    {
+        std::string globalfn = ProjectSettings::get_singleton()->globalize_path(fn).utf8().get_data();
+        ctx->iniFilename.resize(globalfn.length() + 1);
+        std::copy(globalfn.begin(), globalfn.end(), ctx->iniFilename.begin());
+        ctx->iniFilename[ctx->iniFilename.size() - 1] = '\0';
+        io.IniFilename = ctx->iniFilename.data();
+    }
     else
         io.IniFilename = nullptr;
 }

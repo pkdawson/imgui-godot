@@ -30,6 +30,9 @@ public:
     void _notification(int p_what);
     void on_visibility_changed();
 
+    void NewFrame(double delta);
+    void ToolInit();
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;
