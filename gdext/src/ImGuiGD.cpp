@@ -24,6 +24,8 @@ void ImGuiGD::_bind_methods()
                                 &ImGuiGD::RebuildFontAtlas,
                                 DEFVAL(1.0f));
 
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("SetVisible", "visible"), &ImGuiGD::SetVisible);
+
     ClassDB::bind_static_method("ImGuiGD",
                                 D_METHOD("Image", "tex", "size", "uv0", "uv1", "tint_col", "border_col"),
                                 &ImGuiGD::Image,
@@ -88,6 +90,11 @@ void ImGuiGD::AddFontDefault()
 void ImGuiGD::RebuildFontAtlas(float scale)
 {
     ImGui::Godot::RebuildFontAtlas(scale);
+}
+
+void ImGuiGD::SetVisible(bool visible)
+{
+    ImGui::Godot::SetVisible(visible);
 }
 
 PackedInt64Array ImGuiGD::GetFontPtrs()

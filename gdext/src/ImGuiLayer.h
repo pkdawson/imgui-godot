@@ -28,6 +28,7 @@ public:
     void _process(double delta) override;
     void _input(const Ref<InputEvent>& event) override;
     void _notification(int p_what);
+    void on_visibility_changed();
 
 private:
     struct Impl;

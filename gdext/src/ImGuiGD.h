@@ -31,6 +31,8 @@ public:
     static void AddFontDefault();
     static void RebuildFontAtlas(float scale);
 
+    static void SetVisible(bool visible);
+
     static PackedInt64Array GetFontPtrs();
     static PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);
 

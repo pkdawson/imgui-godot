@@ -10,6 +10,7 @@
 #include <imgui.h>
 
 #pragma warning(push, 0)
+#include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
@@ -197,6 +198,13 @@ void SetIniFilename(const String& fn)
         io.IniFilename = ctx->iniFilename.c_str();
     else
         io.IniFilename = nullptr;
+}
+
+void SetVisible(bool visible)
+{
+    CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    if (igl)
+        igl->set_visible(visible);
 }
 
 bool SubViewport(godot::SubViewport* svp)

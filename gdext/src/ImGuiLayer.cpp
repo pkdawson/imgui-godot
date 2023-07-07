@@ -20,7 +20,6 @@ namespace ImGui::Godot {
 struct ImGuiLayer::Impl
 {
     ImGuiLayerHelper* helper = nullptr;
-    CanvasLayer* layer = nullptr;
     Window* window = nullptr;
     RID canvasItem;
 };
@@ -36,6 +35,7 @@ ImGuiLayer::~ImGuiLayer()
 void ImGuiLayer::_bind_methods()
 {
     ADD_SIGNAL(MethodInfo("imgui_layout"));
+    ClassDB::bind_method(D_METHOD("on_visibility_changed"), &ImGuiLayer::on_visibility_changed);
 }
 
 void ImGuiLayer::_enter_tree()
@@ -48,15 +48,9 @@ void ImGuiLayer::_enter_tree()
     if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
         return;
 
+    set_name("ImGuiLayer");
     Engine::get_singleton()->register_singleton("ImGuiLayer", this);
     impl->window = get_window();
-    impl->layer = memnew(CanvasLayer);
-    add_child(impl->layer);
-    impl->layer->set_layer(128);
-
-    RenderingServer* RS = RenderingServer::get_singleton();
-    impl->canvasItem = RS->canvas_item_create();
-    RS->canvas_item_set_parent(impl->canvasItem, impl->layer->get_canvas());
 
     Ref<Resource> cfg = parent->get("Config");
     if (cfg.is_null())
@@ -67,10 +61,16 @@ void ImGuiLayer::_enter_tree()
 
     set_layer(cfg->get("Layer"));
 
+    RenderingServer* RS = RenderingServer::get_singleton();
+    impl->canvasItem = RS->canvas_item_create();
+    RS->canvas_item_set_parent(impl->canvasItem, get_canvas());
+
     ImGui::Godot::Init(get_window(), impl->canvasItem, cfg);
 
     impl->helper = memnew(ImGuiLayerHelper);
     add_child(impl->helper);
+
+    connect("visibility_changed", Callable(this, "on_visibility_changed"));
 }
 
 void ImGuiLayer::_ready()
@@ -123,6 +123,25 @@ void ImGuiLayer::_notification(int p_what)
     if (p_what > 2000)
     {
         ImGui::Godot::ProcessNotification(p_what);
+    }
+}
+
+void ImGuiLayer::on_visibility_changed()
+{
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+        return;
+#endif
+    if (is_visible())
+    {
+        set_process(true);
+        impl->helper->set_process(true);
+    }
+    else
+    {
+        set_process(false);
+        impl->helper->set_process(false);
+        RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
     }
 }
 
