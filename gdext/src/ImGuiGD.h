@@ -29,7 +29,7 @@ public:
     static void ResetFonts();
     static void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
     static void AddFontDefault();
-    static void RebuildFontAtlas();
+    static void RebuildFontAtlas(float scale);
 
     static PackedInt64Array GetFontPtrs();
     static PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);

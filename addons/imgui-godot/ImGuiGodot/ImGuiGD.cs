@@ -37,16 +37,6 @@ public static class ImGuiGD
     private static bool _swapAB = false;
 
     /// <summary>
-    /// Try to calculate how many pixels squared per point. Should be 1 or 2 on non-mobile displays
-    /// </summary>
-    public static int DpiFactor => Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-
-    /// <summary>
-    /// Adjust the scale based on <see cref="DpiFactor"/>
-    /// </summary>
-    public static bool ScaleToDpi { get; } = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
-
-    /// <summary>
     /// Setting this property will reload fonts and modify the ImGuiStyle
     /// </summary>
     public static float Scale
@@ -110,7 +100,7 @@ public static class ImGuiGD
 
     public static void RebuildFontAtlas()
     {
-        _gd.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
+        _gd.RebuildFontAtlas(Scale);
     }
 
     public static void Update(double delta, Vector2 displaySize)

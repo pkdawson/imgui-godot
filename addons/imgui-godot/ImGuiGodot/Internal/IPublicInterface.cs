@@ -7,7 +7,6 @@ public interface IPublicInterface
 {
     public void SetJoyAxisDeadZone(float zone);
     public void SetJoyButtonSwapAB(bool swap);
-    public void SetScale(float scale);
     public void SetVisible(bool visible);
 
     public void Init(Window mainWindow, Rid mainSubViewport, Resource cfg);

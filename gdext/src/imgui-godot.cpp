@@ -40,13 +40,6 @@ struct Context
     bool scaleToDPI = false;
     std::string iniFilename;
 
-    float scale = 1.0f;
-
-    float Scale()
-    {
-        return scaleToDPI ? dpiFactor * scale : scale;
-    }
-
     ~Context()
     {
         RenderingServer::get_singleton()->free_rid(ci);
@@ -84,7 +77,7 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
 
     Array fonts = cfg->get("Fonts");
     bool addDefaultFont = cfg->get("AddDefaultFont");
-    ctx->scale = cfg->get("Scale");
+    float scale = cfg->get("Scale");
     String iniFilename = cfg->get("IniFilename");
     String rendererName = cfg->get("Renderer");
 
@@ -121,7 +114,7 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     }
     if (addDefaultFont)
         AddFontDefault();
-    RebuildFontAtlas();
+    RebuildFontAtlas(scale);
 }
 
 void Update(double delta)
@@ -190,9 +183,9 @@ void AddFontDefault()
     ctx->fonts->Add(nullptr, 13, false);
 }
 
-void RebuildFontAtlas()
+void RebuildFontAtlas(float scale)
 {
-    ctx->fonts->RebuildFontAtlas(ctx->Scale());
+    ctx->fonts->RebuildFontAtlas(ctx->scaleToDPI ? ctx->dpiFactor * scale : scale);
 }
 
 void SetIniFilename(const String& fn)

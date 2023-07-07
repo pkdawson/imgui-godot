@@ -31,7 +31,7 @@ public class PublicInterfaceNative : IPublicInterface
 
     public void RebuildFontAtlas(float scale)
     {
-        _gd.Call("RebuildFontAtlas");
+        _gd.Call("RebuildFontAtlas", scale);
     }
 
     public void Render()
@@ -55,11 +55,6 @@ public class PublicInterfaceNative : IPublicInterface
     }
 
     public void SetJoyButtonSwapAB(bool swap)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SetScale(float scale)
     {
         throw new NotImplementedException();
     }

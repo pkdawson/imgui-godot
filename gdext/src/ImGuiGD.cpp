@@ -19,8 +19,10 @@ void ImGuiGD::_bind_methods()
                                 &ImGuiGD::AddFont,
                                 DEFVAL(false));
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("AddFontDefault"), &ImGuiGD::AddFontDefault);
-    ClassDB::bind_static_method("ImGuiGD", D_METHOD("RebuildFontAtlas"), &ImGuiGD::RebuildFontAtlas);
-    ClassDB::bind_static_method("ImGuiGD", D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
+    ClassDB::bind_static_method("ImGuiGD",
+                                D_METHOD("RebuildFontAtlas", "scale"),
+                                &ImGuiGD::RebuildFontAtlas,
+                                DEFVAL(1.0f));
 
     ClassDB::bind_static_method("ImGuiGD",
                                 D_METHOD("Image", "tex", "size", "uv0", "uv1", "tint_col", "border_col"),
@@ -41,6 +43,7 @@ void ImGuiGD::_bind_methods()
 
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("SubViewport", "svp"), &ImGuiGD::SubViewport);
 
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
     ClassDB::bind_static_method("ImGuiGD",
                                 D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
                                 &ImGuiGD::GetImGuiPtrs);
@@ -82,9 +85,9 @@ void ImGuiGD::AddFontDefault()
     ImGui::Godot::AddFontDefault();
 }
 
-void ImGuiGD::RebuildFontAtlas()
+void ImGuiGD::RebuildFontAtlas(float scale)
 {
-    ImGui::Godot::RebuildFontAtlas();
+    ImGui::Godot::RebuildFontAtlas(scale);
 }
 
 PackedInt64Array ImGuiGD::GetFontPtrs()

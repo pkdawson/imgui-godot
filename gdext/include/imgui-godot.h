@@ -72,7 +72,7 @@ void Connect(const Callable& callable);
 void ResetFonts();
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
-void RebuildFontAtlas();
+void RebuildFontAtlas(float scale);
 void SetIniFilename(const String& fn);
 
 bool SubViewport(SubViewport* svp);
@@ -156,12 +156,6 @@ inline void SetJoyButtonSwapAB(bool swap)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     detail::ImGuiGD->call("SetJoyButtonSwapAB", swap);
-}
-
-inline void SetScale(float scale)
-{
-    ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    detail::ImGuiGD->call("SetScale", scale);
 }
 
 inline void SyncImGuiPtrs()

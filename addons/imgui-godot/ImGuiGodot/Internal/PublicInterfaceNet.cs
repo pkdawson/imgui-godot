@@ -72,7 +72,6 @@ public class PublicInterfaceNet : IPublicInterface
 
     public void RebuildFontAtlas(float scale)
     {
-        GD.Print($"rebuild font atlas @ {scale}");
         State.Instance.Fonts.RebuildFontAtlas(scale);
     }
 
@@ -106,11 +105,6 @@ public class PublicInterfaceNet : IPublicInterface
     public void SetJoyButtonSwapAB(bool swap)
     {
         Input.JoyButtonSwapAB = swap;
-    }
-
-    public void SetScale(float scale)
-    {
-        throw new NotImplementedException();
     }
 
     public void SetVisible(bool visible)

@@ -10,6 +10,16 @@ internal sealed class Fonts
 {
     private Texture2D _fontTexture;
 
+    /// <summary>
+    /// Try to calculate how many pixels squared per point. Should be 1 or 2 on non-mobile displays
+    /// </summary>
+    private static int DpiFactor => Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
+
+    /// <summary>
+    /// Adjust the scale if HiDPI is enabled
+    /// </summary>
+    private static bool ScaleToDpi { get; } = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
+
     private sealed class FontParams
     {
         public FontFile Font { get; init; }
@@ -122,6 +132,7 @@ internal sealed class Fonts
 
     public unsafe void RebuildFontAtlas(float scale)
     {
+        scale = ScaleToDpi ? scale * DpiFactor : scale;
         var io = ImGui.GetIO();
         int fontIndex = -1;
         if (io.NativePtr->FontDefault != null)
