@@ -8,7 +8,7 @@ namespace ImGui::Godot {
 
 struct ImGuiRoot::Impl
 {
-    Object* cfg;
+    Ref<Resource> cfg;
 };
 
 ImGuiRoot::ImGuiRoot() : impl(std::make_unique<Impl>())
@@ -43,14 +43,14 @@ void ImGuiRoot::_enter_tree()
     }
 }
 
-void ImGuiRoot::SetConfig(Object* cfg)
+void ImGuiRoot::SetConfig(Ref<Resource> cfg)
 {
     impl->cfg = cfg;
 }
 
-Object* ImGuiRoot::GetConfig()
+Ref<Resource> ImGuiRoot::GetConfig()
 {
-    return nullptr;
+    return impl->cfg;
 }
 
 } // namespace ImGui::Godot

@@ -5,8 +5,10 @@
 #pragma warning(push, 0)
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/engine.hpp>
+#include <godot_cpp/classes/gd_script.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
 
@@ -56,7 +58,14 @@ void ImGuiLayer::_enter_tree()
     impl->canvasItem = RS->canvas_item_create();
     RS->canvas_item_set_parent(impl->canvasItem, impl->layer->get_canvas());
 
-    ImGui::Godot::Init(get_window(), impl->canvasItem);
+    Ref<Resource> cfg = parent->get("Config");
+    if (cfg.is_null())
+    {
+        Ref<GDScript> script = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/scripts/ImGuiConfig.gd");
+        cfg = script->new_();
+    }
+
+    ImGui::Godot::Init(get_window(), impl->canvasItem, cfg);
 
     impl->helper = memnew(ImGuiLayerHelper);
     add_child(impl->helper);

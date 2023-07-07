@@ -21,6 +21,7 @@
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/font_file.hpp>
 #include <godot_cpp/classes/input_event.hpp>
+#include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/window.hpp>
@@ -38,6 +39,7 @@ using godot::JoyButton;
 using godot::Key;
 using godot::Object;
 using godot::Ref;
+using godot::Resource;
 using godot::RID;
 using godot::String;
 using godot::SubViewport;
@@ -60,7 +62,7 @@ static_assert(sizeof(ImWchar) == 2);
 
 namespace ImGui::Godot {
 #ifdef IGN_EXPORT
-void Init(Window* mainWindow, RID canvasItem, Object* config = nullptr);
+void Init(Window* mainWindow, RID canvasItem, const Ref<Resource>& config = nullptr);
 void Update(double delta);
 bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
 void ProcessNotification(int what);
@@ -68,7 +70,7 @@ void Render();
 void Shutdown();
 void Connect(const Callable& callable);
 void ResetFonts();
-void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
+void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
 void RebuildFontAtlas();
 

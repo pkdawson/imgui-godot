@@ -2,6 +2,7 @@
 
 #pragma warning(push, 0)
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/resource.hpp>
 #pragma warning(pop)
 
 #include <memory>
@@ -24,8 +25,8 @@ public:
 
     void _enter_tree() override;
 
-    void SetConfig(Object* cfg);
-    Object* GetConfig();
+    void SetConfig(Ref<Resource> cfg);
+    Ref<Resource> GetConfig();
 
 private:
     struct Impl;

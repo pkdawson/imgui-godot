@@ -10,7 +10,8 @@ func _ready():
     io.ConfigFlags |= ImGui.ConfigFlags_NavEnableKeyboard
 
 func _process(_delta):
-    ImGui.ShowDemoWindow()
+    if open[0]:
+        ImGui.ShowDemoWindow(open)
 
 func _on_imgui_layout():
     ImGui.SetNextWindowPos(Vector2i(200, 200), ImGui.Cond_Once)

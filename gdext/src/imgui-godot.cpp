@@ -13,6 +13,7 @@
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
 #include <godot_cpp/classes/viewport_texture.hpp>
@@ -35,6 +36,15 @@ struct Context
     RID ci;
     Ref<ImageTexture> fontTexture;
     bool headless = false;
+    int dpiFactor = 1;
+    bool scaleToDPI = false;
+
+    float scale = 1.0f;
+
+    float Scale()
+    {
+        return scaleToDPI ? dpiFactor * scale : scale;
+    }
 
     ~Context()
     {
@@ -48,12 +58,16 @@ std::unique_ptr<Context> ctx;
 const char* PlatformName = "godot4";
 } // namespace
 
-void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
+void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
 {
     ctx = std::make_unique<Context>();
     ctx->mainWindow = mainWindow;
     ctx->ci = canvasItem;
     ctx->input = std::make_unique<Input>(ctx->mainWindow);
+
+    int32_t screenDPI = DisplayServer::get_singleton()->screen_get_dpi();
+    ctx->dpiFactor = std::max(1, screenDPI / 96);
+    ctx->scaleToDPI = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
 
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ctx->mainWindow->get_size();
@@ -67,10 +81,12 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     // io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
     // io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 
-    if (config)
-    {
-        // TODO:
-    }
+    Array fontArray = cfg->get("Fonts");
+    bool addDefaultFont = cfg->get("AddDefaultFont");
+    ctx->scale = cfg->get("Scale");
+    String iniFilename = cfg->get("IniFilename");
+    String rendererName = cfg->get("Renderer");
+    int layer = cfg->get("Layer");
 
     ctx->headless = DisplayServer::get_singleton()->get_name() == "headless";
     if (ctx->headless)
@@ -92,8 +108,8 @@ void Init(godot::Window* mainWindow, RID canvasItem, Object* config)
     RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
     ctx->fonts = std::make_unique<Fonts>();
-    ctx->fonts->Add(nullptr, 16, false);
-    ctx->fonts->RebuildFontAtlas(2.0f);
+    AddFontDefault();
+    RebuildFontAtlas();
 }
 
 void Update(double delta)
@@ -149,18 +165,22 @@ void Connect(const godot::Callable& callable)
 
 void ResetFonts()
 {
+    ctx->fonts->Reset();
 }
 
-void AddFont(FontFile* font_file, int font_size, bool merge)
+void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge)
 {
+    ctx->fonts->Add(fontFile, fontSize, merge);
 }
 
 void AddFontDefault()
 {
+    ctx->fonts->Add(nullptr, 13, false);
 }
 
 void RebuildFontAtlas()
 {
+    ctx->fonts->RebuildFontAtlas(ctx->Scale());
 }
 
 bool SubViewport(godot::SubViewport* svp)

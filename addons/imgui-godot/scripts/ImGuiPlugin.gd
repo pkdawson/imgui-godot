@@ -2,7 +2,8 @@
 extends EditorPlugin
 
 func _enter_tree():
-    if Engine.has_singleton("GodotSharp"):
+    var features = ProjectSettings.get_setting("application/config/features")
+    if "C#" in features:
         add_autoload_singleton("imgui_godot", "res://addons/imgui-godot/ImGuiLayer.tscn")
 
 func _exit_tree():
