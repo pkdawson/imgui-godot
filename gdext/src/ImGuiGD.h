@@ -27,7 +27,7 @@ public:
     static void Connect(const Callable& cb);
 
     static void ResetFonts();
-    static void AddFont(FontFile* fontFile, int fontSize, bool merge = false);
+    static void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
     static void AddFontDefault();
     static void RebuildFontAtlas();
 

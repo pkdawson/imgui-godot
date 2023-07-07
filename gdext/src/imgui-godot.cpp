@@ -38,6 +38,7 @@ struct Context
     bool headless = false;
     int dpiFactor = 1;
     bool scaleToDPI = false;
+    std::string iniFilename;
 
     float scale = 1.0f;
 
@@ -81,15 +82,16 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     // io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
     // io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 
-    Array fontArray = cfg->get("Fonts");
+    Array fonts = cfg->get("Fonts");
     bool addDefaultFont = cfg->get("AddDefaultFont");
     ctx->scale = cfg->get("Scale");
     String iniFilename = cfg->get("IniFilename");
     String rendererName = cfg->get("Renderer");
-    int layer = cfg->get("Layer");
+
+    SetIniFilename(iniFilename);
 
     ctx->headless = DisplayServer::get_singleton()->get_name() == "headless";
-    if (ctx->headless)
+    if (ctx->headless || rendererName == "Dummy")
     {
         ctx->renderer = std::make_unique<DummyRenderer>();
     }
@@ -108,7 +110,17 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
 
     ctx->fonts = std::make_unique<Fonts>();
-    AddFontDefault();
+
+    for (int i = 0; i < fonts.size(); ++i)
+    {
+        Ref<Resource> fontres = fonts[i];
+        Ref<FontFile> font = fontres->get("FontData");
+        int fontSize = fontres->get("FontSize");
+        bool merge = fontres->get("Merge");
+        AddFont(font, fontSize, i > 0 && merge);
+    }
+    if (addDefaultFont)
+        AddFontDefault();
     RebuildFontAtlas();
 }
 
@@ -181,6 +193,17 @@ void AddFontDefault()
 void RebuildFontAtlas()
 {
     ctx->fonts->RebuildFontAtlas(ctx->Scale());
+}
+
+void SetIniFilename(const String& fn)
+{
+    ctx->iniFilename = ProjectSettings::get_singleton()->globalize_path(fn).utf8().get_data();
+
+    ImGuiIO& io = ImGui::GetIO();
+    if (ctx->iniFilename.length() > 0)
+        io.IniFilename = ctx->iniFilename.c_str();
+    else
+        io.IniFilename = nullptr;
 }
 
 bool SubViewport(godot::SubViewport* svp)

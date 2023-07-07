@@ -69,18 +69,22 @@ void ImGuiGD::Connect(const Callable& callable)
 
 void ImGuiGD::ResetFonts()
 {
+    ImGui::Godot::ResetFonts();
 }
 
-void ImGuiGD::AddFont(FontFile* fontFile, int fontSize, bool merge)
+void ImGuiGD::AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge)
 {
+    ImGui::Godot::AddFont(fontFile, fontSize, merge);
 }
 
 void ImGuiGD::AddFontDefault()
 {
+    ImGui::Godot::AddFontDefault();
 }
 
 void ImGuiGD::RebuildFontAtlas()
 {
+    ImGui::Godot::RebuildFontAtlas();
 }
 
 PackedInt64Array ImGuiGD::GetFontPtrs()

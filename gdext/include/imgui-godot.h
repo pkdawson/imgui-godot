@@ -73,6 +73,7 @@ void ResetFonts();
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
 void RebuildFontAtlas();
+void SetIniFilename(const String& fn);
 
 bool SubViewport(SubViewport* svp);
 

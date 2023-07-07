@@ -4,9 +4,13 @@
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
 #include <imgui.h>
+
+#include <filesystem>
 #include <vector>
 
 using namespace godot;
+using namespace std::literals;
+namespace fs = std::filesystem;
 
 namespace ImGui::Godot {
 
@@ -19,17 +23,21 @@ struct Fonts::Impl
         Ref<FontFile> font;
         int fontSize;
         bool merge;
+        ImVector<ImWchar> ranges;
     };
     std::vector<FontParams> fontConfig;
 
-    void AddFontToAtlas(Ref<FontFile> fontData, int fontSize, bool merge);
+    void AddFontToAtlas(const FontParams& fp);
 
-    static ImVector<ImWchar> GetRanges(Ref<Font> font)
+    static ImVector<ImWchar> GetRanges(const Ref<Font>& font)
     {
         ImVector<ImWchar> rv;
-        ImFontGlyphRangesBuilder builder;
-        builder.AddText(font->get_supported_chars().utf8().get_data());
-        builder.BuildRanges(&rv);
+        if (!font.is_null())
+        {
+            ImFontGlyphRangesBuilder builder;
+            builder.AddText(font->get_supported_chars().utf8().get_data());
+            builder.BuildRanges(&rv);
+        }
         return rv;
     }
 
@@ -64,17 +72,17 @@ struct Fonts::Impl
     }
 };
 
-void Fonts::Impl::AddFontToAtlas(Ref<FontFile> fontData, int fontSize, bool merge)
+void Fonts::Impl::AddFontToAtlas(const FontParams& fp)
 {
     ImFontConfig fc;
-    if (merge)
+    if (fp.merge)
         fc.MergeMode = 1;
 
-    if (fontData.is_null())
+    if (fp.font.is_null())
     {
         // default font
         fc = {};
-        fc.SizePixels = fontSize;
+        fc.SizePixels = fp.fontSize;
         fc.OversampleH = 1;
         fc.OversampleV = 1;
         fc.PixelSnapH = true;
@@ -82,21 +90,22 @@ void Fonts::Impl::AddFontToAtlas(Ref<FontFile> fontData, int fontSize, bool merg
     }
     else
     {
-        auto ranges = GetRanges(fontData);
-        // string name = $ "{System.IO.Path.GetFileName(fontData.ResourcePath)}, {fontSize}px";
-        // for (int i = 0; i < name.Length && i < 40; ++i)
-        // {
-        //     fc->Name[i] = Convert.ToByte(name[i]);
-        // }
+        fs::path fontpath = (fp.font->get_path().utf8().get_data());
 
-        int64_t len = fontData->get_data().size();
+        // no std::format in Clang 14
+        std::string fontdesc = fontpath.filename().string() + ", "s + std::to_string(fp.fontSize) + "px";
+        if (fontdesc.length() > 39)
+            fontdesc.resize(39);
+        std::copy(fontdesc.begin(), fontdesc.end(), fc.Name);
+
+        int64_t len = fp.font->get_data().size();
         // let ImGui manage this memory
         void* p = ImGui::MemAlloc(len);
-        memcpy(p, fontData->get_data().ptr(), len);
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF(p, len, fontSize, &fc, ranges.Data);
+        memcpy(p, fp.font->get_data().ptr(), len);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF(p, len, fp.fontSize, &fc, fp.ranges.Data);
     }
 
-    if (merge)
+    if (fp.merge)
     {
         ImGui::GetIO().Fonts->Build();
     }
@@ -120,7 +129,7 @@ void Fonts::Reset()
 
 void Fonts::Add(Ref<FontFile> fontData, int fontSize, bool merge)
 {
-    impl->fontConfig.push_back({fontData, fontSize, merge});
+    impl->fontConfig.push_back({fontData, fontSize, merge, Impl::GetRanges(fontData)});
 }
 
 void Fonts::RebuildFontAtlas(float scale)
@@ -141,9 +150,10 @@ void Fonts::RebuildFontAtlas(float scale)
     }
     io.Fonts->Clear();
 
-    for (const auto& fp : impl->fontConfig)
+    for (auto& fp : impl->fontConfig)
     {
-        impl->AddFontToAtlas(fp.font, (int)(fp.fontSize * scale), fp.merge);
+        fp.fontSize = fp.fontSize * scale;
+        impl->AddFontToAtlas(fp);
     }
 
     uint8_t* pixelData;

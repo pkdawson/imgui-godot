@@ -9,6 +9,7 @@ namespace ImGui::Godot {
 struct ImGuiRoot::Impl
 {
     Ref<Resource> cfg;
+    bool runInEditor = false;
 };
 
 ImGuiRoot::ImGuiRoot() : impl(std::make_unique<Impl>())
@@ -26,11 +27,14 @@ void ImGuiRoot::_bind_methods()
     ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "Config", PROPERTY_HINT_RESOURCE_TYPE, "ImGuiConfig"),
                  "SetConfig",
                  "GetConfig");
+
+    ClassDB::bind_method(D_METHOD("SetRunInEditor", "on"), &ImGuiRoot::SetRunInEditor);
+    ClassDB::bind_method(D_METHOD("GetRunInEditor"), &ImGuiRoot::GetRunInEditor);
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "RunInEditor"), "SetRunInEditor", "GetRunInEditor");
 }
 
 void ImGuiRoot::_get_property_list(List<PropertyInfo>* p_list) const
 {
-    // p_list->push_back(PropertyInfo(Variant::OBJECT, "Config", PROPERTY_HINT_RESOURCE_TYPE, "ImGuiConfig"));
 }
 
 void ImGuiRoot::_enter_tree()
@@ -51,6 +55,17 @@ void ImGuiRoot::SetConfig(Ref<Resource> cfg)
 Ref<Resource> ImGuiRoot::GetConfig()
 {
     return impl->cfg;
+}
+
+void ImGuiRoot::SetRunInEditor(bool on)
+{
+    impl->runInEditor = on;
+    // TODO: talk to ImGuiLayer
+}
+
+bool ImGuiRoot::GetRunInEditor()
+{
+    return impl->runInEditor;
 }
 
 } // namespace ImGui::Godot

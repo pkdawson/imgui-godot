@@ -1,23 +1,19 @@
 #pragma once
 
 #pragma warning(push, 0)
+#include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/input_event.hpp>
-#include <godot_cpp/classes/node.hpp>
 #pragma warning(pop)
 
 #include <memory>
 
-using godot::InputEvent;
-using godot::Node;
-using godot::PackedInt64Array;
-using godot::Ref;
-using godot::String;
+using namespace godot;
 
 namespace ImGui::Godot {
 
-class ImGuiLayer : public Node
+class ImGuiLayer : public CanvasLayer
 {
-    GDCLASS(ImGuiLayer, Node);
+    GDCLASS(ImGuiLayer, CanvasLayer);
 
 protected:
     static void _bind_methods();

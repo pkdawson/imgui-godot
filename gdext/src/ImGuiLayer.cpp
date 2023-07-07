@@ -65,6 +65,8 @@ void ImGuiLayer::_enter_tree()
         cfg = script->new_();
     }
 
+    set_layer(cfg->get("Layer"));
+
     ImGui::Godot::Init(get_window(), impl->canvasItem, cfg);
 
     impl->helper = memnew(ImGuiLayerHelper);
