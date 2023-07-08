@@ -52,7 +52,7 @@ internal sealed class GodotImGuiWindow : IDisposable
         _vp.RendererUserData = (IntPtr)vprid.Id;
 
         State.Instance.Renderer.InitViewport(vprid);
-        RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
+        RenderingServer.ViewportSetTransparentBackground(vprid, true);
     }
 
     // main window

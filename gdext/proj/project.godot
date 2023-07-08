@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 imgui_godot_native="*res://addons/imgui-godot-native/ImGuiGodot.tscn"
-imgui_godot="*res://addons/imgui-godot/ImGuiLayer.tscn"
 
 [dotnet]
 

@@ -22,4 +22,6 @@ target_sources(imgui-godot-native PRIVATE
     Renderer.h
     ShortTermCache.cpp
     ShortTermCache.h
+    Viewports.cpp
+    Viewports.h
 )

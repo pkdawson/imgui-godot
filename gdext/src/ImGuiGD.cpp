@@ -64,9 +64,13 @@ void ImGuiGD::InitEditor()
     SceneTree* st = Object::cast_to<SceneTree>(ml);
     if (st && !Engine::get_singleton()->has_singleton("ImGuiRoot"))
     {
-        Ref<PackedScene> scene =
-            ResourceLoader::get_singleton()->load("res://addons/imgui-godot-native/ImGuiGodot.tscn");
-        st->get_root()->call_deferred("add_child", scene->instantiate());
+        String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
+        if (ResourceLoader::get_singleton()->exists(resPath))
+        {
+            Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
+            if (scene.is_valid())
+                st->get_root()->call_deferred("add_child", scene->instantiate());
+        }
     }
 #endif
 }

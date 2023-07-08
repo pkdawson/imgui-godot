@@ -6,6 +6,7 @@
 #include "RdRenderer.h"
 #include "Renderer.h"
 #include "ShortTermCache.h"
+#include "Viewports.h"
 #include "common.h"
 #include <imgui.h>
 
@@ -33,6 +34,7 @@ struct Context
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<Input> input;
     std::unique_ptr<Fonts> fonts;
+    std::unique_ptr<Viewports> viewports;
     RID svp;
     RID ci;
     Ref<ImageTexture> fontTexture;
@@ -116,6 +118,8 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     if (addDefaultFont)
         AddFontDefault();
     RebuildFontAtlas(scale);
+
+    ctx->viewports = std::make_unique<Viewports>(ctx->mainWindow, ctx->svp);
 }
 
 void Update(double delta)
@@ -197,7 +201,7 @@ void SetIniFilename(const String& fn)
         std::string globalfn = ProjectSettings::get_singleton()->globalize_path(fn).utf8().get_data();
         ctx->iniFilename.resize(globalfn.length() + 1);
         std::copy(globalfn.begin(), globalfn.end(), ctx->iniFilename.begin());
-        ctx->iniFilename[ctx->iniFilename.size() - 1] = '\0';
+        ctx->iniFilename.back() = '\0';
         io.IniFilename = ctx->iniFilename.data();
     }
     else
