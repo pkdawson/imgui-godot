@@ -9,26 +9,25 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-class WindowSignalProxy : public Object
+class ImGuiWindow : public Window
 {
-    GDCLASS(WindowSignalProxy, Object);
+    GDCLASS(ImGuiWindow, Window);
 
 protected:
     static void _bind_methods()
     {
-        ClassDB::bind_method(D_METHOD("window_input", "evt"), &WindowSignalProxy::window_input);
     }
 
 public:
-    void init(ImGuiViewport* vp, Window* window)
+    void init(ImGuiViewport* vp)
     {
         _vp = vp;
-        _window = window;
+        // TODO: connect signals
     }
 
-    void window_input(const Ref<InputEvent>& evt)
+    void _input(const Ref<InputEvent>& evt) override
     {
-        ImGui::Godot::ProcessInput(evt, _window);
+        ImGui::Godot::ProcessInput(evt, this);
     }
 
     void close_requested()
@@ -43,7 +42,6 @@ public:
 
 private:
     ImGuiViewport* _vp = nullptr;
-    Window* _window = nullptr;
 };
 
 class Viewports

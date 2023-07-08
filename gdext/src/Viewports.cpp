@@ -11,7 +11,6 @@ namespace ImGui::Godot {
 struct Godot_ViewportData
 {
     Window* window = nullptr;
-    WindowSignalProxy* signalProxy = nullptr;
 };
 
 struct Viewports::Impl
@@ -39,7 +38,9 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
 
     Rect2i winRect = Rect2i(vp->Pos, vp->Size);
 
-    vd->window = memnew(Window);
+    ImGuiWindow* igwin = memnew(ImGuiWindow);
+    igwin->init(vp);
+    vd->window = Object::cast_to<Window>(igwin);
     vd->window->set_flag(Window::FLAG_BORDERLESS, true);
     vd->window->set_position(winRect.position);
     vd->window->set_size(winRect.size);
@@ -47,11 +48,9 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
 
     // Callable::bind is not yet implemented...
-    vd->signalProxy = memnew(WindowSignalProxy);
-    vd->signalProxy->init(vp, vd->window);
-    vd->window->connect("window_input", Callable(vd->signalProxy, "window_input"));
-    vd->window->connect("close_requested", Callable(vd->signalProxy, "close_requested"));
-    vd->window->connect("size_changed", Callable(vd->signalProxy, "size_changed"));
+    // vd->window->connect("window_input", Callable(vd->signalProxy, "window_input"));
+    // vd->window->connect("close_requested", Callable(vd->signalProxy, "close_requested"));
+    // vd->window->connect("size_changed", Callable(vd->signalProxy, "size_changed"));
 
     Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiRoot"));
     root->add_child(vd->window);
@@ -73,7 +72,6 @@ static void Godot_DestroyWindow(ImGuiViewport* vp)
     Godot_ViewportData* vd = (Godot_ViewportData*)vp->PlatformUserData;
     if (vd)
     {
-        memdelete(vd->signalProxy);
         vd->window->queue_free();
         IM_DELETE(vd);
         vp->PlatformUserData = nullptr;
