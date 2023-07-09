@@ -45,7 +45,7 @@ jobs:
       - name: vcpkg install
         run: |
           cd gdext
-          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-mingw-static
+          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static-md
 
       - name: GDScript bindings
         run: |
@@ -56,12 +56,12 @@ jobs:
       - name: Build debug
         run: |
           cd gdext
-          scons use_mingw=yes debug_symbols=yes
+          scons debug_symbols=yes
 
       - name: Build release
         run: |
           cd gdext
-          scons use_mingw=yes debug_symbols=yes target=template_release
+          scons debug_symbols=yes target=template_release
 
       - name: Upload binaries
         uses: actions/upload-artifact@v3
