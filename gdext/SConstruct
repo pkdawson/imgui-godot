@@ -21,11 +21,18 @@ libs = [env["LIBS"]]
 windows = env["platform"] == "windows"
 linux = env["platform"] == "linux"
 
-if config == "release" and windows:
-    env.Append(CPPDEFINES=["NDEBUG"])
+if config == "release":
+    if windows:
+        env.Append(CPPDEFINES=["NDEBUG"])
+        env.AppendUnique(CCFLAGS=["/GL"])
+        env.AppendUnique(ARFLAGS=["/LTCG"])
+        env.AppendUnique(LINKFLAGS=["/LTCG:STATUS"])
+    else:
+        env.Append(CCFLAGS=["-flto"])
+        env.Append(LINKFLAGS=["-flto"])
 
 if windows:
-    triplet = "x64-windows-static"
+    triplet = "x64-windows-static-md"
 elif linux:
     triplet = "x64-linux"
 else:

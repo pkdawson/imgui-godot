@@ -45,7 +45,7 @@ jobs:
       - name: vcpkg install
         run: |
           cd gdext
-          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static
+          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static-md
 
       - name: GDScript bindings
         run: |
