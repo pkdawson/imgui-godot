@@ -18,7 +18,7 @@ public:
         return "godot4_dummy";
     }
 
-    void RenderDrawData(RID vprid, ImDrawData* drawData) override
+    void Render() override
     {
     }
 };

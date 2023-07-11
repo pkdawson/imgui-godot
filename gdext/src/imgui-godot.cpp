@@ -161,7 +161,7 @@ void Render()
     {
         ImGui::UpdatePlatformWindows();
     }
-    ctx->renderer->RenderDrawData(ctx->svp, ImGui::GetDrawData());
+    ctx->renderer->Render();
 }
 
 void Shutdown()

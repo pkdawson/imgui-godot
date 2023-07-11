@@ -22,7 +22,7 @@ public:
     }
 
     virtual const char* Name() = 0;
-    virtual void RenderDrawData(RID vprid, ImDrawData* drawData) = 0;
+    virtual void Render() = 0;
 };
 
 } // namespace ImGui::Godot

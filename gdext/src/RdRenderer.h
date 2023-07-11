@@ -22,7 +22,7 @@ public:
         return "godot4_rd";
     }
 
-    void RenderDrawData(RID vprid, ImDrawData* drawData) override;
+    void Render() override;
 
 private:
     struct Impl;

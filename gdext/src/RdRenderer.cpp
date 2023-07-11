@@ -59,6 +59,7 @@ struct RdRenderer::Impl
 
     void SetupBuffers(ImDrawData* drawData);
     RID GetFramebuffer(RID vprid);
+    void RenderOne(RID vprid, ImDrawData* drawData);
 
     Impl()
     {
@@ -254,24 +255,13 @@ RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
     impl->uniforms.resize(1);
 }
 
-RdRenderer::~RdRenderer()
-{
-    RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
-    RD->free_rid(impl->shader);
-    RD->free_rid(impl->sampler);
-    if (impl->idxBuffer.is_valid())
-        RD->free_rid(impl->idxBuffer);
-    if (impl->vtxBuffer.is_valid())
-        RD->free_rid(impl->vtxBuffer);
-}
-
-void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
+void RdRenderer::Impl::RenderOne(RID vprid, ImDrawData* drawData)
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
 
-    impl->SetupBuffers(drawData);
+    SetupBuffers(drawData);
 
-    RID fb = impl->GetFramebuffer(vprid);
+    RID fb = GetFramebuffer(vprid);
 
     godot::PackedFloat32Array pcfloats;
     pcfloats.resize(4);
@@ -286,9 +276,9 @@ void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
                                      RenderingDevice::FINAL_ACTION_READ,
                                      RenderingDevice::INITIAL_ACTION_CLEAR,
                                      RenderingDevice::FINAL_ACTION_READ,
-                                     impl->clearColors);
+                                     clearColors);
 
-    RD->draw_list_bind_render_pipeline(dl, impl->pipeline);
+    RD->draw_list_bind_render_pipeline(dl, pipeline);
     RD->draw_list_set_push_constant(dl, pcbuf, pcbuf.size());
 
     int globalIdxOffset = 0;
@@ -302,19 +292,17 @@ void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
             ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
             if (drawCmd.ElemCount == 0)
                 continue;
-            if (!impl->uniformSets.contains(drawCmd.GetTexID()))
+            if (!uniformSets.contains(drawCmd.GetTexID()))
                 continue;
 
-            RID idxArray =
-                RD->index_array_create(impl->idxBuffer, drawCmd.IdxOffset + globalIdxOffset, drawCmd.ElemCount);
+            RID idxArray = RD->index_array_create(idxBuffer, drawCmd.IdxOffset + globalIdxOffset, drawCmd.ElemCount);
 
             int64_t voff = (drawCmd.VtxOffset + globalVtxOffset) * sizeof(ImDrawVert);
-            impl->srcBuffers[0] = impl->srcBuffers[1] = impl->srcBuffers[2] = impl->vtxBuffer;
-            impl->vtxOffsets[0] = impl->vtxOffsets[1] = impl->vtxOffsets[2] = voff;
-            RID vtxArray =
-                RD->vertex_array_create(cmdList->VtxBuffer.Size, impl->vtxFormat, impl->srcBuffers, impl->vtxOffsets);
+            srcBuffers[0] = srcBuffers[1] = srcBuffers[2] = vtxBuffer;
+            vtxOffsets[0] = vtxOffsets[1] = vtxOffsets[2] = voff;
+            RID vtxArray = RD->vertex_array_create(cmdList->VtxBuffer.Size, vtxFormat, srcBuffers, vtxOffsets);
 
-            RD->draw_list_bind_uniform_set(dl, impl->uniformSets[drawCmd.GetTexID()], 0);
+            RD->draw_list_bind_uniform_set(dl, uniformSets[drawCmd.GetTexID()], 0);
             RD->draw_list_bind_index_array(dl, idxArray);
             RD->draw_list_bind_vertex_array(dl, vtxArray);
 
@@ -334,6 +322,32 @@ void RdRenderer::RenderDrawData(RID vprid, ImDrawData* drawData)
         globalVtxOffset += cmdList->VtxBuffer.Size;
     }
     RD->draw_list_end();
+}
+
+RdRenderer::~RdRenderer()
+{
+    RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
+    RD->free_rid(impl->shader);
+    RD->free_rid(impl->sampler);
+    if (impl->idxBuffer.is_valid())
+        RD->free_rid(impl->idxBuffer);
+    if (impl->vtxBuffer.is_valid())
+        RD->free_rid(impl->vtxBuffer);
+}
+
+void RdRenderer::Render()
+{
+    auto& pio = ImGui::GetPlatformIO();
+    for (ImGuiViewport* vp : pio.Viewports)
+    {
+        if (!(vp->Flags & ImGuiViewportFlags_IsMinimized))
+        {
+            // ReplaceTextureRids(vp->DrawData);
+            RID vprid = make_rid(vp->RendererUserData);
+            impl->RenderOne(vprid, vp->DrawData);
+            // impl->RenderOne(GetFramebuffer(vprid), vp->DrawData);
+        }
+    }
 }
 
 } // namespace ImGui::Godot
