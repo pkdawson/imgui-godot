@@ -161,9 +161,9 @@ void Render()
 
 void Shutdown()
 {
-    ctx.reset();
     if (ImGui::GetCurrentContext())
         ImGui::DestroyContext();
+    ctx.reset();
 }
 
 void Connect(const godot::Callable& callable)

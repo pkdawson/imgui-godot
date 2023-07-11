@@ -32,6 +32,11 @@ const char* sn_to_cstr(const StringName& sn)
 
 namespace ImGui::Godot {
 
+void register_imgui_api()
+{
+    ClassDB::register_class<::ImGui::Godot::ImGui>();
+}
+
 void ImGui::_bind_methods()
 {
     REGISTER_IMGUI_ENUMS();

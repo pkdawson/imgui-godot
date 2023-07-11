@@ -15,7 +15,6 @@ struct Godot_ViewportData
 
 struct Viewports::Impl
 {
-    std::unique_ptr<Godot_ViewportData> mainvd;
     void InitPlatformInterface();
     void UpdateMonitors();
 };
@@ -72,9 +71,13 @@ static void Godot_DestroyWindow(ImGuiViewport* vp)
     Godot_ViewportData* vd = (Godot_ViewportData*)vp->PlatformUserData;
     if (vd)
     {
-        vd->window->queue_free();
+        if (vd->window && vp != ImGui::GetMainViewport())
+        {
+            vd->window->queue_free();
+        }
         IM_DELETE(vd);
         vp->PlatformUserData = nullptr;
+        vp->RendererUserData = nullptr;
     }
 }
 
@@ -176,10 +179,10 @@ Viewports::Viewports(Window* mainWindow, RID mainSubViewport) : impl(std::make_u
     impl->InitPlatformInterface();
     impl->UpdateMonitors();
 
-    impl->mainvd = std::make_unique<Godot_ViewportData>();
-    impl->mainvd->window = mainWindow;
+    Godot_ViewportData* mainvd = IM_NEW(Godot_ViewportData);
+    mainvd->window = mainWindow;
     ImGuiViewport* vp = ImGui::GetMainViewport();
-    vp->PlatformUserData = impl->mainvd.get();
+    vp->PlatformUserData = mainvd;
     vp->RendererUserData = (void*)mainSubViewport.get_id();
 }
 

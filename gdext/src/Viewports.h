@@ -16,13 +16,16 @@ class ImGuiWindow : public Window
 protected:
     static void _bind_methods()
     {
+        ClassDB::bind_method(D_METHOD("_close_requested"), &ImGuiWindow::_close_requested);
+        ClassDB::bind_method(D_METHOD("_size_changed"), &ImGuiWindow::_size_changed);
     }
 
 public:
     void init(ImGuiViewport* vp)
     {
         _vp = vp;
-        // TODO: connect signals
+        connect("close_requested", Callable(this, "_close_requested"));
+        connect("size_changed", Callable(this, "_size_changed"));
     }
 
     void _input(const Ref<InputEvent>& evt) override
@@ -30,12 +33,12 @@ public:
         ImGui::Godot::ProcessInput(evt, this);
     }
 
-    void close_requested()
+    void _close_requested()
     {
         _vp->PlatformRequestClose = true;
     }
 
-    void size_changed()
+    void _size_changed()
     {
         _vp->PlatformRequestResize = true;
     }

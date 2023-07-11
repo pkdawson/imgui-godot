@@ -9,11 +9,18 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #pragma warning(pop)
 
-#include "ImGuiAPI.h"
+#include <imgui.h>
+
 #include "ImGuiGD.h"
-#include "ImGuiLayerHelper.h"
 #include "ImGuiLayer.h"
+#include "ImGuiLayerHelper.h"
 #include "ImGuiRoot.h"
+
+// avoid including cimgui.h elsewhere
+
+namespace ImGui::Godot {
+void register_imgui_api();
+}
 
 using namespace godot;
 using namespace ImGui::Godot;
@@ -40,8 +47,8 @@ void sync_modules()
         ImGuiMemAllocFunc afunc;
         ImGuiMemFreeFunc ffunc;
         void* ud;
-        ImGui_GetAllocatorFunctions(&afunc, &ffunc, &ud);
-        mod_init(ImGui_GetCurrentContext(), afunc, ffunc);
+        ImGui::GetAllocatorFunctions(&afunc, &ffunc, &ud);
+        mod_init(ImGui::GetCurrentContext(), afunc, ffunc);
     }
 }
 
@@ -50,13 +57,13 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
 
-    ImGui_CreateContext(nullptr);
+    ImGui::CreateContext();
 
-    ClassDB::register_class<::ImGui::Godot::ImGui>();
     ClassDB::register_class<ImGuiRoot>();
     ClassDB::register_class<ImGuiLayer>();
     ClassDB::register_class<ImGuiLayerHelper>();
     ClassDB::register_class<ImGuiGD>();
+    register_imgui_api();
 
     gd = memnew(ImGuiGD);
     Engine::get_singleton()->register_singleton("ImGuiGD", gd);

@@ -24,12 +24,6 @@ linux = env["platform"] == "linux"
 if config == "release":
     if windows:
         env.Append(CPPDEFINES=["NDEBUG"])
-        env.AppendUnique(CCFLAGS=["/GL"])
-        env.AppendUnique(ARFLAGS=["/LTCG"])
-        env.AppendUnique(LINKFLAGS=["/LTCG:STATUS"])
-    else:
-        env.Append(CCFLAGS=["-flto"])
-        env.Append(LINKFLAGS=["-flto"])
 
 if windows:
     triplet = "x64-windows-static-md"
