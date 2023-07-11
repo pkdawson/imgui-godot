@@ -1,6 +1,6 @@
 #pragma once
 
-#if __has_include("godot_cpp/classes/engine.hpp")
+#if __has_include("godot_cpp/godot.hpp")
 #pragma warning(push, 0)
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/vector2.hpp>

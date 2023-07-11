@@ -75,8 +75,8 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
-    // io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
-    // io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+    io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
 
     Array fonts = cfg->get("Fonts");
     bool addDefaultFont = cfg->get("AddDefaultFont");
@@ -156,6 +156,11 @@ void Render()
     RS->canvas_item_add_texture_rect(ctx->ci, godot::Rect2(0, 0, winSize.x, winSize.y), vptex);
 
     ImGui::Render();
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+    }
     ctx->renderer->RenderDrawData(ctx->svp, ImGui::GetDrawData());
 }
 

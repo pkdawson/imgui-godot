@@ -16,7 +16,7 @@
 #error use ImGui docking branch
 #endif
 
-#if __has_include("godot_cpp/classes/engine.hpp")
+#if __has_include("godot_cpp/godot.hpp")
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/font_file.hpp>
@@ -86,7 +86,7 @@ inline bool GET_IMGUIGD()
 {
     if (ImGuiGD)
         return true;
-#if __has_include("godot_cpp/classes/engine.hpp")
+#if __has_include("godot_cpp/godot.hpp")
     ImGuiGD = Engine::get_singleton()->get_singleton("ImGuiGD");
 #else
     ImGuiGD = Engine::get_singleton()->get_singleton_object("ImGuiGD");
@@ -203,7 +203,7 @@ inline bool ImageButton(const String& str_id, Texture2D* tex, const Vector2& siz
     return ImGui::ImageButton(str_id.utf8().get_data(), BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
-#if __has_include("godot_cpp/classes/engine.hpp")
+#if __has_include("godot_cpp/godot.hpp")
 inline ImGuiKey ToImGuiKey(Key key)
 {
     switch (key)

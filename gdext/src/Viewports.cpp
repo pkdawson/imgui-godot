@@ -90,6 +90,7 @@ static void Godot_ShowWindow(ImGuiViewport* vp)
 static void Godot_SetWindowPos(ImGuiViewport* vp, ImVec2 pos)
 {
     Godot_ViewportData* vd = (Godot_ViewportData*)vp->PlatformUserData;
+    vd->window->set_position(pos);
 }
 
 ImVec2 Godot_GetWindowPos(ImGuiViewport* vp)

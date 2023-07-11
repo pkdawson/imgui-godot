@@ -15,6 +15,7 @@
 #include "ImGuiLayer.h"
 #include "ImGuiLayerHelper.h"
 #include "ImGuiRoot.h"
+#include "Viewports.h"
 
 // avoid including cimgui.h elsewhere
 
@@ -63,6 +64,7 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
     ClassDB::register_class<ImGuiLayer>();
     ClassDB::register_class<ImGuiLayerHelper>();
     ClassDB::register_class<ImGuiGD>();
+    ClassDB::register_class<ImGuiWindow>();
     register_imgui_api();
 
     gd = memnew(ImGuiGD);
