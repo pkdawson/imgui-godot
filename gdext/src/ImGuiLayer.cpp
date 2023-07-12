@@ -22,8 +22,6 @@ struct ImGuiLayer::Impl
     ImGuiLayerHelper* helper = nullptr;
     Window* window = nullptr;
     RID canvasItem;
-    bool runInEditor = false;
-    bool running = true;
 };
 
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
@@ -78,7 +76,7 @@ void ImGuiLayer::_enter_tree()
 void ImGuiLayer::_ready()
 {
     set_process_priority(std::numeric_limits<int32_t>::max());
-    set_process(false);
+    set_physics_process(false);
 
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
@@ -86,6 +84,8 @@ void ImGuiLayer::_ready()
         // skip a frame so tool scripts don't start on exactly frame 1
         ImGui::NewFrame();
         ImGui::Render();
+        set_visible(false);
+        return;
     }
 #endif
 
@@ -102,24 +102,19 @@ void ImGuiLayer::_exit_tree()
 
 void ImGuiLayer::_process(double delta)
 {
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-    {
-        if (!impl->runInEditor)
-        {
-            ImGui::EndFrame();
-            return;
-        }
-    }
-#endif
-    if (!impl->running)
-    {
-        ImGui::EndFrame();
-        return;
-    }
-
     emit_signal("imgui_layout");
     ImGui::Godot::Render();
+}
+
+void ImGuiLayer::_physics_process(double delta)
+{
+    static int count = 0;
+    if (++count > 60)
+    {
+        count = 0;
+        ImGui::Render();
+        ImGui::NewFrame();
+    }
 }
 
 void ImGuiLayer::_input(const Ref<InputEvent>& event)
@@ -143,40 +138,35 @@ void ImGuiLayer::on_visibility_changed()
 {
     if (is_visible())
     {
-        impl->running = true;
+        ImGui::Render();
+        set_process(true);
+        set_physics_process(false);
         impl->helper->set_process(true);
     }
     else
     {
-        impl->running = false;
+        set_process(false);
+        set_physics_process(true);
+#ifdef DEBUG_ENABLED
+        if (Engine::get_singleton()->is_editor_hint())
+        {
+            set_physics_process(false);
+        }
+#endif
+        impl->helper->set_process(false);
         RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
+        ImGui::NewFrame();
     }
 }
 
 void ImGuiLayer::NewFrame(double delta)
 {
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-    {
-        if (!impl->runInEditor)
-        {
-            ImGui::NewFrame();
-            return;
-        }
-    }
-#endif
-    if (!impl->running)
-    {
-        ImGui::NewFrame();
-        return;
-    }
-
     ImGui::Godot::Update(delta);
 }
 
 void ImGuiLayer::ToolInit()
 {
-    impl->runInEditor = true;
+    set_visible(true);
 }
 
 } // namespace ImGui::Godot
