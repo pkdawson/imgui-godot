@@ -13,6 +13,8 @@
 #pragma warning(pop)
 
 #include <imgui.h>
+#include <imgui_internal.h>
+
 using namespace godot;
 
 namespace ImGui::Godot {
@@ -81,10 +83,8 @@ void ImGuiLayer::_ready()
 #ifdef DEBUG_ENABLED
     if (Engine::get_singleton()->is_editor_hint())
     {
-        // skip a frame so tool scripts don't start on exactly frame 1
-        ImGui::NewFrame();
-        ImGui::Render();
         set_visible(false);
+        set_physics_process(false);
         return;
     }
 #endif
@@ -103,7 +103,8 @@ void ImGuiLayer::_exit_tree()
 void ImGuiLayer::_process(double delta)
 {
     emit_signal("imgui_layout");
-    ImGui::Godot::Render();
+    if (is_visible())
+        ImGui::Godot::Render();
 }
 
 void ImGuiLayer::_physics_process(double delta)
@@ -112,7 +113,11 @@ void ImGuiLayer::_physics_process(double delta)
     if (++count > 60)
     {
         count = 0;
-        ImGui::Render();
+        ImGui::EndFrame();
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+        }
         ImGui::NewFrame();
     }
 }
@@ -138,29 +143,33 @@ void ImGuiLayer::on_visibility_changed()
 {
     if (is_visible())
     {
-        ImGui::Render();
         set_process(true);
         set_physics_process(false);
         impl->helper->set_process(true);
+        set_process_input(true);
     }
     else
     {
         set_process(false);
         set_physics_process(true);
-#ifdef DEBUG_ENABLED
-        if (Engine::get_singleton()->is_editor_hint())
-        {
-            set_physics_process(false);
-        }
-#endif
         impl->helper->set_process(false);
+        set_process_input(false);
         RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
-        ImGui::NewFrame();
+        if (!ImGui::GetCurrentContext()->WithinFrameScope)
+            ImGui::NewFrame();
     }
 }
 
 void ImGuiLayer::NewFrame(double delta)
 {
+    if (ImGui::GetCurrentContext()->WithinFrameScope)
+    {
+        ImGui::EndFrame();
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+        }
+    }
     ImGui::Godot::Update(delta);
 }
 
