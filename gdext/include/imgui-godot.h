@@ -62,7 +62,7 @@ static_assert(sizeof(ImWchar) == 2);
 
 namespace ImGui::Godot {
 #ifdef IGN_EXPORT
-void Init(Window* mainWindow, RID canvasItem, const Ref<Resource>& config = nullptr);
+void Init(Window* mainWindow, RID canvasItem, const Ref<Resource>& config);
 void Update(double delta);
 bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
 void ProcessNotification(int what);

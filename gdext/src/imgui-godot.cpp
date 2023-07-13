@@ -57,6 +57,10 @@ const char* PlatformName = "godot4";
 
 void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
 {
+    // re-init not allowed
+    if (ctx)
+        return;
+
     ctx = std::make_unique<Context>();
     ctx->mainWindow = mainWindow;
     ctx->ci = canvasItem;

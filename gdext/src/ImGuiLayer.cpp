@@ -24,6 +24,8 @@ struct ImGuiLayer::Impl
     ImGuiLayerHelper* helper = nullptr;
     Window* window = nullptr;
     RID canvasItem;
+    bool wantHide = false;
+    Ref<Resource> cfg;
 };
 
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
@@ -60,6 +62,7 @@ void ImGuiLayer::_enter_tree()
         Ref<GDScript> script = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/scripts/ImGuiConfig.gd");
         cfg = script->new_();
     }
+    impl->cfg = cfg;
 
     set_layer(cfg->get("Layer"));
 
@@ -67,12 +70,14 @@ void ImGuiLayer::_enter_tree()
     impl->canvasItem = RS->canvas_item_create();
     RS->canvas_item_set_parent(impl->canvasItem, get_canvas());
 
-    ImGui::Godot::Init(get_window(), impl->canvasItem, cfg);
-
     impl->helper = memnew(ImGuiLayerHelper);
     add_child(impl->helper);
 
-    connect("visibility_changed", Callable(this, "on_visibility_changed"));
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+        return;
+#endif
+    ImGui::Godot::Init(get_window(), impl->canvasItem, cfg);
 }
 
 void ImGuiLayer::_ready()
@@ -84,12 +89,12 @@ void ImGuiLayer::_ready()
     if (Engine::get_singleton()->is_editor_hint())
     {
         set_visible(false);
-        set_physics_process(false);
-        return;
+        set_process(false);
+        impl->helper->set_process(false);
     }
 #endif
 
-    set_process(true);
+    connect("visibility_changed", Callable(this, "on_visibility_changed"));
 }
 
 void ImGuiLayer::_exit_tree()
@@ -97,14 +102,31 @@ void ImGuiLayer::_exit_tree()
     Engine::get_singleton()->unregister_singleton("ImGuiLayer");
     ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);
-    // impl->helper->queue_free();
 }
 
 void ImGuiLayer::_process(double delta)
 {
     emit_signal("imgui_layout");
-    if (is_visible())
-        ImGui::Godot::Render();
+    ImGui::Godot::Render();
+
+    if (impl->wantHide)
+    {
+        impl->wantHide = false;
+        set_process(false);
+        set_physics_process(true);
+        impl->helper->set_process(false);
+        set_process_input(false);
+        RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
+
+        // hide viewport windows immediately
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::NewFrame();
+            ImGui::EndFrame();
+            ImGui::UpdatePlatformWindows();
+        }
+        ImGui::NewFrame();
+    }
 }
 
 void ImGuiLayer::_physics_process(double delta)
@@ -150,13 +172,7 @@ void ImGuiLayer::on_visibility_changed()
     }
     else
     {
-        set_process(false);
-        set_physics_process(true);
-        impl->helper->set_process(false);
-        set_process_input(false);
-        RenderingServer::get_singleton()->canvas_item_clear(impl->canvasItem);
-        if (!ImGui::GetCurrentContext()->WithinFrameScope)
-            ImGui::NewFrame();
+        impl->wantHide = true;
     }
 }
 
@@ -175,7 +191,11 @@ void ImGuiLayer::NewFrame(double delta)
 
 void ImGuiLayer::ToolInit()
 {
-    set_visible(true);
+    if (!is_visible())
+    {
+        ImGui::Godot::Init(get_window(), impl->canvasItem, impl->cfg);
+        set_visible(true);
+    }
 }
 
 } // namespace ImGui::Godot
