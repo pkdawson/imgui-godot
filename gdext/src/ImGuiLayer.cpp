@@ -91,6 +91,7 @@ void ImGuiLayer::_ready()
         set_visible(false);
         set_process(false);
         impl->helper->set_process(false);
+        set_process_input(false);
     }
 #endif
 
@@ -106,6 +107,20 @@ void ImGuiLayer::_exit_tree()
 
 void ImGuiLayer::_process(double delta)
 {
+#ifdef DEBUG_ENABLED
+    if (Engine::get_singleton()->is_editor_hint())
+    {
+        // verify signal connections
+        auto conns = get_signal_connection_list("imgui_layout");
+        for (int i = 0; i < conns.size(); ++i)
+        {
+            const Dictionary& conn = conns[i];
+            const Callable& cb = conn["callable"];
+            if (!cb.is_valid())
+                disconnect("imgui_layout", cb);
+        }
+    }
+#endif
     emit_signal("imgui_layout");
     ImGui::Godot::Render();
 
@@ -136,10 +151,7 @@ void ImGuiLayer::_physics_process(double delta)
     {
         count = 0;
         ImGui::EndFrame();
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-        }
+        ImGui::UpdatePlatformWindows();
         ImGui::NewFrame();
     }
 }
@@ -181,10 +193,7 @@ void ImGuiLayer::NewFrame(double delta)
     if (ImGui::GetCurrentContext()->WithinFrameScope)
     {
         ImGui::EndFrame();
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-        }
+        ImGui::UpdatePlatformWindows();
     }
     ImGui::Godot::Update(delta);
 }

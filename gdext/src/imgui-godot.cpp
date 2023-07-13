@@ -160,11 +160,7 @@ void Render()
     RS->canvas_item_add_texture_rect(ctx->ci, godot::Rect2(0, 0, winSize.x, winSize.y), vptex);
 
     ImGui::Render();
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-    }
+    ImGui::UpdatePlatformWindows();
     ctx->renderer->Render();
 }
 
@@ -178,8 +174,8 @@ void Shutdown()
 void Connect(const godot::Callable& callable)
 {
     Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
-    if (igl)
-        igl->connect("imgui_layout", callable);
+    ERR_FAIL_COND(!igl);
+    igl->connect("imgui_layout", callable);
 }
 
 void ResetFonts()
@@ -220,8 +216,8 @@ void SetIniFilename(const String& fn)
 void SetVisible(bool visible)
 {
     CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
-    if (igl)
-        igl->set_visible(visible);
+    ERR_FAIL_COND(!igl);
+    igl->set_visible(visible);
 }
 
 bool SubViewport(godot::SubViewport* svp)
