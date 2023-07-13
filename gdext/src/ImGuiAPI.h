@@ -149,6 +149,7 @@ struct GdsZeroArray
 // #define GDS_PTR_STR(a, len, label) a.size() == 0 ? nullptr : (char*)GdsPtr<String>(a, len, label)
 
 class ImGuiIOPtr;
+class ImGuiStylePtr;
 
 class ImGui : public Object
 {

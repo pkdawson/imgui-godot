@@ -37,7 +37,7 @@ ImGuiGD* gd = nullptr;
 
 void sync_modules()
 {
-    typedef void (*pmodinit)(ImGuiContext*, ImGuiMemAllocFunc, ImGuiMemFreeFunc);
+    typedef void (*pmodinit)(uint32_t, ImGuiContext*, ImGuiMemAllocFunc, ImGuiMemFreeFunc);
 #ifdef _WIN32
     pmodinit mod_init = (pmodinit)GetProcAddress(GetModuleHandle(nullptr), "imgui_godot_module_init");
 #else
@@ -49,7 +49,7 @@ void sync_modules()
         ImGuiMemFreeFunc ffunc;
         void* ud;
         ImGui::GetAllocatorFunctions(&afunc, &ffunc, &ud);
-        mod_init(ImGui::GetCurrentContext(), afunc, ffunc);
+        mod_init(IMGUI_VERSION_NUM, ImGui::GetCurrentContext(), afunc, ffunc);
     }
 }
 

@@ -16,7 +16,7 @@ namespace ImGui::Godot {
 
 struct Fonts::Impl
 {
-    Ref<Texture2D> fontTexture;
+    Ref<ImageTexture> fontTexture;
 
     struct FontParams
     {

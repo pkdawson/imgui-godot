@@ -452,13 +452,14 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
 }
 #endif
 
-#define IMGUI_GODOT_MODULE_INIT()                                                                    \
-    extern "C" {                                                                                     \
-    void imgui_godot_module_init(ImGuiContext* ctx, ImGuiMemAllocFunc afunc, ImGuiMemFreeFunc ffunc) \
-    {                                                                                                \
-        ImGui::SetCurrentContext(ctx);                                                               \
-        ImGui::SetAllocatorFunctions(afunc, ffunc, nullptr);                                         \
-    }                                                                                                \
+#define IMGUI_GODOT_MODULE_INIT()                                                                                  \
+    extern "C" {                                                                                                   \
+    void imgui_godot_module_init(uint32_t ver, ImGuiContext* ctx, ImGuiMemAllocFunc afunc, ImGuiMemFreeFunc ffunc) \
+    {                                                                                                              \
+        IM_ASSERT(ver == IMGUI_VERSION_NUM);                                                                       \
+        ImGui::SetCurrentContext(ctx);                                                                             \
+        ImGui::SetAllocatorFunctions(afunc, ffunc, nullptr);                                                       \
+    }                                                                                                              \
     }
 
 } // namespace ImGui::Godot
