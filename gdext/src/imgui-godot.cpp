@@ -91,7 +91,16 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
 
     SetIniFilename(iniFilename);
 
+    RenderingServer* RS = RenderingServer::get_singleton();
+
     ctx->headless = DisplayServer::get_singleton()->get_name() == "headless";
+
+    if (!ctx->headless && !RS->get_rendering_device())
+    {
+        ctx->headless = true;
+        UtilityFunctions::printerr("imgui-godot requires RenderingDevice");
+    }
+
     if (ctx->headless || rendererName == "Dummy")
     {
         ctx->renderer = std::make_unique<DummyRenderer>();
@@ -109,8 +118,6 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
             ctx->renderer = std::make_unique<RdRenderer>();
     }
     io.BackendRendererName = ctx->renderer->Name();
-
-    RenderingServer* RS = RenderingServer::get_singleton();
 
     Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
     RS->connect("frame_pre_draw", Callable(igl, "on_frame_pre_draw"));
@@ -159,7 +166,8 @@ bool ProcessInput(const Ref<InputEvent>& evt, Window* window)
 
 void ProcessNotification(int what)
 {
-    return ctx->input->ProcessNotification(what);
+    if (ctx)
+        ctx->input->ProcessNotification(what);
 }
 
 void Render()

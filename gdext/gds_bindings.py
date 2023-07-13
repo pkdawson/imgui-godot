@@ -11,20 +11,26 @@ import dear_bindings
 type_map = {
     "bool": "bool",
     "bool*": "Array",
+    "char": "char",
     "char*": "Array",
     "const char*": "String",
     "const float*": "Array",
+    "const ImGuiTableColumnSortSpecs*": "Array",
     "double": "double",
     "double*": "Array",
     "float": "float",
     "float*": "Array",
+    "ImFont*": "int64_t",
+    "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
     "ImGuiButtonFlags": "BitField<ImGui::ButtonFlags>",
     "ImGuiCol": "Col",
     "ImGuiColorEditFlags": "BitField<ImGui::ColorEditFlags>",
     "ImGuiComboFlags": "BitField<ImGui::ComboFlags>",
     "ImGuiCond": "Cond",
+    "ImGuiConfigFlags": "BitField<ImGui::ConfigFlags>",
     "ImGuiDataType": "DataType",
-    "ImGuiDir": "Dir",
+    "ImGuiDir": "ImGui::Dir",
+    "ImGuiDockNodeFlags": "BitField<ImGui::DockNodeFlags>",
     "ImGuiFocusedFlags": "BitField<ImGui::FocusedFlags>",
     "ImGuiHoveredFlags": "BitField<ImGui::HoveredFlags>",
     "ImGuiID": "uint32_t",
@@ -33,33 +39,28 @@ type_map = {
     "ImGuiKey": "Key",
     "ImGuiMouseButton": "MouseButton",
     "ImGuiPopupFlags": "BitField<ImGui::PopupFlags>",
+    "ImGuiSortDirection": "SortDirection",
+    "ImGuiStyle*": "Ref<ImGuiStylePtr>",
     "ImGuiStyleVar": "StyleVar",
     "ImGuiTabBarFlags": "BitField<ImGui::TabBarFlags>",
     "ImGuiTabItemFlags": "BitField<ImGui::TabItemFlags>",
     "ImGuiTableColumnFlags": "BitField<ImGui::TableColumnFlags>",
     "ImGuiTableFlags": "BitField<ImGui::TableFlags>",
     "ImGuiTableRowFlags": "BitField<ImGui::TableRowFlags>",
+    "ImGuiViewportFlags": "BitField<ImGui::ViewportFlags>",
     "ImGuiWindowFlags": "BitField<ImGui::WindowFlags>",
+    "ImS16": "int16_t",
     "ImTextureID": "Ref<Texture2D>",
+    "ImU16": "uint16_t",
     "ImU32": "uint32_t",
+    "ImU8": "uint8_t",
     "ImVec2": "Vector2",
     "ImVec4": "Color",
     "int": "int",
     "int*": "Array",
+    "short": "short",
     "size_t": "int64_t",
     "void": "void",
-    "ImGuiConfigFlags": "BitField<ImGui::ConfigFlags>",
-    "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
-    "ImU16": "uint16_t",
-    "ImGuiViewportFlags": "BitField<ImGui::ViewportFlags>",
-    "ImGuiDockNodeFlags": "BitField<ImGui::DockNodeFlags>",
-    "char": "char",
-    "ImS16": "int16_t",
-    "ImGuiSortDirection": "SortDirection",
-    "const ImGuiTableColumnSortSpecs*": "Array",
-    "short": "short",
-    "ImU8": "uint8_t",
-    "ImFont*": "int64_t",
 }
 
 # use StringName for these const char* params
@@ -92,7 +93,7 @@ exclude_funcs = (
 
 include_structs = (
     "ImGuiIO",
-    # "ImGuiStyle",
+    "ImGuiStyle",
     # "ImGuiTableColumnSortSpecs",
     # "ImGuiTableSortSpecs",
     # "ImGuiTextFilter",
@@ -311,6 +312,12 @@ class Function:
 
 
 class Property:
+    variant_types = {
+        "float": "FLOAT",
+        "Vector2": "VECTOR2",
+        "bool": "BOOL",
+    }
+
     def __init__(self, j, name, struct_name):
         self.struct_name = struct_name
         self.name = name
@@ -344,7 +351,7 @@ class Property:
         dv = "{}"
         if self.gdtype.startswith("BitField"):
             dv = "0"
-        rv += f"if (ptr) return {fcall}; else return {dv};\\\n"
+        rv += f"if (ptr) return ({self.gdtype}){fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
         rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
@@ -362,8 +369,9 @@ class Property:
         setter = f"_Set{self.name}"
         rv = f'ClassDB::bind_method(D_METHOD("{getter}"), &{self.struct_name}::{getter}); \\\n'
         rv += f'ClassDB::bind_method(D_METHOD("{setter}", "x"), &{self.struct_name}::{setter}); \\\n'
-        if self.gdtype.startswith("BitField<"):
-            rv += f'ADD_PROPERTY(PropertyInfo(Variant::INT, "{self.name}"), "{setter}", "{getter}"); \\\n'
+
+        vtype = Property.variant_types.get(self.gdtype, "INT")
+        rv += f'ADD_PROPERTY(PropertyInfo(Variant::{vtype}, "{self.name}"), "{setter}", "{getter}"); \\\n'
         return rv
 
 
@@ -483,8 +491,6 @@ class JsonParser:
             f = Function(jf)
             if f.valid:
                 self.funcs.append(f)
-            else:
-                pass  # print('invalid function ', f.name)
         for f in self.funcs:
             self.func_decls += f.gen_decl()
             self.func_defs += f.gen_def()

@@ -106,7 +106,7 @@ struct GdsArray<const char* const>
     std::vector<CharString> buf;
     std::vector<const char*> ptrs;
 
-    GdsArray(Array& a) : arr(a), buf(a.size())
+    GdsArray(Array& a) : arr(a), buf(a.size()), ptrs(a.size())
     {
         for (int i = 0; i < arr.size(); ++i)
         {
