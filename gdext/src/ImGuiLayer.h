@@ -30,6 +30,7 @@ public:
     void _input(const Ref<InputEvent>& event) override;
     void _notification(int p_what);
     void on_visibility_changed();
+    void on_frame_pre_draw();
 
     void NewFrame(double delta);
     void ToolInit();

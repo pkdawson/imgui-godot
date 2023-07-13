@@ -4,6 +4,7 @@
 #include "ImGuiGD.h"
 #include "Input.h"
 #include "RdRenderer.h"
+#include "RdRendererThreadSafe.h"
 #include "Renderer.h"
 #include "ShortTermCache.h"
 #include "Viewports.h"
@@ -97,11 +98,23 @@ void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
     }
     else
     {
-        ctx->renderer = std::make_unique<RdRenderer>();
+        int threadModel = ProjectSettings::get_singleton()->get_setting("rendering/driver/threads/thread_model");
+#ifdef DEBUG_ENABLED
+        if (Engine::get_singleton()->is_editor_hint())
+            threadModel = 0;
+#endif
+        if (threadModel == 2)
+            ctx->renderer = std::make_unique<RdRendererThreadSafe>();
+        else
+            ctx->renderer = std::make_unique<RdRenderer>();
     }
     io.BackendRendererName = ctx->renderer->Name();
 
     RenderingServer* RS = RenderingServer::get_singleton();
+
+    Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
+    RS->connect("frame_pre_draw", Callable(igl, "on_frame_pre_draw"));
+
     ctx->svp = RS->viewport_create();
     RS->viewport_set_transparent_background(ctx->svp, true);
     RS->viewport_set_update_mode(ctx->svp, RenderingServer::VIEWPORT_UPDATE_ALWAYS);
@@ -218,6 +231,11 @@ void SetVisible(bool visible)
     CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
     ERR_FAIL_COND(!igl);
     igl->set_visible(visible);
+}
+
+void OnFramePreDraw()
+{
+    ctx->renderer->OnFramePreDraw();
 }
 
 bool SubViewport(godot::SubViewport* svp)

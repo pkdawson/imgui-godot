@@ -15,14 +15,19 @@ class RdRenderer : public Renderer
 {
 public:
     RdRenderer();
-    ~RdRenderer();
+    virtual ~RdRenderer();
 
-    const char* Name() override
+    virtual const char* Name() override
     {
         return "godot4_rd";
     }
 
-    void Render() override;
+    virtual void Render() override;
+
+protected:
+    void Render(RID fb, ImDrawData* drawData);
+    static void ReplaceTextureRIDs(ImDrawData* drawData);
+    RID GetFramebuffer(RID vprid);
 
 private:
     struct Impl;

@@ -23,6 +23,9 @@ public:
 
     virtual const char* Name() = 0;
     virtual void Render() = 0;
+    virtual void OnFramePreDraw()
+    {
+    }
 };
 
 } // namespace ImGui::Godot

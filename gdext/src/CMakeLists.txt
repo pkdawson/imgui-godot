@@ -19,6 +19,8 @@ target_sources(imgui-godot-native PRIVATE
     main.cpp
     RdRenderer.cpp
     RdRenderer.h
+    RdRendererThreadSafe.cpp
+    RdRendererThreadSafe.h
     Renderer.h
     ShortTermCache.cpp
     ShortTermCache.h

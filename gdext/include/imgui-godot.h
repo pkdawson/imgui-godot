@@ -75,6 +75,7 @@ void AddFontDefault();
 void RebuildFontAtlas(float scale);
 void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
+void OnFramePreDraw();
 
 bool SubViewport(SubViewport* svp);
 

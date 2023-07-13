@@ -40,6 +40,7 @@ void ImGuiLayer::_bind_methods()
 {
     ADD_SIGNAL(MethodInfo("imgui_layout"));
     ClassDB::bind_method(D_METHOD("on_visibility_changed"), &ImGuiLayer::on_visibility_changed);
+    ClassDB::bind_method(D_METHOD("on_frame_pre_draw"), &ImGuiLayer::on_frame_pre_draw);
 }
 
 void ImGuiLayer::_enter_tree()
@@ -186,6 +187,11 @@ void ImGuiLayer::on_visibility_changed()
     {
         impl->wantHide = true;
     }
+}
+
+void ImGuiLayer::on_frame_pre_draw()
+{
+    ImGui::Godot::OnFramePreDraw();
 }
 
 void ImGuiLayer::NewFrame(double delta)
