@@ -45,8 +45,8 @@ target_sources(imgui-godot-native PRIVATE
     include/imconfig-godot.h
     include/imgui-godot.h
     gen/imgui_bindings.gen.h
-    dear_bindings/cimgui.cpp
-    dear_bindings/cimgui.h
+    gen/cimgui.cpp
+    gen/cimgui.h
     )
 
 target_link_libraries(imgui-godot-native PUBLIC
@@ -54,7 +54,7 @@ target_link_libraries(imgui-godot-native PUBLIC
     freetype
     )
 
-target_include_directories(imgui-godot-native PRIVATE src imgui gen dear_bindings PUBLIC include)
+target_include_directories(imgui-godot-native PRIVATE src imgui gen PUBLIC include)
 set_target_properties(imgui-godot-native PROPERTIES PUBLIC_HEADER "include/imconfig-godot.h;include/imgui-godot.h")
 
 if(WIN32)

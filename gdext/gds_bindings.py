@@ -526,16 +526,16 @@ class JsonParser:
 
 def main():
     dear_bindings.convert_header(
-        "imgui/imgui.h", "dear_bindings/cimgui", "dear_bindings/src/templates"
+        "imgui/imgui.h", "gen/cimgui", "dear_bindings/src/templates"
     )
 
     parser = JsonParser()
-    with open("dear_bindings/cimgui.json") as jfi:
+    with open("gen/cimgui.json") as jfi:
         jdat = json.loads(jfi.read())
         parser.load(jdat)
     parser.write()
 
-    subprocess.call("clang-format -i gen/*.h", shell=True)
+    subprocess.call("clang-format -i gen/imgui_bindings.gen.h", shell=True)
 
 
 if __name__ == "__main__":
