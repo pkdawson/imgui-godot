@@ -21,7 +21,7 @@ type_map = {
     "double*": "Array",
     "float": "float",
     "float*": "Array",
-    "ImDrawFlags": "BitField<ImGui::ImDrawFlags>",
+    "ImDrawFlags": "BitField<ImGui::DrawFlags>",
     "ImDrawList*": "Ref<ImDrawListPtr>",
     "ImFont*": "int64_t",
     "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
@@ -140,12 +140,17 @@ class Enum:
         self.name = self.orig_name.strip("_")
         if self.name.startswith("ImGui"):
             self.name = self.name.replace("ImGui", "", 1)
+        elif self.name.startswith("Im"):
+            self.name = self.name.replace("Im", "", 1)
 
         ignore_endings = tuple(["COUNT", "_", "BEGIN", "END", "OFFSET", "SIZE"])
         for e in j["elements"]:
             name = e["name"]
             if not is_obsolete(e) and not name.endswith(ignore_endings):
-                gdname = name.replace("ImGui", "", 1)
+                if name.startswith("ImGui"):
+                    gdname = name.replace("ImGui", "", 1)
+                elif name.startswith("Im"):
+                    gdname = name.replace("Im", "", 1)
                 self.vals.append((gdname, name))
 
     def gen_def(self):
@@ -367,7 +372,10 @@ class Property:
         dv = "{}"
         if self.gdtype.startswith("BitField"):
             dv = "0"
-        rv += f"if (ptr) return ({self.gdtype}){fcall}; else return {dv};\\\n"
+        cast = ""
+        if self.gdtype == "ImGui::Dir":
+            cast = f"({self.gdtype})"
+        rv += f"if (ptr) return {cast}{fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
         rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
