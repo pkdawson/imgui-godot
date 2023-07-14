@@ -7,6 +7,7 @@ sys.path += ["dear_bindings"]
 import dear_bindings
 
 # TODO: callbacks as Callable
+# TODO: array wrappers
 
 type_map = {
     "bool": "bool",
@@ -20,6 +21,8 @@ type_map = {
     "double*": "Array",
     "float": "float",
     "float*": "Array",
+    "ImDrawFlags": "BitField<ImGui::ImDrawFlags>",
+    "ImDrawList*": "Ref<ImDrawListPtr>",
     "ImFont*": "int64_t",
     "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
     "ImGuiButtonFlags": "BitField<ImGui::ButtonFlags>",
@@ -39,6 +42,7 @@ type_map = {
     "ImGuiKey": "Key",
     "ImGuiMouseButton": "MouseButton",
     "ImGuiPopupFlags": "BitField<ImGui::PopupFlags>",
+    "ImGuiSliderFlags": "BitField<SliderFlags>",
     "ImGuiSortDirection": "SortDirection",
     "ImGuiStyle*": "Ref<ImGuiStylePtr>",
     "ImGuiStyleVar": "StyleVar",
@@ -47,12 +51,13 @@ type_map = {
     "ImGuiTableColumnFlags": "BitField<ImGui::TableColumnFlags>",
     "ImGuiTableFlags": "BitField<ImGui::TableFlags>",
     "ImGuiTableRowFlags": "BitField<ImGui::TableRowFlags>",
+    "ImGuiTreeNodeFlags": "BitField<TreeNodeFlags>",
     "ImGuiViewportFlags": "BitField<ImGui::ViewportFlags>",
     "ImGuiWindowFlags": "BitField<ImGui::WindowFlags>",
     "ImS16": "int16_t",
     "ImTextureID": "Ref<Texture2D>",
     "ImU16": "uint16_t",
-    "ImU32": "uint32_t",
+    "ImU32": "Color",
     "ImU8": "uint8_t",
     "ImVec2": "Vector2",
     "ImVec4": "Color",
@@ -77,23 +82,31 @@ sn_names = (
 
 exclude_funcs = (
     "GetKeyIndex",
-    "ImGui_DestroyPlatformWindows",
-    "ImGui_RenderPlatformWindowsDefault",
-    "ImGui_UpdatePlatformWindows",
-    "ImGui_NewFrame",
-    "ImGui_Render",
+    "ImGui_ColorConvertFloat4ToU32",
+    "ImGui_ColorConvertHSVtoRGB",
+    "ImGui_ColorConvertU32ToFloat4",
     "ImGui_CreateContext",
     "ImGui_DestroyContext",
+    "ImGui_DestroyPlatformWindows",
+    "ImGui_EndFrame",
+    "ImGui_GetColorU32",
+    "ImGui_GetColorU32Ex",
+    "ImGui_GetColorU32ImU32",
+    "ImGui_GetColorU32ImVec4",
     "ImGui_GetCurrentContext",
+    "ImGui_NewFrame",
+    "ImGui_Render",
+    "ImGui_RenderPlatformWindowsDefault",
     "ImGui_SetCurrentContext",
     "ImGui_TextUnformatted",  # this is called by Text()
     "ImGui_TextUnformattedEx",
-    "ImGui_EndFrame",
+    "ImGui_UpdatePlatformWindows",
 )
 
 include_structs = (
     "ImGuiIO",
     "ImGuiStyle",
+    "ImDrawList",
     # "ImGuiTableColumnSortSpecs",
     # "ImGuiTableSortSpecs",
     # "ImGuiTextFilter",
@@ -216,7 +229,10 @@ class Param:
         elif self.gdtype == "Ref<Texture2D>":
             return f"(ImTextureID){self.name}->get_rid().get_id()"
         elif self.gdtype == "Color":
-            return f"{{{self.name}.r, {self.name}.g, {self.name}.b, {self.name}.a}}"
+            if self.orig_type == "ImU32":
+                return f"{self.name}.to_abgr32()"
+            else:
+                return f"{{{self.name}.r, {self.name}.g, {self.name}.b, {self.name}.a}}"
         elif self.gdtype == "StringName":
             return f"sn_to_cstr({self.name})"
         elif self.gdtype == "Array":
@@ -466,11 +482,10 @@ class JsonParser:
         enums = []
         for je in jdat["enums"]:
             e = Enum(je)
-            if e.orig_name.startswith("ImGui"):
-                self.enum_defs += e.gen_def()
-                self.enum_casts += e.gen_cast()
-                self.enum_binds += e.gen_bindings()
-                enums.append(e)
+            self.enum_defs += e.gen_def()
+            self.enum_casts += e.gen_cast()
+            self.enum_binds += e.gen_bindings()
+            enums.append(e)
         self.enum_defs += "\n\n"
         self.enum_binds += "\n\n"
         self.enum_casts += "\n\n"

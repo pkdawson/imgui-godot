@@ -39,8 +39,8 @@ void ShortTermCache::OnNewFrame()
     {
         if (!it->second)
         {
-            it = impl->used.erase(it);
             impl->bufs.erase(it->first);
+            it = impl->used.erase(it);
         }
         else
         {
@@ -57,7 +57,6 @@ std::vector<char>& ShortTermCache::GetTextBuf(const StringName& label, size_t si
     auto it = impl->bufs.find(hash);
     if (it == impl->bufs.end())
     {
-        UtilityFunctions::print("new text buf");
         impl->bufs[hash] = std::vector<char>(size);
         std::vector<char>& buf = impl->bufs[hash];
         Impl::CopyInput(buf, a);

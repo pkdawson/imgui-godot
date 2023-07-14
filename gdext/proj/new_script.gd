@@ -14,8 +14,10 @@ func _ready():
     io.ConfigFlags |= ImGui.ConfigFlags_NavEnableKeyboard
 
 func _process(_delta):
+    # TODO: good simple demo with comments
     if p_open[0]:
         show_demo()
+    ImGui.ShowDemoWindow()
 
 func show_demo():
     ImGui.Begin("GDScript Demo", p_open, ImGui.WindowFlags_MenuBar)
@@ -32,9 +34,9 @@ func show_demo():
     ImGui.Text("Selected item: " + items[p_item[0]])
     ImGui.ListBox("listbox", p_listitem, items, items.size(), 3)
     ImGui.Text("Selected item: " + items[p_listitem[0]])
+    if ImGui.ImageButton("imgbtn", tex, Vector2(100, 100)):
+        print("click")
     ImGui.End()
-
-    ImGui.ShowDemoWindow()
 
 func _on_imgui_layout():
     ImGui.SetNextWindowPos(Vector2i(200, 200), ImGui.Cond_Once)
