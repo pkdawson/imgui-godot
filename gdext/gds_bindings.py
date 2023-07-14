@@ -525,6 +525,7 @@ class JsonParser:
 
 
 def main():
+    os.makedirs("gen", exist_ok=True)
     dear_bindings.convert_header(
         "imgui/imgui.h", "gen/cimgui", "dear_bindings/src/templates"
     )
