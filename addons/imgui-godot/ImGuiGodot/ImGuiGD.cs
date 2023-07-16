@@ -115,11 +115,7 @@ public static class ImGuiGD
     {
         ImGui.Render();
 
-        var io = ImGui.GetIO();
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-        {
-            ImGui.UpdatePlatformWindows();
-        }
+        ImGui.UpdatePlatformWindows();
         Internal.State.Instance.Renderer.RenderDrawData();
     }
 

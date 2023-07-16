@@ -102,6 +102,7 @@ internal sealed class Input
         if (evt is InputEventMouseMotion mm)
         {
             consumed = io.WantCaptureMouse;
+            mm.Dispose();
         }
         else if (evt is InputEventMouseButton mb)
         {
