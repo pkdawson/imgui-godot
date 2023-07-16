@@ -24,20 +24,16 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Build
-        run: dotnet build
-
       - name: Download Godot
         run: |
           cd $HOME
           wget https://github.com/godotengine/godot/releases/download/${{ env.gdver }}/Godot_v${{ env.gdver }}_mono_linux_x86_64.zip
           unzip Godot_v${{ env.gdver }}_mono_linux_x86_64.zip
 
-      # HACK: no better solution for now
-      - name: Import resources
+      - name: Import resources and build
         run: |
           export gdbin=$HOME/Godot_v${{ env.gdver }}_mono_linux_x86_64/Godot_v${{ env.gdver }}_mono_linux.x86_64
-          timeout 45 $gdbin --headless --editor || true
+          $gdbin --headless --build-solutions --quit
 
       # TODO: run tests with the exported binary
       - name: Test

@@ -12,13 +12,15 @@ internal sealed class Input
     private Vector2 _mouseWheel = Vector2.Zero;
     private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private readonly Window _mainWindow;
+    private readonly bool _hasMouse;
 
     public Input(Window mainWindow)
     {
         _mainWindow = mainWindow;
+        _hasMouse = DisplayServer.HasFeature(DisplayServer.Feature.Mouse);
     }
 
-    public void Update(ImGuiIOPtr io)
+    private void UpdateMouse(ImGuiIOPtr io)
     {
         var mousePos = DisplayServer.MouseGetPosition();
 
@@ -66,6 +68,12 @@ internal sealed class Input
         {
             _currentCursor = ImGuiMouseCursor.None;
         }
+    }
+
+    public void Update(ImGuiIOPtr io)
+    {
+        if (_hasMouse)
+            UpdateMouse(io);
 
         CurrentSubViewport = null;
     }
