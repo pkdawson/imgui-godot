@@ -238,6 +238,20 @@ internal class RdRenderer : IRenderer
         }
     }
 
+    protected void FreeUnusedTextures()
+    {
+        // clean up unused textures
+        foreach (IntPtr texid in _uniformSets.Keys)
+        {
+            if (!_usedTextures.Contains(texid))
+            {
+                RD.FreeRid(_uniformSets[texid]);
+                _uniformSets.Remove(texid);
+            }
+        }
+        _usedTextures.Clear();
+    }
+
     public void RenderDrawData()
     {
         var pio = ImGui.GetPlatformIO();
@@ -251,6 +265,7 @@ internal class RdRenderer : IRenderer
                 RenderOne(GetFramebuffer(vprid), vp.DrawData);
             }
         }
+        FreeUnusedTextures();
     }
 
     protected void RenderOne(Rid fb, ImDrawDataPtr drawData)
@@ -289,8 +304,6 @@ internal class RdRenderer : IRenderer
             _vtxBuffer = RD.VertexBufferCreate((uint)(drawData.TotalVtxCount * vertSize));
             _vtxBufferSize = drawData.TotalVtxCount;
         }
-
-        _usedTextures.Clear();
 
         // check if our font texture is still valid
         foreach (var kv in _uniformSets)
@@ -362,16 +375,6 @@ internal class RdRenderer : IRenderer
 #if IMGUI_GODOT_DEV
         RD.DrawCommandEndLabel();
 #endif
-
-        // clean up unused textures
-        foreach (IntPtr texid in _uniformSets.Keys)
-        {
-            if (!_usedTextures.Contains(texid))
-            {
-                RD.FreeRid(_uniformSets[texid]);
-                _uniformSets.Remove(texid);
-            }
-        }
     }
 
     public void OnHide()

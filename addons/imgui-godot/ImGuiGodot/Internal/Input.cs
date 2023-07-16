@@ -143,6 +143,7 @@ internal sealed class Input
                     break;
             };
             consumed = io.WantCaptureMouse;
+            mb.Dispose();
         }
         else if (evt is InputEventKey k)
         {
@@ -158,11 +159,13 @@ internal sealed class Input
                 }
             }
             consumed = io.WantCaptureKeyboard || io.WantTextInput;
+            k.Dispose();
         }
         else if (evt is InputEventPanGesture pg)
         {
             _mouseWheel = new(-pg.Delta.X, -pg.Delta.Y);
             consumed = io.WantCaptureMouse;
+            pg.Dispose();
         }
         else if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.NavEnableGamepad))
         {
@@ -174,6 +177,7 @@ internal sealed class Input
                     io.AddKeyEvent(igk, jb.Pressed);
                     consumed = true;
                 }
+                jb.Dispose();
             }
             else if (evt is InputEventJoypadMotion jm)
             {
@@ -206,6 +210,7 @@ internal sealed class Input
                         break;
                 };
                 consumed = true;
+                jm.Dispose();
             }
         }
 

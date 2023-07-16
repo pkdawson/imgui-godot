@@ -97,5 +97,6 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
                 RenderOne(kv.Item1, kv.Item2);
         }
         FreeAll(dataArray);
+        FreeUnusedTextures();
     }
 }
