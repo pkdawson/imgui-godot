@@ -28,6 +28,7 @@ internal sealed class Input
         {
             if (io.WantSetMousePos)
             {
+#if GODOT4_1_OR_GREATER
                 // WarpMouse is relative to the current focused window
                 int[] windows = DisplayServer.GetWindowList();
                 foreach (int w in windows)
@@ -39,6 +40,7 @@ internal sealed class Input
                         break;
                     }
                 }
+#endif
             }
             else
             {
