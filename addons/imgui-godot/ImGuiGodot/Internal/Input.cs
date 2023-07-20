@@ -28,7 +28,17 @@ internal sealed class Input
         {
             if (io.WantSetMousePos)
             {
-                // TODO: get current focused window
+                // WarpMouse is relative to the current focused window
+                int[] windows = DisplayServer.GetWindowList();
+                foreach (int w in windows)
+                {
+                    if (DisplayServer.WindowIsFocused(w))
+                    {
+                        var winPos = DisplayServer.WindowGetPosition(w);
+                        Godot.Input.WarpMouse(new(io.MousePos.X - winPos.X, io.MousePos.Y - winPos.Y));
+                        break;
+                    }
+                }
             }
             else
             {
