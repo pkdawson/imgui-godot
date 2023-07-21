@@ -68,6 +68,7 @@ public static class ImGuiGD
             renderer = RendererType.Canvas;
         }
 
+        // there's no way to get the actual current thread model, eg if --render-thread is used
         int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
 
         Internal.State.Instance = new(mainWindow, mainSubViewport, renderer switch

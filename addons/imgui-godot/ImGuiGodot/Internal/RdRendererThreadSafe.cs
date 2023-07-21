@@ -1,16 +1,69 @@
 using Godot;
 using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using SharedList = ImGuiGodot.Internal.DisposableList<Godot.Rid, ImGuiGodot.Internal.ClonedDrawData>;
+
 namespace ImGuiGodot.Internal;
+
+internal sealed class ClonedDrawData : IDisposable
+{
+    public ImDrawDataPtr Data { get; private set; }
+
+    public unsafe ClonedDrawData(ImDrawDataPtr inp)
+    {
+        long ddsize = Marshal.SizeOf<ImDrawData>();
+
+        // start with a shallow copy
+        Data = new(ImGui.MemAlloc((uint)ddsize));
+        Buffer.MemoryCopy(inp.NativePtr, Data.NativePtr, ddsize, ddsize);
+
+        // clone the draw data
+        Data.NativePtr->CmdLists = (ImDrawList**)ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * inp.CmdListsCount));
+        for (int i = 0; i < inp.CmdListsCount; ++i)
+        {
+            Data.NativePtr->CmdLists[i] = inp.CmdListsRange[i].CloneOutput().NativePtr;
+        }
+    }
+
+    public unsafe void Dispose()
+    {
+        if (Data.NativePtr == null)
+            return;
+
+        for (int i = 0; i < Data.CmdListsCount; ++i)
+        {
+            Data.CmdListsRange[i].Destroy();
+        }
+        ImGui.MemFree(Data.CmdLists);
+        Data.Destroy();
+        Data = new(null);
+    }
+}
+
+internal sealed class DisposableList<T, U> : List<Tuple<T, U>>, IDisposable where U : IDisposable
+{
+    public DisposableList() : base() { }
+    public DisposableList(int capacity) : base(capacity) { }
+
+    public void Dispose()
+    {
+        foreach (var tuple in this)
+        {
+            tuple.Item2.Dispose();
+        }
+        Clear();
+    }
+}
 
 internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 {
     public new string Name => "imgui_impl_godot4_rd_mt";
 
     private readonly object _sharedDataLock = new();
-    private Tuple<Rid, ImDrawDataPtr>[] _dataToDraw = null;
+    private SharedList _dataToDraw;
 
     public RdRendererThreadSafe() : base()
     {
@@ -23,80 +76,51 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         RenderingServer.FramePreDraw -= OnFramePreDraw;
     }
 
-    private static unsafe ImDrawDataPtr CopyDrawData(ImDrawDataPtr drawData)
-    {
-        long ddsize = Marshal.SizeOf<ImDrawData>();
-        ImDrawDataPtr rv = new(ImGui.MemAlloc((uint)ddsize));
-        Buffer.MemoryCopy(drawData.NativePtr, rv.NativePtr, ddsize, ddsize);
-        rv.CmdLists = ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * drawData.CmdListsCount));
-
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
-        {
-            rv.NativePtr->CmdLists[i] = drawData.CmdListsRange[i].CloneOutput().NativePtr;
-        }
-        return rv;
-    }
-
-    private static unsafe void FreeDrawData(ImDrawDataPtr drawData)
-    {
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
-        {
-            drawData.CmdListsRange[i].Destroy();
-        }
-        ImGui.MemFree(drawData.CmdLists);
-        ImGui.MemFree((IntPtr)drawData.NativePtr);
-    }
-
-    private static void FreeAll(Tuple<Rid, ImDrawDataPtr>[] array)
-    {
-        foreach (var kv in array)
-        {
-            FreeDrawData(kv.Item2);
-        }
-    }
-
     public new void RenderDrawData()
     {
         var pio = ImGui.GetPlatformIO();
-        var newData = new Tuple<Rid, ImDrawDataPtr>[pio.Viewports.Size];
+        var newData = new SharedList(pio.Viewports.Size);
 
         for (int i = 0; i < pio.Viewports.Size; ++i)
         {
-            // TODO: skip minimized windows
             var vp = pio.Viewports[i];
+            if (vp.Flags.HasFlag(ImGuiViewportFlags.IsMinimized))
+                continue;
+
             ReplaceTextureRids(vp.DrawData);
             Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
-            newData[i] = new(GetFramebuffer(vprid), CopyDrawData(vp.DrawData));
+            newData.Add(new(GetFramebuffer(vprid), new(vp.DrawData)));
         }
 
         lock (_sharedDataLock)
         {
             // if a frame was skipped, free old data
-            if (_dataToDraw != null)
-                FreeAll(_dataToDraw);
+            _dataToDraw?.Dispose();
             _dataToDraw = newData;
+        }
+    }
+
+    private SharedList TakeSharedData()
+    {
+        lock (_sharedDataLock)
+        {
+            var rv = _dataToDraw;
+            _dataToDraw = null;
+            return rv ?? new();
         }
     }
 
     private void OnFramePreDraw()
     {
-        Tuple<Rid, ImDrawDataPtr>[] dataArray = null;
-        lock (_sharedDataLock)
-        {
-            // take ownership of shared data
-            dataArray = _dataToDraw;
-            _dataToDraw = null;
-        }
-
-        if (dataArray == null)
-            return;
+        // take ownership of shared data
+        using SharedList dataArray = TakeSharedData();
 
         foreach (var kv in dataArray)
         {
             if (RD.FramebufferIsValid(kv.Item1))
-                RenderOne(kv.Item1, kv.Item2);
+                RenderOne(kv.Item1, kv.Item2.Data);
         }
-        FreeAll(dataArray);
+
         FreeUnusedTextures();
     }
 }
