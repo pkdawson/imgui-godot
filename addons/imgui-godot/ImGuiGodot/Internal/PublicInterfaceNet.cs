@@ -35,6 +35,7 @@ public class PublicInterfaceNet : IPublicInterface
             renderer = RendererType.Canvas;
         }
 
+        // there's no way to get the actual current thread model, eg if --render-thread is used
         int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
 
         State.Instance = new(mainWindow, mainSubViewport, renderer switch
@@ -79,11 +80,7 @@ public class PublicInterfaceNet : IPublicInterface
     {
         ImGui.Render();
 
-        var io = ImGui.GetIO();
-        if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-        {
-            ImGui.UpdatePlatformWindows();
-        }
+        ImGui.UpdatePlatformWindows();
         State.Instance.Renderer.RenderDrawData();
     }
 

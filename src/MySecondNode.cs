@@ -16,10 +16,18 @@ public partial class MySecondNode : Node
 
     private static bool fontLoaded = false;
     private static System.Numerics.Vector4 myTextColor = Colors.Aquamarine.ToVector4();
-    private static readonly ImGuiWindowFlags cswinflags = ImGuiWindowFlags.NoDecoration |
-        ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings |
-        ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoMove;
-    private static readonly string versionString = $"Godot {Engine.GetVersionInfo()["string"].AsString()} with .NET {System.Environment.Version}";
+
+    private static readonly ImGuiWindowFlags cswinflags =
+        ImGuiWindowFlags.NoDecoration |
+        ImGuiWindowFlags.AlwaysAutoResize |
+        ImGuiWindowFlags.NoSavedSettings |
+        ImGuiWindowFlags.NoFocusOnAppearing |
+        ImGuiWindowFlags.NoNav |
+        ImGuiWindowFlags.NoMove;
+
+    private static readonly string versionString =
+        $"Godot {Engine.GetVersionInfo()["string"].AsString()} with .NET " +
+        $"{System.Environment.Version}";
 
     public override void _EnterTree()
     {
@@ -32,7 +40,8 @@ public partial class MySecondNode : Node
 
             // use Hack for the default glyphs, M+2 for Japanese
             ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18);
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22, merge: true);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22,
+                merge: true);
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();
@@ -61,25 +70,32 @@ public partial class MySecondNode : Node
         float fh = ImGui.GetFrameHeight();
 
         var mainVpPos = ImGui.GetMainViewport().WorkPos;
+
         ImGui.SetNextWindowPos(new(mainVpPos.X + 10, mainVpPos.Y + 10));
         ImGui.Begin("change scene window", cswinflags);
+
         if (ImGui.Button("change scene"))
-        {
             GetTree().ChangeSceneToFile("res://data/demo.tscn");
-        }
+
         ImGui.End();
 
-        ImGui.SetNextWindowPos(new(fh, ImGui.GetIO().DisplaySize.Y - (11 * fh) - 5.0f), ImGuiCond.Once);
+        ImGui.SetNextWindowPos(new(fh, ImGui.GetIO().DisplaySize.Y - (11 * fh) - 5.0f),
+            ImGuiCond.Once);
+
         ImGui.SetNextWindowSize(new(18 * fh, 11 * fh), ImGuiCond.Once);
+
         if (ImGui.Begin("SubViewport (press R to reset)"))
         {
             var size = ImGui.GetContentRegionAvail();
             if (size.X > 5 && size.Y > 5)
             {
-                vp.CallDeferred(SubViewport.MethodName.SetSize, new Vector2I((int)size.X - 5, (int)size.Y - 5));
+                vp.CallDeferred(SubViewport.MethodName.SetSize,
+                    new Vector2I((int)size.X - 5, (int)size.Y - 5));
+
                 Widgets.SubViewport(vp);
             }
         }
+
         ImGui.End();
 
         ImGui.SetNextWindowPos(new(fh, 3 * fh), ImGuiCond.Once);
@@ -95,10 +111,10 @@ public partial class MySecondNode : Node
 
         ImGui.Separator();
         ImGui.Text("ImageButton");
+
         if (Widgets.ImageButton("myimgbtn", iconTexture, new(128, 128)))
-        {
             ++numClicks;
-        }
+
         ImGui.SameLine();
         ImGui.Text($"{numClicks}");
 
@@ -110,6 +126,7 @@ public partial class MySecondNode : Node
 
         ImGui.Separator();
         ImGui.Text("GUI scale");
+
         for (int i = 0; i < 6; ++i)
         {
             float s = 0.75f + (i * 0.25f);
@@ -118,22 +135,24 @@ public partial class MySecondNode : Node
                 scale = s;
                 CallDeferred("OnScaleChanged");
             }
+
             if (i < 5) ImGui.SameLine();
         }
 
         ImGui.Separator();
         var col = background.Color.ToVector3();
+
         if (ImGui.ColorEdit3("background color", ref col))
-        {
             background.Color = col.ToColor();
-        }
+
         ImGui.End();
     }
 
     private void OnShowHidePressed()
     {
         ImGuiGD.Visible = !ImGuiGD.Visible;
-        GetNode<Button>("%ShowHideButton").Text = ImGuiGD.Visible ? "hide" : "show";
+        GetNode<Button>("%ShowHideButton").Text = ImGuiGD.Visible
+            ? "hide" : "show";
     }
 
     private void OnScaleChanged()

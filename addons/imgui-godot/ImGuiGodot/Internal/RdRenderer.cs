@@ -30,7 +30,11 @@ internal class RdRenderer : IRenderer
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
-    // private readonly Godot.Collections.Array<Rid> _storageTextures = new();
+#if GODOT4_1_OR_GREATER
+    private readonly Godot.Collections.Array<Rid> _storageTextures = new();
+#else
+    private readonly Godot.Collections.Array _storageTextures = new();
+#endif
     private readonly Godot.Collections.Array<Rid> _srcBuffers = new();
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
@@ -234,6 +238,20 @@ internal class RdRenderer : IRenderer
         }
     }
 
+    protected void FreeUnusedTextures()
+    {
+        // clean up unused textures
+        foreach (IntPtr texid in _uniformSets.Keys)
+        {
+            if (!_usedTextures.Contains(texid))
+            {
+                RD.FreeRid(_uniformSets[texid]);
+                _uniformSets.Remove(texid);
+            }
+        }
+        _usedTextures.Clear();
+    }
+
     public void RenderDrawData()
     {
         var pio = ImGui.GetPlatformIO();
@@ -247,6 +265,7 @@ internal class RdRenderer : IRenderer
                 RenderOne(GetFramebuffer(vprid), vp.DrawData);
             }
         }
+        FreeUnusedTextures();
     }
 
     protected void RenderOne(Rid fb, ImDrawDataPtr drawData)
@@ -286,8 +305,6 @@ internal class RdRenderer : IRenderer
             _vtxBufferSize = drawData.TotalVtxCount;
         }
 
-        _usedTextures.Clear();
-
         // check if our font texture is still valid
         foreach (var kv in _uniformSets)
         {
@@ -302,7 +319,7 @@ internal class RdRenderer : IRenderer
         long dl = RD.DrawListBegin(fb,
                 RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
                 RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
-                _clearColors, 1f, 0, _zeroRect);
+                _clearColors, 1f, 0, _zeroRect, _storageTextures);
 
         RD.DrawListBindRenderPipeline(dl, _pipeline);
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);
@@ -358,16 +375,6 @@ internal class RdRenderer : IRenderer
 #if IMGUI_GODOT_DEV
         RD.DrawCommandEndLabel();
 #endif
-
-        // clean up unused textures
-        foreach (IntPtr texid in _uniformSets.Keys)
-        {
-            if (!_usedTextures.Contains(texid))
-            {
-                RD.FreeRid(_uniformSets[texid]);
-                _uniformSets.Remove(texid);
-            }
-        }
     }
 
     public void OnHide()
