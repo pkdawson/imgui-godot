@@ -3,7 +3,7 @@ extends EditorPlugin
 
 func _enter_tree():
     if not ClassDB.class_exists("ImGuiGD"):
-        print("restarting editor")
+        push_warning("imgui-godot-native: restarting editor to complete installation")
         get_editor_interface().restart_editor()
         return
     var igd = Engine.get_singleton("ImGuiGD")

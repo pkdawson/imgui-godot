@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://sdgew7sm2686"]
 
 [ext_resource type="Texture2D" uid="uid://2cvgmt2fmpao" path="res://data/icon.svg" id="1_c7hdb"]
-[ext_resource type="Script" path="res://data/MyTool.cs" id="1_gk4tn"]
+[ext_resource type="Script" path="res://src/MyTool.cs" id="1_gk4tn"]
 [ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="3_fjiyg"]
 [ext_resource type="Script" path="res://src/MyNode.cs" id="3_qvd0t"]
 [ext_resource type="ButtonGroup" uid="uid://ucf261yyiwkq" path="res://data/buttongroup.tres" id="4_7oj01"]
@@ -92,8 +92,10 @@ offset_left = -64.0
 offset_top = -64.0
 grow_horizontal = 0
 grow_vertical = 0
+pivot_offset = Vector2(32, 32)
 texture = ExtResource("1_c7hdb")
 expand_mode = 1
+script = ExtResource("1_gk4tn")
 
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonCIE" to="MyNode" method="OnContentScaleCIE"]
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonD" to="MyNode" method="OnContentScaleDisabled"]
