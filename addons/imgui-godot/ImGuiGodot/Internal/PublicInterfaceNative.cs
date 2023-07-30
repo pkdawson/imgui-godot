@@ -96,9 +96,10 @@ public class PublicInterfaceNative : IPublicInterface
         }
     }
 
-    public void ToolInit()
+    public bool ToolInit()
     {
         _gd.Call("ToolInit");
+        return true;
     }
 
     public void Update(double delta, Vector2 displaySize)

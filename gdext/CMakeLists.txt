@@ -16,7 +16,7 @@ if (NOT TARGET godot-cpp)
     FetchContent_Declare(
         godot-cpp
         GIT_REPOSITORY https://github.com/godotengine/godot-cpp
-        GIT_TAG master # watch out, something will break eventually
+        GIT_TAG godot-4.1.1-stable
     )
     FetchContent_MakeAvailable(godot-cpp)
 endif()

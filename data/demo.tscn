@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://sdgew7sm2686"]
+[gd_scene load_steps=6 format=3 uid="uid://sdgew7sm2686"]
 
 [ext_resource type="Texture2D" uid="uid://2cvgmt2fmpao" path="res://data/icon.svg" id="1_c7hdb"]
+[ext_resource type="Script" path="res://data/MyTool.cs" id="1_gk4tn"]
 [ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="3_fjiyg"]
 [ext_resource type="Script" path="res://src/MyNode.cs" id="3_qvd0t"]
 [ext_resource type="ButtonGroup" uid="uid://ucf261yyiwkq" path="res://data/buttongroup.tres" id="4_7oj01"]
@@ -29,7 +30,9 @@ offset_right = 128.0
 offset_bottom = 128.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(256, 256)
 texture = ExtResource("1_c7hdb")
+script = ExtResource("1_gk4tn")
 
 [node name="Button1" type="Button" parent="."]
 layout_mode = 0

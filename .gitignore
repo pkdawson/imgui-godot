@@ -31,3 +31,6 @@ gdext/gen/
 gdext/proj/doc/
 gdext/proj/modules/
 gdext/proj/platform/
+
+addons/imgui-godot-native/
+gdext/proj/addons/imgui-godot/

@@ -143,10 +143,14 @@ public static class ImGuiGD
         _gd.SyncImGuiPtrs();
     }
 
-    public static void ToolInit()
+    /// <summary>
+    /// Call in _Ready() to use ImGui in editor
+    /// Requires imgui-godot-native
+    /// </summary>
+    public static bool ToolInit()
     {
         SyncImGuiPtrs();
-        _gd.ToolInit();
+        return _gd.ToolInit();
     }
 
     public static bool SubViewportWidget(SubViewport vp)

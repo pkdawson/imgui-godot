@@ -140,9 +140,9 @@ public class PublicInterfaceNet : IPublicInterface
     {
     }
 
-    public void ToolInit()
+    public bool ToolInit()
     {
-        GD.PrintErr("ImGui tool scripts require imgui-godot-native");
+        return false;
     }
 
     public void Update(double delta, Vector2 displaySize)
