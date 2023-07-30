@@ -31,6 +31,9 @@ struct Input::Impl
     Vector2 currentSubViewportPos;
     Vector2 mouseWheel;
     ImGuiMouseCursor currentCursor = ImGuiMouseCursor_None;
+    bool hasMouse;
+
+    void UpdateMouse();
 };
 
 namespace {
@@ -75,13 +78,14 @@ void UpdateKeyMods(ImGuiIO& io)
 Input::Input(Window* mainWindow) : impl(std::make_unique<Impl>())
 {
     impl->mainWindow = mainWindow;
+    impl->hasMouse = DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_MOUSE);
 }
 
 Input::~Input()
 {
 }
 
-void Input::Update()
+void Input::Impl::UpdateMouse()
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -92,7 +96,17 @@ void Input::Update()
     {
         if (io.WantSetMousePos)
         {
-            // TODO:
+            // WarpMouse is relative to the current focused window
+            PackedInt32Array windows = DS->get_window_list();
+            for (int w : windows)
+            {
+                if (DS->window_is_focused(w))
+                {
+                    Vector2i winPos = DS->window_get_position(w);
+                    DS->warp_mouse({(int)io.MousePos.x - winPos.x, (int)io.MousePos.y - winPos.y});
+                    break;
+                }
+            }
         }
         else
         {
@@ -107,29 +121,35 @@ void Input::Update()
         }
         else
         {
-            Vector2i winPos = impl->mainWindow->get_position();
+            Vector2i winPos = mainWindow->get_position();
             io.AddMousePosEvent(mousePos.x - winPos.x, mousePos.y - winPos.y);
         }
     }
 
-    if (impl->mouseWheel != Vector2())
+    if (mouseWheel != Vector2())
     {
-        io.AddMouseWheelEvent(impl->mouseWheel.x, impl->mouseWheel.y);
-        impl->mouseWheel = Vector2();
+        io.AddMouseWheelEvent(mouseWheel.x, mouseWheel.y);
+        mouseWheel = Vector2();
     }
 
     if (io.WantCaptureMouse && !(io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange))
     {
         ImGuiMouseCursor newCursor = ImGui::GetMouseCursor();
-        if (newCursor != impl->currentCursor)
+        if (newCursor != currentCursor)
         {
             DS->cursor_set_shape(ToCursorShape(newCursor));
         }
     }
     else
     {
-        impl->currentCursor = ImGuiMouseCursor_None;
+        currentCursor = ImGuiMouseCursor_None;
     }
+}
+
+void Input::Update()
+{
+    if (impl->hasMouse)
+        impl->UpdateMouse();
 
     impl->currentSubViewport = nullptr;
 }

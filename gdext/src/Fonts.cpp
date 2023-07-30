@@ -66,6 +66,10 @@ struct Fonts::Impl
         style.LogSliderDeadzone = defaultStyle.LogSliderDeadzone;
         style.TabRounding = defaultStyle.TabRounding;
         style.TabMinWidthForCloseButton = defaultStyle.TabMinWidthForCloseButton;
+        style.SeparatorTextPadding = defaultStyle.SeparatorTextPadding;
+#if IMGUI_VERSION_NUM >= 18980
+        style.DockingSeparatorSize = defaultStyle.DockingSeparatorSize;
+#endif
         style.DisplayWindowPadding = defaultStyle.DisplayWindowPadding;
         style.DisplaySafeAreaPadding = defaultStyle.DisplaySafeAreaPadding;
         style.MouseCursorScale = defaultStyle.MouseCursorScale;

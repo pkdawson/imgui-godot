@@ -2,6 +2,8 @@ using Godot;
 using ImGuiGodot;
 using ImGuiNET;
 
+namespace DemoProject;
+
 [Tool]
 public partial class MyTool : TextureRect
 {
