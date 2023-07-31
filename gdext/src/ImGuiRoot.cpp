@@ -34,7 +34,8 @@ void ImGuiRoot::_get_property_list(List<PropertyInfo>* p_list) const
 
 void ImGuiRoot::_enter_tree()
 {
-    if (get_parent() == get_window())
+    Node* parent = get_parent();
+    if (parent == get_window() || parent->get_name() == StringName("ImGuiGodotNativeEditorPlugin"))
     {
         Engine::get_singleton()->register_singleton("ImGuiRoot", this);
         ImGuiLayer* igl = memnew(ImGuiLayer);

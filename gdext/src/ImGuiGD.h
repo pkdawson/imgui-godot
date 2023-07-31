@@ -22,7 +22,7 @@ protected:
     static void _bind_methods();
 
 public:
-    static void InitEditor();
+    static void InitEditor(Node* parent);
     static void ToolInit();
 
     static void Connect(const Callable& cb);

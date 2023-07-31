@@ -13,7 +13,7 @@ namespace ImGui::Godot {
 
 void ImGuiGD::_bind_methods()
 {
-    ClassDB::bind_static_method("ImGuiGD", D_METHOD("InitEditor"), &ImGuiGD::InitEditor);
+    ClassDB::bind_static_method("ImGuiGD", D_METHOD("InitEditor", "parent"), &ImGuiGD::InitEditor);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("ToolInit"), &ImGuiGD::ToolInit);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("ResetFonts"), &ImGuiGD::ResetFonts);
@@ -37,22 +37,20 @@ void ImGuiGD::_bind_methods()
                                 &ImGuiGD::GetImGuiPtrs);
 }
 
-void ImGuiGD::InitEditor()
+void ImGuiGD::InitEditor(Node* parent)
 {
 #ifdef DEBUG_ENABLED
     if (!Engine::get_singleton()->is_editor_hint())
         return;
 
-    MainLoop* ml = Engine::get_singleton()->get_main_loop();
-    SceneTree* st = Object::cast_to<SceneTree>(ml);
-    if (st && !Engine::get_singleton()->has_singleton("ImGuiRoot"))
+    if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
     {
         String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
         if (ResourceLoader::get_singleton()->exists(resPath))
         {
             Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
             if (scene.is_valid())
-                st->get_root()->call_deferred("add_child", scene->instantiate());
+                parent->add_child(scene->instantiate());
         }
     }
 #endif
