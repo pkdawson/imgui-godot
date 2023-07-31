@@ -29,23 +29,6 @@ void ImGuiGD::_bind_methods()
 
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("SetVisible", "visible"), &ImGuiGD::SetVisible);
 
-    ClassDB::bind_static_method("ImGuiGD",
-                                D_METHOD("Image", "tex", "size", "uv0", "uv1", "tint_col", "border_col"),
-                                &ImGuiGD::Image,
-                                DEFVAL(Vector2(0, 0)),
-                                DEFVAL(Vector2(1, 1)),
-                                DEFVAL(Color(1, 1, 1, 1)),
-                                DEFVAL(Color(0, 0, 0, 0)));
-
-    ClassDB::bind_static_method(
-        "ImGuiGD",
-        D_METHOD("ImageButton", "str_id", "tex", "size", "uv0", "uv1", "tint_col", "border_col"),
-        &ImGuiGD::ImageButton,
-        DEFVAL(Vector2(0, 0)),
-        DEFVAL(Vector2(1, 1)),
-        DEFVAL(Color(0, 0, 0, 0)),
-        DEFVAL(Color(1, 1, 1, 1)));
-
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("SubViewport", "svp"), &ImGuiGD::SubViewport);
 
     ClassDB::bind_static_method("ImGuiGD", D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
@@ -133,7 +116,7 @@ PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize,
     if (version != String(ImGui::GetVersion()) || ioSize != sizeof(ImGuiIO) || vertSize != sizeof(ImDrawVert) ||
         idxSize != sizeof(ImDrawIdx) || charSize != sizeof(ImWchar))
     {
-        UtilityFunctions::printerr("ImGui version mismatch, use ", ImGui::GetVersion(), "-docking");
+        UtilityFunctions::push_error("ImGui version mismatch, use ", ImGui::GetVersion(), "-docking");
         return {};
     }
 
@@ -149,19 +132,6 @@ PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize,
     rv[1] = reinterpret_cast<int64_t>(alloc_func);
     rv[2] = reinterpret_cast<int64_t>(free_func);
     return rv;
-}
-
-void ImGuiGD::Image(Texture2D* tex, const Vector2& size, const Vector2& uv0, const Vector2& uv1, const Color& tint_col,
-                    const Color& border_col)
-{
-    ImGui::Godot::Image(tex, size, uv0, uv1, tint_col, border_col);
-}
-
-bool ImGuiGD::ImageButton(const String& str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0,
-                          const Vector2& uv1, const Color& bg_col, const Color& tint_col)
-
-{
-    return ImGui::Godot::ImageButton(str_id, tex, size, uv0, uv1, bg_col, tint_col);
 }
 
 bool ImGuiGD::SubViewport(godot::SubViewport* svp)

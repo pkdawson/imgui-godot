@@ -42,13 +42,13 @@ public partial class MyTool : Control
         }
     }
 
-    private void ImGuiLayout()
-    {
-        if (_window2Open)
-        {
-            ImGui.Begin("tool signal window", ref _window2Open);
-            ImGui.Text("always visible");
-            ImGui.End();
-        }
-    }
+    //private void ImGuiLayout()
+    //{
+    //    if (_window2Open)
+    //    {
+    //        ImGui.Begin("tool signal window", ref _window2Open);
+    //        ImGui.Text("always visible");
+    //        ImGui.End();
+    //    }
+    //}
 }

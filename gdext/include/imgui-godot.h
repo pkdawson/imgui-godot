@@ -195,6 +195,12 @@ inline void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 
     ImGui::Image(BindTexture(tex), size, uv0, uv1, tint_col, border_col);
 }
 
+inline void Image(const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
+                  const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0})
+{
+    ImGui::Image(BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
+}
+
 inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
@@ -202,11 +208,11 @@ inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size,
     return ImGui::ImageButton(str_id, BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
-inline bool ImageButton(const String& str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
-    return ImGui::ImageButton(str_id.utf8().get_data(), BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+    return ImGui::ImageButton(str_id, BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
 }
 
 #ifdef IGN_GDEXT
