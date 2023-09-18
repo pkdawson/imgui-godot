@@ -7,7 +7,7 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class Input
 {
-    internal SubViewport CurrentSubViewport { get; set; }
+    internal SubViewport? CurrentSubViewport { get; set; }
     internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private Vector2 _mouseWheel = Vector2.Zero;
     private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
@@ -132,7 +132,6 @@ internal sealed class Input
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
 #if GODOT_WINDOWS && !GODOT4_1_OR_GREATER
                     // if the left mouse button is released, the mouse almost certainly should not be captured
-                    // TODO: remove workaround after Godot 4.2
                     if (viewportsEnable && !mb.Pressed)
                         Viewports.MouseCaptureWorkaround();
 #endif

@@ -5,7 +5,7 @@ namespace DemoProject;
 
 public partial class MyNode : Node
 {
-    private Window _window;
+    private Window _window = null!;
 
     public override void _Ready()
     {

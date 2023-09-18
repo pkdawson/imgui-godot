@@ -6,18 +6,18 @@ namespace DemoProject;
 
 public partial class MySecondNode : Node
 {
-    private Texture2D iconTexture;
-    private SubViewport vp;
-    private int iconSize = 64;
-    private float scale;
-    private ImFontPtr proggy;
-    private ColorRect background;
-    private int numClicks = 0;
+    private Texture2D _iconTexture = null!;
+    private SubViewport _vp = null!;
+    private int _iconSize = 64;
+    private float _scale;
+    private ImFontPtr _proggy;
+    private ColorRect _background = null!;
+    private int _numClicks = 0;
 
-    private static bool fontLoaded = false;
-    private static System.Numerics.Vector4 myTextColor = Colors.Aquamarine.ToVector4();
+    private static bool _fontLoaded = false;
+    private static readonly System.Numerics.Vector4 MyTextColor = Colors.Aquamarine.ToVector4();
 
-    private static readonly ImGuiWindowFlags cswinflags =
+    private static readonly ImGuiWindowFlags CsWinFlags =
         ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize |
         ImGuiWindowFlags.NoSavedSettings |
@@ -25,13 +25,13 @@ public partial class MySecondNode : Node
         ImGuiWindowFlags.NoNav |
         ImGuiWindowFlags.NoMove;
 
-    private static readonly string versionString =
+    private static readonly string VersionString =
         $"Godot {Engine.GetVersionInfo()["string"].AsString()} with .NET " +
         $"{System.Environment.Version}";
 
     public override void _EnterTree()
     {
-        if (!fontLoaded)
+        if (!_fontLoaded)
         {
             // it's easier to configure fonts in the ImGuiLayer scene,
             // but here's how it can be done in code
@@ -45,21 +45,21 @@ public partial class MySecondNode : Node
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();
-            fontLoaded = true;
+            _fontLoaded = true;
         }
 
         var io = ImGui.GetIO();
         io.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
-        proggy = io.Fonts.Fonts[1];
-        background = GetNode<ColorRect>("/root/Background");
+        _proggy = io.Fonts.Fonts[1];
+        _background = GetNode<ColorRect>("/root/Background");
     }
 
     public override void _Ready()
     {
         ImGuiLayer.Connect(OnImGuiLayout);
-        iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
-        vp = GetNode<SubViewport>("%SubViewport");
-        scale = ImGuiGD.Scale;
+        _iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
+        _vp = GetNode<SubViewport>("%SubViewport");
+        _scale = ImGuiGD.Scale;
         GetNode<Button>("%ShowHideButton").Pressed += OnShowHidePressed;
     }
 
@@ -72,7 +72,7 @@ public partial class MySecondNode : Node
         var mainVpPos = ImGui.GetMainViewport().WorkPos;
 
         ImGui.SetNextWindowPos(new(mainVpPos.X + 10, mainVpPos.Y + 10));
-        ImGui.Begin("change scene window", cswinflags);
+        ImGui.Begin("change scene window", CsWinFlags);
 
         if (ImGui.Button("change scene"))
             GetTree().ChangeSceneToFile("res://data/demo.tscn");
@@ -89,10 +89,10 @@ public partial class MySecondNode : Node
             var size = ImGui.GetContentRegionAvail();
             if (size.X > 5 && size.Y > 5)
             {
-                vp.CallDeferred(SubViewport.MethodName.SetSize,
+                _vp.CallDeferred(SubViewport.MethodName.SetSize,
                     new Vector2I((int)size.X - 5, (int)size.Y - 5));
 
-                Widgets.SubViewport(vp);
+                Widgets.SubViewport(_vp);
             }
         }
 
@@ -100,23 +100,23 @@ public partial class MySecondNode : Node
 
         ImGui.SetNextWindowPos(new(fh, 3 * fh), ImGuiCond.Once);
         ImGui.Begin("Scene 2", ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.PushFont(proggy);
-        ImGui.TextColored(myTextColor, versionString);
+        ImGui.PushFont(_proggy);
+        ImGui.TextColored(MyTextColor, VersionString);
         ImGui.PopFont();
 
         ImGui.Separator();
         ImGui.Text("Simple texture");
-        Widgets.Image(iconTexture, new(iconSize, iconSize));
-        ImGui.DragInt("size", ref iconSize, 1.0f, 32, 512);
+        Widgets.Image(_iconTexture, new(_iconSize, _iconSize));
+        ImGui.DragInt("size", ref _iconSize, 1.0f, 32, 512);
 
         ImGui.Separator();
         ImGui.Text("ImageButton");
 
-        if (Widgets.ImageButton("myimgbtn", iconTexture, new(128, 128)))
-            ++numClicks;
+        if (Widgets.ImageButton("myimgbtn", _iconTexture, new(128, 128)))
+            ++_numClicks;
 
         ImGui.SameLine();
-        ImGui.Text($"{numClicks}");
+        ImGui.Text($"{_numClicks}");
 
         ImGui.Separator();
         ImGui.Text("Unicode");
@@ -130,9 +130,9 @@ public partial class MySecondNode : Node
         for (int i = 0; i < 6; ++i)
         {
             float s = 0.75f + (i * 0.25f);
-            if (ImGui.RadioButton($"{s:0.00}", scale == s))
+            if (ImGui.RadioButton($"{s:0.00}", _scale == s))
             {
-                scale = s;
+                _scale = s;
                 CallDeferred("OnScaleChanged");
             }
 
@@ -140,10 +140,10 @@ public partial class MySecondNode : Node
         }
 
         ImGui.Separator();
-        var col = background.Color.ToVector3();
+        var col = _background.Color.ToVector3();
 
         if (ImGui.ColorEdit3("background color", ref col))
-            background.Color = col.ToColor();
+            _background.Color = col.ToColor();
 
         ImGui.End();
     }
@@ -157,9 +157,9 @@ public partial class MySecondNode : Node
 
     private void OnScaleChanged()
     {
-        ImGuiGD.Scale = scale;
+        ImGuiGD.Scale = _scale;
 
         // old font pointers are invalid after changing scale
-        proggy = ImGui.GetIO().Fonts.Fonts[1];
+        _proggy = ImGui.GetIO().Fonts.Fonts[1];
     }
 }

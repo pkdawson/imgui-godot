@@ -8,11 +8,11 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class Fonts
 {
-    private Texture2D _fontTexture;
+    private Texture2D? _fontTexture;
 
     private sealed class FontParams
     {
-        public FontFile Font { get; init; }
+        public FontFile? Font { get; init; }
         public int FontSize { get; init; }
         public bool Merge { get; init; }
     }
@@ -31,12 +31,12 @@ internal sealed class Fonts
         _fontConfiguration.Clear();
     }
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge)
     {
         _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
     }
 
-    private static unsafe void AddFontToAtlas(FontFile fontData, int fontSize, bool merge)
+    private static unsafe void AddFontToAtlas(FontFile? fontData, int fontSize, bool merge)
     {
         ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
         if (merge)
