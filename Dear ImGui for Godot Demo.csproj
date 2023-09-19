@@ -11,6 +11,6 @@
     <EmbeddedResource Remove="doc\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.89.7.1" />
+    <PackageReference Include="ImGui.NET" Version="1.89.9.1" />
   </ItemGroup>
 </Project>

@@ -114,8 +114,7 @@ internal sealed class Fonts
         style.TabRounding = defaultStyle.TabRounding;
         style.TabMinWidthForCloseButton = defaultStyle.TabMinWidthForCloseButton;
         style.SeparatorTextPadding = defaultStyle.SeparatorTextPadding;
-        // TODO: 1.89.8
-        // style.DockingSeparatorSize = defaultStyle.DockingSeparatorSize;
+        style.DockingSeparatorSize = defaultStyle.DockingSeparatorSize;
         style.DisplayWindowPadding = defaultStyle.DisplayWindowPadding;
         style.DisplaySafeAreaPadding = defaultStyle.DisplaySafeAreaPadding;
         style.MouseCursorScale = defaultStyle.MouseCursorScale;

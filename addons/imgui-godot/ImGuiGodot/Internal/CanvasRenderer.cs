@@ -65,9 +65,9 @@ internal sealed class CanvasRenderer : IRenderer
 
         // allocate our CanvasItem pool as needed
         int neededNodes = 0;
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
+        for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
-            var cmdBuf = drawData.CmdListsRange[i].CmdBuffer;
+            var cmdBuf = drawData.CmdLists[i].CmdBuffer;
             neededNodes += cmdBuf.Size;
             for (int j = 0; j < cmdBuf.Size; ++j)
             {
@@ -96,9 +96,9 @@ internal sealed class CanvasRenderer : IRenderer
         drawData.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
         int nodeN = 0;
 
-        for (int n = 0; n < drawData.CmdListsCount; ++n)
+        for (int n = 0; n < drawData.CmdLists.Size; ++n)
         {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[n];
+            ImDrawListPtr cmdList = drawData.CmdLists[n];
 
             int nVert = cmdList.VtxBuffer.Size;
 
