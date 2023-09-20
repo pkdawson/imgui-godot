@@ -180,9 +180,9 @@ internal class RdRenderer : IRenderer
         byte[] idxBuf = _bufPool.Rent(idxBufSize);
         int vertBufSize = drawData.TotalVtxCount * vertSize;
         byte[] vertBuf = _bufPool.Rent(vertBufSize);
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
+        for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[i];
+            ImDrawListPtr cmdList = drawData.CmdLists[i];
 
             int vertBytes = cmdList.VtxBuffer.Size * vertSize;
             Marshal.Copy(cmdList.VtxBuffer.Data, vertBuf, globalVtxOffset, vertBytes);
@@ -227,9 +227,9 @@ internal class RdRenderer : IRenderer
 
     protected static void ReplaceTextureRids(ImDrawDataPtr drawData)
     {
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
+        for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[i];
+            ImDrawListPtr cmdList = drawData.CmdLists[i];
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
@@ -326,9 +326,9 @@ internal class RdRenderer : IRenderer
 
         int globalIdxOffset = 0;
         int globalVtxOffset = 0;
-        for (int i = 0; i < drawData.CmdListsCount; ++i)
+        for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[i];
+            ImDrawListPtr cmdList = drawData.CmdLists[i];
 
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {

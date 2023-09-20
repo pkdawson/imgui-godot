@@ -36,7 +36,7 @@ Click `Build` in the top right, then run the project.
 
 1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
 
-2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder. Or [use Chicken](#package-managers).
+2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder. Or [use GodotEnv](#package-managers).
 
 3. In Visual Studio or another IDE, open the solution and allow unsafe code, and install `ImGui.NET` with NuGet. Save and return to Godot.
 
@@ -78,7 +78,7 @@ That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
 ## Package managers
 
-[Chicken](https://github.com/chickensoft-games/Chicken/) is a dotnet tool that can manage Godot addons with just a little configuration. Use something like:
+[GodotEnv](https://github.com/chickensoft-games/GodotEnv/) is a dotnet tool that can manage Godot addons with just a little configuration. Use something like:
 
 ```json
 {

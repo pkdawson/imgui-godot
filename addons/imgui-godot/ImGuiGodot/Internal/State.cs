@@ -33,7 +33,7 @@ internal sealed class State : IDisposable
     internal Fonts Fonts { get; private set; }
     internal Input Input { get; private set; }
     internal IRenderer Renderer { get; private set; }
-    internal static State Instance { get; set; }
+    internal static State Instance { get; set; } = null!;
 
     public State(Window mainWindow, Rid mainSubViewport, IRenderer renderer)
     {

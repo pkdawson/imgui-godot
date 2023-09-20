@@ -14,6 +14,9 @@ internal sealed class ClonedDrawData : IDisposable
 
     public unsafe ClonedDrawData(ImDrawDataPtr inp)
     {
+        // deep swap is difficult because ImGui still owns the draw lists
+        // TODO: revisit when Godot's threaded renderer is stable
+
         long ddsize = Marshal.SizeOf<ImDrawData>();
 
         // start with a shallow copy
@@ -21,10 +24,12 @@ internal sealed class ClonedDrawData : IDisposable
         Buffer.MemoryCopy(inp.NativePtr, Data.NativePtr, ddsize, ddsize);
 
         // clone the draw data
-        Data.NativePtr->CmdLists = (ImDrawList**)ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * inp.CmdListsCount));
-        for (int i = 0; i < inp.CmdListsCount; ++i)
+        int numLists = inp.CmdLists.Size;
+        IntPtr cmdListPtrs = ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * numLists));
+        Data.NativePtr->CmdLists = new ImVector(numLists, numLists, cmdListPtrs);
+        for (int i = 0; i < inp.CmdLists.Size; ++i)
         {
-            Data.NativePtr->CmdLists[i] = inp.CmdListsRange[i].CloneOutput().NativePtr;
+            Data.CmdLists[i] = (IntPtr)inp.CmdLists[i].CloneOutput().NativePtr;
         }
     }
 
@@ -35,9 +40,8 @@ internal sealed class ClonedDrawData : IDisposable
 
         for (int i = 0; i < Data.CmdListsCount; ++i)
         {
-            Data.CmdListsRange[i].Destroy();
+            Data.CmdLists[i].Destroy();
         }
-        ImGui.MemFree(Data.CmdLists);
         Data.Destroy();
         Data = new(null);
     }
@@ -63,7 +67,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
     public new string Name => "godot4_net_rd_mt";
 
     private readonly object _sharedDataLock = new();
-    private SharedList _dataToDraw;
+    private SharedList? _dataToDraw;
 
     public RdRendererThreadSafe() : base()
     {

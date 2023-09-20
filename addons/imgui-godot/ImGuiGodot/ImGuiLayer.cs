@@ -2,24 +2,17 @@ using Godot;
 using ImGuiGodot.Internal;
 using ImGuiNET;
 using System;
-#if IMGUI_GODOT_DEV
-using System.Runtime.InteropServices;
-#endif
 
 namespace ImGuiGodot;
 
 public partial class ImGuiLayer : CanvasLayer
 {
-    public static ImGuiLayer Instance { get; private set; }
-
-#if IMGUI_GODOT_DEV
-    public ImGuiAPI API = new();
-#endif
+    public static ImGuiLayer Instance { get; private set; } = null!;
 
     [Export(PropertyHint.ResourceType, "ImGuiConfig")]
-    public GodotObject Config = null;
+    public GodotObject Config = null!;
 
-    private Window _window;
+    private Window _window = null!;
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _ci;
@@ -31,8 +24,8 @@ public partial class ImGuiLayer : CanvasLayer
     private sealed partial class ImGuiHelper : Node
     {
         private uint _counter = 0;
-        private ImGuiLayer _parent;
-        private Window _window;
+        private ImGuiLayer _parent = null!;
+        private Window _window = null!;
 
         public override void _Ready()
         {
@@ -127,9 +120,6 @@ public partial class ImGuiLayer : CanvasLayer
         ImGuiGD.Shutdown();
         RenderingServer.FreeRid(_ci);
         RenderingServer.FreeRid(_subViewportRid);
-#if IMGUI_GODOT_DEV
-        API.Free();
-#endif
     }
 
     private void OnChangeVisibility()
@@ -191,36 +181,6 @@ public partial class ImGuiLayer : CanvasLayer
     {
         ImGuiGD.Connect(d);
     }
-
-#if IMGUI_GODOT_DEV
-#pragma warning disable CA1822 // Mark members as static
-    // WIP, this will probably be changed or moved
-    public long[] GetImGuiPtrs(string version, int ioSize, int vertSize, int idxSize)
-    {
-        if (version != ImGui.GetVersion() ||
-            ioSize != Marshal.SizeOf<ImGuiIO>() ||
-            vertSize != Marshal.SizeOf<ImDrawVert>() ||
-            idxSize != sizeof(ushort))
-        {
-            throw new PlatformNotSupportedException($"ImGui version mismatch, use {ImGui.GetVersion()}-docking");
-        }
-
-        IntPtr mem_alloc = IntPtr.Zero;
-        IntPtr mem_free = IntPtr.Zero;
-        unsafe
-        {
-            void* user_data = null;
-            ImGui.GetAllocatorFunctions(ref mem_alloc, ref mem_free, ref user_data);
-        }
-
-        return new[] {
-            (long)ImGui.GetCurrentContext(),
-            (long)mem_alloc,
-            (long)mem_free
-        };
-    }
-#pragma warning restore CA1822 // Mark members as static
-#endif
 
     private void CheckContentScale()
     {

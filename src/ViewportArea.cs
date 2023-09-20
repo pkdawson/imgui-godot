@@ -4,15 +4,15 @@ namespace DemoProject;
 
 public partial class ViewportArea : Area3D
 {
-    private MeshInstance3D piece;
-    private MeshInstance3D board;
-    private Texture2D decalTexture;
+    private MeshInstance3D _piece = null!;
+    private MeshInstance3D _board = null!;
+    private Texture2D _decalTexture = null!;
 
     public override void _Ready()
     {
-        piece = GetNode<MeshInstance3D>("%Piece");
-        board = GetNode<MeshInstance3D>("%Board");
-        decalTexture = GD.Load<Texture2D>("res://data/icon.svg");
+        _piece = GetNode<MeshInstance3D>("%Piece");
+        _board = GetNode<MeshInstance3D>("%Board");
+        _decalTexture = GD.Load<Texture2D>("res://data/icon.svg");
     }
 
     public override void _InputEvent(Camera3D cam, InputEvent evt, Vector3 pos,
@@ -20,15 +20,15 @@ public partial class ViewportArea : Area3D
     {
         if (evt is InputEventMouseMotion)
         {
-            piece.Position = pos;
+            _piece.Position = pos;
         }
         else if (evt is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.Left)
             {
-                board.AddChild(new Decal
+                _board.AddChild(new Decal
                 {
-                    TextureAlbedo = decalTexture,
+                    TextureAlbedo = _decalTexture,
                     Scale = new(10, 10, 10),
                     Position = pos,
                     CullMask = 1,
@@ -36,10 +36,10 @@ public partial class ViewportArea : Area3D
             }
             else if (mb.ButtonIndex == MouseButton.Right)
             {
-                var child = board.GetChildOrNull<Decal>(-1);
+                var child = _board.GetChildOrNull<Decal>(-1);
                 if (child != null)
                 {
-                    board.RemoveChild(child);
+                    _board.RemoveChild(child);
                 }
             }
         }
@@ -51,9 +51,9 @@ public partial class ViewportArea : Area3D
         {
             if (k.Keycode == Key.R)
             {
-                foreach (var child in board.GetChildren())
+                foreach (var child in _board.GetChildren())
                 {
-                    board.RemoveChild(child);
+                    _board.RemoveChild(child);
                     child.QueueFree();
                 }
             }
