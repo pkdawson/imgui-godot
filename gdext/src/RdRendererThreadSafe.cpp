@@ -13,24 +13,30 @@ struct RdRendererThreadSafe::Impl
     {
         ClonedDrawData(ImDrawData* drawData)
         {
-            data = (ImDrawData*)IM_ALLOC(sizeof(ImDrawData));
-            memcpy(data, drawData, sizeof(ImDrawData));
-            data->CmdLists = (ImDrawList**)IM_ALLOC(sizeof(void*) * drawData->CmdListsCount);
+            data = IM_NEW(ImDrawData);
+            data->Valid = drawData->Valid;
+            data->CmdListsCount = drawData->CmdListsCount;
+            data->TotalIdxCount = drawData->TotalIdxCount;
+            data->TotalVtxCount = drawData->TotalVtxCount;
+            data->CmdLists = {};
+            data->DisplayPos = drawData->DisplayPos;
+            data->DisplaySize = drawData->DisplaySize;
+            data->FramebufferScale = drawData->FramebufferScale;
+            data->OwnerViewport = drawData->OwnerViewport;
 
-            for (int i = 0; i < drawData->CmdListsCount; ++i)
+            for (int i = 0; i < drawData->CmdLists.Size; ++i)
             {
-                data->CmdLists[i] = drawData->CmdLists[i]->CloneOutput();
+                data->CmdLists.push_back(drawData->CmdLists[i]->CloneOutput());
             }
         }
 
         ~ClonedDrawData()
         {
-            for (int i = 0; i < data->CmdListsCount; ++i)
+            for (int i = 0; i < data->CmdLists.Size; ++i)
             {
                 IM_DELETE(data->CmdLists[i]);
             }
-            IM_FREE(data->CmdLists);
-            IM_FREE(data);
+            IM_DELETE(data);
         }
 
         ImDrawData* data;

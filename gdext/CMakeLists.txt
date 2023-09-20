@@ -22,14 +22,21 @@ if (NOT TARGET godot-cpp)
 endif()
 
 find_package(freetype CONFIG REQUIRED)
+find_package(unofficial-lunasvg CONFIG REQUIRED)
 
 add_library(imgui-godot-native SHARED)
 target_compile_features(imgui-godot-native PRIVATE cxx_std_20)
 target_compile_definitions(imgui-godot-native PUBLIC
     IMGUI_USER_CONFIG="imconfig-godot.h"
     IMGUI_ENABLE_FREETYPE
+    IMGUI_ENABLE_FREETYPE_LUNASVG
     IGN_EXPORT
     )
+
+if (MSVC)
+    target_compile_options(godot-cpp PRIVATE "/MP")
+    target_compile_options(imgui-godot-native PRIVATE "/MP")
+endif()
 
 add_subdirectory(src)
 
@@ -52,6 +59,7 @@ target_sources(imgui-godot-native PRIVATE
 target_link_libraries(imgui-godot-native PUBLIC
     godot-cpp
     freetype
+    unofficial::lunasvg::lunasvg
     )
 
 target_include_directories(imgui-godot-native PRIVATE src imgui gen PUBLIC include)
