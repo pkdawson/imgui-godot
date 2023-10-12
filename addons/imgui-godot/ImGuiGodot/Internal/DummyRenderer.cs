@@ -5,7 +5,7 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class DummyRenderer : IRenderer
 {
-    public string Name => "imgui_impl_godot4_dummy";
+    public string Name => "godot4_net_dummy";
 
     public void Init(ImGuiIOPtr io)
     {

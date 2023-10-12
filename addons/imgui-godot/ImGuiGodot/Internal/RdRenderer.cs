@@ -7,6 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
+internal sealed class RdRendererException : ApplicationException
+{
+    public RdRendererException(string message) : base(message)
+    {
+    }
+}
+
 internal class RdRenderer : IRenderer
 {
     protected readonly RenderingDevice RD;
@@ -39,21 +46,21 @@ internal class RdRenderer : IRenderer
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
 
-    public string Name => "imgui_impl_godot4_rd";
+    public string Name => "godot4_net_rd";
 
     public RdRenderer()
     {
         RD = RenderingServer.GetRenderingDevice();
         if (RD is null)
-        {
-            throw new PlatformNotSupportedException("failed to get RenderingDevice");
-        }
+            throw new RdRendererException("failed to get RenderingDevice");
 
         // set up everything to match the official Vulkan backend as closely as possible
 
         // compiling from source takes ~400ms, so we use a SPIR-V resource
         using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
         _shader = RD.ShaderCreateFromSpirV(spirv);
+        if (!_shader.IsValid)
+            throw new RdRendererException("failed to create shader");
 
 #if IMGUI_GODOT_DEV
 #pragma warning disable CA2201
@@ -62,7 +69,7 @@ internal class RdRenderer : IRenderer
             SourceFragment = _fragmentShaderSource,
             SourceVertex = _vertexShaderSource,
         };
-        using var freshSpirv = RD.ShaderCompileSpirvFromSource(src);
+        using var freshSpirv = RD.ShaderCompileSpirVFromSource(src);
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeFragment, freshSpirv.BytecodeFragment))
             throw new Exception("fragment bytecode mismatch");
         if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeVertex, freshSpirv.BytecodeVertex))
@@ -137,6 +144,9 @@ internal class RdRenderer : IRenderer
             new RDPipelineDepthStencilState(),
             blendData);
 
+        if (!_pipeline.IsValid)
+            throw new RdRendererException("failed to create pipeline");
+
         // sampler used for all textures
         using var samplerState = new RDSamplerState
         {
@@ -148,6 +158,8 @@ internal class RdRenderer : IRenderer
             RepeatW = RenderingDevice.SamplerRepeatMode.Repeat
         };
         _sampler = RD.SamplerCreate(samplerState);
+        if (!_sampler.IsValid)
+            throw new RdRendererException("failed to create sampler");
 
         _srcBuffers.Resize(3);
         _uniformArray.Resize(1);

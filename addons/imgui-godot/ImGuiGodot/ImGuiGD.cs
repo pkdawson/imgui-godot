@@ -71,13 +71,32 @@ public static class ImGuiGD
         // there's no way to get the actual current thread model, eg if --render-thread is used
         int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
 
-        Internal.State.Instance = new(mainWindow, mainSubViewport, renderer switch
+        Internal.IRenderer internalRenderer;
+        try
         {
-            RendererType.Dummy => new Internal.DummyRenderer(),
-            RendererType.Canvas => new Internal.CanvasRenderer(),
-            RendererType.RenderingDevice => threadModel == 2 ? new Internal.RdRendererThreadSafe() : new Internal.RdRenderer(),
-            _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
-        });
+            internalRenderer = renderer switch
+            {
+                RendererType.Dummy => new Internal.DummyRenderer(),
+                RendererType.Canvas => new Internal.CanvasRenderer(),
+                RendererType.RenderingDevice => threadModel == 2 ? new Internal.RdRendererThreadSafe() : new Internal.RdRenderer(),
+                _ => throw new ArgumentException("Invalid renderer", nameof(renderer))
+            };
+        }
+        catch (Exception e)
+        {
+            if (renderer == RendererType.RenderingDevice)
+            {
+                GD.PushWarning($"imgui-godot: falling back to Canvas renderer ({e.Message})");
+                internalRenderer = new Internal.CanvasRenderer();
+            }
+            else
+            {
+                GD.PushError("imgui-godot: failed to init renderer");
+                internalRenderer = new Internal.DummyRenderer();
+            }
+        }
+
+        Internal.State.Instance = new(mainWindow, mainSubViewport, internalRenderer);
         Internal.State.Instance.Renderer.InitViewport(mainSubViewport);
     }
 

@@ -1,13 +1,15 @@
 # Dear ImGui plugin for Godot 4 (C#)
 
+![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
 ![](https://img.shields.io/static/v1?label=Godot&message=4.1&color=blue&logo=godotengine)
 ![](https://img.shields.io/static/v1?label=Godot&message=4.0&color=blue&logo=godotengine)
+
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
 ![screenshot](doc/screenshot.png)
 
-Dear ImGui is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/mellinoe/ImGui.NET), allows you to use ImGui in Godot with C#.
+[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#.
 
 After installing the plugin, usage is as simple as this:
 ```csharp
@@ -28,9 +30,6 @@ Download
 
 ## Getting Started
 
-### Demo
-
-Click `Build` in the top right, then run the project.
 
 ### Your project
 
@@ -52,12 +51,14 @@ Click `Build` in the top right, then run the project.
 
 In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't set the `ProcessPriority` in any of your Nodes to either `int.MinValue` or `int.MaxValue`.
 
-You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using thread groups in Godot 4.1 or later.
+### Signals
+
+You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
 ```csharp
 ImGuiLayer.Connect(OnImGuiLayout);
 ```
 
-### ImGuiLayer
+### Configuration
 
 If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the scene `res://addons/imgui-godot/ImGuiLayer.tscn` and set its `Config` property.
 
@@ -103,4 +104,4 @@ Hack font distributed under the [MIT license](https://github.com/source-foundry/
 
 M PLUS 2 font licensed under the SIL Open Font License, Version 1.1.
 
-This plugin's functionality relies heavily on [ImGui.NET](https://github.com/mellinoe/ImGui.NET) by Eric Mellino
+This plugin's functionality relies heavily on [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET) by Eric Mellino
