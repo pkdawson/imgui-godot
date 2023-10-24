@@ -59,23 +59,19 @@ internal class RdRenderer : IRenderer
         // compiling from source takes ~400ms, so we use a SPIR-V resource
         using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
         _shader = RD.ShaderCreateFromSpirV(spirv);
-        if (!_shader.IsValid)
-            throw new RdRendererException("failed to create shader");
 
-#if IMGUI_GODOT_DEV
-#pragma warning disable CA2201
-        using var src = new RDShaderSource()
+        if (!_shader.IsValid)
         {
-            SourceFragment = _fragmentShaderSource,
-            SourceVertex = _vertexShaderSource,
-        };
-        using var freshSpirv = RD.ShaderCompileSpirVFromSource(src);
-        if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeFragment, freshSpirv.BytecodeFragment))
-            throw new Exception("fragment bytecode mismatch");
-        if (!System.Linq.Enumerable.SequenceEqual(spirv.BytecodeVertex, freshSpirv.BytecodeVertex))
-            throw new Exception("vertex bytecode mismatch");
-#pragma warning restore CA2201
-#endif
+            using var src = new RDShaderSource()
+            {
+                SourceFragment = _fragmentShaderSource,
+                SourceVertex = _vertexShaderSource,
+            };
+            using var freshSpirv = RD.ShaderCompileSpirVFromSource(src);
+            _shader = RD.ShaderCreateFromSpirV(freshSpirv);
+            if (!_shader.IsValid)
+                throw new RdRendererException("failed to create shader");
+        }
 
         // create vertex format
         uint vtxStride = (uint)Marshal.SizeOf<ImDrawVert>();
@@ -420,7 +416,6 @@ internal class RdRenderer : IRenderer
         return fb;
     }
 
-#if IMGUI_GODOT_DEV
     // shader source borrowed from imgui_impl_vulkan.cpp
     private static readonly string _vertexShaderSource = @"#version 450 core
 layout(location = 0) in vec2 aPos;
@@ -446,5 +441,4 @@ void main()
 {
     fColor = In.Color * texture(sTexture, In.UV.st);
 }";
-#endif
 }
