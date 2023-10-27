@@ -76,6 +76,18 @@ This is the rest of the public API. You typically won't need to call any of thes
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
+### Mobile export
+
+ImGui.NET does not support iOS or Android, so all ImGui related code should be conditionally disabled if you want to export for these platforms. For example:
+
+```csharp
+#if !GODOT_MOBILE
+ImGui.Begin("my window");
+// ...
+ImGui.End();
+#endif
+```
+
 
 ## Package managers
 
