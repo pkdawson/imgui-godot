@@ -36,6 +36,9 @@ public static class ImGuiGD
         get => _scale;
         set
         {
+            if (_inProcessFrame)
+                throw new InvalidOperationException("scale cannot be changed during process frame");
+
             if (_scale != value && value >= 0.25f)
             {
                 _scale = value;
@@ -44,6 +47,8 @@ public static class ImGuiGD
         }
     }
     private static float _scale = 1.0f;
+
+    private static bool _inProcessFrame = false;
 
     public static IntPtr BindTexture(Texture2D tex)
     {
@@ -117,6 +122,9 @@ public static class ImGuiGD
 
     public static void RebuildFontAtlas()
     {
+        if (_inProcessFrame)
+            throw new InvalidOperationException("fonts cannot be changed during process frame");
+
         Internal.State.Instance.Fonts.RebuildFontAtlas(ScaleToDpi ? Scale * DpiFactor : Scale);
     }
 
@@ -128,6 +136,7 @@ public static class ImGuiGD
 
         Internal.State.Instance.Input.Update(io);
 
+        _inProcessFrame = true;
         ImGui.NewFrame();
     }
 
@@ -137,6 +146,7 @@ public static class ImGuiGD
 
         ImGui.UpdatePlatformWindows();
         Internal.State.Instance.Renderer.RenderDrawData();
+        _inProcessFrame = false;
     }
 
     public static void Shutdown()

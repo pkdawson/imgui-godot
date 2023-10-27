@@ -133,7 +133,7 @@ public partial class MySecondNode : Node
             if (ImGui.RadioButton($"{s:0.00}", _scale == s))
             {
                 _scale = s;
-                CallDeferred("OnScaleChanged");
+                CallDeferred(nameof(OnScaleChanged));
             }
 
             if (i < 5) ImGui.SameLine();
