@@ -17,7 +17,7 @@ internal sealed class RdRendererException : ApplicationException
 internal class RdRenderer : IRenderer
 {
     protected readonly RenderingDevice RD;
-    private readonly Color[] _clearColors = { new Color(0f, 0f, 0f, 0f) };
+    private readonly Color[] _clearColors = { new(0f, 0f, 0f, 0f) };
     private readonly Rid _shader;
     private readonly Rid _pipeline;
     private readonly Rid _sampler;
@@ -56,22 +56,10 @@ internal class RdRenderer : IRenderer
 
         // set up everything to match the official Vulkan backend as closely as possible
 
-        // compiling from source takes ~400ms, so we use a SPIR-V resource
-        using var spirv = ResourceLoader.Load<RDShaderSpirV>("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
-        _shader = RD.ShaderCreateFromSpirV(spirv);
-
+        using var shaderFile = ResourceLoader.Load<RDShaderFile>("res://addons/imgui-godot/data/ImGuiShader.glsl");
+        _shader = RD.ShaderCreateFromSpirV(shaderFile.GetSpirV());
         if (!_shader.IsValid)
-        {
-            using var src = new RDShaderSource()
-            {
-                SourceFragment = _fragmentShaderSource,
-                SourceVertex = _vertexShaderSource,
-            };
-            using var freshSpirv = RD.ShaderCompileSpirVFromSource(src);
-            _shader = RD.ShaderCreateFromSpirV(freshSpirv);
-            if (!_shader.IsValid)
-                throw new RdRendererException("failed to create shader");
-        }
+            throw new RdRendererException("failed to create shader");
 
         // create vertex format
         uint vtxStride = (uint)Marshal.SizeOf<ImDrawVert>();
@@ -415,30 +403,4 @@ internal class RdRenderer : IRenderer
         _framebuffers[vprid] = fb;
         return fb;
     }
-
-    // shader source borrowed from imgui_impl_vulkan.cpp
-    private static readonly string _vertexShaderSource = @"#version 450 core
-layout(location = 0) in vec2 aPos;
-layout(location = 1) in vec2 aUV;
-layout(location = 2) in vec4 aColor;
-layout(push_constant) uniform uPushConstant { vec2 uScale; vec2 uTranslate; } pc;
-
-out gl_PerVertex { vec4 gl_Position; };
-layout(location = 0) out struct { vec4 Color; vec2 UV; } Out;
-
-void main()
-{
-    Out.Color = aColor;
-    Out.UV = aUV;
-    gl_Position = vec4(aPos * pc.uScale + pc.uTranslate, 0, 1);
-}";
-
-    private static readonly string _fragmentShaderSource = @"#version 450 core
-layout(location = 0) out vec4 fColor;
-layout(set=0, binding=0) uniform sampler2D sTexture;
-layout(location = 0) in struct { vec4 Color; vec2 UV; } In;
-void main()
-{
-    fColor = In.Color * texture(sTexture, In.UV.st);
-}";
 }
