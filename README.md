@@ -86,7 +86,7 @@ That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "godot-4.1",
+      "checkout": "4.x",
       "subfolder": "addons/imgui-godot"
     }
   }
