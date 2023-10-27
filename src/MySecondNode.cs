@@ -6,6 +6,7 @@ namespace DemoProject;
 
 public partial class MySecondNode : Node
 {
+#if !GODOT_MOBILE
     private Texture2D _iconTexture = null!;
     private SubViewport _vp = null!;
     private int _iconSize = 64;
@@ -162,4 +163,5 @@ public partial class MySecondNode : Node
         // old font pointers are invalid after changing scale
         _proggy = ImGui.GetIO().Fonts.Fonts[1];
     }
+#endif
 }

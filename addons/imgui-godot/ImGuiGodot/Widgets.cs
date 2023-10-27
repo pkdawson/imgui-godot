@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -87,3 +88,4 @@ public static class Widgets
         return ImGui.ImageButton(str_id, (IntPtr)tex.GetRid().Id, size, uv0, uv1, bg_col, tint_col);
     }
 }
+#endif

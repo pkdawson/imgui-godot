@@ -1,4 +1,5 @@
 using Godot;
+#if !GODOT_MOBILE
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -247,3 +248,17 @@ public partial class ImGuiLayer : CanvasLayer
         GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }
+#else
+namespace ImGuiNET
+{
+}
+
+namespace ImGuiGodot
+{
+    public partial class ImGuiLayer : CanvasLayer
+    {
+        [Export(PropertyHint.ResourceType, "ImGuiConfig")]
+        public GodotObject Config = null!;
+    }
+}
+#endif

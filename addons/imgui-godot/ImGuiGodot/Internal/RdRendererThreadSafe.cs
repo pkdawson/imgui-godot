@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -128,3 +129,4 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         FreeUnusedTextures();
     }
 }
+#endif

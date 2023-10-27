@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 
@@ -31,3 +32,4 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 }
+#endif

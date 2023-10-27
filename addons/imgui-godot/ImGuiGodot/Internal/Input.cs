@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -395,3 +396,4 @@ internal sealed class Input
         _ => ImGuiKey.None
     };
 }
+#endif

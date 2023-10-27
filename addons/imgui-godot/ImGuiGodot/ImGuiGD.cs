@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -249,3 +250,4 @@ public enum RendererType
     Canvas,
     RenderingDevice
 }
+#endif
