@@ -207,6 +207,7 @@ jobs:
           path: gdext/proj/addons/imgui-godot-native/bin/*.pdb
 
       - name: Prepare files
+        id: prep
         run: |
           ls -R
           mv gdext/proj/addons/imgui-godot-native addons/
@@ -215,54 +216,18 @@ jobs:
           cp -r gdext/include/*.h addons/imgui-godot-native/include/
           git submodule status gdext/imgui | awk '{print substr($1,2)}' > addons/imgui-godot-native/include/imgui-git-commit.txt
 
-      - name: Upload package
-        uses: actions/upload-artifact@v3
-        with:
-          name: imgui-godot-native
-          path: |
-            .
-            !.git*
-
-
-  # TODO: tests?
-
-  attach:
-    name: 📎Attach
-    if: github.event_name == 'release' && github.event.action == 'created'
-    needs: [package]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: imgui-godot-native
-          path: ~/pkg
-
-      - name: check
-        run: |
-          ls -R ~/pkg
-
-      - name: Create .zip
-        id: zip
-        run: |
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
           godot_ver=$(grep -m 1 compatibility_minimum < gdext/proj/addons/imgui-godot-native/imgui-godot-native.gdextension | sed 's/compatibility_minimum = //')
           plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
-          pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}.zip
+          pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}
           echo $pkgfn
-          echo "PKGFN=$pkgfn" >> $GITHUB_OUTPUT
-          outpath="$(pwd)/$pkgfn"
-          cd ~/pkg
-          zip -r $outpath *
-          ls -al $outpath
+          echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
 
-      - name: Upload to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Upload package
+        uses: actions/upload-artifact@v3
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref }}
-          file: ${{ steps.zip.outputs.PKGFN }}
+          name: ${{ steps.prep.outputs.pkgfn }}
+          path: |
+            .
+            !.git*

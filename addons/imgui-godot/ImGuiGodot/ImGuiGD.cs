@@ -58,7 +58,7 @@ public static class ImGuiGD
     private static float _scale = 1.0f;
 
     private static bool _inProcessFrame = false;
-    
+
     public static bool Visible
     {
         get => _visible;
