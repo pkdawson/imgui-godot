@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -177,3 +178,4 @@ internal sealed class Fonts
         ImGui.GetStyle().ScaleAllSizes(scale);
     }
 }
+#endif

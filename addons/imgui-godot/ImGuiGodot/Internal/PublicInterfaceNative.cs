@@ -9,9 +9,9 @@ public class PublicInterfaceNative : IPublicInterface
 {
     private readonly GodotObject _gd = Engine.GetSingleton("ImGuiGD");
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge)
     {
-        _gd.Call("AddFont", fontData, fontSize, merge);
+        _gd.Call("AddFont", fontData!, fontSize, merge);
     }
 
     public void Connect(Callable callable)

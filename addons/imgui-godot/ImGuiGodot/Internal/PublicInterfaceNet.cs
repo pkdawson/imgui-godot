@@ -6,7 +6,7 @@ namespace ImGuiGodot.Internal;
 
 public class PublicInterfaceNet : IPublicInterface
 {
-    public void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge)
     {
         State.Instance.Fonts.AddFont(fontData, fontSize, merge);
     }
@@ -38,13 +38,32 @@ public class PublicInterfaceNet : IPublicInterface
         // there's no way to get the actual current thread model, eg if --render-thread is used
         int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
 
-        State.Instance = new(mainWindow, mainSubViewport, renderer switch
+        IRenderer internalRenderer;
+        try
         {
-            RendererType.Dummy => new DummyRenderer(),
-            RendererType.Canvas => new CanvasRenderer(),
-            RendererType.RenderingDevice => threadModel == 2 ? new RdRendererThreadSafe() : new RdRenderer(),
-            _ => throw new ArgumentException($"Invalid renderer: {renderer}", nameof(cfg))
-        });
+            internalRenderer = renderer switch
+            {
+                RendererType.Dummy => new DummyRenderer(),
+                RendererType.Canvas => new CanvasRenderer(),
+                RendererType.RenderingDevice => threadModel == 2 ? new RdRendererThreadSafe() : new RdRenderer(),
+                _ => throw new ArgumentException("Invalid renderer in configuration", nameof(cfg))
+            };
+        }
+        catch (Exception e)
+        {
+            if (renderer == RendererType.RenderingDevice)
+            {
+                GD.PushWarning($"imgui-godot: falling back to Canvas renderer ({e.Message})");
+                internalRenderer = new CanvasRenderer();
+            }
+            else
+            {
+                GD.PushError("imgui-godot: failed to init renderer");
+                internalRenderer = new DummyRenderer();
+            }
+        }
+
+        State.Instance = new(mainWindow, mainSubViewport, internalRenderer);
         State.Instance.Renderer.InitViewport(mainSubViewport);
 
         ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));

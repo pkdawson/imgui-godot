@@ -43,8 +43,8 @@ libs += [
     "bz2",
     "libpng16" if windows else "png16",
     "zlib" if windows else "z",
-    "brotlidec-static",
-    "brotlicommon-static",
+    "brotlidec",
+    "brotlicommon",
 ]
 
 if env["platform"] == "macos":

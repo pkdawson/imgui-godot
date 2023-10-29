@@ -18,7 +18,7 @@ public interface IPublicInterface
     public void Connect(Callable callable);
 
     public void ResetFonts();
-    public void AddFont(FontFile fontData, int fontSize, bool merge);
+    public void AddFont(FontFile? fontData, int fontSize, bool merge);
     public void RebuildFontAtlas(float scale);
 
     public void SetIniFilename(ImGuiIOPtr io, string fileName);

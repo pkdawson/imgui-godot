@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using System;
 using System.Reflection;
@@ -32,3 +33,4 @@ internal static class Util
         return svp;
     }
 }
+#endif

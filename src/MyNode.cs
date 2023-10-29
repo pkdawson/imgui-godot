@@ -15,7 +15,9 @@ public partial class MyNode : Node
 
     public override void _Process(double delta)
     {
+#if !GODOT_MOBILE
         ImGui.ShowDemoWindow();
+#endif
     }
 
     private void OnButton1Pressed()

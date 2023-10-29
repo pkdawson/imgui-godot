@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -44,6 +45,9 @@ public static class ImGuiGD
         get => _scale;
         set
         {
+            if (_inProcessFrame)
+                throw new InvalidOperationException("scale cannot be changed during process frame");
+
             if (_scale != value && value >= 0.25f)
             {
                 _scale = value;
@@ -53,6 +57,8 @@ public static class ImGuiGD
     }
     private static float _scale = 1.0f;
 
+    private static bool _inProcessFrame = false;
+    
     public static bool Visible
     {
         get => _visible;
@@ -77,7 +83,7 @@ public static class ImGuiGD
         return (IntPtr)tex.GetRid().Id;
     }
 
-    public static void Init(Window mainWindow, Rid mainSubViewport, Resource configResource = null)
+    public static void Init(Window mainWindow, Rid mainSubViewport, Resource? configResource = null)
     {
         configResource ??= (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
         _gd.Init(mainWindow, mainSubViewport, configResource);
@@ -100,17 +106,22 @@ public static class ImGuiGD
 
     public static void RebuildFontAtlas()
     {
+        if (_inProcessFrame)
+            throw new InvalidOperationException("fonts cannot be changed during process frame");
+
         _gd.RebuildFontAtlas(Scale);
     }
 
     public static void Update(double delta, Vector2 displaySize)
     {
+        _inProcessFrame = true;
         _gd.Update(delta, displaySize);
     }
 
     public static void Render()
     {
         _gd.Render();
+        _inProcessFrame = false;
     }
 
     public static void Shutdown()
@@ -214,3 +225,4 @@ public static class ImGuiGD
         _gd.SetIniFilename(io, fileName);
     }
 }
+#endif

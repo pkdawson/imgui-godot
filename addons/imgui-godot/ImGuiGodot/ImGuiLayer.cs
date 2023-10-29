@@ -1,4 +1,5 @@
 using Godot;
+#if !GODOT_MOBILE
 using ImGuiGodot.Internal;
 using ImGuiNET;
 using System;
@@ -17,9 +18,9 @@ public partial class ImGuiLayer : CanvasLayer
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _ci;
     private Transform2D _finalTransform = Transform2D.Identity;
-    private ImGuiHelper _helper;
+    private ImGuiHelper _helper = null!;
     private bool _useNative = ProjectSettings.HasSetting("autoload/imgui_godot_native");
-    public Node Signaler { get; private set; }
+    public Node Signaler { get; private set; } = null!;
 
     private sealed partial class ImGuiHelper : Node
     {
@@ -70,7 +71,7 @@ public partial class ImGuiLayer : CanvasLayer
         if (_useNative)
         {
             ImGuiGD.SyncImGuiPtrs();
-            Instance = null;
+            Instance = null!;
             QueueFree();
             return;
         }
@@ -202,3 +203,17 @@ public partial class ImGuiLayer : CanvasLayer
         GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }
+#else
+namespace ImGuiNET
+{
+}
+
+namespace ImGuiGodot
+{
+    public partial class ImGuiLayer : CanvasLayer
+    {
+        [Export(PropertyHint.ResourceType, "ImGuiConfig")]
+        public GodotObject Config = null!;
+    }
+}
+#endif

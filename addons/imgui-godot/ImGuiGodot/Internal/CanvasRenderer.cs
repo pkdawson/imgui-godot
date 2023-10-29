@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -218,3 +219,4 @@ internal sealed class CanvasRenderer : IRenderer
         _canvasItemPools.Clear();
     }
 }
+#endif

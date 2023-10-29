@@ -1,3 +1,4 @@
+#if !GODOT_MOBILE
 using Godot;
 using ImGuiNET;
 using System;
@@ -96,3 +97,4 @@ internal sealed class State : IDisposable
         }
     }
 }
+#endif
