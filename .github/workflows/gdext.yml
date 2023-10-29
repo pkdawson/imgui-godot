@@ -184,6 +184,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - uses: actions/download-artifact@v3
         with:
@@ -218,11 +220,12 @@ jobs:
 
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
-          godot_ver=$(grep -m 1 compatibility_minimum < gdext/proj/addons/imgui-godot-native/imgui-godot-native.gdextension | sed 's/compatibility_minimum = //')
+          godot_ver=$(grep -m 1 compatibility_minimum < addons/imgui-godot-native/imgui-godot-native.gdextension | sed 's/compatibility_minimum = //')
           plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
           pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}
           echo $pkgfn
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
+          rm -rf gdext
 
       - name: Upload package
         uses: actions/upload-artifact@v3

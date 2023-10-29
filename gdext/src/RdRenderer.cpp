@@ -13,6 +13,7 @@
 #include <godot_cpp/classes/rd_pipeline_multisample_state.hpp>
 #include <godot_cpp/classes/rd_pipeline_rasterization_state.hpp>
 #include <godot_cpp/classes/rd_sampler_state.hpp>
+#include <godot_cpp/classes/rd_shader_file.hpp>
 #include <godot_cpp/classes/rd_shader_spirv.hpp>
 #include <godot_cpp/classes/rd_uniform.hpp>
 #include <godot_cpp/classes/rd_vertex_attribute.hpp>
@@ -182,10 +183,10 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
 RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
-    Ref<RDShaderSPIRV> spirv =
-        ResourceLoader::get_singleton()->load("res://addons/imgui-godot/data/ImGuiShaderSPIRV.tres");
+    Ref<RDShaderFile> shaderFile =
+        ResourceLoader::get_singleton()->load("res://addons/imgui-godot/data/ImGuiShader.glsl");
 
-    impl->shader = RD->shader_create_from_spirv(spirv);
+    impl->shader = RD->shader_create_from_spirv(shaderFile->get_spirv());
 
     TypedArray<RDVertexAttribute> vattrs;
 
