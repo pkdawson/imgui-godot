@@ -11,6 +11,12 @@ public partial class MyNode : Node
     {
         _window = GetWindow();
         GetNode<Button>("../Button1").Pressed += OnButton1Pressed;
+
+        if (DisplayServer.WindowGetVsyncMode() == DisplayServer.VSyncMode.Disabled)
+        {
+            int refreshRate = (int)DisplayServer.ScreenGetRefreshRate();
+            Engine.MaxFps = refreshRate > 0 ? refreshRate : 60;
+        }
     }
 
     public override void _Process(double delta)
