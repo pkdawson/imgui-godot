@@ -8,6 +8,7 @@ public partial class MySecondNode : Node
 {
 #if !GODOT_MOBILE
     private Texture2D _iconTexture = null!;
+    private AtlasTexture _atlasTexture = null!;
     private SubViewport _vp = null!;
     private int _iconSize = 64;
     private float _scale;
@@ -59,6 +60,7 @@ public partial class MySecondNode : Node
     {
         ImGuiLayer.Connect(OnImGuiLayout);
         _iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
+        _atlasTexture = GD.Load<AtlasTexture>("res://data/robot_eye.tres");
         _vp = GetNode<SubViewport>("%SubViewport");
         _scale = ImGuiGD.Scale;
         GetNode<Button>("%ShowHideButton").Pressed += OnShowHidePressed;
@@ -106,8 +108,10 @@ public partial class MySecondNode : Node
         ImGui.PopFont();
 
         ImGui.Separator();
-        ImGui.Text("Simple texture");
+        ImGui.Text("Textures");
         Widgets.Image(_iconTexture, new(_iconSize, _iconSize));
+        ImGui.SameLine();
+        Widgets.Image(_atlasTexture, new(_iconSize, _iconSize));
         ImGui.DragInt("size", ref _iconSize, 1.0f, 32, 512);
 
         ImGui.Separator();

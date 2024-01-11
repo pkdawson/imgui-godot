@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.1.2">
+<Project Sdk="Godot.NET.Sdk/4.2.1">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -11,6 +11,6 @@
     <EmbeddedResource Remove="doc\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.89.9.3" />
+    <PackageReference Include="ImGui.NET" Version="1.90.0.1" />
   </ItemGroup>
 </Project>
