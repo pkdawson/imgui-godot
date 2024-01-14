@@ -1,5 +1,5 @@
 using Godot;
-#if !GODOT_MOBILE
+#if GODOT_PC
 using ImGuiNET;
 using System;
 using System.Collections.Generic;

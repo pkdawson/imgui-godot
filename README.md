@@ -12,6 +12,7 @@
 [Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#.
 
 After installing the plugin, usage is as simple as this:
+
 ```csharp
 public partial class MyNode : Node
 {
@@ -29,7 +30,6 @@ Download
 [![](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
 
 ## Getting Started
-
 
 ### Your project
 
@@ -54,6 +54,7 @@ In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't s
 ### Signals
 
 You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
+
 ```csharp
 ImGuiLayer.Connect(OnImGuiLayout);
 ```
@@ -78,16 +79,15 @@ That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
 ### Mobile export
 
-ImGui.NET does not support iOS or Android, so all ImGui related code should be conditionally disabled if you want to export for these platforms. For example:
+ImGui.NET does not support iOS, Android, or web, so all ImGui related code should be conditionally disabled if you want to export for these platforms. For example:
 
 ```csharp
-#if !GODOT_MOBILE
+#if GODOT_PC
 ImGui.Begin("my window");
 // ...
 ImGui.End();
 #endif
 ```
-
 
 ## Package managers
 
@@ -105,12 +105,11 @@ ImGui.End();
 }
 ```
 
-
 ## Credits
 
 Code written by Patrick Dawson and contributors, released under the MIT license
 
-Godot Logo (C) Andrea Calabró, distributed under the terms of the Creative Commons Attribution 4.0 International License (CC-BY-4.0 International) https://creativecommons.org/licenses/by/4.0/
+Godot Logo (C) Andrea Calabró, distributed under the terms of the Creative Commons Attribution 4.0 International License (CC-BY-4.0 International) <https://creativecommons.org/licenses/by/4.0/>
 
 Hack font distributed under the [MIT license](https://github.com/source-foundry/Hack/blob/master/LICENSE.md)
 

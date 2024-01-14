@@ -1,4 +1,4 @@
-#if !GODOT_MOBILE
+#if GODOT_PC
 using Godot;
 using ImGuiNET;
 using System;

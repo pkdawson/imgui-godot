@@ -21,7 +21,7 @@ public partial class MyNode : Node
 
     public override void _Process(double delta)
     {
-#if !GODOT_MOBILE
+#if GODOT_PC
         ImGui.ShowDemoWindow();
 #endif
     }

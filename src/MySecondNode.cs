@@ -6,7 +6,7 @@ namespace DemoProject;
 
 public partial class MySecondNode : Node
 {
-#if !GODOT_MOBILE
+#if GODOT_PC
     private Texture2D _iconTexture = null!;
     private AtlasTexture _atlasTexture = null!;
     private SubViewport _vp = null!;
