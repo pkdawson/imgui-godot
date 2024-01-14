@@ -313,9 +313,15 @@ internal class RdRenderer : IRenderer
             SetupBuffers(drawData);
 
         // draw
+        const RenderingDevice.FinalAction finalAction =
+#if GODOT4_3_OR_GREATER
+        RenderingDevice.FinalAction.Store;
+#else
+        RenderingDevice.FinalAction.Read;
+#endif
         long dl = RD.DrawListBegin(fb,
-                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
-                RenderingDevice.InitialAction.Clear, RenderingDevice.FinalAction.Read,
+                RenderingDevice.InitialAction.Clear, finalAction,
+                RenderingDevice.InitialAction.Clear, finalAction,
                 _clearColors, 1f, 0, _zeroRect, _storageTextures);
 
         RD.DrawListBindRenderPipeline(dl, _pipeline);
