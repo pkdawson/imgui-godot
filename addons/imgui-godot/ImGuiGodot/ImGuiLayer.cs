@@ -129,12 +129,6 @@ public partial class ImGuiLayer : CanvasLayer
         if (Visible)
         {
             ProcessMode = ProcessModeEnum.Always;
-            // TODO: fix position with multiple monitors
-            //foreach (Node child in GetChildren())
-            //{
-            //    if (child is Window w)
-            //        w.Show();
-            //}
         }
         else
         {
@@ -142,12 +136,14 @@ public partial class ImGuiLayer : CanvasLayer
             Internal.State.Instance.Renderer.OnHide();
             _subViewportSize = Vector2I.Zero;
             RenderingServer.CanvasItemClear(_ci);
-            //foreach (Node child in GetChildren())
-            //{
-            //    if (child is Window w)
-            //        w.Hide();
-            //}
+            CallDeferred(MethodName.FinishHide);
         }
+    }
+
+    private static void FinishHide()
+    {
+        ImGui.NewFrame();
+        ImGuiGD.Render();
     }
 
     public override void _Process(double delta)
