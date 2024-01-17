@@ -136,7 +136,7 @@ public partial class ImGuiLayer : CanvasLayer
             Internal.State.Instance.Renderer.OnHide();
             _subViewportSize = Vector2I.Zero;
             RenderingServer.CanvasItemClear(_ci);
-            CallDeferred(MethodName.FinishHide);
+            CallDeferred(nameof(FinishHide));
         }
     }
 

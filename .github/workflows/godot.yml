@@ -9,7 +9,7 @@ on:
       - godot3
 
 env:
-  gdver: "4.0.3-stable"
+  gdver: "4.0.4-stable"
 
 jobs:
   export_game:
