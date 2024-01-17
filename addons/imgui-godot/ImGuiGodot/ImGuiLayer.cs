@@ -2,7 +2,6 @@ using Godot;
 #if GODOT_PC
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
 
 namespace ImGuiGodot;
 
@@ -13,19 +12,14 @@ public partial class ImGuiLayer : CanvasLayer
     [Export(PropertyHint.ResourceType, "ImGuiConfig")]
     public GodotObject Config = null!;
 
-    /// <summary>
-    /// Do NOT connect to this directly, please use <see cref="Connect"/> instead
-    /// </summary>
-    [Signal] public delegate void ImGuiLayoutEventHandler();
-
     private Window _window = null!;
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _ci;
     private Transform2D _finalTransform = Transform2D.Identity;
     private UpdateFirst _updateFirst = null!;
-    private static readonly HashSet<GodotObject> _connectedObjects = new();
     private bool _headless = false;
+    public Node Signaler { get; private set; } = null!;
 
     private sealed partial class UpdateFirst : Node
     {
@@ -112,6 +106,10 @@ public partial class ImGuiLayer : CanvasLayer
             ProcessMode = ProcessModeEnum.Always,
         };
         AddChild(_updateFirst);
+
+        Signaler = (Node)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiSignaler.gd")).New();
+        Signaler.Name = "Signaler";
+        AddChild(Signaler);
     }
 
     public override void _Ready()
@@ -168,7 +166,7 @@ public partial class ImGuiLayer : CanvasLayer
             RenderingServer.CanvasItemAddTextureRect(_ci, new(0, 0, _subViewportSize.X, _subViewportSize.Y), vptex);
         }
 
-        EmitSignal(SignalName.ImGuiLayout);
+        Signaler.EmitSignal("imgui_layout");
         ImGuiGD.Render();
     }
 
@@ -185,47 +183,14 @@ public partial class ImGuiLayer : CanvasLayer
         }
     }
 
-    public static void Connect(ImGuiLayoutEventHandler d)
+    public static void Connect(Callable callable)
     {
-        if (Instance is null)
-            return;
-
-        Instance.ImGuiLayout += d;
-
-        if (d.Target is GodotObject obj)
-        {
-            if (_connectedObjects.Count == 0)
-            {
-                Instance.GetTree().NodeRemoved += OnNodeRemoved;
-            }
-            _connectedObjects.Add(obj);
-        }
+        Instance?.Signaler.Connect("imgui_layout", callable);
     }
 
-    private static void OnNodeRemoved(Node node)
+    public static void Connect(Action action)
     {
-        // signals declared in C# don't (yet?) work like normal Godot signals,
-        // we need to clean up after removed Objects ourselves
-
-        if (!_connectedObjects.Contains(node))
-            return;
-
-        _connectedObjects.Remove(node);
-
-        // backing_ImGuiLayout is an implementation detail that could change
-        foreach (Delegate d in Instance.backing_ImGuiLayout.GetInvocationList())
-        {
-            // remove ALL delegates with the removed Node as a target
-            if (d.Target == node)
-            {
-                Instance.ImGuiLayout -= (ImGuiLayoutEventHandler)d;
-            }
-        }
-
-        if (_connectedObjects.Count == 0)
-        {
-            Instance.GetTree().NodeRemoved -= OnNodeRemoved;
-        }
+        Connect(Callable.From(action));
     }
 
     private void CheckContentScale()
