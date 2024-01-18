@@ -1,7 +1,6 @@
 using Godot;
 #if GODOT_PC
 using ImGuiNET;
-using System;
 
 namespace ImGuiGodot;
 
@@ -150,16 +149,6 @@ public partial class ImGuiLayer : CanvasLayer
         {
             _window.SetInputAsHandled();
         }
-    }
-
-    public static void Connect(Callable callable)
-    {
-        Instance?.Signaler.Connect("imgui_layout", callable);
-    }
-
-    public static void Connect(Action action)
-    {
-        Connect(Callable.From(action));
     }
 
     private void CheckContentScale()

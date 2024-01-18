@@ -60,5 +60,15 @@ public static class ImGuiGD
 
         Internal.State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? Scale * dpiFactor : Scale);
     }
+
+    public static void Connect(Callable callable)
+    {
+        ImGuiLayer.Instance?.Signaler.Connect("imgui_layout", callable);
+    }
+
+    public static void Connect(Action action)
+    {
+        Connect(Callable.From(action));
+    }
 }
 #endif

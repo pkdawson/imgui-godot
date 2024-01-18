@@ -58,7 +58,7 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Connect(OnImGuiLayout);
+        ImGuiGD.Connect(OnImGuiLayout);
         _iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         _atlasTexture = GD.Load<AtlasTexture>("res://data/robot_eye.tres");
         _vp = GetNode<SubViewport>("%SubViewport");
