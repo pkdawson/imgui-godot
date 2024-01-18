@@ -74,27 +74,6 @@ public partial class ImGuiLayer : CanvasLayer
 
         Internal.State.Init(_window, _subViewportRid, cfg);
 
-        ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
-
-        var fonts = (Godot.Collections.Array)cfg.Get("Fonts");
-        bool merge = (bool)cfg.Get("MergeFonts");
-
-        for (int i = 0; i < fonts.Count; ++i)
-        {
-            var fontres = (Resource)fonts[i];
-            var font = (FontFile)fontres.Get("FontData");
-            int fontSize = (int)fontres.Get("FontSize");
-            if (i == 0)
-                ImGuiGD.AddFont(font, fontSize);
-            else
-                ImGuiGD.AddFont(font, fontSize, merge);
-        }
-        if ((bool)cfg.Get("AddDefaultFont"))
-        {
-            ImGuiGD.AddFontDefault();
-        }
-        ImGuiGD.RebuildFontAtlas();
-
         _updateFirst = new UpdateFirst
         {
             Name = "ImGuiLayer_UpdateFirst",

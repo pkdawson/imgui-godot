@@ -133,6 +133,27 @@ internal sealed class State : IDisposable
             Scale = (float)cfg.Get("Scale")
         };
         Instance.Renderer.InitViewport(mainSubViewport);
+
+        ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
+
+        var fonts = (Godot.Collections.Array)cfg.Get("Fonts");
+
+        for (int i = 0; i < fonts.Count; ++i)
+        {
+            var fontres = (Resource)fonts[i];
+            var font = (FontFile)fontres.Get("FontData");
+            int fontSize = (int)fontres.Get("FontSize");
+            bool merge = (bool)fontres.Get("Merge");
+            if (i == 0)
+                ImGuiGD.AddFont(font, fontSize);
+            else
+                ImGuiGD.AddFont(font, fontSize, merge);
+        }
+        if ((bool)cfg.Get("AddDefaultFont"))
+        {
+            ImGuiGD.AddFontDefault();
+        }
+        ImGuiGD.RebuildFontAtlas();
     }
 
     public unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
