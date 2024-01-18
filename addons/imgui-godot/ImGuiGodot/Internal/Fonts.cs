@@ -17,7 +17,7 @@ internal sealed class Fonts
         public int FontSize { get; init; }
         public bool Merge { get; init; }
     }
-    private readonly List<FontParams> _fontConfiguration = new();
+    private readonly List<FontParams> _fontConfiguration = [];
 
     public Fonts()
     {

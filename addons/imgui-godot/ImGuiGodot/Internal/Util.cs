@@ -12,9 +12,9 @@ internal static class Util
 
     static Util()
     {
-        ConstructorInfo cinfo = typeof(Rid).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) }) ??
+        ConstructorInfo cinfo = typeof(Rid).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, [typeof(ulong)]) ??
             throw new PlatformNotSupportedException("failed to get Rid constructor");
-        DynamicMethod dm = new("ConstructRid", typeof(Rid), new[] { typeof(ulong) });
+        DynamicMethod dm = new("ConstructRid", typeof(Rid), [typeof(ulong)]);
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Newobj, cinfo);

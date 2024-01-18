@@ -8,22 +8,19 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class RdRendererException : ApplicationException
+internal sealed class RdRendererException(string message) : ApplicationException(message)
 {
-    public RdRendererException(string message) : base(message)
-    {
-    }
 }
 
 internal class RdRenderer : IRenderer
 {
     protected readonly RenderingDevice RD;
-    private readonly Color[] _clearColors = { new(0f, 0f, 0f, 0f) };
+    private readonly Color[] _clearColors = [new(0f, 0f, 0f, 0f)];
     private readonly Rid _shader;
     private readonly Rid _pipeline;
     private readonly Rid _sampler;
     private readonly long _vtxFormat;
-    private readonly Dictionary<Rid, Rid> _framebuffers = new();
+    private readonly Dictionary<Rid, Rid> _framebuffers = [];
     private readonly float[] _scale = new float[2];
     private readonly float[] _translate = new float[2];
     private readonly byte[] _pcbuf = new byte[16];
@@ -38,14 +35,10 @@ internal class RdRenderer : IRenderer
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
-#if GODOT4_1_OR_GREATER
-    private readonly Godot.Collections.Array<Rid> _storageTextures = new();
-#else
-    private readonly Godot.Collections.Array _storageTextures = new();
-#endif
-    private readonly Godot.Collections.Array<Rid> _srcBuffers = new();
+    private readonly Godot.Collections.Array<Rid> _storageTextures = [];
+    private readonly Godot.Collections.Array<Rid> _srcBuffers = [];
     private readonly long[] _vtxOffsets = new long[3];
-    private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
+    private readonly Godot.Collections.Array<RDUniform> _uniformArray = [];
 
     public string Name => "godot4_net_rd";
 
@@ -406,7 +399,7 @@ internal class RdRenderer : IRenderer
         }
 
         Rid vptex = RenderingServer.TextureGetRdTexture(RenderingServer.ViewportGetTexture(vprid));
-        fb = RD.FramebufferCreate(new() { vptex });
+        fb = RD.FramebufferCreate([vptex]);
         _framebuffers[vprid] = fb;
         return fb;
     }

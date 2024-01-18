@@ -9,9 +9,6 @@ public partial class ImGuiLayer : CanvasLayer
 {
     public static ImGuiLayer Instance { get; private set; } = null!;
 
-    [Export(PropertyHint.ResourceType, "ImGuiConfig")]
-    public GodotObject Config = null!;
-
     private Window _window = null!;
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
@@ -71,7 +68,10 @@ public partial class ImGuiLayer : CanvasLayer
         _ci = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
-        Resource cfg = Config as Resource ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        Node cfgScene = ResourceLoader.Load<PackedScene>("res://addons/imgui-godot/Config.tscn").Instantiate();
+        Resource cfg = (Resource)cfgScene.Get("Config") ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        cfgScene.Free();
+
         Layer = (int)cfg.Get("Layer");
 
         ImGuiGD.ScaleToDpi = (bool)cfg.Get("ScaleToDpi");
@@ -107,9 +107,7 @@ public partial class ImGuiLayer : CanvasLayer
         };
         AddChild(_updateFirst);
 
-        Signaler = (Node)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiSignaler.gd")).New();
-        Signaler.Name = "Signaler";
-        AddChild(Signaler);
+        Signaler = GetParent();
     }
 
     public override void _Ready()

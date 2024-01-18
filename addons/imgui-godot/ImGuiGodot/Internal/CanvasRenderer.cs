@@ -15,8 +15,8 @@ internal sealed class CanvasRenderer : IRenderer
         public Rid RootCanvasItem { set; get; }
     }
 
-    private readonly Dictionary<Rid, List<Rid>> _canvasItemPools = new();
-    private readonly Dictionary<Rid, ViewportData> _vpData = new();
+    private readonly Dictionary<Rid, List<Rid>> _canvasItemPools = [];
+    private readonly Dictionary<Rid, ViewportData> _vpData = [];
 
     public string Name => "godot4_net_canvas";
 
@@ -60,7 +60,7 @@ internal sealed class CanvasRenderer : IRenderer
         var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target!;
 
         if (!_canvasItemPools.ContainsKey(parent))
-            _canvasItemPools[parent] = new();
+            _canvasItemPools[parent] = [];
 
         var children = _canvasItemPools[parent];
 

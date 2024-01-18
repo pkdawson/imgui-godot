@@ -111,7 +111,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         {
             var rv = _dataToDraw;
             _dataToDraw = null;
-            return rv ?? new();
+            return rv ?? [];
         }
     }
 
