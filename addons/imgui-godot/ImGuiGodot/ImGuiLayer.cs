@@ -15,7 +15,6 @@ public partial class ImGuiLayer : CanvasLayer
     private Rid _ci;
     private Transform2D _finalTransform = Transform2D.Identity;
     private UpdateFirst _updateFirst = null!;
-    private bool _headless = false;
     public Node Signaler { get; private set; } = null!;
 
     private sealed partial class UpdateFirst : Node
@@ -41,7 +40,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, _window.Size);
+            Internal.State.Instance.Update(delta, _window.Size);
         }
 
         private void OnChangeVisibility()
@@ -56,7 +55,6 @@ public partial class ImGuiLayer : CanvasLayer
     public override void _EnterTree()
     {
         Instance = this;
-        _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
 
         CheckContentScale();
@@ -74,9 +72,7 @@ public partial class ImGuiLayer : CanvasLayer
 
         Layer = (int)cfg.Get("Layer");
 
-        ImGuiGD.ScaleToDpi = (bool)cfg.Get("ScaleToDpi");
-        ImGuiGD.Init(_window, _subViewportRid, (float)cfg.Get("Scale"),
-            _headless ? RendererType.Dummy : Enum.Parse<RendererType>((string)cfg.Get("Renderer")));
+        Internal.State.Init(_window, _subViewportRid, cfg);
 
         ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
 
@@ -117,7 +113,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _ExitTree()
     {
-        ImGuiGD.Shutdown();
+        Internal.State.Instance.Shutdown();
         RenderingServer.FreeRid(_ci);
         RenderingServer.FreeRid(_subViewportRid);
     }
@@ -141,7 +137,7 @@ public partial class ImGuiLayer : CanvasLayer
     private static void FinishHide()
     {
         ImGui.NewFrame();
-        ImGuiGD.Render();
+        Internal.State.Instance.Render();
     }
 
     public override void _Process(double delta)
@@ -161,7 +157,7 @@ public partial class ImGuiLayer : CanvasLayer
         }
 
         Signaler.EmitSignal("imgui_layout");
-        ImGuiGD.Render();
+        Internal.State.Instance.Render();
     }
 
     public override void _Notification(int what)
@@ -171,7 +167,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Input(InputEvent e)
     {
-        if (ImGuiGD.ProcessInput(e, _window))
+        if (Internal.State.Instance.ProcessInput(e, _window))
         {
             _window.SetInputAsHandled();
         }
