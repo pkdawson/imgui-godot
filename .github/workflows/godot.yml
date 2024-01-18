@@ -9,7 +9,7 @@ on:
       - godot3
 
 env:
-  gdver: "4.0.4-stable"
+  gdver: "4.2.1-stable"
 
 jobs:
   export_game:
@@ -22,7 +22,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Download Godot
         run: |
