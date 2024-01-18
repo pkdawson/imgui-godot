@@ -157,25 +157,15 @@ public static class ImGuiGD
             ImGui.DestroyContext();
     }
 
-    /// <summary>
-    /// EXPERIMENTAL! Please report bugs, with steps to reproduce.
-    /// </summary>
+    [Obsolete("just set ImGuiConfigFlags.ViewportsEnable instead")]
     public static void ExperimentalEnableViewports()
     {
         var io = ImGui.GetIO();
-        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
 
         if (OS.GetName() != "Windows")
         {
             GD.PushWarning("ImGui Viewports have issues on macOS and Linux https://github.com/ocornut/imgui/wiki/Multi-Viewports#issues");
-        }
-
-        var mainvp = ImGuiLayer.Instance.GetViewport();
-        if (mainvp.GuiEmbedSubwindows)
-        {
-            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
-            mainvp.GuiEmbedSubwindows = false;
         }
     }
 
