@@ -6,17 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal interface IRenderer
-{
-    public string Name { get; }
-    public void Init(ImGuiIOPtr io);
-    public void InitViewport(Rid vprid);
-    public void CloseViewport(Rid vprid);
-    public void RenderDrawData();
-    public void OnHide();
-    public void Shutdown();
-}
-
 internal sealed class State : IDisposable
 {
     private enum RendererType
@@ -52,10 +41,12 @@ internal sealed class State : IDisposable
         ImGui.SetCurrentContext(context);
         var io = ImGui.GetIO();
 
-        io.BackendFlags = 0;
-        io.BackendFlags |= ImGuiBackendFlags.HasGamepad;
-        io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
-        io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+        io.BackendFlags =
+            ImGuiBackendFlags.HasGamepad |
+            ImGuiBackendFlags.HasSetMousePos |
+            ImGuiBackendFlags.HasMouseCursors |
+            ImGuiBackendFlags.RendererHasVtxOffset |
+            ImGuiBackendFlags.RendererHasViewports;
 
         if (_rendererName == IntPtr.Zero)
         {
@@ -68,7 +59,6 @@ internal sealed class State : IDisposable
             io.NativePtr->BackendRendererName = (byte*)_rendererName;
         }
 
-        Renderer.Init(io);
         Viewports = new Viewports(mainWindow, mainSubViewport);
     }
 

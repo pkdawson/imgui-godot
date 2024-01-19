@@ -20,12 +20,6 @@ internal sealed class CanvasRenderer : IRenderer
 
     public string Name => "godot4_net_canvas";
 
-    public void Init(ImGuiIOPtr io)
-    {
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-    }
-
     public void InitViewport(Rid vprid)
     {
         Rid canvas = RenderingServer.CanvasCreate();

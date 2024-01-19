@@ -143,12 +143,6 @@ internal class RdRenderer : IRenderer
         _uniformArray.Resize(1);
     }
 
-    public void Init(ImGuiIOPtr io)
-    {
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-    }
-
     public void InitViewport(Rid vprid)
     {
         //RenderingServer.ViewportSetUpdateMode(vprid, RenderingServer.ViewportUpdateMode.Disabled);
