@@ -1,3 +1,4 @@
+#if GODOT_PC
 using Godot;
 
 namespace ImGuiGodot.Internal;
@@ -11,3 +12,4 @@ internal interface IRenderer
     public void OnHide();
     public void Shutdown();
 }
+#endif

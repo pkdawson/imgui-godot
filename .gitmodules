@@ -1,0 +1,9 @@
+[submodule "gdext/dear_bindings"]
+	path = gdext/dear_bindings
+	url = https://github.com/dearimgui/dear_bindings
+[submodule "gdext/imgui"]
+	path = gdext/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "gdext/godot-cpp"]
+	path = gdext/godot-cpp
+	url = https://github.com/godotengine/godot-cpp

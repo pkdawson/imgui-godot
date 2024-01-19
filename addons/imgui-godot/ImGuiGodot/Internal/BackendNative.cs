@@ -1,3 +1,4 @@
+#if GODOT_PC
 using Godot;
 
 namespace ImGuiGodot.Internal;
@@ -6,6 +7,7 @@ internal sealed class BackendNative : IBackend
 {
     public float JoyAxisDeadZone { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     public float Scale { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public bool Visible { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge)
     {
@@ -37,3 +39,4 @@ internal sealed class BackendNative : IBackend
         throw new System.NotImplementedException();
     }
 }
+#endif

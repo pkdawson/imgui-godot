@@ -1,0 +1,14 @@
+Language: Cpp
+BasedOnStyle: Microsoft
+AccessModifierOffset: -4
+AllowAllArgumentsOnNextLine: false
+AlignEscapedNewlines: Left
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: true
+PointerAlignment: Left
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterNamespace: false
+    AfterExternBlock: false

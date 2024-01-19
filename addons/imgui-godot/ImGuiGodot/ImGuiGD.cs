@@ -36,6 +36,8 @@ public static class ImGuiGD
         }
     }
 
+    public static bool Visible { get; set; }
+
     static ImGuiGD()
     {
         _backend = ClassDB.ClassExists("ImGuiGD") ? new Internal.BackendNative() : new Internal.BackendNet();

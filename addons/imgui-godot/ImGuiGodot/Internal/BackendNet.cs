@@ -1,3 +1,4 @@
+#if GODOT_PC
 using Godot;
 using ImGuiNET;
 using System;
@@ -8,10 +9,17 @@ namespace ImGuiGodot.Internal;
 internal sealed class BackendNet : IBackend
 {
     public float JoyAxisDeadZone { get; set; } = 0.15f;
+
     public float Scale
     {
         get => State.Instance.Scale;
         set => State.Instance.Scale = value;
+    }
+
+    public bool Visible
+    {
+        get => ImGuiLayer.Instance.Visible;
+        set => ImGuiLayer.Instance.Visible = value;
     }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge)
@@ -59,3 +67,4 @@ internal sealed class BackendNet : IBackend
         return false;
     }
 }
+#endif
