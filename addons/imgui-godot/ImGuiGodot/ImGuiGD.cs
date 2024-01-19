@@ -6,28 +6,39 @@ namespace ImGuiGodot;
 
 public static class ImGuiGD
 {
+    private static readonly Internal.IBackend _backend;
+
     /// <summary>
     /// Deadzone for all axes
     /// </summary>
-    public static float JoyAxisDeadZone { get; set; } = 0.15f;
+    public static float JoyAxisDeadZone
+    {
+        get => _backend.JoyAxisDeadZone;
+        set => _backend.JoyAxisDeadZone = value;
+    }
 
     /// <summary>
     /// Setting this property will reload fonts and modify the ImGuiStyle
     /// </summary>
     public static float Scale
     {
-        get => Internal.State.Instance.Scale;
+        get => _backend.Scale;
         set
         {
             //if (_inProcessFrame)
             //    throw new InvalidOperationException("scale cannot be changed during process frame");
 
-            if (Internal.State.Instance.Scale != value && value >= 0.25f)
+            if (_backend.Scale != value && value >= 0.25f)
             {
-                Internal.State.Instance.Scale = value;
+                _backend.Scale = value;
                 RebuildFontAtlas();
             }
         }
+    }
+
+    static ImGuiGD()
+    {
+        _backend = ClassDB.ClassExists("ImGuiGD") ? new Internal.BackendNative() : new Internal.BackendNet();
     }
 
     public static IntPtr BindTexture(Texture2D tex)
@@ -37,17 +48,17 @@ public static class ImGuiGD
 
     public static void ResetFonts()
     {
-        Internal.State.Instance.Fonts.ResetFonts();
+        _backend.ResetFonts();
     }
 
     public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
     {
-        Internal.State.Instance.Fonts.AddFont(fontData, fontSize, merge);
+        _backend.AddFont(fontData, fontSize, merge);
     }
 
     public static void AddFontDefault()
     {
-        Internal.State.Instance.Fonts.AddFont(null, 13, false);
+        _backend.AddFontDefault();
     }
 
     public static void RebuildFontAtlas()
@@ -58,17 +69,22 @@ public static class ImGuiGD
         bool scaleToDpi = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
         int dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
 
-        Internal.State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? Scale * dpiFactor : Scale);
+        _backend.RebuildFontAtlas(scaleToDpi ? Scale * dpiFactor : Scale);
     }
 
     public static void Connect(Callable callable)
     {
-        ImGuiLayer.Instance?.Signaler.Connect("imgui_layout", callable);
+        _backend.Connect(callable);
     }
 
     public static void Connect(Action action)
     {
         Connect(Callable.From(action));
+    }
+
+    internal static bool SubViewportWidget(SubViewport svp)
+    {
+        return _backend.SubViewportWidget(svp);
     }
 }
 #endif
