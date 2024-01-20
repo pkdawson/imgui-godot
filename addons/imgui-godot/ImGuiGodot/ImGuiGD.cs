@@ -69,10 +69,7 @@ public static class ImGuiGD
         //if (_inProcessFrame)
         //    throw new InvalidOperationException("fonts cannot be changed during process frame");
 
-        bool scaleToDpi = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
-        int dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-
-        _backend.RebuildFontAtlas(scaleToDpi ? Scale * dpiFactor : Scale);
+        _backend.RebuildFontAtlas(Scale);
     }
 
     public static void Connect(Callable callable)

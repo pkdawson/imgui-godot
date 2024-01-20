@@ -39,7 +39,9 @@ internal sealed class BackendNet : IBackend
 
     public void RebuildFontAtlas(float scale)
     {
-        State.Instance.Fonts.RebuildFontAtlas(scale);
+        bool scaleToDpi = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
+        int dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
+        State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
     }
 
     public void ResetFonts()
