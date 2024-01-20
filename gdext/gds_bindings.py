@@ -436,7 +436,7 @@ class Struct:
         return rv
 
     def gen_bindings(self):
-        return f"ClassDB::register_internal_class<{self.name}>(); \\\n"
+        return f"ClassDB::register_class<{self.name}>(); \\\n"
 
 
 class JsonParser:
