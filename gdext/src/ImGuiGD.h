@@ -22,7 +22,6 @@ protected:
     static void _bind_methods();
 
 public:
-    void InitEditor(Node* parent);
     void ToolInit();
 
     void Connect(const Callable& cb);
@@ -37,6 +36,9 @@ public:
 
     void _SetVisible(bool visible);
     bool _GetVisible();
+
+    void _SetScale(float scale);
+    float _GetScale();
 
     PackedInt64Array GetFontPtrs();
     PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);

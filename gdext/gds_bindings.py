@@ -1,10 +1,6 @@
 import json
 import os
-import sys
 import subprocess
-
-sys.path += ["dear_bindings"]
-import dear_bindings
 
 # TODO: callbacks as Callable
 # TODO: array wrappers
@@ -26,6 +22,7 @@ type_map = {
     "ImFont*": "int64_t",
     "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
     "ImGuiButtonFlags": "BitField<ImGui::ButtonFlags>",
+    "ImGuiChildFlags": "BitField<ImGui::ChildFlags>",
     "ImGuiCol": "Col",
     "ImGuiColorEditFlags": "BitField<ImGui::ColorEditFlags>",
     "ImGuiComboFlags": "BitField<ImGui::ComboFlags>",
@@ -191,7 +188,7 @@ class Param:
         self.gdtype = type_map.get(self.orig_type)
         if self.is_array:
             self.gdtype = "Array"
-            self.orig_type = self.orig_type[:self.orig_type.find('[')]
+            self.orig_type = self.orig_type[: self.orig_type.find("[")]
 
         if self.gdtype == "String" and self.name in sn_names:
             self.gdtype = "StringName"
@@ -526,9 +523,9 @@ class JsonParser:
 
 def main():
     os.makedirs("gen", exist_ok=True)
-    # dear_bindings.convert_header(
-    #     "imgui/imgui.h", "gen/cimgui", "dear_bindings/src/templates"
-    # )
+    subprocess.call(
+        "python dear_bindings/dear_bindings.py -o gen/cimgui imgui/imgui.h", shell=True
+    )
 
     parser = JsonParser()
     with open("gen/cimgui.json") as jfi:

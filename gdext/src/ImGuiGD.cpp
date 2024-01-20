@@ -13,13 +13,17 @@ namespace ImGui::Godot {
 
 void ImGuiGD::_bind_methods()
 {
-    ClassDB::bind_method(D_METHOD("_SetJoyAxisDeadZone", "swap"), &ImGuiGD::_SetJoyAxisDeadZone);
+    ClassDB::bind_method(D_METHOD("_SetJoyAxisDeadZone", "deadZone"), &ImGuiGD::_SetJoyAxisDeadZone);
     ClassDB::bind_method(D_METHOD("_GetJoyAxisDeadZone"), &ImGuiGD::_GetJoyAxisDeadZone);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "JoyAxisDeadZone"), "_SetJoyAxisDeadZone", "_GetJoyAxisDeadZone");
 
     ClassDB::bind_method(D_METHOD("_SetVisible", "visible"), &ImGuiGD::_SetVisible);
     ClassDB::bind_method(D_METHOD("_GetVisible"), &ImGuiGD::_GetVisible);
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "Visible"), "_SetVisible", "_GetVisible");
+
+    ClassDB::bind_method(D_METHOD("_SetScale", "scale"), &ImGuiGD::_SetScale);
+    ClassDB::bind_method(D_METHOD("_GetScale"), &ImGuiGD::_GetScale);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "Scale"), "_SetScale", "_GetScale");
 
     ClassDB::bind_method(D_METHOD("AddFont", "font_file", "font_size", "merge"), &ImGuiGD::AddFont, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("AddFontDefault"), &ImGuiGD::AddFontDefault);
@@ -32,27 +36,26 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("ToolInit"), &ImGuiGD::ToolInit);
 
     ClassDB::bind_method(D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
-    ClassDB::bind_method(D_METHOD("InitEditor", "parent"), &ImGuiGD::InitEditor);
 }
 
-void ImGuiGD::InitEditor(Node* parent)
-{
-#ifdef DEBUG_ENABLED
-    if (!Engine::get_singleton()->is_editor_hint())
-        return;
-
-    if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
-    {
-        String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
-        if (ResourceLoader::get_singleton()->exists(resPath))
-        {
-            Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
-            if (scene.is_valid())
-                parent->add_child(scene->instantiate());
-        }
-    }
-#endif
-}
+//void ImGuiGD::InitEditor(Node* parent)
+//{
+//#ifdef DEBUG_ENABLED
+//    if (!Engine::get_singleton()->is_editor_hint())
+//        return;
+//
+//    if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
+//    {
+//        String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
+//        if (ResourceLoader::get_singleton()->exists(resPath))
+//        {
+//            Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
+//            if (scene.is_valid())
+//                parent->add_child(scene->instantiate());
+//        }
+//    }
+//#endif
+//}
 
 void ImGuiGD::ToolInit()
 {
@@ -114,6 +117,16 @@ float ImGuiGD::_GetJoyAxisDeadZone()
     return 0.15f;
 }
 
+void ImGuiGD::_SetScale(float scale)
+{
+
+}
+
+float ImGuiGD::_GetScale()
+{
+    return 1.0f;
+}
+
 PackedInt64Array ImGuiGD::GetFontPtrs()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -151,7 +164,7 @@ PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize,
 
 bool ImGuiGD::SubViewport(godot::SubViewport* svp)
 {
-    return ImGui::Godot::SubViewport(svp);
+    return ImGui::Godot::SubViewportWidget(svp);
 }
 
 } // namespace ImGui::Godot

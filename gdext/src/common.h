@@ -14,7 +14,7 @@ inline RID make_rid(int64_t id)
 {
     // ugly, may break in the future
     RID rv;
-    *(int64_t*)(rv._native_ptr()) = id;
+    *reinterpret_cast<int64_t*>(rv._native_ptr()) = id;
     assert(rv.get_id() == id);
     return rv;
 }

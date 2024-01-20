@@ -1,4 +1,5 @@
 #include "Viewports.h"
+#include "Context.h"
 #include <imgui.h>
 
 #include <godot_cpp/classes/display_server.hpp>
@@ -189,6 +190,11 @@ Viewports::Viewports(Window* mainWindow, RID mainSubViewport) : impl(std::make_u
 
 Viewports::~Viewports()
 {
+}
+
+ void ImGuiWindow::_input(const Ref<InputEvent>& evt)
+{
+    ImGui::Godot::ProcessInput(evt, this);
 }
 
 } // namespace ImGui::Godot

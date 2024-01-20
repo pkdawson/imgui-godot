@@ -1,27 +1,9 @@
 #include "Context.h"
-#include "DummyRenderer.h"
-#include "Fonts.h"
-#include "ImGuiGD.h"
-#include "Input.h"
-#include "RdRenderer.h"
-#include "RdRendererThreadSafe.h"
-#include "Renderer.h"
-#include "ShortTermCache.h"
-#include "Viewports.h"
 #include "common.h"
 #include <imgui.h>
 
 #pragma warning(push, 0)
-#include <godot_cpp/classes/canvas_layer.hpp>
-#include <godot_cpp/classes/display_server.hpp>
-#include <godot_cpp/classes/image.hpp>
-#include <godot_cpp/classes/image_texture.hpp>
-#include <godot_cpp/classes/project_settings.hpp>
-#include <godot_cpp/classes/rendering_server.hpp>
-#include <godot_cpp/classes/sub_viewport.hpp>
-#include <godot_cpp/classes/viewport_texture.hpp>
-#include <godot_cpp/variant/packed_byte_array.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
+
 #pragma warning(pop)
 
 using namespace godot;
@@ -29,32 +11,15 @@ using namespace godot;
 namespace ImGui::Godot {
 
 namespace {
-struct Context
-{
-    Window* mainWindow = nullptr;
-    std::unique_ptr<Renderer> renderer;
-    std::unique_ptr<Input> input;
-    std::unique_ptr<Fonts> fonts;
-    std::unique_ptr<Viewports> viewports;
-    RID svp;
-    RID ci;
-    Ref<ImageTexture> fontTexture;
-    bool headless = false;
-    int dpiFactor = 1;
-    bool scaleToDPI = false;
-    std::vector<char> iniFilename;
-
-    ~Context()
-    {
-        RenderingServer::get_singleton()->free_rid(ci);
-        RenderingServer::get_singleton()->free_rid(svp);
-    }
-};
-
 std::unique_ptr<Context> ctx;
 
 const char* PlatformName = "godot4";
 } // namespace
+
+Context* GetContext()
+{
+    return ctx.get();
+}
 
 void Init(godot::Window* mainWindow, RID canvasItem, const Ref<Resource>& cfg)
 {
@@ -246,7 +211,7 @@ void OnFramePreDraw()
     ctx->renderer->OnFramePreDraw();
 }
 
-bool SubViewport(godot::SubViewport* svp)
+bool SubViewportWidget(SubViewport* svp)
 {
     ImVec2 vpSize = svp->get_size();
     ImVec2 pos = ImGui::GetCursorScreenPos();

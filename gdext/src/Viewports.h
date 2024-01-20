@@ -1,5 +1,5 @@
 #pragma once
-#include "Context.h"
+// #include "Context.h"
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <imgui.h>
@@ -28,10 +28,7 @@ public:
         connect("size_changed", Callable(this, "_size_changed"));
     }
 
-    void _input(const Ref<InputEvent>& evt) override
-    {
-        ImGui::Godot::ProcessInput(evt, this);
-    }
+    void _input(const Ref<InputEvent>& evt) override;
 
     void _close_requested()
     {
