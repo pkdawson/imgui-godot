@@ -13,6 +13,7 @@ struct RdRendererThreadSafe::Impl
     {
         ClonedDrawData(ImDrawData* drawData)
         {
+            static_assert(sizeof(ImDrawData) == 64);
             data = IM_NEW(ImDrawData);
             data->Valid = drawData->Valid;
             data->CmdListsCount = drawData->CmdListsCount;

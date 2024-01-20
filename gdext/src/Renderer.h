@@ -22,7 +22,11 @@ public:
     }
 
     virtual const char* Name() = 0;
+
+    virtual void InitViewport(RID vprid) = 0;
+    virtual void CloseViewport(RID vprid) = 0;
     virtual void Render() = 0;
+    virtual void OnHide() = 0;
     virtual void OnFramePreDraw()
     {
     }

@@ -34,7 +34,7 @@ internal sealed class CanvasRenderer : IRenderer
         };
     }
 
-    public void RenderDrawData()
+    public void Render()
     {
         var pio = ImGui.GetPlatformIO();
         for (int vpidx = 0; vpidx < pio.Viewports.Size; vpidx++)
@@ -186,7 +186,7 @@ internal sealed class CanvasRenderer : IRenderer
         ClearCanvasItems();
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
         ClearCanvasItems();
         foreach (ViewportData vd in _vpData.Values)

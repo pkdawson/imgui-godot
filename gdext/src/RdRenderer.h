@@ -22,7 +22,17 @@ public:
         return "godot4_rd";
     }
 
+    void InitViewport(RID vprid) override
+    {
+    }
+    void CloseViewport(RID vprid) override
+    {
+    }
     virtual void Render() override;
+    void OnHide() override
+    {
+    }
+
 
 protected:
     void Render(RID fb, ImDrawData* drawData);

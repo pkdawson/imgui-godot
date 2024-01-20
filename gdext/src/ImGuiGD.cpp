@@ -59,9 +59,14 @@ void ImGuiGD::ToolInit()
 #ifdef DEBUG_ENABLED
     if (!Engine::get_singleton()->is_editor_hint())
         return;
-    ImGuiLayer* igl = Object::cast_to<ImGuiLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
-    if (igl)
+
+    Node* plugin = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiPlugin"));
+    if (!plugin->get_node_or_null("ImGuiLayer"))
+    {
+        ImGuiLayer* igl = memnew(ImGuiLayer);
+        plugin->add_child(igl);
         igl->ToolInit();
+    }
 #endif
 }
 

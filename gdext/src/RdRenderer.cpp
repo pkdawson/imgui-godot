@@ -25,15 +25,6 @@
 
 using namespace godot;
 
-template <>
-struct std::hash<RID>
-{
-    std::size_t operator()(const RID& rid) const noexcept
-    {
-        return std::hash<int64_t>{}(rid.get_id());
-    }
-};
-
 namespace ImGui::Godot {
 
 struct RdRenderer::Impl

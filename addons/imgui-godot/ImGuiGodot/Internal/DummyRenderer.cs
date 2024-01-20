@@ -19,11 +19,11 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void RenderDrawData()
+    public void Render()
     {
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
     }
 }

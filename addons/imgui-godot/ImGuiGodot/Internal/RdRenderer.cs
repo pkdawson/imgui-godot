@@ -236,7 +236,7 @@ internal class RdRenderer : IRenderer
         _usedTextures.Clear();
     }
 
-    public void RenderDrawData()
+    public void Render()
     {
         var pio = ImGui.GetPlatformIO();
         for (int i = 0; i < pio.Viewports.Size; ++i)
@@ -371,7 +371,7 @@ internal class RdRenderer : IRenderer
     {
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
         RD.FreeRid(_sampler);
         RD.FreeRid(_shader);

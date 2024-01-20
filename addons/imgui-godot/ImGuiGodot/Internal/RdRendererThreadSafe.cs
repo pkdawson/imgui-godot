@@ -81,7 +81,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         RenderingServer.FramePreDraw -= OnFramePreDraw;
     }
 
-    public new void RenderDrawData()
+    public new void Render()
     {
         var pio = ImGui.GetPlatformIO();
         var newData = new SharedList(pio.Viewports.Size);

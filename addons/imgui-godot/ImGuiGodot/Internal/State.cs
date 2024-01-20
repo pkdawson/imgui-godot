@@ -65,9 +65,8 @@ internal sealed class State : IDisposable
     public void Dispose()
     {
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
-        {
             ImGui.DestroyContext();
-        }
+        Renderer.Dispose();
     }
 
     public static void Init(Window mainWindow, Rid mainSubViewport, Resource cfg)
@@ -181,15 +180,8 @@ internal sealed class State : IDisposable
         ImGui.Render();
 
         ImGui.UpdatePlatformWindows();
-        Renderer.RenderDrawData();
+        Renderer.Render();
         //_inProcessFrame = false;
-    }
-
-    public void Shutdown()
-    {
-        Renderer.Shutdown();
-        if (ImGui.GetCurrentContext() != IntPtr.Zero)
-            ImGui.DestroyContext();
     }
 
     /// <returns>

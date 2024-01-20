@@ -1,12 +1,13 @@
 #if GODOT_PC
 using Godot;
+using ImGuiGodot.Internal;
 using System;
 
 namespace ImGuiGodot;
 
 public static class ImGuiGD
 {
-    private static readonly Internal.IBackend _backend;
+    private static readonly IBackend _backend;
 
     /// <summary>
     /// Deadzone for all axes
@@ -40,7 +41,7 @@ public static class ImGuiGD
 
     static ImGuiGD()
     {
-        _backend = ClassDB.ClassExists("ImGuiGD") ? new Internal.BackendNative() : new Internal.BackendNet();
+        _backend = ClassDB.ClassExists("ImGuiGD") ? new BackendNative() : new BackendNet();
     }
 
     public static IntPtr BindTexture(Texture2D tex)
@@ -82,6 +83,19 @@ public static class ImGuiGD
     public static void Connect(Action action)
     {
         Connect(Callable.From(action));
+    }
+
+    public static bool ToolInit()
+    {
+        if (_backend is BackendNative nbe)
+        {
+            nbe.ToolInit();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     internal static bool SubViewportWidget(SubViewport svp)

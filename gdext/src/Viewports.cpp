@@ -51,7 +51,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     // vd->window->connect("close_requested", Callable(vd->signalProxy, "close_requested"));
     // vd->window->connect("size_changed", Callable(vd->signalProxy, "size_changed"));
 
-    Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiRoot"));
+    Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
     root->add_child(vd->window);
 
     // need to do this after add_child

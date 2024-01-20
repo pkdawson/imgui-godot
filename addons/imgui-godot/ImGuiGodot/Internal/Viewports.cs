@@ -70,6 +70,7 @@ internal sealed class GodotImGuiWindow : IDisposable
     {
         if (GodotWindow.GetParent() != null)
         {
+            State.Instance.Renderer.CloseViewport(Util.ConstructRid((ulong)_vp.RendererUserData));
             GodotWindow.QueueFree();
         }
         _gcHandle.Free();

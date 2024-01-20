@@ -8,10 +8,12 @@ namespace ImGuiGodot;
 
 public partial class ImGuiSync : GodotObject
 {
+    public static readonly StringName GetImGuiPtrs = "GetImGuiPtrs";
+
     public static void SyncPtrs()
     {
         GodotObject gd = Engine.GetSingleton("ImGuiGD");
-        long[] ptrs = (long[])gd.Call("GetImGuiPtrs",
+        long[] ptrs = (long[])gd.Call(GetImGuiPtrs,
             ImGui.GetVersion(),
             Marshal.SizeOf<ImGuiIO>(),
             Marshal.SizeOf<ImDrawVert>(),

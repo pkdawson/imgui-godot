@@ -91,7 +91,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _ExitTree()
     {
-        Internal.State.Instance.Shutdown();
+        Internal.State.Instance.Dispose();
         RenderingServer.FreeRid(_ci);
         RenderingServer.FreeRid(_subViewportRid);
     }

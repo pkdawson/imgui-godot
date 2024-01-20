@@ -9,6 +9,7 @@ public:
     DummyRenderer()
     {
     }
+
     ~DummyRenderer()
     {
     }
@@ -18,7 +19,19 @@ public:
         return "godot4_dummy";
     }
 
+    void InitViewport(RID vprid) override
+    {
+    }
+
+    void CloseViewport(RID vprid) override
+    {
+    }
+
     void Render() override
+    {
+    }
+
+    void OnHide() override
     {
     }
 };

@@ -1,5 +1,7 @@
 target_sources(imgui-godot-native PRIVATE
     common.h
+    CanvasRenderer.cpp
+    CanvasRenderer.h
     Context.cpp
     Context.h
     DummyRenderer.h
