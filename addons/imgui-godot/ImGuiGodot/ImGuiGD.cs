@@ -89,10 +89,8 @@ public static class ImGuiGD
             nbe.ToolInit();
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     internal static bool SubViewportWidget(SubViewport svp)

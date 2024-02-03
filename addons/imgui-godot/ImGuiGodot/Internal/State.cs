@@ -19,10 +19,10 @@ internal sealed class State : IDisposable
     private static IntPtr _rendererName = IntPtr.Zero;
     private IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
-    internal Viewports Viewports { get; private set; }
-    internal Fonts Fonts { get; private set; }
-    internal Input Input { get; private set; }
-    internal IRenderer Renderer { get; private set; }
+    internal Viewports Viewports { get; }
+    internal Fonts Fonts { get; }
+    internal Input Input { get; }
+    internal IRenderer Renderer { get; }
     internal float Scale { get; set; } = 1.0f;
     internal static State Instance { get; set; } = null!;
 
@@ -84,7 +84,8 @@ internal sealed class State : IDisposable
         }
 
         // fall back to Canvas in OpenGL compatibility mode
-        if (renderer == RendererType.RenderingDevice && RenderingServer.GetRenderingDevice() == null)
+        if (renderer == RendererType.RenderingDevice
+            && RenderingServer.GetRenderingDevice() == null)
         {
             renderer = RendererType.Canvas;
         }
@@ -99,7 +100,9 @@ internal sealed class State : IDisposable
             {
                 RendererType.Dummy => new DummyRenderer(),
                 RendererType.Canvas => new CanvasRenderer(),
-                RendererType.RenderingDevice => threadModel == 2 ? new RdRendererThreadSafe() : new RdRenderer(),
+                RendererType.RenderingDevice => threadModel == 2
+                    ? new RdRendererThreadSafe()
+                    : new RdRenderer(),
                 _ => throw new ArgumentException("Invalid renderer", nameof(cfg))
             };
         }
@@ -184,6 +187,9 @@ internal sealed class State : IDisposable
         //_inProcessFrame = false;
     }
 
+    /// <summary>
+    /// Send input event to ImGui
+    /// </summary>
     /// <returns>
     /// True if the InputEvent was consumed
     /// </returns>

@@ -65,8 +65,10 @@ public partial class ImGuiLayer : CanvasLayer
         _ci = RenderingServer.CanvasItemCreate();
         RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
 
-        Node cfgScene = ResourceLoader.Load<PackedScene>("res://addons/imgui-godot/Config.tscn").Instantiate();
-        Resource cfg = (Resource)cfgScene.Get("Config") ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        Node cfgScene = ResourceLoader.Load<PackedScene>("res://addons/imgui-godot/Config.tscn")
+            .Instantiate();
+        Resource cfg = (Resource)cfgScene.Get("Config") ?? (Resource)((GDScript)GD.Load(
+            "res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
         cfgScene.Free();
 
         Layer = (int)cfg.Get("Layer");
@@ -127,11 +129,17 @@ public partial class ImGuiLayer : CanvasLayer
             // this is more or less how SubViewportContainer works
             _subViewportSize = winSize;
             _finalTransform = ft;
-            RenderingServer.ViewportSetSize(_subViewportRid, _subViewportSize.X, _subViewportSize.Y);
+            RenderingServer.ViewportSetSize(
+                _subViewportRid,
+                _subViewportSize.X,
+                _subViewportSize.Y);
             Rid vptex = RenderingServer.ViewportGetTexture(_subViewportRid);
             RenderingServer.CanvasItemClear(_ci);
             RenderingServer.CanvasItemSetTransform(_ci, ft.AffineInverse());
-            RenderingServer.CanvasItemAddTextureRect(_ci, new(0, 0, _subViewportSize.X, _subViewportSize.Y), vptex);
+            RenderingServer.CanvasItemAddTextureRect(
+                _ci,
+                new(0, 0, _subViewportSize.X, _subViewportSize.Y),
+                vptex);
         }
 
         Signaler.EmitSignal("imgui_layout");
@@ -143,9 +151,9 @@ public partial class ImGuiLayer : CanvasLayer
         Internal.Input.ProcessNotification(what);
     }
 
-    public override void _Input(InputEvent e)
+    public override void _Input(InputEvent @event)
     {
-        if (Internal.State.Instance.ProcessInput(e, _window))
+        if (Internal.State.Instance.ProcessInput(@event, _window))
         {
             _window.SetInputAsHandled();
         }
@@ -166,8 +174,9 @@ public partial class ImGuiLayer : CanvasLayer
 
     private void PrintErrContentScale()
     {
-        GD.PrintErr($"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}" +
-            $" or {Window.ContentScaleModeEnum.CanvasItems}");
+        GD.PrintErr(
+            $"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}"
+            + $" or {Window.ContentScaleModeEnum.CanvasItems}");
         GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }

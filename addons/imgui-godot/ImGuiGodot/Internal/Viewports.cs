@@ -14,7 +14,9 @@ internal sealed class GodotImGuiWindow : IDisposable
 
     public Window GodotWindow { get; init; }
 
-    // sub window
+    /// <summary>
+    /// sub window
+    /// </summary>
     public GodotImGuiWindow(ImGuiViewportPtr vp)
     {
         _gcHandle = GCHandle.Alloc(this);
@@ -26,7 +28,8 @@ internal sealed class GodotImGuiWindow : IDisposable
         Window mainWindow = ImGuiLayer.Instance.GetWindow();
         if (mainWindow.GuiEmbedSubwindows)
         {
-            GD.PushWarning("ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            GD.PushWarning(
+                "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
             mainWindow.GuiEmbedSubwindows = false;
         }
 
@@ -56,7 +59,9 @@ internal sealed class GodotImGuiWindow : IDisposable
         RenderingServer.ViewportSetTransparentBackground(GodotWindow.GetViewportRid(), true);
     }
 
-    // main window
+    /// <summary>
+    /// main window
+    /// </summary>
     public GodotImGuiWindow(ImGuiViewportPtr vp, Window gw, Rid mainSubViewport)
     {
         _gcHandle = GCHandle.Alloc(this);
@@ -144,10 +149,14 @@ internal sealed partial class Viewports
 {
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowPos(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
+    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowPos(
+        ImGuiPlatformIO* platform_io,
+        IntPtr funcPtr);
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowSize(ImGuiPlatformIO* platform_io, IntPtr funcPtr);
+    private static unsafe partial void ImGuiPlatformIO_Set_Platform_GetWindowSize(
+        ImGuiPlatformIO* platform_io,
+        IntPtr funcPtr);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void Platform_CreateWindow(ImGuiViewportPtr vp);
@@ -187,13 +196,13 @@ internal sealed partial class Viewports
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate bool Platform_GetWindowMinimized(ImGuiViewportPtr vp);
-    private static readonly Platform_GetWindowMinimized _getWindowMinimized = Godot_GetWindowMinimized;
+    private static readonly Platform_GetWindowMinimized _getWindowMinimized
+        = Godot_GetWindowMinimized;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void Platform_SetWindowTitle(ImGuiViewportPtr vp, string title);
     private static readonly Platform_SetWindowTitle _setWindowTitle = Godot_SetWindowTitle;
 
-    //private static bool _wantUpdateMonitors = true;
     private readonly GodotImGuiWindow _mainWindow;
 
     private static void UpdateMonitors()
@@ -238,11 +247,16 @@ internal sealed partial class Viewports
         //pio->Platform_GetWindowSize = Marshal.GetFunctionPointerForDelegate(_getWindowSize);
         pio->Platform_SetWindowFocus = Marshal.GetFunctionPointerForDelegate(_setWindowFocus);
         pio->Platform_GetWindowFocus = Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
-        pio->Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
+        pio->Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(
+            _getWindowMinimized);
         pio->Platform_SetWindowTitle = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
 
-        ImGuiPlatformIO_Set_Platform_GetWindowPos(pio, Marshal.GetFunctionPointerForDelegate(_getWindowPos));
-        ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
+        ImGuiPlatformIO_Set_Platform_GetWindowPos(
+            pio,
+            Marshal.GetFunctionPointerForDelegate(_getWindowPos));
+        ImGuiPlatformIO_Set_Platform_GetWindowSize(
+            pio,
+            Marshal.GetFunctionPointerForDelegate(_getWindowSize));
     }
 
     public Viewports(Window mainWindow, Rid mainSubViewport)

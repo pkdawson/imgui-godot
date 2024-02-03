@@ -24,13 +24,13 @@ internal sealed class Input(Window mainWindow)
             if (io.WantSetMousePos)
             {
                 // WarpMouse is relative to the current focused window
-                int[] windows = DisplayServer.GetWindowList();
-                foreach (int w in windows)
+                foreach (int w in DisplayServer.GetWindowList())
                 {
                     if (DisplayServer.WindowIsFocused(w))
                     {
                         var winPos = DisplayServer.WindowGetPosition(w);
-                        Godot.Input.WarpMouse(new(io.MousePos.X - winPos.X, io.MousePos.Y - winPos.Y));
+                        Godot.Input
+                            .WarpMouse(new(io.MousePos.X - winPos.X, io.MousePos.Y - winPos.Y));
                         break;
                     }
                 }
@@ -97,7 +97,8 @@ internal sealed class Input(Window mainWindow)
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(windowPos.X + mouseEvent.GlobalPosition.X - CurrentSubViewportPos.X,
+                mouseEvent.Position = new Vector2(
+                    windowPos.X + mouseEvent.GlobalPosition.X - CurrentSubViewportPos.X,
                     windowPos.Y + mouseEvent.GlobalPosition.Y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
@@ -142,7 +143,7 @@ internal sealed class Input(Window mainWindow)
                 case MouseButton.WheelRight:
                     _mouseWheel.X = mb.Factor;
                     break;
-            };
+            }
             consumed = io.WantCaptureMouse;
             mb.Dispose();
         }
@@ -209,7 +210,7 @@ internal sealed class Input(Window mainWindow)
                     case JoyAxis.TriggerRight:
                         io.AddKeyAnalogEvent(ImGuiKey.GamepadR2, pressed, v);
                         break;
-                };
+                }
                 consumed = true;
                 jm.Dispose();
             }
@@ -228,7 +229,7 @@ internal sealed class Input(Window mainWindow)
             case MainLoop.NotificationApplicationFocusOut:
                 ImGui.GetIO().AddFocusEvent(false);
                 break;
-        };
+        }
     }
 
     private static void UpdateKeyMods(ImGuiIOPtr io)

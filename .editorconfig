@@ -36,3 +36,14 @@ dotnet_diagnostic.CA1001.severity = none
 dotnet_diagnostic.CA1725.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1711.severity = none
+
+# Roslynator
+dotnet_diagnostic.rcs0056.severity = warning
+roslynator_max_line_length = 100
+
+dotnet_diagnostic.rcs1194.severity = none
+dotnet_diagnostic.rcs1129.severity = none
+dotnet_diagnostic.rcs1061.severity = none
+dotnet_diagnostic.rcs1006.severity = none
+dotnet_diagnostic.rcs1141.severity = none
+dotnet_diagnostic.rcs1161.severity = none

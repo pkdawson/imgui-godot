@@ -51,7 +51,8 @@ internal sealed class CanvasRenderer : IRenderer
         ViewportData vd = _vpData[vprid];
         Rid parent = vd.RootCanvasItem;
 
-        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle)
+            .Target!;
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = [];
@@ -168,7 +169,16 @@ internal sealed class CanvasRenderer : IRenderer
                     drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
                 );
 
-                RenderingServer.CanvasItemAddTriangleArray(child, indices, cmdvertices, cmdcolors, cmduvs, null, null, texrid, -1);
+                RenderingServer.CanvasItemAddTriangleArray(
+                    child,
+                    indices,
+                    cmdvertices,
+                    cmdcolors,
+                    cmduvs,
+                    null,
+                    null,
+                    texrid,
+                    -1);
             }
         }
     }

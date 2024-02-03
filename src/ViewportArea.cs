@@ -15,14 +15,14 @@ public partial class ViewportArea : Area3D
         _decalTexture = GD.Load<Texture2D>("res://data/icon.svg");
     }
 
-    public override void _InputEvent(Camera3D cam, InputEvent evt, Vector3 pos,
+    public override void _InputEvent(Camera3D camera, InputEvent @event, Vector3 position,
         Vector3 normal, int shapeIdx)
     {
-        if (evt is InputEventMouseMotion)
+        if (@event is InputEventMouseMotion)
         {
-            _piece.Position = pos;
+            _piece.Position = position;
         }
-        else if (evt is InputEventMouseButton mb && mb.Pressed)
+        else if (@event is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.Left)
             {
@@ -30,7 +30,7 @@ public partial class ViewportArea : Area3D
                 {
                     TextureAlbedo = _decalTexture,
                     Scale = new(10, 10, 10),
-                    Position = pos,
+                    Position = position,
                     CullMask = 1,
                 });
             }
@@ -45,9 +45,9 @@ public partial class ViewportArea : Area3D
         }
     }
 
-    public override void _UnhandledKeyInput(InputEvent evt)
+    public override void _UnhandledKeyInput(InputEvent @event)
     {
-        if (evt is InputEventKey k && k.Pressed)
+        if (@event is InputEventKey k && k.Pressed)
         {
             if (k.Keycode == Key.R)
             {

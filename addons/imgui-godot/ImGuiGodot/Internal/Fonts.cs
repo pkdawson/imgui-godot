@@ -34,7 +34,8 @@ internal sealed class Fonts
 
     public void AddFont(FontFile? fontData, int fontSize, bool merge)
     {
-        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
+        _fontConfiguration.Add(
+            new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
     }
 
     private static unsafe void AddFontToAtlas(FontFile? fontData, int fontSize, bool merge)
@@ -82,7 +83,8 @@ internal sealed class Fonts
 
     private static unsafe ImVector GetRanges(Font font)
     {
-        var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+        var builder = new ImFontGlyphRangesBuilderPtr(
+            ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
         builder.AddText(font.GetSupportedChars());
         builder.BuildRanges(out ImVector vec);
         builder.Destroy();
@@ -146,15 +148,18 @@ internal sealed class Fonts
             AddFontToAtlas(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
         }
 
-        io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
+        io.Fonts.GetTexDataAsRGBA32(
+            out byte* pixelData,
+            out int width,
+            out int height,
+            out int bytesPerPixel);
 
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
         var img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
-        var imgtex = ImageTexture.CreateFromImage(img);
-        _fontTexture = imgtex;
+        _fontTexture = ImageTexture.CreateFromImage(img);
         io.Fonts.SetTexID((IntPtr)_fontTexture.GetRid().Id);
         io.Fonts.ClearTexData();
 

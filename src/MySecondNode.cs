@@ -19,7 +19,7 @@ public partial class MySecondNode : Node
     private static bool _fontLoaded = false;
     private static readonly System.Numerics.Vector4 MyTextColor = Colors.Aquamarine.ToVector4();
 
-    private static readonly ImGuiWindowFlags CsWinFlags =
+    private const ImGuiWindowFlags CsWinFlags =
         ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize |
         ImGuiWindowFlags.NoSavedSettings |

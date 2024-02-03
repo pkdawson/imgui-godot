@@ -25,9 +25,17 @@ internal sealed class BackendNative : IBackend
         public static readonly StringName Visible = "Visible";
     }
 
-    public float JoyAxisDeadZone { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public float JoyAxisDeadZone
+    {
+        get => throw new System.NotImplementedException();
+        set => throw new System.NotImplementedException();
+    }
     public float Scale { get; set; } = 1.0f; // TODO: make property
-    public bool Visible { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    public bool Visible
+    {
+        get => throw new System.NotImplementedException();
+        set => throw new System.NotImplementedException();
+    }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge)
     {

@@ -49,20 +49,20 @@ internal sealed class BackendNet : IBackend
         State.Instance.Fonts.ResetFonts();
     }
 
-    public bool SubViewportWidget(SubViewport vp)
+    public bool SubViewportWidget(SubViewport svp)
     {
-        Vector2 vpSize = new(vp.Size.X, vp.Size.Y);
+        Vector2 vpSize = new(svp.Size.X, svp.Size.Y);
         var pos = ImGui.GetCursorScreenPos();
         var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
-        ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);
+        ImGui.GetWindowDrawList().AddImage((IntPtr)svp.GetTexture().GetRid().Id, pos, pos_max);
 
-        ImGui.PushID(vp.NativeInstance);
+        ImGui.PushID(svp.NativeInstance);
         ImGui.InvisibleButton("godot_subviewport", vpSize);
         ImGui.PopID();
 
         if (ImGui.IsItemHovered())
         {
-            State.Instance.Input.CurrentSubViewport = vp;
+            State.Instance.Input.CurrentSubViewport = svp;
             State.Instance.Input.CurrentSubViewportPos = pos;
             return true;
         }
