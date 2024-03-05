@@ -16,6 +16,7 @@ internal sealed class Fonts
         public FontFile? Font { get; init; }
         public int FontSize { get; init; }
         public bool Merge { get; init; }
+        public ushort[] Ranges { get; init; }
     }
     private readonly List<FontParams> _fontConfiguration = new();
 
@@ -32,12 +33,12 @@ internal sealed class Fonts
         _fontConfiguration.Clear();
     }
 
-    public void AddFont(FontFile? fontData, int fontSize, bool merge)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge, ushort[] predefinedRanges = null)
     {
-        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
+        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge, Ranges = predefinedRanges});
     }
 
-    private static unsafe void AddFontToAtlas(FontFile? fontData, int fontSize, bool merge)
+    private static unsafe void AddFontToAtlas(FontFile? fontData, int fontSize, bool merge, ushort[] predefinedRanges)
     {
         ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
         if (merge)
@@ -70,7 +71,14 @@ internal sealed class Fonts
             // let ImGui manage this memory
             IntPtr p = ImGui.MemAlloc((uint)len);
             Marshal.Copy(fontData.Data, 0, p, len);
-            ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
+            if ( predefinedRanges == null ) {
+                ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
+            }
+            else {
+                fixed ( ushort* rangesPtr = predefinedRanges ) {
+                    ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ( IntPtr )rangesPtr);
+                }
+            }
         }
 
         if (merge)
@@ -143,7 +151,7 @@ internal sealed class Fonts
 
         foreach (var fontParams in _fontConfiguration)
         {
-            AddFontToAtlas(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
+            AddFontToAtlas(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge, fontParams.Ranges);
         }
 
         io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);

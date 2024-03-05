@@ -11,6 +11,9 @@ internal sealed class GodotImGuiWindow : IDisposable
 {
     private readonly GCHandle _gcHandle;
     private readonly ImGuiViewportPtr _vp;
+    private readonly Callable _onCloseRequestedCall;
+    private readonly Callable _onSizeChangedCall;
+    private readonly Callable _onWindowInputCall;
 
     public Window GodotWindow { get; init; }
 
@@ -38,10 +41,14 @@ internal sealed class GodotImGuiWindow : IDisposable
             Transparent = true,
             TransparentBg = true
         };
-
-        GodotWindow.CloseRequested += () => _vp.PlatformRequestClose = true;
-        GodotWindow.SizeChanged += () => _vp.PlatformRequestResize = true;
-        GodotWindow.WindowInput += OnWindowInput;
+        
+        _onCloseRequestedCall = Callable.From( OnCloseRequested );
+        _onSizeChangedCall = Callable.From( OnSizeChanged );
+        _onWindowInputCall = Callable.From< InputEvent >( OnWindowInput );
+        
+        GodotWindow.Connect( Window.SignalName.CloseRequested, _onCloseRequestedCall );
+        GodotWindow.Connect( Window.SignalName.SizeChanged, _onSizeChangedCall );
+        GodotWindow.Connect( Window.SignalName.WindowInput, _onWindowInputCall );
 
         ImGuiLayer.Instance.AddChild(GodotWindow);
 
@@ -70,9 +77,20 @@ internal sealed class GodotImGuiWindow : IDisposable
     {
         if (GodotWindow.GetParent() != null)
         {
+            GodotWindow.Disconnect( Window.SignalName.CloseRequested, _onCloseRequestedCall );
+            GodotWindow.Disconnect( Window.SignalName.SizeChanged, _onSizeChangedCall );
+            GodotWindow.Disconnect( Window.SignalName.WindowInput, _onWindowInputCall );
             GodotWindow.QueueFree();
         }
         _gcHandle.Free();
+    }
+
+    private void OnCloseRequested() {
+        _vp.PlatformRequestClose = true;
+    }
+
+    private void OnSizeChanged() {
+        _vp.PlatformRequestResize = true;
     }
 
     private void OnWindowInput(InputEvent evt)
@@ -139,7 +157,7 @@ internal static class ViewportsExts
     }
 }
 
-internal sealed partial class Viewports
+internal sealed partial class Viewports : IDisposable
 {
 #if NET7_0_OR_GREATER
 #if GODOT_WINDOWS && !GODOT4_1_OR_GREATER
@@ -276,6 +294,25 @@ internal sealed partial class Viewports
         ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
     }
 
+    private static unsafe void DeInitPlatformInterface() {
+        var pio = ImGui.GetPlatformIO().NativePtr;
+
+        pio->Platform_CreateWindow = IntPtr.Zero;
+        pio->Platform_DestroyWindow = IntPtr.Zero;
+        pio->Platform_ShowWindow = IntPtr.Zero;
+        pio->Platform_SetWindowPos = IntPtr.Zero;
+        //pio->Platform_GetWindowPos = IntPtr.Zero;
+        pio->Platform_SetWindowSize = IntPtr.Zero;
+        //pio->Platform_GetWindowSize = IntPtr.Zero;
+        pio->Platform_SetWindowFocus = IntPtr.Zero;
+        pio->Platform_GetWindowFocus = IntPtr.Zero;
+        pio->Platform_GetWindowMinimized = IntPtr.Zero;
+        pio->Platform_SetWindowTitle = IntPtr.Zero;
+
+        ImGuiPlatformIO_Set_Platform_GetWindowPos(pio, IntPtr.Zero);
+        ImGuiPlatformIO_Set_Platform_GetWindowSize(pio, IntPtr.Zero);
+    }
+
     public Viewports(Window mainWindow, Rid mainSubViewport)
     {
         _mainWindow = new(ImGui.GetMainViewport(), mainWindow, mainSubViewport);
@@ -283,6 +320,10 @@ internal sealed partial class Viewports
         ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         InitPlatformInterface();
         UpdateMonitors();
+    }
+    
+    public void Dispose() {
+        DeInitPlatformInterface();
     }
 
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
