@@ -109,9 +109,9 @@ public static class ImGuiGD
         Internal.State.Instance.Fonts.ResetFonts();
     }
 
-    public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
+    public static void AddFont(FontFile fontData, int fontSize, bool merge = false, ushort[] predefinedRanges = null)
     {
-        Internal.State.Instance.Fonts.AddFont(fontData, fontSize, merge);
+        Internal.State.Instance.Fonts.AddFont(fontData, fontSize, merge, predefinedRanges);
     }
 
     public static void AddFontDefault()
