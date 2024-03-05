@@ -66,6 +66,8 @@ internal sealed class State : IDisposable
 
     public void Dispose()
     {
+        Viewports.Dispose();
+        Viewports = null;
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
         {
             ImGui.DestroyContext();
