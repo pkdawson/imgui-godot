@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from glob import glob
 from pathlib import Path
+import os
 import shutil
 import subprocess
 
@@ -22,10 +23,12 @@ if windows:
 elif linux:
     triplet = "x64-linux"
 else:
-    subprocess.call("zsh vcpkg-macos.sh", shell=True)
+    if not os.path.exists("vcpkg_installed/arm64-osx"):
+        subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True)
     triplet = "arm64-osx"
 
-subprocess.call("python gds_bindings.py", shell=True)
+if not os.path.exists("gen/imgui_bindings.gen.h"):
+    subprocess.call("python scripts/gds_bindings.py", shell=True)
 
 sources = Glob("src/*.cpp") + Glob("imgui/*.cpp") + Glob("gen/*.cpp")
 
@@ -39,12 +42,13 @@ libs = [env["LIBS"]]
 
 env.Append(CPPPATH=["imgui/misc/freetype/"])
 env.Append(CPPPATH=[f"vcpkg_installed/{triplet}/include"])
-env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE"]) #, "IMGUI_ENABLE_FREETYPE_LUNASVG"])
+env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE"])
+# env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE_LUNASVG"])
 sources += Glob("imgui/misc/freetype/*.cpp")
 libpath += [f"vcpkg_installed/{triplet}/lib"]
 libs += [
     "freetype",
-#    "lunasvg",
+    # "lunasvg",
     "bz2",
     "libpng16" if windows else "png16",
     "zlib" if windows else "z",
