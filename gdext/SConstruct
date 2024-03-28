@@ -20,12 +20,16 @@ if config == "release":
 
 if windows:
     triplet = "x64-windows-static"
+    if not os.path.exists("vcpkg_installed"):
+        subprocess.call(f"%VCPKG_ROOT%/vcpkg install --triplet {triplet}", shell=True)
 elif linux:
     triplet = "x64-linux"
+    if not os.path.exists("vcpkg_installed"):
+        subprocess.call("$VCPKG_ROOT/vcpkg install", shell=True)
 else:
-    if not os.path.exists("vcpkg_installed/arm64-osx"):
-        subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True)
     triplet = "arm64-osx"
+    if not os.path.exists("vcpkg_installed"):
+        subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True)
 
 if not os.path.exists("gen/imgui_bindings.gen.h"):
     subprocess.call("python scripts/gds_bindings.py", shell=True)

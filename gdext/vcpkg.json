@@ -1,6 +1,5 @@
 {
     "dependencies": [
-        "freetype",
-        "lunasvg"
+        "freetype"
     ]
 }
