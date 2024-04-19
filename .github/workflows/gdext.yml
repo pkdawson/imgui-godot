@@ -4,7 +4,7 @@ on: push
 
 env:
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
-  vcpkg_tag: 2024.03.25
+  vcpkg_tag: a34c873a9717a888f58dc05268dea15592c2f0ff # 2024.03.25
 
 jobs:
   windows:
