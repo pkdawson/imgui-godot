@@ -37,6 +37,13 @@ jobs:
           cd gdext
           ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static
 
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        with:
+          path: |
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+
       - name: Build debug
         run: |
           cd gdext
@@ -138,6 +145,13 @@ jobs:
         run: |
           cd gdext
           zsh scripts/vcpkg-macos.sh
+
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        with:
+          path: |
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
 
       - name: Build debug
         run: |
