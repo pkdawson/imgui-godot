@@ -37,3 +37,4 @@ gdext/proj/addons/imgui-godot/
 gdext/samples/project/addons/
 addons/imgui-godot/imgui-godot-native.gdextension
 addons/imgui-godot/include/*.h
+scons_cache

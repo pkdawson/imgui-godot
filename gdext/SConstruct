@@ -6,7 +6,7 @@ import shutil
 import subprocess
 
 env = SConscript("godot-cpp/SConstruct")
-env = env.Clone()
+env.CacheDir("scons_cache")
 env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', "IGN_EXPORT"])
 env.Append(CPPPATH=["src/", "imgui/", "include/", "gen/"])
 env.Replace(CXXFLAGS=str(env["CXXFLAGS"]).replace("c++17", "c++20"))

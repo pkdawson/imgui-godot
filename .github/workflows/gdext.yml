@@ -88,12 +88,13 @@ jobs:
         id: cache-godot-cpp
         with:
           path: |
-            gdext/godot-cpp
-          key: ${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
 
       - name: Build debug
         run: |
           cd gdext
+          ls -R
           scons
 
       - name: Build release
