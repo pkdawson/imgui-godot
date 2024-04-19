@@ -12,36 +12,30 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Python 3.x
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
-      - name: Setup scons
+      - name: Install tools
         run: |
           python -m pip install scons
           scons --version
+          pip install ply
 
-      - name: Get vcpkg
-        run: |
-          git clone -n https://github.com/microsoft/vcpkg
-          cd vcpkg
-          git checkout ${{ env.vcpkg_tag }}
-          .\bootstrap-vcpkg.bat
-
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
+  
       - name: vcpkg install
         run: |
           cd gdext
           ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static
-
-      - name: GDScript bindings
-        run: |
-          cd gdext
-          pip install ply
 
       - name: Build debug
         run: |
@@ -54,7 +48,7 @@ jobs:
           scons debug_symbols=yes target=template_release
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gdext-windows
           path: addons/imgui-godot/bin
@@ -64,37 +58,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Python 3.x
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
-      - name: Setup scons
+      - name: Install tools
         run: |
           python -m pip install scons
           scons --version
+          pip install ply
+          sudo apt install clang-format
 
-      - name: Get vcpkg
-        run: |
-          git clone -n https://github.com/microsoft/vcpkg
-          cd vcpkg
-          git checkout ${{ env.vcpkg_tag }}
-          ./bootstrap-vcpkg.sh
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
       - name: vcpkg install
         run: |
           cd gdext
           ${{ env.VCPKG_ROOT }}/vcpkg install --triplet x64-linux
-
-      - name: GDScript bindings
-        run: |
-          cd gdext
-          pip install ply
-          sudo apt install clang-format
 
       - name: Build debug
         run: |
@@ -107,47 +95,41 @@ jobs:
           scons target=template_release
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gdext-linux
           path: addons/imgui-godot/bin
 
   macos:
     name: 🍎macOS
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Setup Python 3.x
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
-      - name: Setup scons
+      - name: Install tools
         run: |
           python -m pip install scons
           scons --version
+          pip install ply
+          brew install clang-format
 
-      - name: Get vcpkg
-        run: |
-          git clone -n https://github.com/microsoft/vcpkg
-          cd vcpkg
-          git checkout ${{ env.vcpkg_tag }}
-          ./bootstrap-vcpkg.sh
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
       - name: vcpkg install
         run: |
           cd gdext
           zsh scripts/vcpkg-macos.sh
-
-      - name: GDScript bindings
-        run: |
-          cd gdext
-          pip install ply
-          brew install clang-format
 
       - name: Build debug
         run: |
@@ -165,7 +147,7 @@ jobs:
           scons target=template_release
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gdext-macos
           path: addons/imgui-godot/bin
@@ -176,11 +158,11 @@ jobs:
     needs: [windows, linux, macos]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           path: addons/imgui-godot/bin
 
@@ -190,11 +172,13 @@ jobs:
       - name: Extract
         run: |
           cd addons/imgui-godot/bin
+          mv gdext-*/* .
+          rmdir gdext-*
           rm *.exp
           rm *.lib
 
       - name: Upload PDBs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pdbs
           path: addons/imgui-godot/bin/*.pdb
@@ -216,7 +200,7 @@ jobs:
           rm -rf gdext
 
       - name: Upload package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prep.outputs.pkgfn }}
           path: |
