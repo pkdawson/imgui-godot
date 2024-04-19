@@ -34,32 +34,38 @@
 using namespace godot;
 
 namespace ImGui::Godot {
+
+enum class RendererType
+{
+    Dummy,
+    Canvas,
+    RenderingDevice,
+};
+
 struct Context
 {
-    Window* mainWindow = nullptr;
-    std::unique_ptr<Renderer> renderer;
-    std::unique_ptr<Input> input;
-    std::unique_ptr<Fonts> fonts;
+    // Window* mainWindow = nullptr;
     std::unique_ptr<Viewports> viewports;
-    RID svp;
-    RID ci;
-    Ref<ImageTexture> fontTexture;
-    bool headless = false;
-    int dpiFactor = 1;
-    bool scaleToDPI = false;
-    std::vector<char> iniFilename;
+    std::unique_ptr<Fonts> fonts;
+    std::unique_ptr<Input> input;
+    std::unique_ptr<Renderer> renderer;
+    float scale = 1.0f;
 
-    ~Context()
-    {
-        RenderingServer::get_singleton()->free_rid(ci);
-        RenderingServer::get_singleton()->free_rid(svp);
-    }
+    // RID svp;
+    // RID ci;
+    // Ref<ImageTexture> fontTexture;
+    // bool headless = false;
+    // int dpiFactor = 1;
+    // bool scaleToDPI = false;
+
+    Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Renderer> r);
+    ~Context();
 };
 
 Context* GetContext();
 
 void Init(Window* mainWindow, RID canvasItem, const Ref<Resource>& config);
-void Update(double delta);
+void Update(double delta, Vector2 displaySize);
 bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
 void ProcessNotification(int what);
 void Render();
@@ -68,9 +74,10 @@ void Connect(const Callable& callable);
 void ResetFonts();
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
-void RebuildFontAtlas(float scale);
+void RebuildFontAtlas();
 void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
+bool IsVisible();
 
 bool SubViewportWidget(SubViewport* svp);
 

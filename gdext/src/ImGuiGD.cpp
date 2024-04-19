@@ -38,24 +38,24 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
 }
 
-//void ImGuiGD::InitEditor(Node* parent)
+// void ImGuiGD::InitEditor(Node* parent)
 //{
-//#ifdef DEBUG_ENABLED
-//    if (!Engine::get_singleton()->is_editor_hint())
-//        return;
+// #ifdef DEBUG_ENABLED
+//     if (!Engine::get_singleton()->is_editor_hint())
+//         return;
 //
-//    if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
-//    {
-//        String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
-//        if (ResourceLoader::get_singleton()->exists(resPath))
-//        {
-//            Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
-//            if (scene.is_valid())
-//                parent->add_child(scene->instantiate());
-//        }
-//    }
-//#endif
-//}
+//     if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
+//     {
+//         String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
+//         if (ResourceLoader::get_singleton()->exists(resPath))
+//         {
+//             Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
+//             if (scene.is_valid())
+//                 parent->add_child(scene->instantiate());
+//         }
+//     }
+// #endif
+// }
 
 void ImGuiGD::ToolInit()
 {
@@ -95,31 +95,35 @@ void ImGuiGD::AddFontDefault()
 
 void ImGuiGD::RebuildFontAtlas(float scale)
 {
-    ImGui::Godot::RebuildFontAtlas(scale);
+    ImGui::Godot::RebuildFontAtlas();
 }
 
 void ImGuiGD::_SetVisible(bool visible)
 {
-    ImGui::Godot::SetVisible(visible);
+    CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    ERR_FAIL_COND(!igl);
+    igl->set_visible(visible);
 }
 
 bool ImGuiGD::_GetVisible()
 {
-    return true;
+    CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    ERR_FAIL_COND_V(!igl, false);
+    return igl->is_visible();
 }
 
 void ImGuiGD::_SetJoyAxisDeadZone(float zone)
 {
+    ImGui::Godot::GetContext()->input->SetJoyAxisDeadZone(zone);
 }
 
 float ImGuiGD::_GetJoyAxisDeadZone()
 {
-    return 0.15f;
+    return ImGui::Godot::GetContext()->input->GetJoyAxisDeadZone();
 }
 
 void ImGuiGD::_SetScale(float scale)
 {
-
 }
 
 float ImGuiGD::_GetScale()

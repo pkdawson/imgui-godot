@@ -19,6 +19,11 @@ public:
         return "godot4_dummy";
     }
 
+    bool Init() override
+    {
+        return true;
+    }
+
     void InitViewport(RID vprid) override
     {
     }

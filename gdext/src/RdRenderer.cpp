@@ -173,11 +173,23 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
 
 RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
 {
+}
+
+bool RdRenderer::Init()
+{
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
+    if (!RD)
+        return false;
+
+    // set up everything to match the official Vulkan backend as closely as possible
+
     Ref<RDShaderFile> shaderFile =
         ResourceLoader::get_singleton()->load("res://addons/imgui-godot/data/ImGuiShader.glsl");
 
     impl->shader = RD->shader_create_from_spirv(shaderFile->get_spirv());
+
+    if (!impl->shader.is_valid())
+        return false;
 
     TypedArray<RDVertexAttribute> vattrs;
 
@@ -244,6 +256,7 @@ RdRenderer::RdRenderer() : impl(std::make_unique<Impl>())
 
     impl->srcBuffers.resize(3);
     impl->uniforms.resize(1);
+    return true;
 }
 
 void RdRenderer::Render(RID fb, ImDrawData* drawData)
@@ -324,6 +337,11 @@ RdRenderer::~RdRenderer()
         RD->free_rid(impl->idxBuffer);
     if (impl->vtxBuffer.is_valid())
         RD->free_rid(impl->vtxBuffer);
+}
+
+void RdRenderer::InitViewport(RID vprid)
+{
+    RenderingServer::get_singleton()->viewport_set_clear_mode(vprid, RenderingServer::VIEWPORT_CLEAR_NEVER);
 }
 
 void RdRenderer::Render()

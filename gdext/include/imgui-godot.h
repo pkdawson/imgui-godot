@@ -21,6 +21,7 @@
 #endif
 
 #ifdef IGN_GDEXT
+// GDExtension
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/font_file.hpp>
@@ -52,6 +53,7 @@ using godot::TypedArray;
 using godot::Vector2;
 using godot::Window;
 #else
+// module
 #include "core/config/engine.h"
 #include "core/variant/callable.h"
 #include "scene/main/viewport.h"
@@ -114,15 +116,15 @@ inline void ResetFonts()
 inline void SetJoyAxisDeadZone(float deadZone)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    static const StringName sn("SetJoyAxisDeadZone");
-    detail::ImGuiGD->call(sn, deadZone);
+    static const StringName sn("JoyAxisDeadZone");
+    detail::ImGuiGD->set(sn, deadZone);
 }
 
 inline void SetVisible(bool vis)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
-    static const StringName sn("SetVisible");
-    detail::ImGuiGD->call(sn, vis);
+    static const StringName sn("Visible");
+    detail::ImGuiGD->set(sn, vis);
 }
 
 inline void ToolInit()
@@ -130,13 +132,6 @@ inline void ToolInit()
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("ToolInit");
     detail::ImGuiGD->call(sn);
-}
-
-inline bool SubViewport(SubViewport* svp)
-{
-    ERR_FAIL_COND_V(!detail::GET_IMGUIGD(), false);
-    static const StringName sn("SubViewport");
-    return detail::ImGuiGD->call(sn, svp);
 }
 
 inline void SyncImGuiPtrs()
@@ -161,33 +156,6 @@ inline void SyncImGuiPtrs()
 inline ImTextureID BindTexture(Texture2D* tex)
 {
     return reinterpret_cast<ImTextureID>(tex->get_rid().get_id());
-}
-
-inline void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
-                  const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0})
-{
-    ImGui::Image(BindTexture(tex), size, uv0, uv1, tint_col, border_col);
-}
-
-inline void Image(const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
-                  const Vector2& uv1 = {1, 1}, const Color& tint_col = {1, 1, 1, 1},
-                  const Color& border_col = {0, 0, 0, 0})
-{
-    ImGui::Image(BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
-}
-
-inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
-                        const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
-                        const Color& tint_col = {1, 1, 1, 1})
-{
-    return ImGui::ImageButton(str_id, BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
-}
-
-inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
-                        const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
-                        const Color& tint_col = {1, 1, 1, 1})
-{
-    return ImGui::ImageButton(str_id, BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
 }
 #endif
 
@@ -438,6 +406,46 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
     };
 }
 #endif
+} // namespace ImGui::Godot
+
+#ifndef IGN_EXPORT
+// widgets
+namespace ImGui {
+inline bool SubViewport(SubViewport* svp)
+{
+    ERR_FAIL_COND_V(!Godot::detail::GET_IMGUIGD(), false);
+    static const StringName sn("SubViewport");
+    return Godot::detail::ImGuiGD->call(sn, svp);
+}
+
+inline void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
+                  const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0})
+{
+    ImGui::Image(Godot::BindTexture(tex), size, uv0, uv1, tint_col, border_col);
+}
+
+inline void Image(const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+                  const Vector2& uv1 = {1, 1}, const Color& tint_col = {1, 1, 1, 1},
+                  const Color& border_col = {0, 0, 0, 0})
+{
+    ImGui::Image(Godot::BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
+}
+
+inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+                        const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
+                        const Color& tint_col = {1, 1, 1, 1})
+{
+    return ImGui::ImageButton(str_id, Godot::BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+}
+
+inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
+                        const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
+                        const Color& tint_col = {1, 1, 1, 1})
+{
+    return ImGui::ImageButton(str_id, Godot::BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
+}
+} // namespace ImGui
+#endif
 
 #define IMGUI_GODOT_MODULE_INIT()                                                                                  \
     extern "C" {                                                                                                   \
@@ -448,5 +456,3 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
         ImGui::SetAllocatorFunctions(afunc, ffunc, nullptr);                                                       \
     }                                                                                                              \
     }
-
-} // namespace ImGui::Godot

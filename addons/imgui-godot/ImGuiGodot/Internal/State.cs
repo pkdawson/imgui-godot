@@ -39,8 +39,8 @@ internal sealed class State : IDisposable
 
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
-        var io = ImGui.GetIO();
 
+        var io = ImGui.GetIO();
         io.BackendFlags =
             ImGuiBackendFlags.HasGamepad |
             ImGuiBackendFlags.HasSetMousePos |
@@ -72,31 +72,27 @@ internal sealed class State : IDisposable
     public static void Init(Window mainWindow, Rid mainSubViewport, Resource cfg)
     {
         if (IntPtr.Size != sizeof(ulong))
-        {
             throw new PlatformNotSupportedException("imgui-godot requires 64-bit pointers");
-        }
 
-        RendererType renderer = Enum.Parse<RendererType>((string)cfg.Get("Renderer"));
+        RendererType rendererType = Enum.Parse<RendererType>((string)cfg.Get("Renderer"));
 
         if (DisplayServer.GetName() == "headless")
-        {
-            renderer = RendererType.Dummy;
-        }
+            rendererType = RendererType.Dummy;
 
         // fall back to Canvas in OpenGL compatibility mode
-        if (renderer == RendererType.RenderingDevice
+        if (rendererType == RendererType.RenderingDevice
             && RenderingServer.GetRenderingDevice() == null)
         {
-            renderer = RendererType.Canvas;
+            rendererType = RendererType.Canvas;
         }
 
         // there's no way to get the actual current thread model, eg if --render-thread is used
         int threadModel = (int)ProjectSettings.GetSetting("rendering/driver/threads/thread_model");
 
-        IRenderer internalRenderer;
+        IRenderer renderer;
         try
         {
-            internalRenderer = renderer switch
+            renderer = rendererType switch
             {
                 RendererType.Dummy => new DummyRenderer(),
                 RendererType.Canvas => new CanvasRenderer(),
@@ -108,19 +104,19 @@ internal sealed class State : IDisposable
         }
         catch (Exception e)
         {
-            if (renderer == RendererType.RenderingDevice)
+            if (rendererType == RendererType.RenderingDevice)
             {
                 GD.PushWarning($"imgui-godot: falling back to Canvas renderer ({e.Message})");
-                internalRenderer = new CanvasRenderer();
+                renderer = new CanvasRenderer();
             }
             else
             {
                 GD.PushError("imgui-godot: failed to init renderer");
-                internalRenderer = new DummyRenderer();
+                renderer = new DummyRenderer();
             }
         }
 
-        Instance = new(mainWindow, mainSubViewport, internalRenderer)
+        Instance = new(mainWindow, mainSubViewport, renderer)
         {
             Scale = (float)cfg.Get("Scale")
         };
@@ -133,18 +129,16 @@ internal sealed class State : IDisposable
         for (int i = 0; i < fonts.Count; ++i)
         {
             var fontres = (Resource)fonts[i];
-            var font = (FontFile)fontres.Get("FontData");
+            var fontData = (FontFile)fontres.Get("FontData");
             int fontSize = (int)fontres.Get("FontSize");
             bool merge = (bool)fontres.Get("Merge");
             if (i == 0)
-                ImGuiGD.AddFont(font, fontSize);
+                ImGuiGD.AddFont(fontData, fontSize);
             else
-                ImGuiGD.AddFont(font, fontSize, merge);
+                ImGuiGD.AddFont(fontData, fontSize, merge);
         }
         if ((bool)cfg.Get("AddDefaultFont"))
-        {
             ImGuiGD.AddFontDefault();
-        }
         ImGuiGD.RebuildFontAtlas();
     }
 
@@ -181,7 +175,6 @@ internal sealed class State : IDisposable
     public void Render()
     {
         ImGui.Render();
-
         ImGui.UpdatePlatformWindows();
         Renderer.Render();
         //_inProcessFrame = false;

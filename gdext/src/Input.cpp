@@ -27,11 +27,13 @@ namespace ImGui::Godot {
 struct Input::Impl
 {
     Window* mainWindow = nullptr;
+    godot::SubViewport* previousSubViewport = nullptr;
     godot::SubViewport* currentSubViewport = nullptr;
     Vector2 currentSubViewportPos;
     Vector2 mouseWheel;
     ImGuiMouseCursor currentCursor = ImGuiMouseCursor_None;
     bool hasMouse;
+    float deadZone = 0.15f;
 
     void UpdateMouse();
 };
@@ -152,6 +154,7 @@ void Input::Update()
     if (impl->hasMouse)
         impl->UpdateMouse();
 
+    impl->previousSubViewport = impl->currentSubViewport;
     impl->currentSubViewport = nullptr;
 }
 
@@ -163,10 +166,12 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         windowPos = window->get_position();
 
-    if (impl->currentSubViewport != nullptr)
+    if (impl->currentSubViewport)
     {
-        Ref<InputEvent> vpevt = evt->duplicate();
+        if (impl->currentSubViewport != impl->previousSubViewport)
+            impl->currentSubViewport->notification(Node::NOTIFICATION_VP_MOUSE_ENTER);
 
+        Ref<InputEvent> vpevt = evt->duplicate();
         if (Ref<InputEventMouse> me = vpevt; me.is_valid())
         {
             Vector2 gpos = me->get_global_position();
@@ -175,6 +180,10 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
                                  .clamp(Vector2(0, 0), impl->currentSubViewport->get_size()));
         }
         impl->currentSubViewport->push_input(vpevt, true);
+    }
+    else if (impl->previousSubViewport)
+    {
+        impl->previousSubViewport->notification(Node::NOTIFICATION_VP_MOUSE_EXIT);
     }
 
     bool consumed = false;
@@ -202,6 +211,7 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
             break;
         case MOUSE_BUTTON_XBUTTON2:
             io.AddMouseButtonEvent(ImGuiMouseButton_Middle + 2, pressed);
+            break;
         case MOUSE_BUTTON_WHEEL_UP:
             impl->mouseWheel.y = mb->get_factor();
             break;
@@ -252,7 +262,7 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         {
             bool pressed = true;
             float v = jm->get_axis_value();
-            if (std::abs(v) < 0.15f) // TODO: set dead zone
+            if (std::abs(v) < impl->deadZone)
             {
                 v = 0;
                 pressed = false;
@@ -304,6 +314,16 @@ void Input::SetActiveSubViewport(godot::SubViewport* svp, Vector2 pos)
 {
     impl->currentSubViewport = svp;
     impl->currentSubViewportPos = pos;
+}
+
+void Input::SetJoyAxisDeadZone(float val)
+{
+    impl->deadZone = val;
+}
+
+float Input::GetJoyAxisDeadZone()
+{
+    return impl->deadZone;
 }
 
 } // namespace ImGui::Godot

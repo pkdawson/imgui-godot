@@ -8,7 +8,11 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class BackendNet : IBackend
 {
-    public float JoyAxisDeadZone { get; set; } = 0.15f;
+    public float JoyAxisDeadZone
+    {
+        get => State.Instance.Input.JoyAxisDeadZone;
+        set => State.Instance.Input.JoyAxisDeadZone = value;
+    }
 
     public float Scale
     {

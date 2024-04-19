@@ -23,6 +23,7 @@ public:
 
     virtual const char* Name() = 0;
 
+    virtual bool Init() = 0;
     virtual void InitViewport(RID vprid) = 0;
     virtual void CloseViewport(RID vprid) = 0;
     virtual void Render() = 0;

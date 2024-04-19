@@ -22,9 +22,8 @@ public:
         return "godot4_rd";
     }
 
-    void InitViewport(RID vprid) override
-    {
-    }
+    bool Init() override;
+    void InitViewport(RID vprid) override;
     void CloseViewport(RID vprid) override
     {
     }

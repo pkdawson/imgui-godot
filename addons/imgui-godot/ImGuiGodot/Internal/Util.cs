@@ -23,16 +23,5 @@ internal static class Util
         il.Emit(OpCodes.Ret);
         ConstructRid = dm.CreateDelegate<Func<ulong, Rid>>();
     }
-
-    public static Rid AddLayerSubViewport(Node parent)
-    {
-        Rid svp = RenderingServer.ViewportCreate();
-        RenderingServer.ViewportSetTransparentBackground(svp, true);
-        RenderingServer.ViewportSetUpdateMode(svp, RenderingServer.ViewportUpdateMode.Always);
-        RenderingServer.ViewportSetClearMode(svp, RenderingServer.ViewportClearMode.Always);
-        RenderingServer.ViewportSetActive(svp, true);
-        RenderingServer.ViewportSetParentViewport(svp, parent.GetWindow().GetViewportRid());
-        return svp;
-    }
 }
 #endif

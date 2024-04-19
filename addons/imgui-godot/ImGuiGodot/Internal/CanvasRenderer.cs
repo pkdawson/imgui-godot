@@ -3,7 +3,6 @@ using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
@@ -50,9 +49,6 @@ internal sealed class CanvasRenderer : IRenderer
     {
         ViewportData vd = _vpData[vprid];
         Rid parent = vd.RootCanvasItem;
-
-        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(drawData.OwnerViewport.PlatformHandle)
-            .Target!;
 
         if (!_canvasItemPools.ContainsKey(parent))
             _canvasItemPools[parent] = [];
@@ -129,10 +125,10 @@ internal sealed class CanvasRenderer : IRenderer
                 }
 
                 var indices = new int[drawCmd.ElemCount];
-                int idxOffset = (int)drawCmd.IdxOffset;
-                for (int i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; ++i, ++j)
+                uint idxOffset = drawCmd.IdxOffset;
+                for (uint i = idxOffset, j = 0; i < idxOffset + drawCmd.ElemCount; ++i, ++j)
                 {
-                    indices[j] = cmdList.IdxBuffer[i];
+                    indices[j] = cmdList.IdxBuffer[(int)i];
                 }
 
                 Vector2[] cmdvertices = vertices;

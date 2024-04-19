@@ -22,6 +22,7 @@ public:
         return "godot4_canvas";
     }
 
+    bool Init() override;
     void InitViewport(RID vprid) override;
     void CloseViewport(RID vprid) override;
     void Render() override;

@@ -13,7 +13,7 @@ public:
     ~Fonts();
 
     void Reset();
-    void Add(Ref<FontFile> fontData, int fontSize, bool merge);
+    void Add(Ref<FontFile> fontData, int fontSize, bool merge = false);
     void RebuildFontAtlas(float scale);
 
 private:

@@ -1,5 +1,5 @@
 #include "ImGuiLayerHelper.h"
-#include "ImGuiLayer.h"
+#include "Context.h"
 #include "imgui-godot.h"
 
 #pragma warning(push, 0)
@@ -15,7 +15,7 @@ namespace ImGui::Godot {
 
 struct ImGuiLayerHelper::Impl
 {
-    ImGuiLayer* igl = nullptr;
+    Window* window;
 };
 
 ImGuiLayerHelper::ImGuiLayerHelper() : impl(std::make_unique<Impl>())
@@ -32,12 +32,14 @@ void ImGuiLayerHelper::_bind_methods()
 
 void ImGuiLayerHelper::_enter_tree()
 {
-    impl->igl = Object::cast_to<ImGuiLayer>(get_parent());
 }
 
 void ImGuiLayerHelper::_ready()
 {
+    set_name("ImGuiLayerHelper");
     set_process_priority(std::numeric_limits<int32_t>::min());
+    set_process_mode(Node::PROCESS_MODE_ALWAYS);
+    impl->window = get_window();
 }
 
 void ImGuiLayerHelper::_exit_tree()
@@ -46,7 +48,7 @@ void ImGuiLayerHelper::_exit_tree()
 
 void ImGuiLayerHelper::_process(double delta)
 {
-    impl->igl->NewFrame(delta);
+    ImGui::Godot::Update(delta, impl->window->get_size());
 }
 
 } // namespace ImGui::Godot

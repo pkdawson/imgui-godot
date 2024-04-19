@@ -27,14 +27,16 @@ internal sealed class BackendNative : IBackend
 
     public float JoyAxisDeadZone
     {
-        get => throw new System.NotImplementedException();
-        set => throw new System.NotImplementedException();
+        get => (float)_gd.Get(PropertyName.JoyAxisDeadZone);
+        set => _gd.Set(PropertyName.JoyAxisDeadZone, value);
     }
+
     public float Scale { get; set; } = 1.0f; // TODO: make property
+
     public bool Visible
     {
-        get => throw new System.NotImplementedException();
-        set => throw new System.NotImplementedException();
+        get => (bool)_gd.Get(PropertyName.Visible);
+        set => _gd.Set(PropertyName.Visible, value);
     }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge)

@@ -155,7 +155,6 @@ internal class RdRenderer : IRenderer
 
     public void InitViewport(Rid vprid)
     {
-        //RenderingServer.ViewportSetUpdateMode(vprid, RenderingServer.ViewportUpdateMode.Disabled);
         RenderingServer.ViewportSetClearMode(vprid, RenderingServer.ViewportClearMode.Never);
     }
 

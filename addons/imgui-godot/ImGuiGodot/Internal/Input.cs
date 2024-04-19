@@ -8,6 +8,8 @@ namespace ImGuiGodot.Internal;
 
 internal sealed class Input(Window mainWindow)
 {
+    public float JoyAxisDeadZone { get; set; } = 0.15f;
+    internal SubViewport? PreviousSubViewport { get; set; }
     internal SubViewport? CurrentSubViewport { get; set; }
     internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private Vector2 _mouseWheel = Vector2.Zero;
@@ -80,6 +82,7 @@ internal sealed class Input(Window mainWindow)
         if (_hasMouse)
             UpdateMouse(io);
 
+        PreviousSubViewport = CurrentSubViewport;
         CurrentSubViewport = null;
     }
 
@@ -94,6 +97,9 @@ internal sealed class Input(Window mainWindow)
 
         if (CurrentSubViewport != null)
         {
+            if (CurrentSubViewport != PreviousSubViewport)
+                CurrentSubViewport.Notification((int)Node.NotificationVpMouseEnter);
+
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
@@ -103,6 +109,10 @@ internal sealed class Input(Window mainWindow)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
+        }
+        else
+        {
+            PreviousSubViewport?.Notification((int)Node.NotificationVpMouseExit);
         }
 
         bool consumed = false;
@@ -185,7 +195,7 @@ internal sealed class Input(Window mainWindow)
             {
                 bool pressed = true;
                 float v = jm.AxisValue;
-                if (Math.Abs(v) < ImGuiGD.JoyAxisDeadZone)
+                if (Math.Abs(v) < JoyAxisDeadZone)
                 {
                     v = 0f;
                     pressed = false;

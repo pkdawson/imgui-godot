@@ -63,7 +63,6 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
 
     ImGui::CreateContext();
 
-    // ClassDB::register_internal_class<ImGuiRoot>();
     ClassDB::register_internal_class<ImGuiLayer>();
     ClassDB::register_internal_class<ImGuiLayerHelper>();
     ClassDB::register_class<ImGuiGD>();

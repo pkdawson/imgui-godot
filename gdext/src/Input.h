@@ -20,6 +20,9 @@ public:
     void ProcessNotification(int what);
     void SetActiveSubViewport(godot::SubViewport* svp, Vector2 pos);
 
+    void SetJoyAxisDeadZone(float val);
+    float GetJoyAxisDeadZone();
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

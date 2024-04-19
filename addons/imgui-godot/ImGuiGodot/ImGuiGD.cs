@@ -37,7 +37,11 @@ public static class ImGuiGD
         }
     }
 
-    public static bool Visible { get; set; }
+    public static bool Visible
+    {
+        get => _backend.Visible;
+        set => _backend.Visible = value;
+    }
 
     static ImGuiGD()
     {

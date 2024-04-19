@@ -63,7 +63,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vp->RendererUserData = (void*)vprid.get_id();
 
     RenderingServer* RS = RenderingServer::get_singleton();
-    RS->viewport_set_clear_mode(vprid, RenderingServer::VIEWPORT_CLEAR_NEVER);
+    ImGui::Godot::GetContext()->renderer->InitViewport(vprid);
     RS->viewport_set_transparent_background(vprid, true);
 }
 
@@ -192,7 +192,7 @@ Viewports::~Viewports()
 {
 }
 
- void ImGuiWindow::_input(const Ref<InputEvent>& evt)
+void ImGuiWindow::_input(const Ref<InputEvent>& evt)
 {
     ImGui::Godot::ProcessInput(evt, this);
 }
