@@ -91,13 +91,6 @@ jobs:
             gdext/godot-cpp
           key: ${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
 
-      - name: Build godot-cpp
-        if: steps.cache-godot-cpp.outputs.cache-hit != 'true'
-        run: |
-          cd gdext/godot-cpp
-          scons
-          scons target=template_release
-
       - name: Build debug
         run: |
           cd gdext
