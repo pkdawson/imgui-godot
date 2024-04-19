@@ -84,6 +84,20 @@ jobs:
           cd gdext
           ${{ env.VCPKG_ROOT }}/vcpkg install --triplet x64-linux
 
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        with:
+          path: |
+            gdext/godot-cpp
+          key: ${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+
+      - name: Build godot-cpp
+        if: steps.cache-godot-cpp.outputs.cache-hit != 'true'
+        run: |
+          cd gdext/godot-cpp
+          scons
+          scons target=template_release
+
       - name: Build debug
         run: |
           cd gdext
@@ -188,6 +202,7 @@ jobs:
         run: |
           ls -R
           rm addons/imgui-godot/bin/*.pdb
+          mkdir addons/imgui-godot/include
           cp -r gdext/include/*.h addons/imgui-godot/include/
 
           env
