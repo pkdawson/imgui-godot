@@ -41,12 +41,12 @@ jobs:
       - name: Build debug
         run: |
           cd gdext
-          scons debug_symbols=yes
+          scons
 
       - name: Build release
         run: |
           cd gdext
-          scons debug_symbols=yes target=template_release
+          scons target=template_release
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
@@ -182,11 +182,12 @@ jobs:
           rm *.exp
           rm *.lib
 
-      - name: Upload PDBs
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdbs
-          path: addons/imgui-godot/bin/*.pdb
+      # TODO: disable cache and enable debug symbols for tagged builds
+      # - name: Upload PDBs
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: pdbs
+      #     path: addons/imgui-godot/bin/*.pdb
 
       - name: Prepare files
         id: prep
