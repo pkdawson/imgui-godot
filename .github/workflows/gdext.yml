@@ -3,7 +3,6 @@ name: 🦕 C++ GDExtension
 on: push
 
 env:
-  VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
   vcpkg_tag: a34c873a9717a888f58dc05268dea15592c2f0ff # 2024.03.25
 
 jobs:
@@ -32,11 +31,6 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
   
-      - name: vcpkg install
-        run: |
-          cd gdext
-          ${{ env.VCPKG_ROOT }}\vcpkg install --triplet x64-windows-static
-
       - uses: actions/cache@v4
         id: cache-godot-cpp
         with:
@@ -86,11 +80,6 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
-      - name: vcpkg install
-        run: |
-          cd gdext
-          ${{ env.VCPKG_ROOT }}/vcpkg install --triplet x64-linux
-
       - uses: actions/cache@v4
         id: cache-godot-cpp
         with:
@@ -101,7 +90,6 @@ jobs:
       - name: Build debug
         run: |
           cd gdext
-          ls -R
           scons
 
       - name: Build release
@@ -140,11 +128,6 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
-
-      - name: vcpkg install
-        run: |
-          cd gdext
-          zsh scripts/vcpkg-macos.sh
 
       - uses: actions/cache@v4
         id: cache-godot-cpp
@@ -212,12 +195,13 @@ jobs:
           rm addons/imgui-godot/bin/*.pdb
           mkdir addons/imgui-godot/include
           cp -r gdext/include/*.h addons/imgui-godot/include/
+          touch addons/imgui-godot/include/.gdignore
+          cp gdext/imgui-godot-native.gdextension addons/imgui-godot/
 
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
-          godot_ver=$(grep -m 1 compatibility_minimum < addons/imgui-godot/imgui-godot-native.gdextension | sed 's/compatibility_minimum = //')
           plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
-          pkgfn=imgui-godot-native-${plugin_ver}_godot-${godot_ver}_imgui-${imgui_ver}
+          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}
           echo $pkgfn
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
