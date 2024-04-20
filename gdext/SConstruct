@@ -4,9 +4,18 @@ from pathlib import Path
 import os
 import shutil
 import subprocess
+import SCons
+
+class CustomCacheDir(SCons.CacheDir.CacheDir):
+    @classmethod
+    def copy_to_cache(cls, env, src, dst) -> str:
+        if str(src).startswith("godot-cpp"):
+            return super().copy_to_cache(env, src, dst)
+        else:
+            return None
 
 env = SConscript("godot-cpp/SConstruct")
-env.CacheDir("scons_cache")
+env.CacheDir("scons_cache", CustomCacheDir)
 env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', "IGN_EXPORT"])
 env.Append(CPPPATH=["src/", "imgui/", "include/", "gen/"])
 env.Replace(CXXFLAGS=str(env["CXXFLAGS"]).replace("c++17", "c++20"))
