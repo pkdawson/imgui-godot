@@ -43,8 +43,6 @@ Context::Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Render
 
 Context::~Context()
 {
-    // RenderingServer::get_singleton()->free_rid(ci);
-    // RenderingServer::get_singleton()->free_rid(svp);
     if (ImGui::GetCurrentContext())
         ImGui::DestroyContext();
 }
