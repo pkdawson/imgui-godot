@@ -119,7 +119,11 @@ void ImGuiGD::_SetJoyAxisDeadZone(float zone)
 
 float ImGuiGD::_GetJoyAxisDeadZone()
 {
-    return ImGui::Godot::GetContext()->input->GetJoyAxisDeadZone();
+    Context* ctx = ImGui::Godot::GetContext();
+    if (ctx)
+        return ctx->input->GetJoyAxisDeadZone();
+    else
+        return 0.15f;
 }
 
 void ImGuiGD::_SetScale(float scale)

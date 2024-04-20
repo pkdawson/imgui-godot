@@ -206,14 +206,13 @@ jobs:
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
 
-          pkgdir=~/tmp/imgui-godot-${plugin_ver}
+          pkgdir=~/out/imgui-godot-${plugin_ver}
           mkdir -p $pkgdir
           mv * $pkgdir
-          echo "pkgdir=$pkgdir" >> $GITHUB_OUTPUT
 
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prep.outputs.pkgfn }}
           path: |
-            ~/tmp
+            ~/out
