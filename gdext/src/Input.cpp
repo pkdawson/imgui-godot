@@ -224,6 +224,8 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         case MOUSE_BUTTON_WHEEL_RIGHT:
             impl->mouseWheel.x = mb->get_factor();
             break;
+        case MOUSE_BUTTON_NONE:
+            break;
         }
         consumed = io.WantCaptureMouse;
     }
@@ -287,6 +289,10 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
                 break;
             case JOY_AXIS_TRIGGER_RIGHT:
                 io.AddKeyAnalogEvent(ImGuiKey_GamepadR2, pressed, v);
+                break;
+            case JOY_AXIS_INVALID:
+            case JOY_AXIS_SDL_MAX:
+            case JOY_AXIS_MAX:
                 break;
             };
 
