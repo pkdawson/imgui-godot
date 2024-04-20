@@ -192,7 +192,7 @@ jobs:
         id: prep
         run: |
           ls -R
-          rm addons/imgui-godot/bin/*.pdb
+          rm -f addons/imgui-godot/bin/*.pdb
           mkdir addons/imgui-godot/include
           cp -r gdext/include/*.h addons/imgui-godot/include/
           touch addons/imgui-godot/include/.gdignore
