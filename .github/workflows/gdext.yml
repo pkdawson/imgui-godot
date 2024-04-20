@@ -140,6 +140,8 @@ jobs:
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
           echo $PATH
+          export CC=clang
+          export CXX=clang++
           env
           clang++ --version
           cd gdext
