@@ -6,13 +6,16 @@ import shutil
 import subprocess
 import SCons
 
+
 class CustomCacheDir(SCons.CacheDir.CacheDir):
     @classmethod
     def copy_to_cache(cls, env, src, dst) -> str:
-        if str(src).startswith("godot-cpp"):
-            return super().copy_to_cache(env, src, dst)
-        else:
-            return None
+        fn = str(src)
+        if fn.startswith("godot-cpp"):
+            if os.path.splitext(fn)[1] not in [".lib", ".dll", ".exp", ".a", ".so"]:
+                return super().copy_to_cache(env, src, dst)
+        return None
+
 
 env = SConscript("godot-cpp/SConstruct")
 env.CacheDir("scons_cache", CustomCacheDir)
