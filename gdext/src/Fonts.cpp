@@ -6,7 +6,6 @@
 #include <imgui.h>
 
 #include <filesystem>
-#include <format>
 #include <vector>
 
 using namespace godot;
@@ -98,8 +97,7 @@ void Fonts::Impl::AddFontToAtlas(const Ref<FontFile>& font, int fontSize, bool m
         fs::path fontpath = (font->get_path().utf8().get_data());
 
         // no std::format in Clang 14
-        std::string fontdesc = std::format("{}, {}px", fontpath.filename().string(), fontSize);
-        // std::string fontdesc = fontpath.filename().string() + ", "s + std::to_string(fontSize) + "px";
+        std::string fontdesc = fontpath.filename().string() + ", "s + std::to_string(fontSize) + "px";
         if (fontdesc.length() > 39)
             fontdesc.resize(39);
         std::copy(fontdesc.begin(), fontdesc.end(), fc.Name);
