@@ -74,7 +74,7 @@ void Connect(const Callable& callable);
 void ResetFonts();
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
 void AddFontDefault();
-void RebuildFontAtlas();
+void RebuildFontAtlas(float scale = 1.0f);
 void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
 bool IsVisible();

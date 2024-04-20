@@ -95,7 +95,9 @@ void ImGuiGD::AddFontDefault()
 
 void ImGuiGD::RebuildFontAtlas(float scale)
 {
-    ImGui::Godot::RebuildFontAtlas();
+    bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
+    int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
+    ImGui::Godot::RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
 }
 
 void ImGuiGD::_SetVisible(bool visible)
@@ -108,8 +110,9 @@ void ImGuiGD::_SetVisible(bool visible)
 bool ImGuiGD::_GetVisible()
 {
     CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
-    ERR_FAIL_COND_V(!igl, false);
-    return igl->is_visible();
+    if (igl)
+        return igl->is_visible();
+    return false;
 }
 
 void ImGuiGD::_SetJoyAxisDeadZone(float zone)
@@ -122,16 +125,21 @@ float ImGuiGD::_GetJoyAxisDeadZone()
     Context* ctx = ImGui::Godot::GetContext();
     if (ctx)
         return ctx->input->GetJoyAxisDeadZone();
-    else
-        return 0.15f;
+    return 0.15f;
 }
 
 void ImGuiGD::_SetScale(float scale)
 {
+    Context* ctx = ImGui::Godot::GetContext();
+    ERR_FAIL_COND(!ctx);
+    ctx->scale = scale;
 }
 
 float ImGuiGD::_GetScale()
 {
+    Context* ctx = ImGui::Godot::GetContext();
+    if (ctx)
+        return ctx->scale;
     return 1.0f;
 }
 

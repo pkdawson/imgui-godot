@@ -31,7 +31,11 @@ internal sealed class BackendNative : IBackend
         set => _gd.Set(PropertyName.JoyAxisDeadZone, value);
     }
 
-    public float Scale { get; set; } = 1.0f; // TODO: make property
+    public float Scale
+    {
+        get => (float)_gd.Get(PropertyName.Scale);
+        set => _gd.Set(PropertyName.Scale, value);
+    }
 
     public bool Visible
     {

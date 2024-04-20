@@ -283,9 +283,9 @@ void AddFontDefault()
     ctx->fonts->Add(nullptr, 13, false);
 }
 
-void RebuildFontAtlas()
+void RebuildFontAtlas(float scale)
 {
-    ctx->fonts->RebuildFontAtlas(ctx->scale);
+    ctx->fonts->RebuildFontAtlas(scale);
 }
 
 void SetIniFilename(const String& fn)
