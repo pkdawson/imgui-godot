@@ -139,18 +139,12 @@ jobs:
       - name: Build debug
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
-          echo $PATH
-          export CC=$(which clang)
-          export CXX=$(which clang++)
-          env
-          clang++ --version
           cd gdext
           scons
 
       - name: Build release
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
-          echo $PATH
           cd gdext
           scons target=template_release
 
