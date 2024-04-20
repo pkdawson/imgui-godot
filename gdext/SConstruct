@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import SCons
+import sys
 
 
 class CustomCacheDir(SCons.CacheDir.CacheDir):
@@ -42,7 +43,8 @@ elif linux:
 else:
     triplet = "arm64-osx"
     if not os.path.exists("vcpkg_installed"):
-        subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True)
+        if subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True) != 0:
+            sys.exit(1)
 
 if not os.path.exists("gen/imgui_bindings.gen.h"):
     subprocess.call("python scripts/gds_bindings.py", shell=True)

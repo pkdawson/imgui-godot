@@ -19,6 +19,8 @@ done
 
 rm -r $vcpkg_x64
 
+echo "zzzzzzzzzzzzzzzzzzzzzz"
 cat /Users/runner/work/imgui-godot/imgui-godot/vcpkg/buildtrees/detect_compiler/config-arm64-osx-rel-CMakeCache.txt.log
 cat /Users/runner/work/imgui-godot/imgui-godot/vcpkg/buildtrees/detect_compiler/config-arm64-osx-rel-out.log
 cat /Users/runner/work/imgui-godot/imgui-godot/vcpkg/buildtrees/detect_compiler/config-arm64-osx-rel-err.log
+echo "zzzzzzzzzzzzzzzzzzzzzz"
