@@ -206,8 +206,8 @@ jobs:
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
 
-          pkgdir=~/imgui-godot-${plugin_ver}
-          mkdir $pkgdir
+          pkgdir=~/tmp/imgui-godot-${plugin_ver}
+          mkdir -p $pkgdir
           mv * $pkgdir
           echo "pkgdir=$pkgdir" >> $GITHUB_OUTPUT
 
@@ -216,4 +216,4 @@ jobs:
         with:
           name: ${{ steps.prep.outputs.pkgfn }}
           path: |
-            ${{ steps.prep.outputs.pkgdir }}
+            ~/tmp
