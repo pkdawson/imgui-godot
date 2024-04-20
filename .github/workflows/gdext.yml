@@ -1,6 +1,10 @@
 name: 🦕 C++ GDExtension
 
-on: push
+on:
+  push:
+    branches: "*"
+    tags: v*
+
 
 env:
   vcpkg_tag: a34c873a9717a888f58dc05268dea15592c2f0ff # 2024.03.25
@@ -33,20 +37,25 @@ jobs:
   
       - uses: actions/cache@v4
         id: cache-godot-cpp
+        if: github.ref_type != 'tag'
         with:
           path: |
             gdext/scons_cache
           key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
 
-      - name: Build debug
+      - name: Build
+        if: github.ref_type != 'tag'
         run: |
           cd gdext
           scons
+          scons target=template_release
 
-      - name: Build release
+      - name: Build (with debug symbols)
+        if: github.ref_type == 'tag'
         run: |
           cd gdext
-          scons target=template_release
+          scons debug_symbols=yes
+          scons debug_symbols=yes target=template_release
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
@@ -179,12 +188,12 @@ jobs:
           rm *.exp
           rm *.lib
 
-      # TODO: disable cache and enable debug symbols for tagged builds
-      # - name: Upload PDBs
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: pdbs
-      #     path: addons/imgui-godot/bin/*.pdb
+      - name: Upload PDBs
+        if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdbs
+          path: addons/imgui-godot/bin/*.pdb
 
       - name: Prepare files
         id: prep
