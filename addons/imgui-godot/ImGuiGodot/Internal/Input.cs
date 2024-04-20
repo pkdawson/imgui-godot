@@ -94,19 +94,20 @@ internal sealed class Input
     public bool ProcessInput(InputEvent evt, Window window)
     {
         var io = ImGui.GetIO();
-        bool viewportsEnable = io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable);
-
-        var windowPos = Vector2I.Zero;
-        if (viewportsEnable)
-            windowPos = window.Position;
 
         if (CurrentSubViewport != null)
         {
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
-                mouseEvent.Position = new Vector2(windowPos.X + mouseEvent.GlobalPosition.X - CurrentSubViewportPos.X,
-                    windowPos.Y + mouseEvent.GlobalPosition.Y - CurrentSubViewportPos.Y)
+                var mousePos = DisplayServer.MouseGetPosition();
+                var windowPos = Vector2I.Zero;
+                if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
+                    windowPos = window.Position;
+
+                mouseEvent.Position = new Vector2(
+                    mousePos.X - windowPos.X - CurrentSubViewportPos.X,
+                    mousePos.Y - windowPos.Y - CurrentSubViewportPos.Y)
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
@@ -133,7 +134,7 @@ internal sealed class Input
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
 #if GODOT_WINDOWS && !GODOT4_1_OR_GREATER
                     // if the left mouse button is released, the mouse almost certainly should not be captured
-                    if (viewportsEnable && !mb.Pressed)
+                    if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable) && !mb.Pressed)
                         Viewports.MouseCaptureWorkaround();
 #endif
                     break;
