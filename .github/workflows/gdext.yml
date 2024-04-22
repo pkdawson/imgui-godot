@@ -47,14 +47,18 @@ jobs:
         if: github.ref_type != 'tag'
         run: |
           cd gdext
+          scons godot-cpp
           scons
+          scons target=template_release godot-cpp
           scons target=template_release
 
       - name: Build (with debug symbols)
         if: github.ref_type == 'tag'
         run: |
           cd gdext
+          scons debug_symbols=yes godot-cpp
           scons debug_symbols=yes
+          scons debug_symbols=yes target=template_release godot-cpp
           scons debug_symbols=yes target=template_release
 
       - name: Upload binaries
@@ -99,11 +103,13 @@ jobs:
       - name: Build debug
         run: |
           cd gdext
+          scons godot-cpp
           scons
 
       - name: Build release
         run: |
           cd gdext
+          scons target=template_release godot-cpp
           scons target=template_release
 
       - name: Upload binaries
@@ -149,12 +155,14 @@ jobs:
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
           cd gdext
+          scons godot-cpp
           scons
 
       - name: Build release
         run: |
           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
           cd gdext
+          scons target=template_release godot-cpp
           scons target=template_release
 
       - name: Upload binaries
