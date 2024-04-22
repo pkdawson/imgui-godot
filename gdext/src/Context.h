@@ -64,7 +64,7 @@ struct Context
 
 Context* GetContext();
 
-void Init(Window* mainWindow, RID canvasItem, const Ref<Resource>& config);
+void Init(Window* mainWindow, RID mainSubViewport, const Ref<Resource>& config);
 void Update(double delta, Vector2 displaySize);
 bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
 void ProcessNotification(int what);

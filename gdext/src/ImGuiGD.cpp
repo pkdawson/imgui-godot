@@ -57,19 +57,23 @@ void ImGuiGD::_bind_methods()
 // #endif
 // }
 
-void ImGuiGD::ToolInit()
+bool ImGuiGD::ToolInit()
 {
 #ifdef DEBUG_ENABLED
     if (!Engine::get_singleton()->is_editor_hint())
-        return;
+        return false;
 
     Node* plugin = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiPlugin"));
+    ERR_FAIL_COND_V(!plugin, false);
     if (!plugin->get_node_or_null("ImGuiLayer"))
     {
         ImGuiLayer* igl = memnew(ImGuiLayer);
         plugin->add_child(igl);
-        igl->ToolInit();
+        igl->set_visible(true);
     }
+    return true;
+#else
+    return false;
 #endif
 }
 
@@ -109,7 +113,9 @@ void ImGuiGD::_SetVisible(bool visible)
 
 bool ImGuiGD::_GetVisible()
 {
-    CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    CanvasLayer* igl = nullptr;
+    if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
+        igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
     if (igl)
         return igl->is_visible();
     return false;

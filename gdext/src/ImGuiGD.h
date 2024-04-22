@@ -22,7 +22,7 @@ protected:
     static void _bind_methods();
 
 public:
-    void ToolInit();
+    bool ToolInit();
 
     void Connect(const Callable& cb);
 

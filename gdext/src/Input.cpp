@@ -15,11 +15,6 @@
 #include <godot_cpp/variant/variant.hpp>
 #include <imgui.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#endif
-
 using namespace godot;
 
 namespace ImGui::Godot {
@@ -171,13 +166,13 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         if (Ref<InputEventMouse> me = vpevt; me.is_valid())
         {
             Vector2i mousePos = DisplayServer::get_singleton()->mouse_get_position();
-            Vector2i windowPos = {0, 0};
+            Vector2i windowPos{0, 0};
             if (!(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 windowPos = window->get_position();
 
             me->set_position(Vector2(mousePos.x - windowPos.x - impl->currentSubViewportPos.x,
                                      mousePos.y - windowPos.y - impl->currentSubViewportPos.y)
-                                 .clamp(Vector2(0, 0), impl->currentSubViewport->get_size()));
+                                 .clamp({0, 0}, impl->currentSubViewport->get_size()));
         }
         impl->currentSubViewport->push_input(vpevt, true);
     }

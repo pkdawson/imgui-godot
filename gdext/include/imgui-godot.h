@@ -1,15 +1,4 @@
 #pragma once
-
-#ifdef _WIN32
-#ifdef IGN_EXPORT
-#define IGN_API __declspec(dllexport)
-#else
-#define IGN_API __declspec(dllimport)
-#endif
-#else
-#define IGN_API
-#endif
-
 #include <imgui.h>
 
 #ifndef IMGUI_HAS_VIEWPORT
@@ -18,9 +7,6 @@
 
 #if __has_include("godot_cpp/godot.hpp")
 #define IGN_GDEXT
-#endif
-
-#ifdef IGN_GDEXT
 // GDExtension
 #pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>
@@ -127,11 +113,11 @@ inline void SetVisible(bool vis)
     detail::ImGuiGD->set(sn, vis);
 }
 
-inline void ToolInit()
+inline bool ToolInit()
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("ToolInit");
-    detail::ImGuiGD->call(sn);
+    return detail::ImGuiGD->call(sn);
 }
 
 inline void SyncImGuiPtrs()

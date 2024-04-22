@@ -12,6 +12,16 @@ using godot::Color;
 using godot::Vector2;
 using godot::Vector2i;
 using godot::Vector4;
+
+#ifndef IM_ASSERT
+#include <godot_cpp/variant/utility_functions.hpp>
+#define IM_ASSERT(_EXPR)                                                                                             \
+    do                                                                                                               \
+    {                                                                                                                \
+        if (!(_EXPR))                                                                                                \
+            godot::UtilityFunctions::push_error(godot::vformat("IM_ASSERT %s (%s:%d)", #_EXPR, __FILE__, __LINE__)); \
+    } while (0)
+#endif
 #pragma warning(pop)
 #else
 #include "core/math/color.h"

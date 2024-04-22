@@ -32,7 +32,7 @@ struct ImGuiLayer::Impl
     Ref<Resource> cfg;
 
     static RID AddLayerSubViewport(Node* parent);
-    void CheckContentScale();
+    void CheckContentScale() const;
 };
 
 RID ImGuiLayer::Impl::AddLayerSubViewport(Node* parent)
@@ -47,7 +47,7 @@ RID ImGuiLayer::Impl::AddLayerSubViewport(Node* parent)
     return svp;
 }
 
-void ImGuiLayer::Impl::CheckContentScale()
+void ImGuiLayer::Impl::CheckContentScale() const
 {
     if (window->get_content_scale_mode() == Window::CONTENT_SCALE_MODE_VIEWPORT)
     {
@@ -109,10 +109,6 @@ void ImGuiLayer::_enter_tree()
     impl->helper = memnew(ImGuiLayerHelper);
     add_child(impl->helper);
 
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-        return;
-#endif
     ImGui::Godot::Init(get_window(), impl->subViewportRid, cfg);
 }
 
@@ -120,16 +116,6 @@ void ImGuiLayer::_ready()
 {
     set_process_priority(std::numeric_limits<int32_t>::max());
     set_physics_process(false);
-
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-    {
-        set_visible(false);
-        set_process(false);
-        impl->helper->set_process(false);
-        set_process_input(false);
-    }
-#endif
 
     connect("visibility_changed", Callable(this, "on_visibility_changed"));
 }
@@ -164,7 +150,12 @@ void ImGuiLayer::_process(double delta)
         Vector2i winSize = impl->window->get_size();
         Transform2D ft = impl->window->get_final_transform();
 
-        if (impl->subViewportSize != winSize || impl->finalTransform != ft)
+        if (impl->subViewportSize != winSize || impl->finalTransform != ft
+#ifdef DEBUG_ENABLED
+            // force redraw on every frame in editor
+            || Engine::get_singleton()->is_editor_hint()
+#endif
+        )
         {
             // this is more or less how SubViewportContainer works
             impl->subViewportSize = winSize;
@@ -222,15 +213,6 @@ void ImGuiLayer::on_visibility_changed()
 void ImGuiLayer::on_frame_pre_draw()
 {
     ImGui::Godot::OnFramePreDraw();
-}
-
-void ImGuiLayer::ToolInit()
-{
-    if (!is_visible())
-    {
-        ImGui::Godot::Init(get_window(), impl->canvasItem, impl->cfg);
-        set_visible(true);
-    }
 }
 
 } // namespace ImGui::Godot

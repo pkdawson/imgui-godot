@@ -31,8 +31,6 @@ public:
     void on_visibility_changed();
     void on_frame_pre_draw();
 
-    void ToolInit();
-
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;
