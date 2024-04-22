@@ -162,10 +162,6 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    Vector2i windowPos;
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        windowPos = window->get_position();
-
     if (impl->currentSubViewport)
     {
         if (impl->currentSubViewport != impl->previousSubViewport)
@@ -174,9 +170,13 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         Ref<InputEvent> vpevt = evt->duplicate();
         if (Ref<InputEventMouse> me = vpevt; me.is_valid())
         {
-            Vector2 gpos = me->get_global_position();
-            me->set_position(Vector2(windowPos.x + gpos.x - impl->currentSubViewportPos.x,
-                                     windowPos.y + gpos.y - impl->currentSubViewportPos.y)
+            Vector2i mousePos = DisplayServer::get_singleton()->mouse_get_position();
+            Vector2i windowPos = {0, 0};
+            if (!(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
+                windowPos = window->get_position();
+
+            me->set_position(Vector2(mousePos.x - windowPos.x - impl->currentSubViewportPos.x,
+                                     mousePos.y - windowPos.y - impl->currentSubViewportPos.y)
                                  .clamp(Vector2(0, 0), impl->currentSubViewport->get_size()));
         }
         impl->currentSubViewport->push_input(vpevt, true);
