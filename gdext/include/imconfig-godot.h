@@ -13,6 +13,7 @@ using godot::Vector2;
 using godot::Vector2i;
 using godot::Vector4;
 
+#ifdef DEBUG_ENABLED
 #ifndef IM_ASSERT
 #include <godot_cpp/variant/utility_functions.hpp>
 #define IM_ASSERT(_EXPR)                                                                                             \
@@ -21,6 +22,7 @@ using godot::Vector4;
         if (!(_EXPR))                                                                                                \
             godot::UtilityFunctions::push_error(godot::vformat("IM_ASSERT %s (%s:%d)", #_EXPR, __FILE__, __LINE__)); \
     } while (0)
+#endif
 #endif
 #pragma warning(pop)
 #else
