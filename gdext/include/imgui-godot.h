@@ -115,7 +115,7 @@ inline void SetVisible(bool vis)
 
 inline bool ToolInit()
 {
-    ERR_FAIL_COND(!detail::GET_IMGUIGD());
+    ERR_FAIL_COND_V(!detail::GET_IMGUIGD(), false);
     static const StringName sn("ToolInit");
     return detail::ImGuiGD->call(sn);
 }

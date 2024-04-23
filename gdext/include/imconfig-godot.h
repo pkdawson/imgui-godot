@@ -13,7 +13,7 @@ using godot::Vector2;
 using godot::Vector2i;
 using godot::Vector4;
 
-#ifdef DEBUG_ENABLED
+#if defined(DEBUG_ENABLED) && defined(IGN_EXPORT)
 #ifndef IM_ASSERT
 #include <godot_cpp/variant/utility_functions.hpp>
 #define IM_ASSERT(_EXPR)                                                                                             \
