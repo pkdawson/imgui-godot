@@ -279,7 +279,9 @@ void AddFontDefault()
 
 void RebuildFontAtlas(float scale)
 {
-    ctx->fonts->RebuildFontAtlas(scale);
+    bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
+    int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
+    ctx->fonts->RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
 }
 
 void SetIniFilename(const String& fn)

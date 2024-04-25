@@ -99,9 +99,7 @@ void ImGuiGD::AddFontDefault()
 
 void ImGuiGD::RebuildFontAtlas(float scale)
 {
-    bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
-    int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
-    ImGui::Godot::RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
+    ImGui::Godot::RebuildFontAtlas(scale);
 }
 
 void ImGuiGD::_SetVisible(bool visible)
