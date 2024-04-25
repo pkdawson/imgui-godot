@@ -9,6 +9,7 @@
 #define IGN_GDEXT
 // GDExtension
 #pragma warning(push, 0)
+#include <godot_cpp/classes/atlas_texture.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/font_file.hpp>
 #include <godot_cpp/classes/input_event.hpp>
@@ -20,6 +21,7 @@
 #include <godot_cpp/variant/typed_array.hpp>
 #pragma warning(pop)
 
+using godot::AtlasTexture;
 using godot::Callable;
 using godot::CharString;
 using godot::Color;
@@ -46,6 +48,7 @@ using godot::Window;
 #include "core/variant/callable.h"
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
+#include "scene/resources/atlas_texture.h"
 #include "scene/resources/texture.h"
 #endif
 
@@ -70,6 +73,13 @@ inline bool GET_IMGUIGD()
     ImGuiGD = Engine::get_singleton()->get_singleton_object("ImGuiGD");
 #endif
     return ImGuiGD != nullptr;
+}
+
+inline static void GetAtlasUVs(AtlasTexture* tex, ImVec2& uv0, ImVec2& uv1)
+{
+    Vector2 atlasSize = tex->get_atlas()->get_size();
+    uv0 = tex->get_region().get_position() / atlasSize;
+    uv1 = tex->get_region().get_end() / atlasSize;
 }
 } // namespace detail
 
@@ -665,6 +675,22 @@ inline void Image(const Ref<Texture2D>& tex, const Vector2& size, const Vector2&
     ImGui::Image(ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
 }
 
+inline void Image(AtlasTexture* tex, const Vector2& size, const Color& tint_col = {1, 1, 1, 1},
+                  const Color& border_col = {0, 0, 0, 0})
+{
+    ImVec2 uv0, uv1;
+    ImGui::Godot::detail::GetAtlasUVs(tex, uv0, uv1);
+    ImGui::Image(ImGui::Godot::BindTexture(tex), size, uv0, uv1, tint_col, border_col);
+}
+
+inline void Image(const Ref<AtlasTexture>& tex, const Vector2& size, const Color& tint_col = {1, 1, 1, 1},
+                  const Color& border_col = {0, 0, 0, 0})
+{
+    ImVec2 uv0, uv1;
+    ImGui::Godot::detail::GetAtlasUVs(tex.ptr(), uv0, uv1);
+    ImGui::Image(ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
+}
+
 inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
@@ -676,6 +702,22 @@ inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vec
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
+    return ImGui::ImageButton(str_id, ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
+}
+
+inline bool ImageButton(const char* str_id, AtlasTexture* tex, const Vector2& size, const Color& bg_col = {0, 0, 0, 0},
+                        const Color& tint_col = {1, 1, 1, 1})
+{
+    ImVec2 uv0, uv1;
+    ImGui::Godot::detail::GetAtlasUVs(tex, uv0, uv1);
+    return ImGui::ImageButton(str_id, ImGui::Godot::BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+}
+
+inline bool ImageButton(const char* str_id, const Ref<AtlasTexture>& tex, const Vector2& size,
+                        const Color& bg_col = {0, 0, 0, 0}, const Color& tint_col = {1, 1, 1, 1})
+{
+    ImVec2 uv0, uv1;
+    ImGui::Godot::detail::GetAtlasUVs(tex.ptr(), uv0, uv1);
     return ImGui::ImageButton(str_id, ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
 }
 } // namespace ImGui

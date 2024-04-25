@@ -19,7 +19,7 @@ Example::~Example()
 void Example::_ready()
 {
     ImGui::Godot::SyncImGuiPtrs();
-    _img = ResourceLoader::get_singleton()->load("res://icon.svg");
+    _img = ResourceLoader::get_singleton()->load("res://robot_eye.tres");
 }
 
 void Example::_process(double delta)
