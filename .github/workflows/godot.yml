@@ -8,13 +8,14 @@ on:
     branches-ignore:
       - godot3
 
-env:
-  gdver: "4.2.2"
-
 jobs:
   export_game:
     name: Run with Godot
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        gdver: ["4.2.2", "4.3.0-dev.5"]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +28,7 @@ jobs:
       - name: Download Godot
         run: |
           dotnet tool install --global Chickensoft.GodotEnv
-          godotenv godot install ${{ env.gdver }}
+          godotenv godot install ${{ matrix.gdver }}
 
       - name: Import resources and build
         run: |
