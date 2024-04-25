@@ -41,12 +41,12 @@ using godot::Window;
 #else
 // module
 #include "core/config/engine.h"
+#include "core/input/input_enums.h"
+#include "core/os/keyboard.h"
 #include "core/variant/callable.h"
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
 #include "scene/resources/texture.h"
-#include "core/os/keyboard.h"
-#include "core/input/input_enums.h"
 #endif
 
 static_assert(sizeof(RID) == 8);
@@ -647,36 +647,36 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
 namespace ImGui {
 inline bool SubViewport(SubViewport* svp)
 {
-    ERR_FAIL_COND_V(!Godot::detail::GET_IMGUIGD(), false);
+    ERR_FAIL_COND_V(!ImGui::Godot::detail::GET_IMGUIGD(), false);
     static const StringName sn("SubViewport");
-    return Godot::detail::ImGuiGD->call(sn, svp);
+    return ImGui::Godot::detail::ImGuiGD->call(sn, svp);
 }
 
 inline void Image(Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0}, const Vector2& uv1 = {1, 1},
                   const Color& tint_col = {1, 1, 1, 1}, const Color& border_col = {0, 0, 0, 0})
 {
-    ImGui::Image(Godot::BindTexture(tex), size, uv0, uv1, tint_col, border_col);
+    ImGui::Image(ImGui::Godot::BindTexture(tex), size, uv0, uv1, tint_col, border_col);
 }
 
 inline void Image(const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                   const Vector2& uv1 = {1, 1}, const Color& tint_col = {1, 1, 1, 1},
                   const Color& border_col = {0, 0, 0, 0})
 {
-    ImGui::Image(Godot::BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
+    ImGui::Image(ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, tint_col, border_col);
 }
 
 inline bool ImageButton(const char* str_id, Texture2D* tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
-    return ImGui::ImageButton(str_id, Godot::BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
+    return ImGui::ImageButton(str_id, ImGui::Godot::BindTexture(tex), size, uv0, uv1, bg_col, tint_col);
 }
 
 inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vector2& size, const Vector2& uv0 = {0, 0},
                         const Vector2& uv1 = {1, 1}, const Color& bg_col = {0, 0, 0, 0},
                         const Color& tint_col = {1, 1, 1, 1})
 {
-    return ImGui::ImageButton(str_id, Godot::BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
+    return ImGui::ImageButton(str_id, ImGui::Godot::BindTexture(tex.ptr()), size, uv0, uv1, bg_col, tint_col);
 }
 } // namespace ImGui
 #endif
