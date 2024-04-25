@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
 
+[display]
+
+window/subwindows/embed_subwindows=false
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")

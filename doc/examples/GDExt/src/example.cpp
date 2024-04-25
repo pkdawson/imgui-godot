@@ -1,4 +1,5 @@
 #include "example.h"
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <imgui-godot.h>
 
 using namespace godot;
@@ -18,6 +19,7 @@ Example::~Example()
 void Example::_ready()
 {
     ImGui::Godot::SyncImGuiPtrs();
+    _img = ResourceLoader::get_singleton()->load("res://icon.svg");
 }
 
 void Example::_process(double delta)
@@ -33,5 +35,7 @@ void Example::_process(double delta)
     ImGui::Begin("GDExtension Example");
     ImGui::DragInt("x", &x);
     ImGui::Text("x = %d", x);
+    ImGui::Separator();
+    ImGui::Image(_img, {64, 64});
     ImGui::End();
 }

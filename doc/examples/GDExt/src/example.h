@@ -1,5 +1,6 @@
 #pragma once
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 
 using namespace godot;
 
@@ -16,4 +17,7 @@ public:
 
     void _ready() override;
     void _process(double delta) override;
+
+private:
+    Ref<Texture2D> _img;
 };
