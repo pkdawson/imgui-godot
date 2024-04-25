@@ -45,6 +45,8 @@ using godot::Window;
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
 #include "scene/resources/texture.h"
+#include "core/os/keyboard.h"
+#include "core/input/input_enums.h"
 #endif
 
 static_assert(sizeof(RID) == 8);
@@ -145,7 +147,7 @@ inline ImTextureID BindTexture(Texture2D* tex)
 }
 #endif
 
-#ifdef IGN_GDEXT
+#ifdef IGN_GDEXT // GDExtension
 inline ImGuiKey ToImGuiKey(Key key)
 {
     switch (key)
@@ -386,6 +388,252 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
     case JoyButton::JOY_BUTTON_DPAD_LEFT:
         return ImGuiKey_GamepadDpadLeft;
     case JoyButton::JOY_BUTTON_DPAD_RIGHT:
+        return ImGuiKey_GamepadDpadRight;
+    default:
+        return ImGuiKey_None;
+    };
+}
+#else // module
+inline ImGuiKey ToImGuiKey(Key key)
+{
+    switch (key)
+    {
+    case Key::ESCAPE:
+        return ImGuiKey_Escape;
+    case Key::TAB:
+        return ImGuiKey_Tab;
+    case Key::BACKSPACE:
+        return ImGuiKey_Backspace;
+    case Key::ENTER:
+        return ImGuiKey_Enter;
+    case Key::KP_ENTER:
+        return ImGuiKey_KeypadEnter;
+    case Key::INSERT:
+        return ImGuiKey_Insert;
+    case Key::KEY_DELETE:
+        return ImGuiKey_Delete;
+    case Key::PAUSE:
+        return ImGuiKey_Pause;
+    case Key::PRINT:
+        return ImGuiKey_PrintScreen;
+    case Key::HOME:
+        return ImGuiKey_Home;
+    case Key::END:
+        return ImGuiKey_End;
+    case Key::LEFT:
+        return ImGuiKey_LeftArrow;
+    case Key::UP:
+        return ImGuiKey_UpArrow;
+    case Key::RIGHT:
+        return ImGuiKey_RightArrow;
+    case Key::DOWN:
+        return ImGuiKey_DownArrow;
+    case Key::PAGEUP:
+        return ImGuiKey_PageUp;
+    case Key::PAGEDOWN:
+        return ImGuiKey_PageDown;
+    case Key::SHIFT:
+        return ImGuiKey_LeftShift;
+    case Key::CTRL:
+        return ImGuiKey_LeftCtrl;
+    case Key::META:
+        return ImGuiKey_LeftSuper;
+    case Key::ALT:
+        return ImGuiKey_LeftAlt;
+    case Key::CAPSLOCK:
+        return ImGuiKey_CapsLock;
+    case Key::NUMLOCK:
+        return ImGuiKey_NumLock;
+    case Key::SCROLLLOCK:
+        return ImGuiKey_ScrollLock;
+    case Key::F1:
+        return ImGuiKey_F1;
+    case Key::F2:
+        return ImGuiKey_F2;
+    case Key::F3:
+        return ImGuiKey_F3;
+    case Key::F4:
+        return ImGuiKey_F4;
+    case Key::F5:
+        return ImGuiKey_F5;
+    case Key::F6:
+        return ImGuiKey_F6;
+    case Key::F7:
+        return ImGuiKey_F7;
+    case Key::F8:
+        return ImGuiKey_F8;
+    case Key::F9:
+        return ImGuiKey_F9;
+    case Key::F10:
+        return ImGuiKey_F10;
+    case Key::F11:
+        return ImGuiKey_F11;
+    case Key::F12:
+        return ImGuiKey_F12;
+    case Key::KP_MULTIPLY:
+        return ImGuiKey_KeypadMultiply;
+    case Key::KP_DIVIDE:
+        return ImGuiKey_KeypadDivide;
+    case Key::KP_SUBTRACT:
+        return ImGuiKey_KeypadSubtract;
+    case Key::KP_PERIOD:
+        return ImGuiKey_KeypadDecimal;
+    case Key::KP_ADD:
+        return ImGuiKey_KeypadAdd;
+    case Key::KP_0:
+        return ImGuiKey_Keypad0;
+    case Key::KP_1:
+        return ImGuiKey_Keypad1;
+    case Key::KP_2:
+        return ImGuiKey_Keypad2;
+    case Key::KP_3:
+        return ImGuiKey_Keypad3;
+    case Key::KP_4:
+        return ImGuiKey_Keypad4;
+    case Key::KP_5:
+        return ImGuiKey_Keypad5;
+    case Key::KP_6:
+        return ImGuiKey_Keypad6;
+    case Key::KP_7:
+        return ImGuiKey_Keypad7;
+    case Key::KP_8:
+        return ImGuiKey_Keypad8;
+    case Key::KP_9:
+        return ImGuiKey_Keypad9;
+    case Key::MENU:
+        return ImGuiKey_Menu;
+    case Key::SPACE:
+        return ImGuiKey_Space;
+    case Key::APOSTROPHE:
+        return ImGuiKey_Apostrophe;
+    case Key::COMMA:
+        return ImGuiKey_Comma;
+    case Key::MINUS:
+        return ImGuiKey_Minus;
+    case Key::PERIOD:
+        return ImGuiKey_Period;
+    case Key::SLASH:
+        return ImGuiKey_Slash;
+    case Key::KEY_0:
+        return ImGuiKey_0;
+    case Key::KEY_1:
+        return ImGuiKey_1;
+    case Key::KEY_2:
+        return ImGuiKey_2;
+    case Key::KEY_3:
+        return ImGuiKey_3;
+    case Key::KEY_4:
+        return ImGuiKey_4;
+    case Key::KEY_5:
+        return ImGuiKey_5;
+    case Key::KEY_6:
+        return ImGuiKey_6;
+    case Key::KEY_7:
+        return ImGuiKey_7;
+    case Key::KEY_8:
+        return ImGuiKey_8;
+    case Key::KEY_9:
+        return ImGuiKey_9;
+    case Key::SEMICOLON:
+        return ImGuiKey_Semicolon;
+    case Key::EQUAL:
+        return ImGuiKey_Equal;
+    case Key::A:
+        return ImGuiKey_A;
+    case Key::B:
+        return ImGuiKey_B;
+    case Key::C:
+        return ImGuiKey_C;
+    case Key::D:
+        return ImGuiKey_D;
+    case Key::E:
+        return ImGuiKey_E;
+    case Key::F:
+        return ImGuiKey_F;
+    case Key::G:
+        return ImGuiKey_G;
+    case Key::H:
+        return ImGuiKey_H;
+    case Key::I:
+        return ImGuiKey_I;
+    case Key::J:
+        return ImGuiKey_J;
+    case Key::K:
+        return ImGuiKey_K;
+    case Key::L:
+        return ImGuiKey_L;
+    case Key::M:
+        return ImGuiKey_M;
+    case Key::N:
+        return ImGuiKey_N;
+    case Key::O:
+        return ImGuiKey_O;
+    case Key::P:
+        return ImGuiKey_P;
+    case Key::Q:
+        return ImGuiKey_Q;
+    case Key::R:
+        return ImGuiKey_R;
+    case Key::S:
+        return ImGuiKey_S;
+    case Key::T:
+        return ImGuiKey_T;
+    case Key::U:
+        return ImGuiKey_U;
+    case Key::V:
+        return ImGuiKey_V;
+    case Key::W:
+        return ImGuiKey_W;
+    case Key::X:
+        return ImGuiKey_X;
+    case Key::Y:
+        return ImGuiKey_Y;
+    case Key::Z:
+        return ImGuiKey_Z;
+    case Key::BRACKETLEFT:
+        return ImGuiKey_LeftBracket;
+    case Key::BACKSLASH:
+        return ImGuiKey_Backslash;
+    case Key::BRACKETRIGHT:
+        return ImGuiKey_RightBracket;
+    case Key::QUOTELEFT:
+        return ImGuiKey_GraveAccent;
+    default:
+        return ImGuiKey_None;
+    };
+}
+
+inline ImGuiKey ToImGuiKey(JoyButton btn)
+{
+    switch (btn)
+    {
+    case JoyButton::A:
+        return ImGuiKey_GamepadFaceDown;
+    case JoyButton::B:
+        return ImGuiKey_GamepadFaceRight;
+    case JoyButton::X:
+        return ImGuiKey_GamepadFaceLeft;
+    case JoyButton::Y:
+        return ImGuiKey_GamepadFaceUp;
+    case JoyButton::BACK:
+        return ImGuiKey_GamepadBack;
+    case JoyButton::START:
+        return ImGuiKey_GamepadStart;
+    case JoyButton::LEFT_STICK:
+        return ImGuiKey_GamepadL3;
+    case JoyButton::RIGHT_STICK:
+        return ImGuiKey_GamepadR3;
+    case JoyButton::LEFT_SHOULDER:
+        return ImGuiKey_GamepadL1;
+    case JoyButton::RIGHT_SHOULDER:
+        return ImGuiKey_GamepadR1;
+    case JoyButton::DPAD_UP:
+        return ImGuiKey_GamepadDpadUp;
+    case JoyButton::DPAD_DOWN:
+        return ImGuiKey_GamepadDpadDown;
+    case JoyButton::DPAD_LEFT:
+        return ImGuiKey_GamepadDpadLeft;
+    case JoyButton::DPAD_RIGHT:
         return ImGuiKey_GamepadDpadRight;
     default:
         return ImGuiKey_None;
