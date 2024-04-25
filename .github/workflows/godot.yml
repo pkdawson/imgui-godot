@@ -31,9 +31,9 @@ jobs:
 
       - name: Import resources and build
         run: |
-          $GODOT --headless --build-solutions --quit
+          $(godotenv godot env path) --headless --build-solutions --quit
 
       # TODO: run tests with the exported binary
       - name: Test
         run: |
-          $GODOT --headless --quit
+          $(godotenv godot env path) --headless --quit
