@@ -24,12 +24,6 @@ Context::Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Render
     input = std::make_unique<Input>(mainWindow);
     fonts = std::make_unique<Fonts>();
 
-    if (ImGui::GetCurrentContext())
-        ImGui::DestroyContext();
-
-    ImGuiContext* context = ImGui::CreateContext();
-    ImGui::SetCurrentContext(context);
-
     ImGuiIO& io = ImGui::GetIO();
     io.BackendFlags = ImGuiBackendFlags_HasGamepad | ImGuiBackendFlags_HasSetMousePos |
                       ImGuiBackendFlags_HasMouseCursors | ImGuiBackendFlags_RendererHasVtxOffset |

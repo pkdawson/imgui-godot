@@ -1,0 +1,10 @@
+Import('env')
+
+IMGUI_PATH = "../../../../../gdext/imgui"
+IMGUI_GODOT_INCLUDE = "../../../../../addons/imgui-godot/include"
+
+env.Append(CPPPATH=[IMGUI_PATH, IMGUI_GODOT_INCLUDE])
+env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
+env.add_source_files(env.modules_sources, f"{IMGUI_PATH}/*.cpp")
+
+env.add_source_files(env.modules_sources, "*.cpp")

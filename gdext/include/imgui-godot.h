@@ -433,12 +433,21 @@ inline bool ImageButton(const char* str_id, const Ref<Texture2D>& tex, const Vec
 } // namespace ImGui
 #endif
 
-#define IMGUI_GODOT_MODULE_INIT()                                                                                  \
-    extern "C" {                                                                                                   \
-    void imgui_godot_module_init(uint32_t ver, ImGuiContext* ctx, ImGuiMemAllocFunc afunc, ImGuiMemFreeFunc ffunc) \
-    {                                                                                                              \
-        IM_ASSERT(ver == IMGUI_VERSION_NUM);                                                                       \
-        ImGui::SetCurrentContext(ctx);                                                                             \
-        ImGui::SetAllocatorFunctions(afunc, ffunc, nullptr);                                                       \
-    }                                                                                                              \
+#ifndef IGN_GDEXT
+#ifdef _WIN32
+#define IGN_MOD_EXPORT __declspec(dllexport)
+#else
+#define IGN_MOD_EXPORT
+#endif
+
+#define IMGUI_GODOT_MODULE_INIT()                                                                         \
+    extern "C" {                                                                                          \
+    void IGN_MOD_EXPORT imgui_godot_module_init(uint32_t ver, ImGuiContext* ctx, ImGuiMemAllocFunc afunc, \
+                                                ImGuiMemFreeFunc ffunc)                                   \
+    {                                                                                                     \
+        IM_ASSERT(ver == IMGUI_VERSION_NUM);                                                              \
+        ImGui::SetCurrentContext(ctx);                                                                    \
+        ImGui::SetAllocatorFunctions(afunc, ffunc, nullptr);                                              \
+    }                                                                                                     \
     }
+#endif
