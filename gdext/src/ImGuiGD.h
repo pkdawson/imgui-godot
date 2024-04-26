@@ -27,7 +27,8 @@ public:
     void Connect(const Callable& cb);
 
     void ResetFonts();
-    void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
+    void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false,
+                 const PackedInt32Array& glyphRanges = {});
     void AddFontDefault();
     void RebuildFontAtlas(float scale);
 

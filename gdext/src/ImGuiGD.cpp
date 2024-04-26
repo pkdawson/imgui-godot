@@ -25,7 +25,10 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("_GetScale"), &ImGuiGD::_GetScale);
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "Scale"), "_SetScale", "_GetScale");
 
-    ClassDB::bind_method(D_METHOD("AddFont", "font_file", "font_size", "merge"), &ImGuiGD::AddFont, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("AddFont", "font_file", "font_size", "merge", "glyph_ranges"),
+                         &ImGuiGD::AddFont,
+                         DEFVAL(false),
+                         DEFVAL(PackedInt32Array()));
     ClassDB::bind_method(D_METHOD("AddFontDefault"), &ImGuiGD::AddFontDefault);
     ClassDB::bind_method(D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
     ClassDB::bind_method(D_METHOD("RebuildFontAtlas", "scale"), &ImGuiGD::RebuildFontAtlas, DEFVAL(1.0f));
@@ -87,9 +90,20 @@ void ImGuiGD::ResetFonts()
     ImGui::Godot::ResetFonts();
 }
 
-void ImGuiGD::AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge)
+void ImGuiGD::AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge, const PackedInt32Array& glyphRanges)
 {
-    ImGui::Godot::AddFont(fontFile, fontSize, merge);
+    if (glyphRanges.size() > 0)
+    {
+        ImVector<ImWchar> gr;
+        gr.resize(glyphRanges.size() + 1, 0);
+        for (int i = 0; i < glyphRanges.size(); ++i)
+            gr[i] = glyphRanges[i];
+        ImGui::Godot::AddFont(fontFile, fontSize, merge, gr);
+    }
+    else
+    {
+        ImGui::Godot::AddFont(fontFile, fontSize, merge);
+    }
 }
 
 void ImGuiGD::AddFontDefault()

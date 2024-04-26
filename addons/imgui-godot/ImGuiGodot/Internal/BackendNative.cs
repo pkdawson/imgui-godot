@@ -43,9 +43,19 @@ internal sealed class BackendNative : IBackend
         set => _gd.Set(PropertyName.Visible, value);
     }
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
     {
-        _gd.Call(MethodName.AddFont, fontData, fontSize, merge);
+        if (glyphRanges != null)
+        {
+            int[] gr = new int[glyphRanges.Length];
+            for (int i = 0; i < glyphRanges.Length; ++i)
+                gr[i] = glyphRanges[i];
+            _gd.Call(MethodName.AddFont, fontData, fontSize, merge, gr);
+        }
+        else
+        {
+            _gd.Call(MethodName.AddFont, fontData, fontSize, merge);
+        }
     }
 
     public void AddFontDefault()

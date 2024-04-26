@@ -31,6 +31,7 @@ using godot::InputEvent;
 using godot::JoyButton;
 using godot::Key;
 using godot::Object;
+using godot::PackedInt32Array;
 using godot::Ref;
 using godot::Resource;
 using godot::RID;
@@ -77,17 +78,26 @@ inline bool GET_IMGUIGD()
 
 inline static void GetAtlasUVs(AtlasTexture* tex, ImVec2& uv0, ImVec2& uv1)
 {
+    ERR_FAIL_COND(!tex);
     Vector2 atlasSize = tex->get_atlas()->get_size();
     uv0 = tex->get_region().get_position() / atlasSize;
     uv1 = tex->get_region().get_end() / atlasSize;
 }
 } // namespace detail
 
-inline void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false)
+inline void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false, ImWchar* glyphRanges = nullptr)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("AddFont");
-    detail::ImGuiGD->call(sn, fontSize, merge);
+    PackedInt32Array gr;
+    if (glyphRanges)
+    {
+        do
+        {
+            gr.append(*glyphRanges);
+        } while (*++glyphRanges != 0);
+    }
+    detail::ImGuiGD->call(sn, fontSize, merge, gr);
 }
 
 inline void Connect(const Callable& callable)
@@ -153,6 +163,7 @@ inline void SyncImGuiPtrs()
 
 inline ImTextureID BindTexture(Texture2D* tex)
 {
+    ERR_FAIL_COND_V(!tex, 0);
     return reinterpret_cast<ImTextureID>(tex->get_rid().get_id());
 }
 #endif

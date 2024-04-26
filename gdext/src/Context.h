@@ -72,7 +72,7 @@ void Render();
 void Shutdown();
 void Connect(const Callable& callable);
 void ResetFonts();
-void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false);
+void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false, const ImVector<ImWchar>& glyphRanges = {});
 void AddFontDefault();
 void RebuildFontAtlas(float scale = 1.0f);
 void SetIniFilename(const String& fn);

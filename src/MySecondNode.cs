@@ -42,8 +42,9 @@ public partial class MySecondNode : Node
 
             // use Hack for the default glyphs, M+2 for Japanese
             ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18);
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22,
-                merge: true);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 24,
+                merge: true,
+                glyphRanges: ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();

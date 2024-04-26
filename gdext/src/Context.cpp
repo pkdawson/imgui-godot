@@ -267,9 +267,9 @@ void ResetFonts()
     ctx->fonts->Reset();
 }
 
-void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge)
+void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge, const ImVector<ImWchar>& glyphRanges)
 {
-    ctx->fonts->Add(fontFile, fontSize, merge);
+    ctx->fonts->Add(fontFile, fontSize, merge, glyphRanges);
 }
 
 void AddFontDefault()

@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-
+#include <imgui.h>
 #include <godot_cpp/classes/font_file.hpp>
 using namespace godot;
 
@@ -13,7 +13,7 @@ public:
     ~Fonts();
 
     void Reset();
-    void Add(Ref<FontFile> fontData, int fontSize, bool merge = false);
+    void Add(Ref<FontFile> fontData, int fontSize, bool merge = false, const ImVector<ImWchar>& glyphRanges = {});
     void RebuildFontAtlas(float scale);
 
 private:

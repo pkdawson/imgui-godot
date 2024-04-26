@@ -26,14 +26,14 @@ internal sealed class BackendNet : IBackend
         set => ImGuiLayer.Instance.Visible = value;
     }
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge)
+    public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
     {
-        State.Instance.Fonts.AddFont(fontData, fontSize, merge);
+        State.Instance.Fonts.AddFont(fontData, fontSize, merge, glyphRanges);
     }
 
     public void AddFontDefault()
     {
-        State.Instance.Fonts.AddFont(null, 13, false);
+        State.Instance.Fonts.AddFont(null, 13, false, null);
     }
 
     public void Connect(Callable callable)

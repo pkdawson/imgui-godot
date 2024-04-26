@@ -58,9 +58,28 @@ public static class ImGuiGD
         _backend.ResetFonts();
     }
 
-    public static void AddFont(FontFile fontData, int fontSize, bool merge = false)
+    public static void AddFont(
+        FontFile fontData,
+        int fontSize,
+        bool merge = false,
+        ushort[]? glyphRanges = null)
     {
-        _backend.AddFont(fontData, fontSize, merge);
+        _backend.AddFont(fontData, fontSize, merge, glyphRanges);
+    }
+
+    /// <summary>
+    /// Add a font using glyph ranges from ImGui.GetIO().Fonts.GetGlyphRanges*()
+    /// </summary>
+    /// <param name="glyphRanges">pointer to an array of ushorts terminated by 0</param>
+    public static unsafe void AddFont(FontFile fontData, int fontSize, bool merge, nint glyphRanges)
+    {
+        ushort* p = (ushort*)glyphRanges;
+        int len = 1;
+        while (p[len++] != 0) ;
+        ushort[] gr = new ushort[len];
+        for (int i = 0; i < len; ++i)
+            gr[i] = p[i];
+        _backend.AddFont(fontData, fontSize, merge, gr);
     }
 
     public static void AddFontDefault()

@@ -27,7 +27,7 @@ struct Fonts::Impl
     };
     std::vector<FontParams> fontConfig;
 
-    void AddFontToAtlas(const Ref<FontFile>& font, int fontSize, bool merge, const ImVector<ImWchar>& ranges);
+    void AddFontToAtlas(const FontParams& fp, float scale);
 
     static ImVector<ImWchar> GetRanges(const Ref<Font>& font)
     {
@@ -76,13 +76,16 @@ struct Fonts::Impl
     }
 };
 
-void Fonts::Impl::AddFontToAtlas(const Ref<FontFile>& font, int fontSize, bool merge, const ImVector<ImWchar>& ranges)
+void Fonts::Impl::AddFontToAtlas(const FontParams& fp, float scale)
 {
+    auto& io = ImGui::GetIO();
+    int fontSize = fp.fontSize * scale;
     ImFontConfig fc;
-    if (merge)
+
+    if (fp.merge)
         fc.MergeMode = 1;
 
-    if (font.is_null())
+    if (fp.font.is_null())
     {
         // default font
         fc = {};
@@ -90,29 +93,28 @@ void Fonts::Impl::AddFontToAtlas(const Ref<FontFile>& font, int fontSize, bool m
         fc.OversampleH = 1;
         fc.OversampleV = 1;
         fc.PixelSnapH = true;
-        ImGui::GetIO().Fonts->AddFontDefault(&fc);
+        io.Fonts->AddFontDefault(&fc);
     }
     else
     {
-        fs::path fontpath = (font->get_path().utf8().get_data());
+        fs::path fontpath = (fp.font->get_path().utf8().get_data());
 
         // no std::format in Clang 14
         std::string fontdesc = fontpath.filename().string() + ", "s + std::to_string(fontSize) + "px";
         if (fontdesc.length() > 39)
             fontdesc.resize(39);
         std::copy(fontdesc.begin(), fontdesc.end(), fc.Name);
+        fc.Name[fontdesc.length()] = '\0';
 
-        int64_t len = font->get_data().size();
+        int64_t len = fp.font->get_data().size();
         // let ImGui manage this memory
         void* p = ImGui::MemAlloc(len);
-        memcpy(p, font->get_data().ptr(), len);
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF(p, len, fontSize, &fc, ranges.Data);
+        memcpy(p, fp.font->get_data().ptr(), len);
+        io.Fonts->AddFontFromMemoryTTF(p, len, fontSize, &fc, fp.ranges.Data);
     }
 
-    if (merge)
-    {
-        ImGui::GetIO().Fonts->Build();
-    }
+    if (fp.merge)
+        io.Fonts->Build();
 }
 
 Fonts::Fonts() : impl(std::make_unique<Impl>())
@@ -131,9 +133,10 @@ void Fonts::Reset()
     impl->fontConfig.clear();
 }
 
-void Fonts::Add(Ref<FontFile> fontData, int fontSize, bool merge)
+void Fonts::Add(Ref<FontFile> fontData, int fontSize, bool merge, const ImVector<ImWchar>& glyphRanges)
 {
-    impl->fontConfig.push_back({fontData, fontSize, merge, Impl::GetRanges(fontData)});
+    impl->fontConfig.push_back(
+        {fontData, fontSize, merge, glyphRanges.size() > 0 ? glyphRanges : Impl::GetRanges(fontData)});
 }
 
 void Fonts::RebuildFontAtlas(float scale)
@@ -156,7 +159,7 @@ void Fonts::RebuildFontAtlas(float scale)
 
     for (const auto& fp : impl->fontConfig)
     {
-        impl->AddFontToAtlas(fp.font, fp.fontSize * scale, fp.merge, fp.ranges);
+        impl->AddFontToAtlas(fp, scale);
     }
 
     uint8_t* pixelData;
