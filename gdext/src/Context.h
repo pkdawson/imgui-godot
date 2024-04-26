@@ -1,6 +1,4 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -19,16 +17,15 @@
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#pragma warning(pop)
 
 #include "DummyRenderer.h"
 #include "Fonts.h"
+#include "GdsCache.h"
 #include "ImGuiGD.h"
 #include "Input.h"
 #include "RdRenderer.h"
 #include "RdRendererThreadSafe.h"
 #include "Renderer.h"
-#include "ShortTermCache.h"
 #include "Viewports.h"
 
 using namespace godot;
@@ -72,7 +69,8 @@ void Render();
 void Shutdown();
 void Connect(const Callable& callable);
 void ResetFonts();
-void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false, const ImVector<ImWchar>& glyphRanges = {});
+void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false,
+             const ImVector<ImWchar>& glyphRanges = {});
 void AddFontDefault();
 void RebuildFontAtlas(float scale = 1.0f);
 void SetIniFilename(const String& fn);

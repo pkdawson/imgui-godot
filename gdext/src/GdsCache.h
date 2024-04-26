@@ -1,9 +1,5 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/variant/variant.hpp>
-#pragma warning(pop)
-
 #include <memory>
 #include <vector>
 
@@ -11,11 +7,11 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-class ShortTermCache
+class GdsCache
 {
 public:
-    ShortTermCache();
-    ~ShortTermCache();
+    GdsCache();
+    ~GdsCache();
 
     void OnNewFrame();
     std::vector<char>& GetTextBuf(const StringName& label, size_t size, const Array& a);
@@ -26,6 +22,6 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-extern std::unique_ptr<ShortTermCache> gdscache;
+extern std::unique_ptr<GdsCache> gdscache;
 
 } // namespace ImGui::Godot

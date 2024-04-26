@@ -47,11 +47,6 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_transparent_background(true);
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
 
-    // Callable::bind is not yet implemented...
-    // vd->window->connect("window_input", Callable(vd->signalProxy, "window_input"));
-    // vd->window->connect("close_requested", Callable(vd->signalProxy, "close_requested"));
-    // vd->window->connect("size_changed", Callable(vd->signalProxy, "size_changed"));
-
     Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
     root->add_child(vd->window);
 

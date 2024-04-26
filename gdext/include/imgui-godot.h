@@ -8,7 +8,6 @@
 #if __has_include("godot_cpp/godot.hpp")
 #define IGN_GDEXT
 // GDExtension
-#pragma warning(push, 0)
 #include <godot_cpp/classes/atlas_texture.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/font_file.hpp>
@@ -19,7 +18,6 @@
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
-#pragma warning(pop)
 
 using godot::AtlasTexture;
 using godot::Callable;

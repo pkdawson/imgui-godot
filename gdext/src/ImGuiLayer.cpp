@@ -2,7 +2,6 @@
 #include "Context.h"
 #include "ImGuiLayerHelper.h"
 
-#pragma warning(push, 0)
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/gd_script.hpp>
@@ -11,8 +10,6 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#pragma warning(pop)
-
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -75,8 +72,6 @@ void ImGuiLayer::_enter_tree()
     Node* parent = get_parent();
     if (!parent)
         return;
-    // if (parent->get_class() != "ImGuiRoot")
-    //     return;
     if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
         return;
 
@@ -115,7 +110,7 @@ void ImGuiLayer::_enter_tree()
 void ImGuiLayer::_ready()
 {
     set_process_priority(std::numeric_limits<int32_t>::max());
-    set_physics_process(false);
+    set_process_mode(Node::PROCESS_MODE_ALWAYS);
 
     connect("visibility_changed", Callable(this, "on_visibility_changed"));
 }
@@ -150,7 +145,8 @@ void ImGuiLayer::_process(double delta)
         Vector2i winSize = impl->window->get_size();
         Transform2D ft = impl->window->get_final_transform();
 
-        if (impl->subViewportSize != winSize || impl->finalTransform != ft
+        if (impl->subViewportSize != winSize ||
+            impl->finalTransform != ft
 #ifdef DEBUG_ENABLED
             // force redraw on every frame in editor
             || Engine::get_singleton()->is_editor_hint()

@@ -1,13 +1,9 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/font_file.hpp>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/variant/variant.hpp>
-#pragma warning(pop)
-
 #include <memory>
 
 using namespace godot;

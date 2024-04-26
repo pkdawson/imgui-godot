@@ -1,9 +1,5 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/variant/rid.hpp>
-#pragma warning(pop)
-
 #include <imgui.h>
 
 using godot::RID;

@@ -2,8 +2,7 @@
 
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS // match ImGui.NET
 
-#if __has_include("godot_cpp/godot.hpp")
-#pragma warning(push, 0)
+#if __has_include("godot_cpp/godot.hpp") // GDExtension
 #include <godot_cpp/variant/color.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 #include <godot_cpp/variant/vector2i.hpp>
@@ -24,8 +23,7 @@ using godot::Vector4;
     } while (0)
 #endif
 #endif
-#pragma warning(pop)
-#else
+#else // module
 #include "core/math/color.h"
 #include "core/math/vector2.h"
 #include "core/math/vector2i.h"

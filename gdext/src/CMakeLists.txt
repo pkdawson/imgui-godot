@@ -1,12 +1,14 @@
 target_sources(imgui-godot-native PRIVATE
-    common.h
     CanvasRenderer.cpp
     CanvasRenderer.h
+    common.h
     Context.cpp
     Context.h
     DummyRenderer.h
     Fonts.cpp
     Fonts.h
+    GdsCache.cpp
+    GdsCache.h
     ImGuiAPI.cpp
     ImGuiAPI.h
     ImGuiGD.cpp
@@ -15,8 +17,6 @@ target_sources(imgui-godot-native PRIVATE
     ImGuiLayer.h
     ImGuiLayerHelper.cpp
     ImGuiLayerHelper.h
-    ImGuiRoot.cpp
-    ImGuiRoot.h
     Input.cpp
     Input.h
     main.cpp
@@ -25,8 +25,6 @@ target_sources(imgui-godot-native PRIVATE
     RdRendererThreadSafe.cpp
     RdRendererThreadSafe.h
     Renderer.h
-    ShortTermCache.cpp
-    ShortTermCache.h
     Viewports.cpp
     Viewports.h
 )

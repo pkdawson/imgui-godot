@@ -1,4 +1,3 @@
-#pragma warning(push, 0)
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/main_loop.hpp>
@@ -8,7 +7,6 @@
 #include <godot_cpp/core/version.hpp>
 #include <godot_cpp/godot.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#pragma warning(pop)
 
 static_assert(GODOT_VERSION_MAJOR == 4 && GODOT_VERSION_MINOR >= 2);
 
@@ -17,7 +15,6 @@ static_assert(GODOT_VERSION_MAJOR == 4 && GODOT_VERSION_MINOR >= 2);
 #include "ImGuiGD.h"
 #include "ImGuiLayer.h"
 #include "ImGuiLayerHelper.h"
-#include "ImGuiRoot.h"
 #include "Viewports.h"
 
 // avoid including cimgui.h elsewhere

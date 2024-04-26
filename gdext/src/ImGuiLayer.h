@@ -1,10 +1,6 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/input_event.hpp>
-#pragma warning(pop)
-
 #include <memory>
 
 using namespace godot;

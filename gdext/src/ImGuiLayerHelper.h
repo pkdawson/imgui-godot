@@ -1,9 +1,5 @@
 #pragma once
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/node.hpp>
-#pragma warning(pop)
-
 #include <memory>
 
 using godot::InputEvent;

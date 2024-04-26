@@ -1,18 +1,13 @@
 #pragma once
-
-#pragma warning(push, 0)
+#include "GdsCache.h"
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
-#pragma warning(pop)
-
-#include <cimgui.h>
 #include <memory>
 #include <string_view>
 
-#include "ShortTermCache.h"
 #include "imgui_bindings.gen.h"
 
 using namespace godot;

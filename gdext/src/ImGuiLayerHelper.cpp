@@ -1,13 +1,9 @@
 #include "ImGuiLayerHelper.h"
 #include "Context.h"
 #include "imgui-godot.h"
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#pragma warning(pop)
-
 #include <imgui.h>
 using namespace godot;
 

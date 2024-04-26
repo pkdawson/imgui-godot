@@ -44,8 +44,7 @@ Context::~Context()
 void Init(godot::Window* mainWindow, RID mainSubViewport, const Ref<Resource>& cfg)
 {
     // re-init not allowed
-    // if (ctx)
-    //    return;
+    ERR_FAIL_COND(ctx);
 
     DisplayServer* DS = DisplayServer::get_singleton();
     RenderingServer* RS = RenderingServer::get_singleton();
@@ -123,90 +122,6 @@ void Init(godot::Window* mainWindow, RID mainSubViewport, const Ref<Resource>& c
     if (cfg->get("AddDefaultFont"))
         AddFontDefault();
     RebuildFontAtlas();
-
-    //    ctx = std::make_unique<Context>();
-    //    ctx->mainWindow = mainWindow;
-    //    ctx->ci = canvasItem;
-    //    ctx->input = std::make_unique<Input>(ctx->mainWindow);
-    //
-    //    int32_t screenDPI = DisplayServer::get_singleton()->screen_get_dpi();
-    //    ctx->dpiFactor = std::max(1, screenDPI / 96);
-    //    ctx->scaleToDPI = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
-    //
-    //    ImGuiIO& io = ImGui::GetIO();
-    //    io.DisplaySize = ctx->mainWindow->get_size();
-    //
-    //    io.BackendPlatformName = PlatformName;
-    //
-    //    io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
-    //    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-    //    io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
-    //    io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
-    //    io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
-    //    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
-    //
-    //    Array fonts = cfg->get("Fonts");
-    //    bool addDefaultFont = cfg->get("AddDefaultFont");
-    //    float scale = cfg->get("Scale");
-    //    String iniFilename = cfg->get("IniFilename");
-    //    String rendererName = cfg->get("Renderer");
-    //
-    //    SetIniFilename(iniFilename);
-    //
-    //    RenderingServer* RS = RenderingServer::get_singleton();
-    //
-    //    ctx->headless = DisplayServer::get_singleton()->get_name() == "headless";
-    //
-    //    if (!ctx->headless && !RS->get_rendering_device())
-    //    {
-    //        ctx->headless = true;
-    //        UtilityFunctions::printerr("imgui-godot requires RenderingDevice");
-    //    }
-    //
-    //    if (ctx->headless || rendererName == "Dummy")
-    //    {
-    //        ctx->renderer = std::make_unique<DummyRenderer>();
-    //    }
-    //    else
-    //    {
-    //        int threadModel = ProjectSettings::get_singleton()->get_setting("rendering/driver/threads/thread_model");
-    // #ifdef DEBUG_ENABLED
-    //        if (Engine::get_singleton()->is_editor_hint())
-    //            threadModel = 0;
-    // #endif
-    //        if (threadModel == 2)
-    //            ctx->renderer = std::make_unique<RdRendererThreadSafe>();
-    //        else
-    //            ctx->renderer = std::make_unique<RdRenderer>();
-    //    }
-    //    ctx->renderer = std::make_unique<CanvasRenderer>();
-    //    io.BackendRendererName = ctx->renderer->Name();
-    //
-    //    Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
-    //    RS->connect("frame_pre_draw", Callable(igl, "on_frame_pre_draw"));
-    //
-    //    ctx->svp = RS->viewport_create();
-    //    RS->viewport_set_transparent_background(ctx->svp, true);
-    //    RS->viewport_set_update_mode(ctx->svp, RenderingServer::VIEWPORT_UPDATE_ALWAYS);
-    //    RS->viewport_set_clear_mode(ctx->svp, RenderingServer::VIEWPORT_CLEAR_NEVER);
-    //    RS->viewport_set_active(ctx->svp, true);
-    //    RS->viewport_set_parent_viewport(ctx->svp, ctx->mainWindow->get_viewport_rid());
-    //
-    //    ctx->fonts = std::make_unique<Fonts>();
-    //
-    //    for (int i = 0; i < fonts.size(); ++i)
-    //    {
-    //        Ref<Resource> fontres = fonts[i];
-    //        Ref<FontFile> font = fontres->get("FontData");
-    //        int fontSize = fontres->get("FontSize");
-    //        bool merge = fontres->get("Merge");
-    //        AddFont(font, fontSize, i > 0 && merge);
-    //    }
-    //    if (addDefaultFont)
-    //        AddFontDefault();
-    //    RebuildFontAtlas(scale);
-    //
-    //    ctx->viewports = std::make_unique<Viewports>(ctx->mainWindow, ctx->svp);
 }
 
 void Update(double delta, Vector2 displaySize)
@@ -215,7 +130,6 @@ void Update(double delta, Vector2 displaySize)
     io.DisplaySize = displaySize;
     io.DeltaTime = static_cast<float>(delta);
 
-    // if (!ctx->headless)
     ctx->input->Update();
 
     gdscache->OnNewFrame();
@@ -235,14 +149,6 @@ void ProcessNotification(int what)
 
 void Render()
 {
-    // RenderingServer* RS = RenderingServer::get_singleton();
-    // godot::Vector2i winSize = ctx->mainWindow->get_size();
-    // RS->viewport_set_size(ctx->svp, winSize.x, winSize.y);
-    // RID vptex = RS->viewport_get_texture(ctx->svp);
-    // RS->canvas_item_clear(ctx->ci);
-    // RS->canvas_item_set_transform(ctx->ci, ctx->mainWindow->get_final_transform().affine_inverse());
-    // RS->canvas_item_add_texture_rect(ctx->ci, godot::Rect2(0, 0, winSize.x, winSize.y), vptex);
-
     ImGui::Render();
     ImGui::UpdatePlatformWindows();
     ctx->renderer->Render();

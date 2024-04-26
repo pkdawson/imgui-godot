@@ -1,7 +1,6 @@
 #include "ImGuiGD.h"
 #include "Context.h"
 #include "ImGuiLayer.h"
-#include "ImGuiRoot.h"
 #include "common.h"
 #include <godot_cpp/classes/main_loop.hpp>
 #include <godot_cpp/classes/packed_scene.hpp>
@@ -40,25 +39,6 @@ void ImGuiGD::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
 }
-
-// void ImGuiGD::InitEditor(Node* parent)
-//{
-// #ifdef DEBUG_ENABLED
-//     if (!Engine::get_singleton()->is_editor_hint())
-//         return;
-//
-//     if (!Engine::get_singleton()->has_singleton("ImGuiRoot"))
-//     {
-//         String resPath = "res://addons/imgui-godot-native/ImGuiGodot.tscn";
-//         if (ResourceLoader::get_singleton()->exists(resPath))
-//         {
-//             Ref<PackedScene> scene = ResourceLoader::get_singleton()->load(resPath);
-//             if (scene.is_valid())
-//                 parent->add_child(scene->instantiate());
-//         }
-//     }
-// #endif
-// }
 
 bool ImGuiGD::ToolInit()
 {
@@ -135,7 +115,9 @@ bool ImGuiGD::_GetVisible()
 
 void ImGuiGD::_SetJoyAxisDeadZone(float zone)
 {
-    ImGui::Godot::GetContext()->input->SetJoyAxisDeadZone(zone);
+    Context* ctx = ImGui::Godot::GetContext();
+    ERR_FAIL_COND(!ctx);
+    ctx->input->SetJoyAxisDeadZone(zone);
 }
 
 float ImGuiGD::_GetJoyAxisDeadZone()

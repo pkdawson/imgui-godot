@@ -1,11 +1,6 @@
 #include "RdRenderer.h"
 #include "common.h"
 #include <array>
-#include <imgui.h>
-#include <unordered_map>
-#include <unordered_set>
-
-#pragma warning(push, 0)
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/rd_pipeline_color_blend_state.hpp>
 #include <godot_cpp/classes/rd_pipeline_color_blend_state_attachment.hpp>
@@ -21,7 +16,9 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-#pragma warning(pop)
+#include <imgui.h>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace godot;
 

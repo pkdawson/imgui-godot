@@ -1,4 +1,4 @@
-#include "ShortTermCache.h"
+#include "GdsCache.h"
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <imgui.h>
 #include <iterator>
@@ -9,9 +9,9 @@ using namespace godot;
 
 namespace ImGui::Godot {
 
-std::unique_ptr<ShortTermCache> gdscache = std::make_unique<ShortTermCache>();
+std::unique_ptr<GdsCache> gdscache = std::make_unique<GdsCache>();
 
-struct ShortTermCache::Impl
+struct GdsCache::Impl
 {
     std::unordered_map<int64_t, std::vector<char>> bufs;
     std::unordered_map<int64_t, bool> used;
@@ -27,15 +27,15 @@ struct ShortTermCache::Impl
     }
 };
 
-ShortTermCache::ShortTermCache() : impl(std::make_unique<Impl>())
+GdsCache::GdsCache() : impl(std::make_unique<Impl>())
 {
 }
 
-ShortTermCache::~ShortTermCache()
+GdsCache::~GdsCache()
 {
 }
 
-void ShortTermCache::OnNewFrame()
+void GdsCache::OnNewFrame()
 {
     for (auto it = impl->used.begin(); it != impl->used.end();)
     {
@@ -52,7 +52,7 @@ void ShortTermCache::OnNewFrame()
     }
 }
 
-std::vector<char>& ShortTermCache::GetTextBuf(const StringName& label, size_t size, const Array& a)
+std::vector<char>& GdsCache::GetTextBuf(const StringName& label, size_t size, const Array& a)
 {
     int64_t hash = ImGui::GetID((void*)label.hash());
     impl->used[hash] = true;
@@ -73,7 +73,7 @@ std::vector<char>& ShortTermCache::GetTextBuf(const StringName& label, size_t si
     }
 }
 
-const std::vector<char>& ShortTermCache::GetZeroArray(const Array& a)
+const std::vector<char>& GdsCache::GetZeroArray(const Array& a)
 {
     int64_t hash = a.hash();
     impl->used[hash] = true;

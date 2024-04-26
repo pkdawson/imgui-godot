@@ -1,11 +1,8 @@
 #pragma once
 #include "Renderer.h"
+#include <godot_cpp/variant/rid.hpp>
 #include <imgui.h>
 #include <memory>
-
-#pragma warning(push, 0)
-#include <godot_cpp/variant/rid.hpp>
-#pragma warning(pop)
 
 using godot::RID;
 
@@ -31,7 +28,6 @@ public:
     void OnHide() override
     {
     }
-
 
 protected:
     void Render(RID fb, ImDrawData* drawData);
