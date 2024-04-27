@@ -170,24 +170,28 @@ void Connect(const godot::Callable& callable)
 
 void ResetFonts()
 {
+    ERR_FAIL_COND(!ctx);
     ctx->fonts->Reset();
 }
 
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge, const ImVector<ImWchar>& glyphRanges)
 {
+    ERR_FAIL_COND(!ctx);
     ctx->fonts->Add(fontFile, fontSize, merge, glyphRanges);
 }
 
 void AddFontDefault()
 {
+    ERR_FAIL_COND(!ctx);
     ctx->fonts->Add(nullptr, 13, false);
 }
 
-void RebuildFontAtlas(float scale)
+void RebuildFontAtlas()
 {
+    ERR_FAIL_COND(!ctx);
     bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
     int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
-    ctx->fonts->RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
+    ctx->fonts->RebuildFontAtlas(scaleToDpi ? dpiFactor * ctx->scale : ctx->scale);
 }
 
 void SetIniFilename(const String& fn)

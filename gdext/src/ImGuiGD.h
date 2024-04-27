@@ -26,7 +26,7 @@ public:
     void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false,
                  const PackedInt32Array& glyphRanges = {});
     void AddFontDefault();
-    void RebuildFontAtlas(float scale);
+    void RebuildFontAtlas();
 
     void _SetJoyAxisDeadZone(float zone);
     float _GetJoyAxisDeadZone();

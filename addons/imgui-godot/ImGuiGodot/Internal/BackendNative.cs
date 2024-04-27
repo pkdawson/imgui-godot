@@ -68,9 +68,9 @@ internal sealed class BackendNative : IBackend
         _gd.Call(MethodName.Connect, callable);
     }
 
-    public void RebuildFontAtlas(float scale)
+    public void RebuildFontAtlas()
     {
-        _gd.Call(MethodName.RebuildFontAtlas, scale);
+        _gd.Call(MethodName.RebuildFontAtlas);
     }
 
     public void ResetFonts()

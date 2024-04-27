@@ -92,7 +92,7 @@ public static class ImGuiGD
         //if (_inProcessFrame)
         //    throw new InvalidOperationException("fonts cannot be changed during process frame");
 
-        _backend.RebuildFontAtlas(Scale);
+        _backend.RebuildFontAtlas();
     }
 
     public static void Connect(Callable callable)

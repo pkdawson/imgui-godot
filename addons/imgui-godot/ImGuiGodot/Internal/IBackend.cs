@@ -11,7 +11,7 @@ internal interface IBackend
     public void ResetFonts();
     public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges);
     public void AddFontDefault();
-    public void RebuildFontAtlas(float scale);
+    public void RebuildFontAtlas();
     public void Connect(Callable callable);
     public bool SubViewportWidget(SubViewport svp);
 }

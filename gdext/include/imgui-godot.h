@@ -105,11 +105,11 @@ inline void Connect(const Callable& callable)
     detail::ImGuiGD->call(sn, callable);
 }
 
-inline void RebuildFontAtlas(float scale)
+inline void RebuildFontAtlas()
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("RebuildFontAtlas");
-    detail::ImGuiGD->call(sn, scale);
+    detail::ImGuiGD->call(sn);
 }
 
 inline void ResetFonts()

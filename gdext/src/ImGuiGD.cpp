@@ -30,7 +30,7 @@ void ImGuiGD::_bind_methods()
                          DEFVAL(PackedInt32Array()));
     ClassDB::bind_method(D_METHOD("AddFontDefault"), &ImGuiGD::AddFontDefault);
     ClassDB::bind_method(D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
-    ClassDB::bind_method(D_METHOD("RebuildFontAtlas", "scale"), &ImGuiGD::RebuildFontAtlas, DEFVAL(1.0f));
+    ClassDB::bind_method(D_METHOD("RebuildFontAtlas"), &ImGuiGD::RebuildFontAtlas);
     ClassDB::bind_method(D_METHOD("ResetFonts"), &ImGuiGD::ResetFonts);
     ClassDB::bind_method(D_METHOD("SubViewport", "svp"), &ImGuiGD::SubViewport);
     ClassDB::bind_method(D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
@@ -91,9 +91,9 @@ void ImGuiGD::AddFontDefault()
     ImGui::Godot::AddFontDefault();
 }
 
-void ImGuiGD::RebuildFontAtlas(float scale)
+void ImGuiGD::RebuildFontAtlas()
 {
-    ImGui::Godot::RebuildFontAtlas(scale);
+    ImGui::Godot::RebuildFontAtlas();
 }
 
 void ImGuiGD::_SetVisible(bool visible)

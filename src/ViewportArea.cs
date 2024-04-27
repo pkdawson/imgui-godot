@@ -18,9 +18,10 @@ public partial class ViewportArea : Area3D
     public override void _InputEvent(Camera3D camera, InputEvent @event, Vector3 position,
         Vector3 normal, int shapeIdx)
     {
-        if (@event is InputEventMouseMotion)
+        if (@event is InputEventMouseMotion mm)
         {
             _piece.Position = position;
+            mm.Dispose(); // prevent "leaks"
         }
         else if (@event is InputEventMouseButton mb && mb.Pressed)
         {

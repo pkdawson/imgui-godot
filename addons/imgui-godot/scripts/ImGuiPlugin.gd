@@ -9,3 +9,4 @@ func _enter_tree():
 
 func _exit_tree():
     remove_autoload_singleton("ImGuiRoot")
+    Engine.unregister_singleton("ImGuiPlugin")

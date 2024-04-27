@@ -41,11 +41,11 @@ internal sealed class BackendNet : IBackend
         ImGuiLayer.Instance?.Signaler.Connect("imgui_layout", callable);
     }
 
-    public void RebuildFontAtlas(float scale)
+    public void RebuildFontAtlas()
     {
         bool scaleToDpi = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
         int dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
-        State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? dpiFactor * scale : scale);
+        State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? dpiFactor * Scale : Scale);
     }
 
     public void ResetFonts()

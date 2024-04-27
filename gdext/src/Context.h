@@ -72,7 +72,7 @@ void ResetFonts();
 void AddFont(const Ref<FontFile>& fontFile, int fontSize, bool merge = false,
              const ImVector<ImWchar>& glyphRanges = {});
 void AddFontDefault();
-void RebuildFontAtlas(float scale = 1.0f);
+void RebuildFontAtlas();
 void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
 bool IsVisible();
