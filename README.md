@@ -1,4 +1,4 @@
-# Dear ImGui plugin for Godot 4 (C#)
+# Dear ImGui plugin for Godot 4
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
 
@@ -37,11 +37,19 @@ Download
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications.)
 
+> [!IMPORTANT]
+> If you are using the GDExtension package, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
+
 4. Back in the Godot editor, click `Build`.
 
 5. Enable the plugin in `Project > Project Settings > Plugins`.
 
-6. Write code!
+## Getting Started (GDScript)
+
+1. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder from the full package which includes
+the GDExtension.
+
+2. Enable the plugin in `Project > Project Settings > Plugins`.
 
 ## Usage
 
@@ -57,7 +65,9 @@ ImGuiGD.Connect(OnImGuiLayout);
 
 ### Configuration
 
-If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the scene `res://addons/imgui-godot/ImGuiLayer.tscn` and set its `Config` property.
+If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the
+scene `res://addons/imgui-godot/Config.tscn`, select the `Config` node, and set its `Config`
+property.
 
 ### Widgets
 

@@ -22,7 +22,9 @@ public partial class ImGuiSync : GodotObject
             );
 
         if (ptrs.Length != 3)
-            return;
+        {
+            throw new NotSupportedException("ImGui version mismatch");
+        }
 
         checked
         {
