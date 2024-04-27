@@ -184,6 +184,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: addons/imgui-godot/bin
+          pattern: gdext-*
 
       - run: ls -R
         working-directory: addons/imgui-godot/bin
