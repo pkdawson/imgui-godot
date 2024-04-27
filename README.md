@@ -1,15 +1,13 @@
 # Dear ImGui plugin for Godot 4 (C#)
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
-![](https://img.shields.io/static/v1?label=Godot&message=4.1&color=blue&logo=godotengine)
-![](https://img.shields.io/static/v1?label=Godot&message=4.0&color=blue&logo=godotengine)
 
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
 ![screenshot](doc/screenshot.png)
 
-[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#.
+[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#, C++, and GDScript.
 
 After installing the plugin, usage is as simple as this:
 
@@ -29,9 +27,7 @@ Download
 
 [![](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
 
-## Getting Started
-
-### Your project
+## Getting Started (C#)
 
 1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
 
@@ -56,7 +52,7 @@ In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't s
 You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
 
 ```csharp
-ImGuiLayer.Connect(OnImGuiLayout);
+ImGuiGD.Connect(OnImGuiLayout);
 ```
 
 ### Configuration
