@@ -24,7 +24,7 @@ public partial class MyNode : Node
 ```
 
 ```gdscript
-extends Node2D
+extends Node
 
 func _process(delta):
     ImGui.Begin("My Window")
