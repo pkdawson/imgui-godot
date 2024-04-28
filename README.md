@@ -23,9 +23,12 @@ public partial class MyNode : Node
 }
 ```
 
-Download
+## Download
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
+If you only need C# support with basic features, you can use the `csharp-only` package. Otherwise,
+download the full package which includes GDExtension binaries.
+
+[![download](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
 
 ## Getting Started (C#)
 
@@ -37,8 +40,8 @@ Download
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications.)
 
-> [!IMPORTANT]
-> If you are using the GDExtension package, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
+   > [!IMPORTANT]
+   > If you are using the GDExtension, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
 
 4. Back in the Godot editor, click `Build`.
 
@@ -97,14 +100,15 @@ ImGui.End();
 
 ## Package managers
 
-[GodotEnv](https://github.com/chickensoft-games/GodotEnv/) is a dotnet tool that can manage Godot addons with just a little configuration. Use something like:
+If you only need C# support (no GDExtension), you can use [GodotEnv](https://github.com/chickensoft-games/GodotEnv/)
+to install and update imgui-godot. The configuration should be something like:
 
 ```json
 {
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "4.x",
+      "checkout": "5.x",
       "subfolder": "addons/imgui-godot"
     }
   }
