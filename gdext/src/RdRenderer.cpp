@@ -47,7 +47,6 @@ struct RdRenderer::Impl
     int vtxBufferSize = 0; // size in vertices
 
     void SetupBuffers(ImDrawData* drawData);
-    void RenderOne(RID vprid, ImDrawData* drawData);
 
     Impl()
     {
@@ -84,35 +83,6 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
 
-    // clean out invalidated uniform sets so they can be refreshed
-    for (auto it = uniformSets.begin(); it != uniformSets.end();)
-    {
-        if (!RD->uniform_set_is_valid(it->second))
-            it = uniformSets.erase(it);
-        else
-            ++it;
-    }
-
-    // allocate merged index and vertex buffers
-    if (idxBufferSize < drawData->TotalIdxCount)
-    {
-        if (idxBuffer.get_id() != 0)
-            RD->free_rid(idxBuffer);
-        idxBuffer = RD->index_buffer_create(drawData->TotalIdxCount, RenderingDevice::INDEX_BUFFER_FORMAT_UINT16);
-        idxBufferSize = drawData->TotalIdxCount;
-    }
-
-    if (vtxBufferSize < drawData->TotalVtxCount)
-    {
-        if (vtxBuffer.get_id() != 0)
-            RD->free_rid(vtxBuffer);
-        vtxBuffer = RD->vertex_buffer_create(drawData->TotalVtxCount * sizeof(ImDrawVert));
-        vtxBufferSize = drawData->TotalVtxCount;
-    }
-
-    if (drawData->TotalIdxCount == 0)
-        return;
-
     int globalIdxOffset = 0;
     int globalVtxOffset = 0;
 
@@ -128,27 +98,30 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
     {
         ImDrawList* cmdList = drawData->CmdLists[i];
 
-        std::copy(cmdList->IdxBuffer.begin(),
-                  cmdList->IdxBuffer.end(),
-                  reinterpret_cast<ImDrawIdx*>(idxBuf.ptrw() + globalIdxOffset));
         std::copy(cmdList->VtxBuffer.begin(),
                   cmdList->VtxBuffer.end(),
                   reinterpret_cast<ImDrawVert*>(vertBuf.ptrw() + globalVtxOffset));
-
-        globalIdxOffset += cmdList->IdxBuffer.size_in_bytes();
         globalVtxOffset += cmdList->VtxBuffer.size_in_bytes();
 
+        std::copy(cmdList->IdxBuffer.begin(),
+                  cmdList->IdxBuffer.end(),
+                  reinterpret_cast<ImDrawIdx*>(idxBuf.ptrw() + globalIdxOffset));
+        globalIdxOffset += cmdList->IdxBuffer.size_in_bytes();
+
+        // create a uniform set for each texture
         for (int cmdi = 0; cmdi < cmdList->CmdBuffer.Size; ++cmdi)
         {
             const ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
             ImTextureID texid = drawCmd.GetTexID();
             if (!texid)
                 continue;
+            RID texrid = make_rid(texid);
+            if (!RD->texture_is_valid(texrid))
+                continue;
 
             usedTextures.insert(texid);
             if (!uniformSets.contains(texid))
             {
-                RID texrid = make_rid(texid);
                 Ref<RDUniform> uniform;
                 uniform.instantiate();
                 uniform->set_binding(0);
@@ -157,9 +130,7 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
                 uniform->add_id(texrid);
 
                 uniforms[0] = uniform;
-
-                RID uniformSet = RD->uniform_set_create(uniforms, shader, 0);
-                uniformSets[texid] = uniformSet;
+                uniformSets[texid] = RD->uniform_set_create(uniforms, shader, 0);
             }
         }
     }
@@ -241,6 +212,9 @@ bool RdRenderer::Init()
                                                 {},
                                                 blend);
 
+    if (!impl->pipeline.is_valid())
+        return false;
+
     RDSamplerState sampler_state;
     sampler_state.set_min_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
     sampler_state.set_mag_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
@@ -260,7 +234,8 @@ void RdRenderer::Render(RID fb, ImDrawData* drawData)
 {
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
 
-    impl->SetupBuffers(drawData);
+    if (!fb.is_valid())
+        return;
 
     godot::PackedFloat32Array pcfloats;
     pcfloats.resize(4);
@@ -270,6 +245,30 @@ void RdRenderer::Render(RID fb, ImDrawData* drawData)
     pcfloats[3] = -1.0f - (drawData->DisplayPos.y * pcfloats[1]);
     godot::PackedByteArray pcbuf = pcfloats.to_byte_array();
 
+    // allocate merged index and vertex buffers
+    if (impl->idxBufferSize < drawData->TotalIdxCount)
+    {
+        if (impl->idxBuffer.get_id() != 0)
+            RD->free_rid(impl->idxBuffer);
+        impl->idxBuffer = RD->index_buffer_create(drawData->TotalIdxCount, RenderingDevice::INDEX_BUFFER_FORMAT_UINT16);
+        impl->idxBufferSize = drawData->TotalIdxCount;
+    }
+
+    if (impl->vtxBufferSize < drawData->TotalVtxCount)
+    {
+        if (impl->vtxBuffer.get_id() != 0)
+            RD->free_rid(impl->vtxBuffer);
+        impl->vtxBuffer = RD->vertex_buffer_create(drawData->TotalVtxCount * sizeof(ImDrawVert));
+        impl->vtxBufferSize = drawData->TotalVtxCount;
+    }
+
+    // check if our font texture is still valid
+    std::erase_if(impl->uniformSets, [RD](const auto& kv) { return !RD->uniform_set_is_valid(kv.second); });
+
+    if (drawData->CmdListsCount > 0)
+        impl->SetupBuffers(drawData);
+
+    // draw
     int64_t dl = RD->draw_list_begin(fb,
                                      RenderingDevice::INITIAL_ACTION_CLEAR,
                                      RenderingDevice::FINAL_ACTION_READ,
@@ -341,6 +340,27 @@ void RdRenderer::InitViewport(RID vprid)
     RenderingServer::get_singleton()->viewport_set_clear_mode(vprid, RenderingServer::VIEWPORT_CLEAR_NEVER);
 }
 
+void RdRenderer::FreeUnusedTextures()
+{
+    RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
+
+    // clean up unused textures
+    std::vector<ImTextureID> keys;
+    keys.reserve(impl->uniformSets.size());
+    for (const auto& kv : impl->uniformSets)
+        keys.push_back(kv.first);
+
+    for (ImTextureID texid : keys)
+    {
+        if (!impl->usedTextures.contains(texid))
+        {
+            RD->free_rid(impl->uniformSets[texid]);
+            impl->uniformSets.erase(texid);
+        }
+    }
+    impl->usedTextures.clear();
+}
+
 void RdRenderer::Render()
 {
     auto& pio = ImGui::GetPlatformIO();
@@ -353,6 +373,7 @@ void RdRenderer::Render()
             Render(GetFramebuffer(vprid), vp->DrawData);
         }
     }
+    FreeUnusedTextures();
 }
 
 void RdRenderer::ReplaceTextureRIDs(ImDrawData* drawData)

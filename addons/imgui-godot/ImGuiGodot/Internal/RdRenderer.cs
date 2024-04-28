@@ -168,11 +168,12 @@ internal class RdRenderer : IRenderer
         int globalIdxOffset = 0;
         int globalVtxOffset = 0;
 
-        // set up buffers
         int idxBufSize = drawData.TotalIdxCount * sizeof(ushort);
         byte[] idxBuf = _bufPool.Rent(idxBufSize);
+
         int vertBufSize = drawData.TotalVtxCount * vertSize;
         byte[] vertBuf = _bufPool.Rent(vertBufSize);
+
         for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdLists[i];

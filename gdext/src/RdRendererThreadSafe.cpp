@@ -1,5 +1,6 @@
 #include "RdRendererThreadSafe.h"
 #include "common.h"
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <mutex>
 
@@ -51,6 +52,8 @@ struct RdRendererThreadSafe::Impl
 
 RdRendererThreadSafe::RdRendererThreadSafe() : impl(std::make_unique<Impl>())
 {
+    RenderingServer* RS = RenderingServer::get_singleton();
+    RS->connect("frame_pre_draw", Callable(Engine::get_singleton()->get_singleton("ImGuiLayer"), "on_frame_pre_draw"));
 }
 
 RdRendererThreadSafe::~RdRendererThreadSafe()
@@ -64,8 +67,10 @@ void RdRendererThreadSafe::Render()
 
     for (int i = 0; i < pio.Viewports.size(); ++i)
     {
-        // TODO: skip minimized windows
         ImGuiViewport* vp = pio.Viewports[i];
+        if (vp->Flags & ImGuiViewportFlags_IsMinimized)
+            continue;
+
         ReplaceTextureRIDs(vp->DrawData);
         RID vprid = make_rid(vp->RendererUserData);
         newData[i].first = GetFramebuffer(vprid);
@@ -88,15 +93,14 @@ void RdRendererThreadSafe::OnFramePreDraw()
         dataArray = std::move(impl->dataToDraw);
     }
 
-    if (dataArray.size() == 0)
-        return;
-
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
     for (auto& kv : dataArray)
     {
         if (RD->framebuffer_is_valid(kv.first))
             RdRenderer::Render(kv.first, kv.second->data);
     }
+
+    FreeUnusedTextures();
 }
 
 } // namespace ImGui::Godot

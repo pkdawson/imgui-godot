@@ -19,16 +19,14 @@ public static class ImGuiGD
     }
 
     /// <summary>
-    /// Setting this property will reload fonts and modify the ImGuiStyle
+    /// Setting this property will reload fonts and modify the ImGuiStyle.
+    /// Can only be set outside of a process frame (eg, use CallDeferred)
     /// </summary>
     public static float Scale
     {
         get => _backend.Scale;
         set
         {
-            //if (_inProcessFrame)
-            //    throw new InvalidOperationException("scale cannot be changed during process frame");
-
             if (_backend.Scale != value && value >= 0.25f)
             {
                 _backend.Scale = value;
@@ -89,9 +87,6 @@ public static class ImGuiGD
 
     public static void RebuildFontAtlas()
     {
-        //if (_inProcessFrame)
-        //    throw new InvalidOperationException("fonts cannot be changed during process frame");
-
         _backend.RebuildFontAtlas();
     }
 
@@ -105,6 +100,9 @@ public static class ImGuiGD
         Connect(Callable.From(action));
     }
 
+    /// <summary>
+    /// Must call from a tool script before doing anything else
+    /// </summary>
     public static bool ToolInit()
     {
         if (_backend is BackendNative nbe)

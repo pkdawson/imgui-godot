@@ -33,6 +33,7 @@ protected:
     void Render(RID fb, ImDrawData* drawData);
     static void ReplaceTextureRIDs(ImDrawData* drawData);
     RID GetFramebuffer(RID vprid);
+    void FreeUnusedTextures();
 
 private:
     struct Impl;
