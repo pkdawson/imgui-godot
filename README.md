@@ -23,6 +23,15 @@ public partial class MyNode : Node
 }
 ```
 
+```gdscript
+extends Node2D
+
+func _process(delta):
+    ImGui.Begin("My Window")
+    ImGui.Text("hello from GDScript")
+    ImGui.End()
+```
+
 ## Download
 
 If you only need C# support with basic features, you can use the `csharp-only` package. Otherwise,
@@ -40,8 +49,8 @@ download the full package which includes GDExtension binaries.
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications.)
 
-   > [!IMPORTANT]
-   > If you are using the GDExtension, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
+> [!IMPORTANT]
+> If you are using the GDExtension, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
 
 4. Back in the Godot editor, click `Build`.
 
@@ -60,7 +69,7 @@ In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't s
 
 ### Signals
 
-You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
+You can also connect to the `imgui_layout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
 
 ```csharp
 ImGuiGD.Connect(OnImGuiLayout);
@@ -74,7 +83,7 @@ property.
 
 ### Widgets
 
-These methods should only be called within `_Process` or an `ImGuiLayout` callback.
+These methods should only be called within `_Process` or an `imgui_layout` callback.
 
 `Image` and `ImageButton` are simple wrappers for your convenience.
 
