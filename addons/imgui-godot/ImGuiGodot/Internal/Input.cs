@@ -1,4 +1,5 @@
 #if GODOT_PC
+#nullable enable
 using Godot;
 using ImGuiNET;
 using System;
