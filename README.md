@@ -1,6 +1,7 @@
 # Dear ImGui plugin for Godot 4
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
+![](https://img.shields.io/static/v1?label=Godot&message=4.3&color=blue&logo=godotengine)
 
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
@@ -45,7 +46,7 @@ download the full package which includes GDExtension binaries.
 
 2. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder. Or [use GodotEnv](#package-managers).
 
-3. In Visual Studio or another IDE, open the solution and allow unsafe code, and install `ImGui.NET` with NuGet. Save and return to Godot.
+3. In Visual Studio or another IDE, open the solution and allow unsafe code, and install `ImGui.NET` with NuGet. Set your target framework to .NET 8 or later. Save and return to Godot.
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications.)
 
