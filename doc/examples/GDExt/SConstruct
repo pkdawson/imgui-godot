@@ -1,18 +1,30 @@
 #!/usr/bin/env python
 
-IMGUI_PATH = "../../../gdext/imgui"
 IMGUI_GODOT_INCLUDE = "../../../addons/imgui-godot/include"
+IMGUI_TAG = "v1.90.1-docking"
 
-env = SConscript("../../../gdext/godot-cpp/SConstruct")
+import os
+import subprocess
+
+if not os.path.exists("godot-cpp"):
+    subprocess.call(
+        "git clone -b 4.2 https://github.com/godotengine/godot-cpp", shell=True
+    )
+
+if not os.path.exists("imgui"):
+    subprocess.call("git clone -b docking https://github.com/ocornut/imgui", shell=True)
+    subprocess.call(f"git -C imgui checkout {IMGUI_TAG}", shell=True)
+
+env = SConscript("godot-cpp/SConstruct")
 env = env.Clone()
 
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
 
 # Dear ImGui
-sources += Glob(f"{IMGUI_PATH}/*.cpp")
+sources += Glob(f"imgui/*.cpp")
 env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
-env.Append(CPPPATH=[IMGUI_PATH, IMGUI_GODOT_INCLUDE])
+env.Append(CPPPATH=["imgui", IMGUI_GODOT_INCLUDE])
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

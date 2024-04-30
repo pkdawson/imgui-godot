@@ -1,0 +1,5 @@
+Run:
+
+```
+godotenv addons install
+```
