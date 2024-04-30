@@ -39,3 +39,4 @@ addons/imgui-godot/imgui-godot-native.gdextension
 addons/imgui-godot/include/*.h
 scons_cache
 doc/**/addons/
+addons/imgui-godot/include/imgui-version.txt

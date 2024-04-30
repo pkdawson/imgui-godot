@@ -1,6 +1,6 @@
 Import('env')
 
-IMGUI_PATH = "../../../../../gdext/imgui"
+IMGUI_PATH = "../../imgui"
 IMGUI_GODOT_INCLUDE = "../../../../../addons/imgui-godot/include"
 
 env.Append(CPPPATH=[IMGUI_PATH, IMGUI_GODOT_INCLUDE])
