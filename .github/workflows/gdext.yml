@@ -215,6 +215,8 @@ jobs:
           touch addons/imgui-godot/include/.gdignore
           cp gdext/imgui-godot-native.gdextension addons/imgui-godot/
           ls -al gdext/imgui
+
+          git -C gdext/imgui fetch --tags
           git -C gdext/imgui describe > addons/imgui-godot/include/imgui-version.txt
 
           env
