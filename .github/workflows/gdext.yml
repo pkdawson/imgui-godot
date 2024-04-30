@@ -1,0 +1,263 @@
+name: 🦕 C++ GDExtension
+
+on:
+  push:
+    branches: "*"
+    tags: v*
+
+
+env:
+  vcpkg_tag: a34c873a9717a888f58dc05268dea15592c2f0ff # 2024.03.25
+
+jobs:
+  windows:
+    name: 🪟Windows
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install tools
+        run: |
+          python -m pip install scons
+          scons --version
+          pip install ply
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
+  
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        if: github.ref_type != 'tag'
+        with:
+          path: |
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+
+      - name: Build
+        if: github.ref_type != 'tag'
+        run: |
+          cd gdext
+          scons godot-cpp
+          scons
+          scons target=template_release godot-cpp
+          scons target=template_release
+
+      - name: Build (with debug symbols)
+        if: github.ref_type == 'tag'
+        run: |
+          cd gdext
+          scons debug_symbols=yes godot-cpp
+          scons debug_symbols=yes
+          scons debug_symbols=yes target=template_release godot-cpp
+          scons debug_symbols=yes target=template_release
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdext-windows
+          path: addons/imgui-godot/bin
+
+  linux:
+    name: 🐧Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install tools
+        run: |
+          python -m pip install scons
+          scons --version
+          pip install ply
+          sudo apt install clang-format
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
+
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        with:
+          path: |
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+
+      - name: Build debug
+        run: |
+          cd gdext
+          scons godot-cpp
+          scons
+
+      - name: Build release
+        run: |
+          cd gdext
+          scons target=template_release godot-cpp
+          scons target=template_release
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdext-linux
+          path: addons/imgui-godot/bin
+
+  macos:
+    name: 🍎macOS
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install tools
+        run: |
+          python -m pip install scons
+          scons --version
+          pip install ply
+          brew install clang-format ninja
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
+
+      - uses: actions/cache@v4
+        id: cache-godot-cpp
+        with:
+          path: |
+            gdext/scons_cache
+          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+
+      - name: Build debug
+        run: |
+          export PATH="$(brew --prefix llvm@15)/bin:$PATH"
+          cd gdext
+          scons godot-cpp
+          scons
+
+      - name: Build release
+        run: |
+          export PATH="$(brew --prefix llvm@15)/bin:$PATH"
+          cd gdext
+          scons target=template_release godot-cpp
+          scons target=template_release
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdext-macos
+          path: addons/imgui-godot/bin
+
+  package:
+    name: 📦Package
+    runs-on: ubuntu-latest
+    needs: [windows, linux, macos]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: addons/imgui-godot/bin
+          pattern: gdext-*
+
+      - run: ls -R
+        working-directory: addons/imgui-godot/bin
+
+      - name: Extract
+        run: |
+          cd addons/imgui-godot/bin
+          mv gdext-*/* .
+          rmdir gdext-*
+          rm *.exp
+          rm *.lib
+
+      - name: Upload PDBs
+        if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdbs
+          path: addons/imgui-godot/bin/*.pdb
+
+      - name: Prepare files
+        id: prep
+        run: |
+          ls -R
+          rm -f addons/imgui-godot/bin/*.pdb
+          mkdir addons/imgui-godot/include
+          cp -r gdext/include/*.h addons/imgui-godot/include/
+          touch addons/imgui-godot/include/.gdignore
+          cp gdext/imgui-godot-native.gdextension addons/imgui-godot/
+
+          env
+          imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
+          plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
+          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}
+          echo $pkgfn
+          echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
+          rm -rf gdext
+
+          pkgdir=~/out/imgui-godot-${plugin_ver}
+          mkdir -p $pkgdir
+          mv * $pkgdir
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prep.outputs.pkgfn }}
+          path: |
+            ~/out
+
+  package_cs:
+    name: 📦Package (C# only)
+    runs-on: ubuntu-latest
+    needs: [windows, linux, macos]
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Prepare files
+        id: prep_cs
+        run: |
+          ls -R
+          rm -rf doc/examples
+          rm -rf gdext
+          plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
+          pkgfn=imgui-godot-${plugin_ver}-csharp-only
+          echo $pkgfn
+          echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
+
+          pkgdir=~/out/imgui-godot-${plugin_ver}
+          mkdir -p $pkgdir
+          mv * $pkgdir
+      
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prep_cs.outputs.pkgfn }}
+          path: ~/out

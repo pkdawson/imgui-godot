@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://7nffahig8gu8"]
-
-[ext_resource type="Script" path="res://addons/imgui-godot/ImGuiGodot/ImGuiLayer.cs" id="1_ag3g6"]
-
-[node name="ImGuiLayer" type="CanvasLayer"]
-process_mode = 3
-process_priority = 2147483647
-layer = 128
-script = ExtResource("1_ag3g6")

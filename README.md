@@ -1,15 +1,13 @@
-# Dear ImGui plugin for Godot 4 (C#)
+# Dear ImGui plugin for Godot 4
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
-![](https://img.shields.io/static/v1?label=Godot&message=4.1&color=blue&logo=godotengine)
-![](https://img.shields.io/static/v1?label=Godot&message=4.0&color=blue&logo=godotengine)
 
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
 
 ![screenshot](doc/screenshot.png)
 
-[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#.
+[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#, C++, and GDScript.
 
 After installing the plugin, usage is as simple as this:
 
@@ -25,13 +23,23 @@ public partial class MyNode : Node
 }
 ```
 
-Download
+```gdscript
+extends Node
 
-[![](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
+func _process(delta):
+    ImGui.Begin("My Window")
+    ImGui.Text("hello from GDScript")
+    ImGui.End()
+```
 
-## Getting Started
+## Download
 
-### Your project
+If you only need C# support with basic features, you can use the `csharp-only` package. Otherwise,
+download the full package which includes GDExtension binaries.
+
+[![download](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
+
+## Getting Started (C#)
 
 1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
 
@@ -41,11 +49,19 @@ Download
 
     (If you prefer to manually edit the .csproj instead, refer to the demo csproj for the necessary modifications.)
 
+> [!IMPORTANT]
+> If you are using the GDExtension, you must use a version of ImGui.NET which matches the version that the GDExtension was built with.
+
 4. Back in the Godot editor, click `Build`.
 
 5. Enable the plugin in `Project > Project Settings > Plugins`.
 
-6. Write code!
+## Getting Started (GDScript)
+
+1. [Install the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) by copying over the `addons` folder from the full package which includes
+the GDExtension.
+
+2. Enable the plugin in `Project > Project Settings > Plugins`.
 
 ## Usage
 
@@ -53,19 +69,21 @@ In any Node's `_Process` method, use `ImGuiNET` to create your GUI. Just don't s
 
 ### Signals
 
-You can also connect to the `ImGuiLayout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
+You can also connect to the `imgui_layout` signal, and use ImGui in the method which handles that signal. This is strongly recommended if you're using process thread groups in Godot 4.1 or later.
 
 ```csharp
-ImGuiLayer.Connect(OnImGuiLayout);
+ImGuiGD.Connect(OnImGuiLayout);
 ```
 
 ### Configuration
 
-If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the scene `res://addons/imgui-godot/ImGuiLayer.tscn` and set its `Config` property.
+If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the
+scene `res://addons/imgui-godot/Config.tscn`, select the `Config` node, and set its `Config`
+property.
 
 ### Widgets
 
-These methods should only be called within `_Process` or an `ImGuiLayout` callback.
+These methods should only be called within `_Process` or an `imgui_layout` callback.
 
 `Image` and `ImageButton` are simple wrappers for your convenience.
 
@@ -91,14 +109,15 @@ ImGui.End();
 
 ## Package managers
 
-[GodotEnv](https://github.com/chickensoft-games/GodotEnv/) is a dotnet tool that can manage Godot addons with just a little configuration. Use something like:
+If you only need C# support (no GDExtension), you can use [GodotEnv](https://github.com/chickensoft-games/GodotEnv/)
+to install and update imgui-godot. The configuration should be something like:
 
 ```json
 {
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "4.x",
+      "checkout": "5.x",
       "subfolder": "addons/imgui-godot"
     }
   }

@@ -19,7 +19,7 @@ public partial class MySecondNode : Node
     private static bool _fontLoaded = false;
     private static readonly System.Numerics.Vector4 MyTextColor = Colors.Aquamarine.ToVector4();
 
-    private static readonly ImGuiWindowFlags CsWinFlags =
+    private const ImGuiWindowFlags CsWinFlags =
         ImGuiWindowFlags.NoDecoration |
         ImGuiWindowFlags.AlwaysAutoResize |
         ImGuiWindowFlags.NoSavedSettings |
@@ -42,8 +42,9 @@ public partial class MySecondNode : Node
 
             // use Hack for the default glyphs, M+2 for Japanese
             ImGuiGD.AddFont(GD.Load<FontFile>("res://data/Hack-Regular.ttf"), 18);
-            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 22,
-                merge: true);
+            ImGuiGD.AddFont(GD.Load<FontFile>("res://data/MPLUS2-Regular.ttf"), 24,
+                merge: true,
+                glyphRanges: ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             ImGuiGD.AddFontDefault();
             ImGuiGD.RebuildFontAtlas();
@@ -58,7 +59,7 @@ public partial class MySecondNode : Node
 
     public override void _Ready()
     {
-        ImGuiLayer.Connect(OnImGuiLayout);
+        ImGuiGD.Connect(OnImGuiLayout);
         _iconTexture = GD.Load<Texture2D>("res://data/icon.svg");
         _atlasTexture = GD.Load<AtlasTexture>("res://data/robot_eye.tres");
         _vp = GetNode<SubViewport>("%SubViewport");
@@ -155,8 +156,8 @@ public partial class MySecondNode : Node
 
     private void OnShowHidePressed()
     {
-        ImGuiLayer.Instance.Visible = !ImGuiLayer.Instance.Visible;
-        GetNode<Button>("%ShowHideButton").Text = ImGuiLayer.Instance.Visible
+        ImGuiGD.Visible = !ImGuiGD.Visible;
+        GetNode<Button>("%ShowHideButton").Text = ImGuiGD.Visible
             ? "hide" : "show";
     }
 

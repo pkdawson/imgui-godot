@@ -1,7 +1,5 @@
 using Godot;
 #if GODOT_PC
-using ImGuiNET;
-using System;
 
 namespace ImGuiGodot;
 
@@ -9,161 +7,117 @@ public partial class ImGuiLayer : CanvasLayer
 {
     public static ImGuiLayer Instance { get; private set; } = null!;
 
-    [Export(PropertyHint.ResourceType, "ImGuiConfig")]
-    public GodotObject Config = null!;
-
     private Window _window = null!;
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
-    private Rid _ci;
+    private Rid _canvasItem;
     private Transform2D _finalTransform = Transform2D.Identity;
-    private UpdateFirst _updateFirst = null!;
-    private bool _headless = false;
+    private ImGuiLayerHelper _helper = null!;
+    private bool _visible = true;
     public Node Signaler { get; private set; } = null!;
 
-    private sealed partial class UpdateFirst : Node
+    private sealed partial class ImGuiLayerHelper : Node
     {
-        private uint _counter = 0;
-        private ImGuiLayer _parent = null!;
         private Window _window = null!;
 
         public override void _Ready()
         {
-            _parent = (ImGuiLayer)GetParent();
+            Name = "ImGuiLayerHelper";
+            ProcessPriority = int.MinValue;
+            ProcessMode = ProcessModeEnum.Always;
             _window = GetWindow();
-            _parent.VisibilityChanged += OnChangeVisibility;
-            OnChangeVisibility();
-        }
-
-        public override void _PhysicsProcess(double delta)
-        {
-            // call NewFrame occasionally if GUI isn't visible, to prevent leaks
-            if (unchecked(_counter++) % 60 == 0)
-                ImGui.NewFrame();
         }
 
         public override void _Process(double delta)
         {
-            ImGuiGD.Update(delta, _window.Size);
-        }
-
-        private void OnChangeVisibility()
-        {
-            _counter = 0;
-            bool vis = _parent.Visible;
-            SetProcess(vis);
-            SetPhysicsProcess(!vis);
+            Internal.State.Instance.Update(delta, _window.Size);
         }
     }
 
     public override void _EnterTree()
     {
         Instance = this;
-        _headless = DisplayServer.GetName() == "headless";
         _window = GetWindow();
 
         CheckContentScale();
 
-        ProcessPriority = int.MaxValue;
-        VisibilityChanged += OnChangeVisibility;
+        _subViewportRid = AddLayerSubViewport(this);
+        _canvasItem = RenderingServer.CanvasItemCreate();
+        RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
 
-        _subViewportRid = Internal.Util.AddLayerSubViewport(this);
-        _ci = RenderingServer.CanvasItemCreate();
-        RenderingServer.CanvasItemSetParent(_ci, GetCanvas());
+        Node cfgScene = ResourceLoader.Load<PackedScene>("res://addons/imgui-godot/Config.tscn")
+            .Instantiate();
+        Resource cfg = (Resource)cfgScene.Get("Config") ?? (Resource)((GDScript)GD.Load(
+            "res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
+        cfgScene.Free();
 
-        Resource cfg = Config as Resource ?? (Resource)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
         Layer = (int)cfg.Get("Layer");
 
-        ImGuiGD.ScaleToDpi = (bool)cfg.Get("ScaleToDpi");
-        ImGuiGD.Init(_window, _subViewportRid, (float)cfg.Get("Scale"),
-            _headless ? RendererType.Dummy : Enum.Parse<RendererType>((string)cfg.Get("Renderer")));
+        Internal.State.Init(_window, _subViewportRid, cfg);
 
-        ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
+        _helper = new ImGuiLayerHelper();
+        AddChild(_helper);
 
-        var fonts = (Godot.Collections.Array)cfg.Get("Fonts");
-        bool merge = (bool)cfg.Get("MergeFonts");
-
-        for (int i = 0; i < fonts.Count; ++i)
-        {
-            var fontres = (Resource)fonts[i];
-            var font = (FontFile)fontres.Get("FontData");
-            int fontSize = (int)fontres.Get("FontSize");
-            if (i == 0)
-                ImGuiGD.AddFont(font, fontSize);
-            else
-                ImGuiGD.AddFont(font, fontSize, merge);
-        }
-        if ((bool)cfg.Get("AddDefaultFont"))
-        {
-            ImGuiGD.AddFontDefault();
-        }
-        ImGuiGD.RebuildFontAtlas();
-
-        _updateFirst = new UpdateFirst
-        {
-            Name = "ImGuiLayer_UpdateFirst",
-            ProcessPriority = int.MinValue,
-            ProcessMode = ProcessModeEnum.Always,
-        };
-        AddChild(_updateFirst);
-
-        Signaler = (Node)((GDScript)GD.Load("res://addons/imgui-godot/scripts/ImGuiSignaler.gd")).New();
-        Signaler.Name = "Signaler";
-        AddChild(Signaler);
+        Signaler = GetParent();
     }
 
     public override void _Ready()
     {
+        ProcessPriority = int.MaxValue;
+        VisibilityChanged += OnChangeVisibility;
         OnChangeVisibility();
     }
 
     public override void _ExitTree()
     {
-        ImGuiGD.Shutdown();
-        RenderingServer.FreeRid(_ci);
+        Internal.State.Instance.Dispose();
+        RenderingServer.FreeRid(_canvasItem);
         RenderingServer.FreeRid(_subViewportRid);
     }
 
     private void OnChangeVisibility()
     {
-        if (Visible)
+        _visible = Visible;
+        if (_visible)
         {
-            ProcessMode = ProcessModeEnum.Always;
+            SetProcessInput(true);
         }
         else
         {
-            ProcessMode = ProcessModeEnum.Disabled;
+            SetProcessInput(false);
             Internal.State.Instance.Renderer.OnHide();
             _subViewportSize = Vector2I.Zero;
-            RenderingServer.CanvasItemClear(_ci);
-            CallDeferred(nameof(FinishHide));
+            RenderingServer.CanvasItemClear(_canvasItem);
         }
-    }
-
-    private static void FinishHide()
-    {
-        ImGui.NewFrame();
-        ImGuiGD.Render();
     }
 
     public override void _Process(double delta)
     {
-        var winSize = _window.Size;
-        var ft = _window.GetFinalTransform();
-        if (_subViewportSize != winSize || _finalTransform != ft)
+        if (_visible)
         {
-            // this is more or less how SubViewportContainer works
-            _subViewportSize = winSize;
-            _finalTransform = ft;
-            RenderingServer.ViewportSetSize(_subViewportRid, _subViewportSize.X, _subViewportSize.Y);
-            Rid vptex = RenderingServer.ViewportGetTexture(_subViewportRid);
-            RenderingServer.CanvasItemClear(_ci);
-            RenderingServer.CanvasItemSetTransform(_ci, ft.AffineInverse());
-            RenderingServer.CanvasItemAddTextureRect(_ci, new(0, 0, _subViewportSize.X, _subViewportSize.Y), vptex);
-        }
+            var winSize = _window.Size;
+            var ft = _window.GetFinalTransform();
+            if (_subViewportSize != winSize || _finalTransform != ft)
+            {
+                // this is more or less how SubViewportContainer works
+                _subViewportSize = winSize;
+                _finalTransform = ft;
+                RenderingServer.ViewportSetSize(
+                    _subViewportRid,
+                    _subViewportSize.X,
+                    _subViewportSize.Y);
+                Rid vptex = RenderingServer.ViewportGetTexture(_subViewportRid);
+                RenderingServer.CanvasItemClear(_canvasItem);
+                RenderingServer.CanvasItemSetTransform(_canvasItem, ft.AffineInverse());
+                RenderingServer.CanvasItemAddTextureRect(
+                    _canvasItem,
+                    new(0, 0, _subViewportSize.X, _subViewportSize.Y),
+                    vptex);
+            }
 
-        Signaler.EmitSignal("imgui_layout");
-        ImGuiGD.Render();
+            Signaler.EmitSignal("imgui_layout");
+        }
+        Internal.State.Instance.Render();
     }
 
     public override void _Notification(int what)
@@ -171,42 +125,31 @@ public partial class ImGuiLayer : CanvasLayer
         Internal.Input.ProcessNotification(what);
     }
 
-    public override void _Input(InputEvent e)
+    public override void _Input(InputEvent @event)
     {
-        if (ImGuiGD.ProcessInput(e, _window))
+        if (Internal.State.Instance.ProcessInput(@event, _window))
         {
             _window.SetInputAsHandled();
         }
     }
 
-    public static void Connect(Callable callable)
+    private static Rid AddLayerSubViewport(Node parent)
     {
-        Instance?.Signaler.Connect("imgui_layout", callable);
-    }
-
-    public static void Connect(Action action)
-    {
-        Connect(Callable.From(action));
+        Rid svp = RenderingServer.ViewportCreate();
+        RenderingServer.ViewportSetTransparentBackground(svp, true);
+        RenderingServer.ViewportSetUpdateMode(svp, RenderingServer.ViewportUpdateMode.Always);
+        RenderingServer.ViewportSetClearMode(svp, RenderingServer.ViewportClearMode.Always);
+        RenderingServer.ViewportSetActive(svp, true);
+        RenderingServer.ViewportSetParentViewport(svp, parent.GetWindow().GetViewportRid());
+        return svp;
     }
 
     private void CheckContentScale()
     {
-        switch (_window.ContentScaleMode)
+        if (_window.ContentScaleMode == Window.ContentScaleModeEnum.Viewport)
         {
-            case Window.ContentScaleModeEnum.Disabled:
-            case Window.ContentScaleModeEnum.CanvasItems:
-                break;
-            case Window.ContentScaleModeEnum.Viewport:
-                PrintErrContentScale();
-                break;
+            GD.PrintErr("imgui-godot: scale mode `viewport` is unsupported");
         }
-    }
-
-    private void PrintErrContentScale()
-    {
-        GD.PrintErr($"imgui-godot only supports content scale modes {Window.ContentScaleModeEnum.Disabled}" +
-            $" or {Window.ContentScaleModeEnum.CanvasItems}");
-        GD.PrintErr($"  current mode is {_window.ContentScaleMode}/{_window.ContentScaleAspect}");
     }
 }
 #else

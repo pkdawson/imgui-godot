@@ -1,4 +1,5 @@
 #if GODOT_PC
+#nullable enable
 using Godot;
 using ImGuiNET;
 using System;
@@ -16,8 +17,9 @@ internal sealed class Fonts
         public FontFile? Font { get; init; }
         public int FontSize { get; init; }
         public bool Merge { get; init; }
+        public ushort[]? Ranges { get; init; }
     }
-    private readonly List<FontParams> _fontConfiguration = new();
+    private readonly List<FontParams> _fontConfiguration = [];
 
     public Fonts()
     {
@@ -32,20 +34,30 @@ internal sealed class Fonts
         _fontConfiguration.Clear();
     }
 
-    public void AddFont(FontFile? fontData, int fontSize, bool merge)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge, ushort[]? ranges)
     {
-        _fontConfiguration.Add(new FontParams { Font = fontData, FontSize = fontSize, Merge = merge });
+        _fontConfiguration.Add(
+            new FontParams
+            {
+                Font = fontData,
+                FontSize = fontSize,
+                Merge = merge,
+                Ranges = ranges
+            });
     }
 
-    private static unsafe void AddFontToAtlas(FontFile? fontData, int fontSize, bool merge)
+    private static unsafe void AddFontToAtlas(FontParams fp, float scale)
     {
+        var io = ImGui.GetIO();
+        int fontSize = (int)(fp.FontSize * scale);
         ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
-        if (merge)
+
+        if (fp.Merge)
         {
             fc->MergeMode = 1;
         }
 
-        if (fontData == null)
+        if (fp.Font == null)
         {
             // default font
             var fcptr = new ImFontConfigPtr(fc)
@@ -55,34 +67,44 @@ internal sealed class Fonts
                 OversampleV = 1,
                 PixelSnapH = true
             };
-            ImGui.GetIO().Fonts.AddFontDefault(fc);
+            io.Fonts.AddFontDefault(fc);
         }
         else
         {
-            ImVector ranges = GetRanges(fontData);
-            string name = $"{System.IO.Path.GetFileName(fontData.ResourcePath)}, {fontSize}px";
+            string name = $"{System.IO.Path.GetFileName(fp.Font.ResourcePath)}, {fontSize}px";
             for (int i = 0; i < name.Length && i < 40; ++i)
             {
                 fc->Name[i] = Convert.ToByte(name[i]);
             }
 
-            int len = fontData.Data.Length;
+            int len = fp.Font.Data.Length;
             // let ImGui manage this memory
             IntPtr p = ImGui.MemAlloc((uint)len);
-            Marshal.Copy(fontData.Data, 0, p, len);
-            ImGui.GetIO().Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
+            Marshal.Copy(fp.Font.Data, 0, p, len);
+            if (fp.Ranges == null)
+            {
+                ImVector ranges = GetRanges(fp.Font);
+                io.Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
+            }
+            else
+            {
+                fixed (ushort* pranges = fp.Ranges)
+                {
+                    io.Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, (nint)pranges);
+                }
+            }
         }
 
-        if (merge)
-        {
-            ImGui.GetIO().Fonts.Build();
-        }
+        if (fp.Merge)
+            io.Fonts.Build();
+
         ImGuiNative.ImFontConfig_destroy(fc);
     }
 
     private static unsafe ImVector GetRanges(Font font)
     {
-        var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+        var builder = new ImFontGlyphRangesBuilderPtr(
+            ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
         builder.AddText(font.GetSupportedChars());
         builder.BuildRanges(out ImVector vec);
         builder.Destroy();
@@ -127,6 +149,8 @@ internal sealed class Fonts
     {
         var io = ImGui.GetIO();
         int fontIndex = -1;
+
+        // save current font index
         if (io.NativePtr->FontDefault != null)
         {
             for (int i = 0; i < io.Fonts.Fonts.Size; ++i)
@@ -143,21 +167,25 @@ internal sealed class Fonts
 
         foreach (var fontParams in _fontConfiguration)
         {
-            AddFontToAtlas(fontParams.Font, (int)(fontParams.FontSize * scale), fontParams.Merge);
+            AddFontToAtlas(fontParams, scale);
         }
 
-        io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
+        io.Fonts.GetTexDataAsRGBA32(
+            out byte* pixelData,
+            out int width,
+            out int height,
+            out int bytesPerPixel);
 
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
 
         var img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
-        var imgtex = ImageTexture.CreateFromImage(img);
-        _fontTexture = imgtex;
+        _fontTexture = ImageTexture.CreateFromImage(img);
         io.Fonts.SetTexID((IntPtr)_fontTexture.GetRid().Id);
         io.Fonts.ClearTexData();
 
+        // maintain selected font when rescaling
         if (fontIndex != -1 && fontIndex < io.Fonts.Fonts.Size)
         {
             io.NativePtr->FontDefault = io.Fonts.Fonts[fontIndex].NativePtr;

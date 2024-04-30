@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cyyuaskyox3eb"]
+
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiConfigNode.gd" id="1_ac7kg"]
+
+[node name="Config" type="Node"]
+script = ExtResource("1_ac7kg")

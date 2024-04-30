@@ -12,25 +12,16 @@ internal static class Util
 
     static Util()
     {
-        ConstructorInfo cinfo = typeof(Rid).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(ulong) }) ??
+        ConstructorInfo cinfo = typeof(Rid).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            [typeof(ulong)]) ??
             throw new PlatformNotSupportedException("failed to get Rid constructor");
-        DynamicMethod dm = new("ConstructRid", typeof(Rid), new[] { typeof(ulong) });
+        DynamicMethod dm = new("ConstructRid", typeof(Rid), [typeof(ulong)]);
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Newobj, cinfo);
         il.Emit(OpCodes.Ret);
         ConstructRid = dm.CreateDelegate<Func<ulong, Rid>>();
-    }
-
-    public static Rid AddLayerSubViewport(Node parent)
-    {
-        Rid svp = RenderingServer.ViewportCreate();
-        RenderingServer.ViewportSetTransparentBackground(svp, true);
-        RenderingServer.ViewportSetUpdateMode(svp, RenderingServer.ViewportUpdateMode.Always);
-        RenderingServer.ViewportSetClearMode(svp, RenderingServer.ViewportClearMode.Always);
-        RenderingServer.ViewportSetActive(svp, true);
-        RenderingServer.ViewportSetParentViewport(svp, parent.GetWindow().GetViewportRid());
-        return svp;
     }
 }
 #endif

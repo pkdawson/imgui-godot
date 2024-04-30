@@ -8,35 +8,33 @@ on:
     branches-ignore:
       - godot3
 
-env:
-  gdver: "4.0.4-stable"
-
 jobs:
   export_game:
     name: Run with Godot
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        gdver: ["4.2.2", "4.3.0-dev.5"]
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Download Godot
         run: |
-          cd $HOME
-          wget https://github.com/godotengine/godot/releases/download/${{ env.gdver }}/Godot_v${{ env.gdver }}_mono_linux_x86_64.zip
-          unzip Godot_v${{ env.gdver }}_mono_linux_x86_64.zip
+          dotnet tool install --global Chickensoft.GodotEnv
+          godotenv godot install ${{ matrix.gdver }}
 
       - name: Import resources and build
         run: |
-          export gdbin=$HOME/Godot_v${{ env.gdver }}_mono_linux_x86_64/Godot_v${{ env.gdver }}_mono_linux.x86_64
-          $gdbin --headless --build-solutions --quit
+          $(godotenv godot env path) --headless --build-solutions --quit
 
       # TODO: run tests with the exported binary
       - name: Test
         run: |
-          export gdbin=$HOME/Godot_v${{ env.gdver }}_mono_linux_x86_64/Godot_v${{ env.gdver }}_mono_linux.x86_64
-          $gdbin --headless --quit
+          $(godotenv godot env path) --headless --quit

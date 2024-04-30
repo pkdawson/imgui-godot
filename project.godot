@@ -18,7 +18,7 @@ config/icon="res://data/icon.svg"
 
 [autoload]
 
-ImGuiLayer="*res://addons/imgui-godot/ImGuiLayer.tscn"
+ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
 
 [display]
 

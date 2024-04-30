@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+from glob import glob
+from pathlib import Path
+import os
+import shutil
+import subprocess
+import SCons
+import sys
+
+
+class CustomCacheDir(SCons.CacheDir.CacheDir):
+    @classmethod
+    def copy_to_cache(cls, env, src, dst) -> str:
+        fn = str(src)
+        if fn.startswith("godot-cpp"):
+            if os.path.splitext(fn)[1] not in [".lib", ".dll", ".exp", ".a", ".so"]:
+                return super().copy_to_cache(env, src, dst)
+        return None
+
+
+env = SConscript("godot-cpp/SConstruct")
+env.CacheDir("scons_cache", CustomCacheDir)
+env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""', "IGN_EXPORT"])
+env.Append(CPPPATH=["src/", "imgui/", "include/", "gen/"])
+env.Replace(CXXFLAGS=str(env["CXXFLAGS"]).replace("c++17", "c++20"))
+
+windows = env["platform"] == "windows"
+linux = env["platform"] == "linux"
+config = "release" if env["target"] == "template_release" else "debug"
+
+if config == "release":
+    if windows:
+        env.Append(CPPDEFINES=["NDEBUG"])
+
+if windows:
+    triplet = "x64-windows-static"
+    if not os.path.exists("vcpkg_installed"):
+        subprocess.call(f"%VCPKG_ROOT%/vcpkg install --triplet {triplet}", shell=True)
+elif linux:
+    triplet = "x64-linux"
+    if not os.path.exists("vcpkg_installed"):
+        subprocess.call("$VCPKG_ROOT/vcpkg install", shell=True)
+else:
+    triplet = "arm64-osx"
+    if not os.path.exists("vcpkg_installed"):
+        if subprocess.call("zsh scripts/vcpkg-macos.sh", shell=True) != 0:
+            sys.exit(1)
+
+if not os.path.exists("gen/imgui_bindings.gen.h"):
+    subprocess.call("python scripts/gds_bindings.py", shell=True)
+
+sources = Glob("src/*.cpp") + Glob("imgui/*.cpp") + Glob("gen/*.cpp")
+
+shutil.copy("imgui-godot-native.gdextension", "../addons/imgui-godot/")
+(extension_path,) = glob("../addons/imgui-godot/*.gdextension")
+addon_path = Path(extension_path).parent
+project_name = Path(extension_path).stem
+
+libpath = env.get("LIBPATH", [])
+libs = [env["LIBS"]]
+
+env.Append(CPPPATH=["imgui/misc/freetype/"])
+env.Append(CPPPATH=[f"vcpkg_installed/{triplet}/include"])
+env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE"])
+# env.Append(CPPDEFINES=["IMGUI_ENABLE_FREETYPE_LUNASVG"])
+sources += Glob("imgui/misc/freetype/*.cpp")
+libpath += [f"vcpkg_installed/{triplet}/lib"]
+libs += [
+    "freetype",
+    # "lunasvg",
+    "bz2",
+    "libpng16" if windows else "png16",
+    "zlib" if windows else "z",
+    "brotlidec",
+    "brotlicommon",
+]
+
+if env["platform"] == "macos":
+    library = env.SharedLibrary(
+        "{0}/bin/lib{1}.{2}.{3}.framework/{1}.{2}.{3}".format(
+            addon_path,
+            project_name,
+            env["platform"],
+            config,
+        ),
+        source=sources,
+        LIBPATH=libpath,
+        LIBS=libs,
+    )
+else:
+    library = env.SharedLibrary(
+        "{}/bin/lib{}.{}.{}.{}{}".format(
+            addon_path,
+            project_name,
+            env["platform"],
+            config,
+            env["arch"],
+            env["SHLIBSUFFIX"],
+        ),
+        source=sources,
+        LIBPATH=libpath,
+        LIBS=libs,
+    )
+
+Default(library)

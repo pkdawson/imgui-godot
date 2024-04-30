@@ -1,16 +1,11 @@
 #if GODOT_PC
 using Godot;
-using ImGuiNET;
 
 namespace ImGuiGodot.Internal;
 
 internal sealed class DummyRenderer : IRenderer
 {
     public string Name => "godot4_net_dummy";
-
-    public void Init(ImGuiIOPtr io)
-    {
-    }
 
     public void InitViewport(Rid vprid)
     {
@@ -24,11 +19,11 @@ internal sealed class DummyRenderer : IRenderer
     {
     }
 
-    public void RenderDrawData()
+    public void Render()
     {
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
     }
 }

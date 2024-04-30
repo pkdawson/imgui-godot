@@ -8,44 +8,43 @@ using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class RdRendererException : ApplicationException
+internal sealed class RdRendererException(string message) : ApplicationException(message)
 {
-    public RdRendererException(string message) : base(message)
-    {
-    }
 }
 
 internal class RdRenderer : IRenderer
 {
     protected readonly RenderingDevice RD;
-    private readonly Color[] _clearColors = { new(0f, 0f, 0f, 0f) };
+    private readonly Color[] _clearColors = [new(0f, 0f, 0f, 0f)];
     private readonly Rid _shader;
     private readonly Rid _pipeline;
     private readonly Rid _sampler;
     private readonly long _vtxFormat;
-    private readonly Dictionary<Rid, Rid> _framebuffers = new();
+    private readonly Dictionary<Rid, Rid> _framebuffers = [];
     private readonly float[] _scale = new float[2];
     private readonly float[] _translate = new float[2];
     private readonly byte[] _pcbuf = new byte[16];
     private readonly ArrayPool<byte> _bufPool = ArrayPool<byte>.Create();
 
     private Rid _idxBuffer;
-    private int _idxBufferSize = 0; // size in indices
+    /// <summary>
+    /// size in indices
+    /// </summary>
+    private int _idxBufferSize = 0;
     private Rid _vtxBuffer;
-    private int _vtxBufferSize = 0; // size in vertices
+    /// <summary>
+    /// size in vertices
+    /// </summary>
+    private int _vtxBufferSize = 0;
 
     private readonly Dictionary<IntPtr, Rid> _uniformSets = new(8);
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
-#if GODOT4_1_OR_GREATER
-    private readonly Godot.Collections.Array<Rid> _storageTextures = new();
-#else
-    private readonly Godot.Collections.Array _storageTextures = new();
-#endif
-    private readonly Godot.Collections.Array<Rid> _srcBuffers = new();
+    private readonly Godot.Collections.Array<Rid> _storageTextures = [];
+    private readonly Godot.Collections.Array<Rid> _srcBuffers = [];
     private readonly long[] _vtxOffsets = new long[3];
-    private readonly Godot.Collections.Array<RDUniform> _uniformArray = new();
+    private readonly Godot.Collections.Array<RDUniform> _uniformArray = [];
 
     public string Name => "godot4_net_rd";
 
@@ -57,7 +56,8 @@ internal class RdRenderer : IRenderer
 
         // set up everything to match the official Vulkan backend as closely as possible
 
-        using var shaderFile = ResourceLoader.Load<RDShaderFile>("res://addons/imgui-godot/data/ImGuiShader.glsl");
+        using var shaderFile = ResourceLoader.Load<RDShaderFile>(
+            "res://addons/imgui-godot/data/ImGuiShader.glsl");
         _shader = RD.ShaderCreateFromSpirV(shaderFile.GetSpirV());
         if (!_shader.IsValid)
             throw new RdRendererException("failed to create shader");
@@ -89,7 +89,10 @@ internal class RdRenderer : IRenderer
             Offset = sizeof(float) * 4
         };
 
-        var vattrs = new Godot.Collections.Array<RDVertexAttribute>() { attrPoints, attrUvs, attrColors };
+        var vattrs = new Godot.Collections.Array<RDVertexAttribute>() {
+            attrPoints,
+            attrUvs,
+            attrColors };
         _vtxFormat = RD.VertexFormatCreate(vattrs);
 
         // blend state
@@ -150,15 +153,8 @@ internal class RdRenderer : IRenderer
         _uniformArray.Resize(1);
     }
 
-    public void Init(ImGuiIOPtr io)
-    {
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-    }
-
     public void InitViewport(Rid vprid)
     {
-        //RenderingServer.ViewportSetUpdateMode(vprid, RenderingServer.ViewportUpdateMode.Disabled);
         RenderingServer.ViewportSetClearMode(vprid, RenderingServer.ViewportClearMode.Never);
     }
 
@@ -172,11 +168,12 @@ internal class RdRenderer : IRenderer
         int globalIdxOffset = 0;
         int globalVtxOffset = 0;
 
-        // set up buffers
         int idxBufSize = drawData.TotalIdxCount * sizeof(ushort);
         byte[] idxBuf = _bufPool.Rent(idxBufSize);
+
         int vertBufSize = drawData.TotalVtxCount * vertSize;
         byte[] vertBuf = _bufPool.Rent(vertBufSize);
+
         for (int i = 0; i < drawData.CmdLists.Size; ++i)
         {
             ImDrawListPtr cmdList = drawData.CmdLists[i];
@@ -211,8 +208,7 @@ internal class RdRenderer : IRenderer
                     uniform.AddId(_sampler);
                     uniform.AddId(texrid);
                     _uniformArray[0] = uniform;
-                    Rid uniformSet = RD.UniformSetCreate(_uniformArray, _shader, 0);
-                    _uniformSets[texid] = uniformSet;
+                    _uniformSets[texid] = RD.UniformSetCreate(_uniformArray, _shader, 0);
                 }
             }
         }
@@ -230,7 +226,8 @@ internal class RdRenderer : IRenderer
             for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; ++cmdi)
             {
                 ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
-                drawCmd.TextureId = (IntPtr)RenderingServer.TextureGetRdTexture(Util.ConstructRid((ulong)drawCmd.TextureId)).Id;
+                drawCmd.TextureId = (IntPtr)RenderingServer.TextureGetRdTexture(
+                    Util.ConstructRid((ulong)drawCmd.TextureId)).Id;
             }
         }
     }
@@ -249,7 +246,7 @@ internal class RdRenderer : IRenderer
         _usedTextures.Clear();
     }
 
-    public void RenderDrawData()
+    public void Render()
     {
         var pio = ImGui.GetPlatformIO();
         for (int i = 0; i < pio.Viewports.Size; ++i)
@@ -290,7 +287,9 @@ internal class RdRenderer : IRenderer
         {
             if (_idxBuffer.Id != 0)
                 RD.FreeRid(_idxBuffer);
-            _idxBuffer = RD.IndexBufferCreate((uint)drawData.TotalIdxCount, RenderingDevice.IndexBufferFormat.Uint16);
+            _idxBuffer = RD.IndexBufferCreate(
+                (uint)drawData.TotalIdxCount,
+                RenderingDevice.IndexBufferFormat.Uint16);
             _idxBufferSize = drawData.TotalIdxCount;
         }
 
@@ -384,7 +383,7 @@ internal class RdRenderer : IRenderer
     {
     }
 
-    public void Shutdown()
+    public void Dispose()
     {
         RD.FreeRid(_sampler);
         RD.FreeRid(_shader);
@@ -406,7 +405,7 @@ internal class RdRenderer : IRenderer
         }
 
         Rid vptex = RenderingServer.TextureGetRdTexture(RenderingServer.ViewportGetTexture(vprid));
-        fb = RD.FramebufferCreate(new() { vptex });
+        fb = RD.FramebufferCreate([vptex]);
         _framebuffers[vprid] = fb;
         return fb;
     }

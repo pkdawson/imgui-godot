@@ -1,11 +1,13 @@
 #if GODOT_PC
+#nullable enable
 using Godot;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-using SharedList = ImGuiGodot.Internal.DisposableList<Godot.Rid, ImGuiGodot.Internal.ClonedDrawData>;
+using SharedList = ImGuiGodot.Internal.DisposableList<Godot.Rid,
+    ImGuiGodot.Internal.ClonedDrawData>;
 
 namespace ImGuiGodot.Internal;
 
@@ -50,7 +52,7 @@ internal sealed class ClonedDrawData : IDisposable
 
 internal sealed class DisposableList<T, U> : List<Tuple<T, U>>, IDisposable where U : IDisposable
 {
-    public DisposableList() : base() { }
+    public DisposableList() { }
     public DisposableList(int capacity) : base(capacity) { }
 
     public void Dispose()
@@ -70,7 +72,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
     private readonly object _sharedDataLock = new();
     private SharedList? _dataToDraw;
 
-    public RdRendererThreadSafe() : base()
+    public RdRendererThreadSafe()
     {
         // draw on the renderer thread to avoid conflicts
         RenderingServer.FramePreDraw += OnFramePreDraw;
@@ -81,7 +83,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         RenderingServer.FramePreDraw -= OnFramePreDraw;
     }
 
-    public new void RenderDrawData()
+    public new void Render()
     {
         var pio = ImGui.GetPlatformIO();
         var newData = new SharedList(pio.Viewports.Size);
@@ -111,7 +113,7 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         {
             var rv = _dataToDraw;
             _dataToDraw = null;
-            return rv ?? new();
+            return rv ?? [];
         }
     }
 

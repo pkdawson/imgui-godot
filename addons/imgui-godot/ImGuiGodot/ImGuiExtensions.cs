@@ -1,3 +1,4 @@
+#if GODOT_PC
 using Godot;
 using ImGuiNET;
 using Vector3 = System.Numerics.Vector3;
@@ -63,3 +64,4 @@ public static class ImGuiExtensions
         Internal.State.Instance.SetIniFilename(io, fileName);
     }
 }
+#endif

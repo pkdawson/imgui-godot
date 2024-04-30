@@ -1,4 +1,5 @@
 #if GODOT_PC
+#nullable enable
 using Godot;
 using ImGuiNET;
 using System;
@@ -6,20 +7,16 @@ using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class Input
+internal sealed class Input(Window mainWindow)
 {
+    public float JoyAxisDeadZone { get; set; } = 0.15f;
+    internal SubViewport? PreviousSubViewport { get; set; }
     internal SubViewport? CurrentSubViewport { get; set; }
     internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private Vector2 _mouseWheel = Vector2.Zero;
     private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private readonly Window _mainWindow;
-    private readonly bool _hasMouse;
-
-    public Input(Window mainWindow)
-    {
-        _mainWindow = mainWindow;
-        _hasMouse = DisplayServer.HasFeature(DisplayServer.Feature.Mouse);
-    }
+    private readonly Window _mainWindow = mainWindow;
+    private readonly bool _hasMouse = DisplayServer.HasFeature(DisplayServer.Feature.Mouse);
 
     private void UpdateMouse(ImGuiIOPtr io)
     {
@@ -29,19 +26,17 @@ internal sealed class Input
         {
             if (io.WantSetMousePos)
             {
-#if GODOT4_1_OR_GREATER
                 // WarpMouse is relative to the current focused window
-                int[] windows = DisplayServer.GetWindowList();
-                foreach (int w in windows)
+                foreach (int w in DisplayServer.GetWindowList())
                 {
                     if (DisplayServer.WindowIsFocused(w))
                     {
                         var winPos = DisplayServer.WindowGetPosition(w);
-                        Godot.Input.WarpMouse(new(io.MousePos.X - winPos.X, io.MousePos.Y - winPos.Y));
+                        Godot.Input
+                            .WarpMouse(new(io.MousePos.X - winPos.X, io.MousePos.Y - winPos.Y));
                         break;
                     }
                 }
-#endif
             }
             else
             {
@@ -88,6 +83,7 @@ internal sealed class Input
         if (_hasMouse)
             UpdateMouse(io);
 
+        PreviousSubViewport = CurrentSubViewport;
         CurrentSubViewport = null;
     }
 
@@ -97,6 +93,9 @@ internal sealed class Input
 
         if (CurrentSubViewport != null)
         {
+            if (CurrentSubViewport != PreviousSubViewport)
+                CurrentSubViewport.Notification((int)Node.NotificationVpMouseEnter);
+
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
@@ -111,12 +110,10 @@ internal sealed class Input
                     .Clamp(Vector2.Zero, CurrentSubViewport.Size);
             }
             CurrentSubViewport.PushInput(vpEvent, true);
-#if !GODOT4_1_OR_GREATER
-            if (!CurrentSubViewport.IsInputHandled())
-            {
-                CurrentSubViewport.PushUnhandledInput(vpEvent, true);
-            }
-#endif
+        }
+        else
+        {
+            PreviousSubViewport?.Notification((int)Node.NotificationVpMouseExit);
         }
 
         bool consumed = false;
@@ -132,11 +129,6 @@ internal sealed class Input
             {
                 case MouseButton.Left:
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Left, mb.Pressed);
-#if GODOT_WINDOWS && !GODOT4_1_OR_GREATER
-                    // if the left mouse button is released, the mouse almost certainly should not be captured
-                    if (io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable) && !mb.Pressed)
-                        Viewports.MouseCaptureWorkaround();
-#endif
                     break;
                 case MouseButton.Right:
                     io.AddMouseButtonEvent((int)ImGuiMouseButton.Right, mb.Pressed);
@@ -162,7 +154,7 @@ internal sealed class Input
                 case MouseButton.WheelRight:
                     _mouseWheel.X = mb.Factor;
                     break;
-            };
+            }
             consumed = io.WantCaptureMouse;
             mb.Dispose();
         }
@@ -204,7 +196,7 @@ internal sealed class Input
             {
                 bool pressed = true;
                 float v = jm.AxisValue;
-                if (Math.Abs(v) < ImGuiGD.JoyAxisDeadZone)
+                if (Math.Abs(v) < JoyAxisDeadZone)
                 {
                     v = 0f;
                     pressed = false;
@@ -229,7 +221,7 @@ internal sealed class Input
                     case JoyAxis.TriggerRight:
                         io.AddKeyAnalogEvent(ImGuiKey.GamepadR2, pressed, v);
                         break;
-                };
+                }
                 consumed = true;
                 jm.Dispose();
             }
@@ -248,7 +240,7 @@ internal sealed class Input
             case MainLoop.NotificationApplicationFocusOut:
                 ImGui.GetIO().AddFocusEvent(false);
                 break;
-        };
+        }
     }
 
     private static void UpdateKeyMods(ImGuiIOPtr io)
@@ -278,9 +270,9 @@ internal sealed class Input
         JoyButton.Start => ImGuiKey.GamepadStart,
         JoyButton.Back => ImGuiKey.GamepadBack,
         JoyButton.Y => ImGuiKey.GamepadFaceUp,
-        JoyButton.A => ImGuiGD.JoyButtonSwapAB ? ImGuiKey.GamepadFaceRight : ImGuiKey.GamepadFaceDown,
+        JoyButton.A => ImGuiKey.GamepadFaceDown,
         JoyButton.X => ImGuiKey.GamepadFaceLeft,
-        JoyButton.B => ImGuiGD.JoyButtonSwapAB ? ImGuiKey.GamepadFaceDown : ImGuiKey.GamepadFaceRight,
+        JoyButton.B => ImGuiKey.GamepadFaceRight,
         JoyButton.DpadUp => ImGuiKey.GamepadDpadUp,
         JoyButton.DpadDown => ImGuiKey.GamepadDpadDown,
         JoyButton.DpadLeft => ImGuiKey.GamepadDpadLeft,

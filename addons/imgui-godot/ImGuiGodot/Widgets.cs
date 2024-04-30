@@ -20,22 +20,7 @@ public static class Widgets
     /// </returns>
     public static bool SubViewport(SubViewport vp)
     {
-        Vector2 vpSize = new(vp.Size.X, vp.Size.Y);
-        var pos = ImGui.GetCursorScreenPos();
-        var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
-        ImGui.GetWindowDrawList().AddImage((IntPtr)vp.GetTexture().GetRid().Id, pos, pos_max);
-
-        ImGui.PushID(vp.NativeInstance);
-        ImGui.InvisibleButton("godot_subviewport", vpSize);
-        ImGui.PopID();
-
-        if (ImGui.IsItemHovered())
-        {
-            Internal.State.Instance.Input.CurrentSubViewport = vp;
-            Internal.State.Instance.Input.CurrentSubViewportPos = pos;
-            return true;
-        }
-        return false;
+        return ImGuiGD.SubViewportWidget(vp);
     }
 
     public static void Image(Texture2D tex, Vector2 size)
@@ -53,12 +38,23 @@ public static class Widgets
         Image(tex, size, uv0, uv1, Vector4.One, Vector4.Zero);
     }
 
-    public static void Image(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 tint_col)
+    public static void Image(
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 tint_col)
     {
         Image(tex, size, uv0, uv1, tint_col, Vector4.Zero);
     }
 
-    public static void Image(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 tint_col, Vector4 border_col)
+    public static void Image(
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 tint_col,
+        Vector4 border_col)
     {
         ImGuiNative.igImage((IntPtr)tex.GetRid().Id, size, uv0, uv1, tint_col, border_col);
     }
@@ -89,17 +85,35 @@ public static class Widgets
         return ImageButton(str_id, tex, size, uv0, Vector2.One, Vector4.Zero, Vector4.One);
     }
 
-    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1)
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1)
     {
         return ImageButton(str_id, tex, size, uv0, uv1, Vector4.Zero, Vector4.One);
     }
 
-    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 bg_col)
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 bg_col)
     {
         return ImageButton(str_id, tex, size, uv0, uv1, bg_col, Vector4.One);
     }
 
-    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 bg_col, Vector4 tint_col)
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 bg_col,
+        Vector4 tint_col)
     {
         return ImGui.ImageButton(str_id, (IntPtr)tex.GetRid().Id, size, uv0, uv1, bg_col, tint_col);
     }
@@ -114,7 +128,12 @@ public static class Widgets
         return ImageButton(str_id, tex, size, bg_col, Vector4.One);
     }
 
-    public static bool ImageButton(string str_id, AtlasTexture tex, Vector2 size, Vector4 bg_col, Vector4 tint_col)
+    public static bool ImageButton(
+        string str_id,
+        AtlasTexture tex,
+        Vector2 size,
+        Vector4 bg_col,
+        Vector4 tint_col)
     {
         (Vector2 uv0, Vector2 uv1) = GetAtlasUVs(tex);
         return ImGui.ImageButton(str_id, (IntPtr)tex.GetRid().Id, size, uv0, uv1, bg_col, tint_col);
