@@ -213,6 +213,7 @@ jobs:
           cp -r gdext/include/*.h addons/imgui-godot/include/
           touch addons/imgui-godot/include/.gdignore
           cp gdext/imgui-godot-native.gdextension addons/imgui-godot/
+          git -C gdext/imgui describe > addons/imgui-godot/include/imgui-version.txt
 
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
