@@ -7,7 +7,7 @@ on:
 
 
 env:
-  vcpkg_tag: a34c873a9717a888f58dc05268dea15592c2f0ff # 2024.03.25
+  vcpkg_tag: 943c5ef1c8f6b5e6ced092b242c8299caae2ff01 # 2024.04.26
 
 jobs:
   windows:

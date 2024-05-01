@@ -89,6 +89,7 @@ exclude_funcs = (
     "ImGui_GetColorU32",
     "ImGui_GetColorU32Ex",
     "ImGui_GetColorU32ImU32",
+    "ImGui_GetColorU32ImU32Ex",
     "ImGui_GetColorU32ImVec4",
     "ImGui_GetCurrentContext",
     "ImGui_NewFrame",

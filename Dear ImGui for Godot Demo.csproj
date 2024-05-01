@@ -11,20 +11,20 @@
     <EmbeddedResource Remove="doc\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.12.1">
+    <PackageReference Include="ImGui.NET" Version="1.90.5.1" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.12.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="4.12.1">
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="4.12.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.CodeFixes" Version="4.12.1">
+    <PackageReference Include="Roslynator.CodeFixes" Version="4.12.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.12.1">
+    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.12.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
