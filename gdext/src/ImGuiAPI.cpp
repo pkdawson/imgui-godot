@@ -16,9 +16,9 @@ inline Color ToColor(ImVec4 v)
     return Color(v.x, v.y, v.z, v.w);
 }
 
-std::unordered_map<StringName, std::string> stringname_cache;
 const char* sn_to_cstr(const StringName& sn)
 {
+    static std::unordered_map<StringName, std::string> stringname_cache;
     if (!stringname_cache.contains(sn))
     {
         stringname_cache[sn] = std::string(String(sn).utf8().get_data());

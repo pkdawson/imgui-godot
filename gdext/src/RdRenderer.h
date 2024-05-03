@@ -14,20 +14,13 @@ public:
     RdRenderer();
     virtual ~RdRenderer();
 
-    virtual const char* Name() override
-    {
-        return "godot4_rd";
-    }
+    virtual const char* Name() override { return "godot4_rd"; }
 
     bool Init() override;
     void InitViewport(RID vprid) override;
-    void CloseViewport(RID vprid) override
-    {
-    }
+    void CloseViewport(RID vprid) override {}
     virtual void Render() override;
-    void OnHide() override
-    {
-    }
+    void OnHide() override {}
 
 protected:
     void Render(RID fb, ImDrawData* drawData);

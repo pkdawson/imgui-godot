@@ -6,39 +6,16 @@ namespace ImGui::Godot {
 class DummyRenderer : public Renderer
 {
 public:
-    DummyRenderer()
-    {
-    }
+    DummyRenderer() {}
+    ~DummyRenderer() {}
 
-    ~DummyRenderer()
-    {
-    }
+    const char* Name() override { return "godot4_dummy"; }
 
-    const char* Name() override
-    {
-        return "godot4_dummy";
-    }
-
-    bool Init() override
-    {
-        return true;
-    }
-
-    void InitViewport(RID vprid) override
-    {
-    }
-
-    void CloseViewport(RID vprid) override
-    {
-    }
-
-    void Render() override
-    {
-    }
-
-    void OnHide() override
-    {
-    }
+    bool Init() override { return true; }
+    void InitViewport(RID vprid) override {}
+    void CloseViewport(RID vprid) override {}
+    void Render() override {}
+    void OnHide() override {}
 };
 
 } // namespace ImGui::Godot

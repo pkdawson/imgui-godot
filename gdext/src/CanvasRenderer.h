@@ -14,10 +14,7 @@ public:
     CanvasRenderer();
     virtual ~CanvasRenderer();
 
-    virtual const char* Name() override
-    {
-        return "godot4_canvas";
-    }
+    virtual const char* Name() override { return "godot4_canvas"; }
 
     bool Init() override;
     void InitViewport(RID vprid) override;

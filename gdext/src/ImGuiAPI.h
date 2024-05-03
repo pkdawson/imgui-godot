@@ -29,15 +29,9 @@ struct GdsPtr
         val = arr[0];
     }
 
-    ~GdsPtr()
-    {
-        arr[0] = val;
-    }
+    ~GdsPtr() { arr[0] = val; }
 
-    operator T*()
-    {
-        return &val;
-    }
+    operator T*() { return &val; }
 };
 
 template <>
@@ -60,10 +54,7 @@ struct GdsPtr<String>
         }
     }
 
-    operator char*()
-    {
-        return buf.data();
-    }
+    operator char*() { return buf.data(); }
 };
 
 template <class T>
@@ -88,10 +79,7 @@ struct GdsArray
         }
     }
 
-    operator T*()
-    {
-        return buf.data();
-    }
+    operator T*() { return buf.data(); }
 };
 
 template <>
@@ -118,24 +106,16 @@ struct GdsArray<const char* const>
         }
     }
 
-    operator const char* const*()
-    {
-        return ptrs.data();
-    }
+    operator const char* const*() { return ptrs.data(); }
 };
 
 struct GdsZeroArray
 {
     const std::vector<char>& buf;
 
-    GdsZeroArray(const Array& a) : buf(gdscache->GetZeroArray(a))
-    {
-    }
+    GdsZeroArray(const Array& a) : buf(gdscache->GetZeroArray(a)) {}
 
-    operator const char*()
-    {
-        return buf.data();
-    }
+    operator const char*() { return buf.data(); }
 };
 
 #define VARIANT_CSTR(v) v.get_type() == Variant::STRING ? static_cast<String>(v).utf8().get_data() : nullptr

@@ -10,13 +10,8 @@ namespace ImGui::Godot {
 class Renderer
 {
 public:
-    Renderer()
-    {
-    }
-
-    virtual ~Renderer()
-    {
-    }
+    Renderer() {}
+    virtual ~Renderer() {}
 
     virtual const char* Name() = 0;
 
@@ -25,9 +20,7 @@ public:
     virtual void CloseViewport(RID vprid) = 0;
     virtual void Render() = 0;
     virtual void OnHide() = 0;
-    virtual void OnFramePreDraw()
-    {
-    }
+    virtual void OnFramePreDraw() {}
 };
 
 } // namespace ImGui::Godot

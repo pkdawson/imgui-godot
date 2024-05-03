@@ -14,10 +14,7 @@ public:
     RdRendererThreadSafe();
     virtual ~RdRendererThreadSafe();
 
-    const char* Name() override
-    {
-        return "godot4_rd_mt";
-    }
+    const char* Name() override { return "godot4_rd_mt"; }
 
     void Render() override;
     void OnFramePreDraw() override;

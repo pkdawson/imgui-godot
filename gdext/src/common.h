@@ -25,8 +25,5 @@ inline RID make_rid(ImTextureID id)
 template <>
 struct std::hash<RID>
 {
-    std::size_t operator()(const RID& rid) const noexcept
-    {
-        return std::hash<int64_t>{}(rid.get_id());
-    }
+    std::size_t operator()(const RID& rid) const noexcept { return std::hash<int64_t>{}(rid.get_id()); }
 };

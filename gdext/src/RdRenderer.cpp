@@ -32,7 +32,6 @@ struct RdRenderer::Impl
     RID sampler;
     TypedArray<RID> srcBuffers;
     TypedArray<RDUniform> uniforms;
-    // TypedArray<RID> storageTextures;
     godot::PackedColorArray clearColors;
 
     std::unordered_map<RID, RID> framebuffers;

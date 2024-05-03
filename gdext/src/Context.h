@@ -41,19 +41,11 @@ enum class RendererType
 
 struct Context
 {
-    // Window* mainWindow = nullptr;
     std::unique_ptr<Viewports> viewports;
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Input> input;
     std::unique_ptr<Renderer> renderer;
     float scale = 1.0f;
-
-    // RID svp;
-    // RID ci;
-    // Ref<ImageTexture> fontTexture;
-    // bool headless = false;
-    // int dpiFactor = 1;
-    // bool scaleToDPI = false;
 
     Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Renderer> r);
     ~Context();
@@ -75,7 +67,6 @@ void AddFontDefault();
 void RebuildFontAtlas();
 void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
-bool IsVisible();
 
 bool SubViewportWidget(SubViewport* svp);
 

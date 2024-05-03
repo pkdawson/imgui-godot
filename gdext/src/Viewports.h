@@ -29,15 +29,9 @@ public:
 
     void _input(const Ref<InputEvent>& evt) override;
 
-    void _close_requested()
-    {
-        _vp->PlatformRequestClose = true;
-    }
+    void _close_requested() { _vp->PlatformRequestClose = true; }
 
-    void _size_changed()
-    {
-        _vp->PlatformRequestResize = true;
-    }
+    void _size_changed() { _vp->PlatformRequestResize = true; }
 
 private:
     ImGuiViewport* _vp = nullptr;
