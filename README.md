@@ -135,4 +135,6 @@ Hack font distributed under the [MIT license](https://github.com/source-foundry/
 
 M PLUS 2 font licensed under the SIL Open Font License, Version 1.1.
 
+3D scene demo borrowed from [godot-demo-projects](https://github.com/godotengine/godot-demo-projects/tree/master/viewport/gui_in_3d)
+
 This plugin's functionality relies heavily on [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET) by Eric Mellino

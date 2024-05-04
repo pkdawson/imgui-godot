@@ -31,16 +31,6 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_c7hdb")
 
-[node name="Button1" type="Button" parent="."]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 211.0
-offset_bottom = 69.0
-theme_override_fonts/font = ExtResource("3_fjiyg")
-theme_override_font_sizes/font_size = 24
-text = "Switch scene"
-
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 2
@@ -91,6 +81,36 @@ grow_horizontal = 0
 grow_vertical = 0
 texture = ExtResource("1_c7hdb")
 expand_mode = 1
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 0
+offset_right = 241.0
+offset_bottom = 168.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="Button1" type="Button" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_fjiyg")
+theme_override_font_sizes/font_size = 24
+text = "Widgets"
+
+[node name="Button2" type="Button" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_fjiyg")
+theme_override_font_sizes/font_size = 24
+text = "New Window"
+
+[node name="Button3" type="Button" parent="CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_fjiyg")
+theme_override_font_sizes/font_size = 24
+text = "3D Scene"
 
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonCIE" to="MyNode" method="OnContentScaleCIE"]
 [connection signal="pressed" from="PanelContainer/CenterContainer/VBoxContainer/ButtonD" to="MyNode" method="OnContentScaleDisabled"]

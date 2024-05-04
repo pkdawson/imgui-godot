@@ -78,7 +78,7 @@ public partial class MySecondNode : Node
         ImGui.SetNextWindowPos(new(mainVpPos.X + 10, mainVpPos.Y + 10));
         ImGui.Begin("change scene window", CsWinFlags);
 
-        if (ImGui.Button("change scene"))
+        if (ImGui.Button("back"))
             GetTree().ChangeSceneToFile("res://data/demo.tscn");
 
         ImGui.End();

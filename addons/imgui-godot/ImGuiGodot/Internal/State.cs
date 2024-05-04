@@ -21,15 +21,18 @@ internal sealed class State : IDisposable
 
     internal Viewports Viewports { get; }
     internal Fonts Fonts { get; }
-    internal Input Input { get; }
+    internal Input Input { get; set; }
     internal IRenderer Renderer { get; }
     internal float Scale { get; set; } = 1.0f;
+    internal float JoyAxisDeadZone { get; set; } = 0.15f;
+    internal int Layer { get; private set; } = 128;
+
     internal static State Instance { get; set; } = null!;
 
-    public State(Window mainWindow, Rid mainSubViewport, IRenderer renderer)
+    public State(IRenderer renderer)
     {
         Renderer = renderer;
-        Input = new Input(mainWindow);
+        Input = new Input();
         Fonts = new Fonts();
 
         if (ImGui.GetCurrentContext() != IntPtr.Zero)
@@ -59,7 +62,7 @@ internal sealed class State : IDisposable
             io.NativePtr->BackendRendererName = (byte*)_rendererName;
         }
 
-        Viewports = new Viewports(mainWindow, mainSubViewport);
+        Viewports = new Viewports();
     }
 
     public void Dispose()
@@ -69,7 +72,7 @@ internal sealed class State : IDisposable
         Renderer.Dispose();
     }
 
-    public static void Init(Window mainWindow, Rid mainSubViewport, Resource cfg)
+    public static void Init(Resource cfg)
     {
         if (IntPtr.Size != sizeof(ulong))
             throw new PlatformNotSupportedException("imgui-godot requires 64-bit pointers");
@@ -116,11 +119,11 @@ internal sealed class State : IDisposable
             }
         }
 
-        Instance = new(mainWindow, mainSubViewport, renderer)
+        Instance = new(renderer)
         {
-            Scale = (float)cfg.Get("Scale")
+            Scale = (float)cfg.Get("Scale"),
+            Layer = (int)cfg.Get("Layer")
         };
-        Instance.Renderer.InitViewport(mainSubViewport);
 
         ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));
 
@@ -160,15 +163,14 @@ internal sealed class State : IDisposable
         }
     }
 
-    public void Update(double delta, Vector2 displaySize)
+    public void Update(double delta, System.Numerics.Vector2 displaySize)
     {
         var io = ImGui.GetIO();
-        io.DisplaySize = new(displaySize.X, displaySize.Y);
+        io.DisplaySize = displaySize;
         io.DeltaTime = (float)delta;
 
         Input.Update(io);
 
-        //_inProcessFrame = true;
         ImGui.NewFrame();
     }
 
@@ -177,7 +179,6 @@ internal sealed class State : IDisposable
         ImGui.Render();
         ImGui.UpdatePlatformWindows();
         Renderer.Render();
-        //_inProcessFrame = false;
     }
 
     /// <summary>
@@ -186,9 +187,9 @@ internal sealed class State : IDisposable
     /// <returns>
     /// True if the InputEvent was consumed
     /// </returns>
-    public bool ProcessInput(InputEvent evt, Window window)
+    public bool ProcessInput(InputEvent evt)
     {
-        return Input.ProcessInput(evt, window);
+        return Input.ProcessInput(evt);
     }
 }
 #endif

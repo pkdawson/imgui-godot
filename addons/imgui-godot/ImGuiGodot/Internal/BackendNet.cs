@@ -11,8 +11,8 @@ internal sealed class BackendNet : IBackend
 {
     public float JoyAxisDeadZone
     {
-        get => State.Instance.Input.JoyAxisDeadZone;
-        set => State.Instance.Input.JoyAxisDeadZone = value;
+        get => State.Instance.JoyAxisDeadZone;
+        set => State.Instance.JoyAxisDeadZone = value;
     }
 
     public float Scale
@@ -23,8 +23,12 @@ internal sealed class BackendNet : IBackend
 
     public bool Visible
     {
-        get => ImGuiLayer.Instance.Visible;
-        set => ImGuiLayer.Instance.Visible = value;
+        get => ImGuiLayer.Instance?.Visible ?? false;
+        set
+        {
+            if (ImGuiLayer.Instance != null)
+                ImGuiLayer.Instance!.Visible = value;
+        }
     }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
@@ -39,7 +43,7 @@ internal sealed class BackendNet : IBackend
 
     public void Connect(Callable callable)
     {
-        ImGuiLayer.Instance?.Signaler.Connect("imgui_layout", callable);
+        ImGuiController.Instance?.Signaler.Connect("imgui_layout", callable);
     }
 
     public void RebuildFontAtlas()
@@ -52,6 +56,11 @@ internal sealed class BackendNet : IBackend
     public void ResetFonts()
     {
         State.Instance.Fonts.ResetFonts();
+    }
+
+    public void SetMainViewport(Viewport vp)
+    {
+        ImGuiController.Instance.SetMainViewport(vp);
     }
 
     public bool SubViewportWidget(SubViewport svp)

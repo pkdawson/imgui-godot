@@ -1,4 +1,5 @@
 using Godot;
+using ImGuiGodot;
 using ImGuiNET;
 
 namespace DemoProject;
@@ -10,7 +11,9 @@ public partial class MyNode : Node
     public override void _Ready()
     {
         _window = GetWindow();
-        GetNode<Button>("../Button1").Pressed += OnButton1Pressed;
+        GetNode<Button>("%Button1").Pressed += OnButton1Pressed;
+        GetNode<Button>("%Button2").Pressed += OnButton2Pressed;
+        GetNode<Button>("%Button3").Pressed += OnButton3Pressed;
 
         if (DisplayServer.WindowGetVsyncMode() == DisplayServer.VSyncMode.Disabled)
         {
@@ -29,6 +32,24 @@ public partial class MyNode : Node
     private void OnButton1Pressed()
     {
         GetTree().ChangeSceneToFile("res://data/demo2.tscn");
+    }
+
+    private void OnButton2Pressed()
+    {
+        Window newWindow = new()
+        {
+            Position = new(
+                System.Random.Shared.Next(100, 200),
+                System.Random.Shared.Next(100, 200)),
+            Size = new(640, 480)
+        };
+        newWindow.CloseRequested += newWindow.QueueFree;
+        AddChild(newWindow);
+        ImGuiGD.SetMainViewport(newWindow);
+    }
+    private void OnButton3Pressed()
+    {
+        GetTree().ChangeSceneToFile("res://data/gui_in_3d.tscn");
     }
 
     private void OnContentScaleCIE()

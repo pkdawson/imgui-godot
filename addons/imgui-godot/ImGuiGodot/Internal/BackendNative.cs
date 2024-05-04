@@ -1,6 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
+using System;
 
 namespace ImGuiGodot.Internal;
 
@@ -77,6 +78,10 @@ internal sealed class BackendNative : IBackend
     public void ResetFonts()
     {
         _gd.Call(MethodName.ResetFonts);
+    }
+    public void SetMainViewport(Viewport vp)
+    {
+        throw new NotImplementedException();
     }
 
     public bool SubViewportWidget(SubViewport svp)

@@ -102,6 +102,15 @@ public static class ImGuiGD
     }
 
     /// <summary>
+    /// Changes the main viewport to either a new <see cref="Window"/>
+    /// or a <see cref="SubViewport"/>.
+    /// </summary>
+    public static void SetMainViewport(Viewport vp)
+    {
+        _backend.SetMainViewport(vp);
+    }
+
+    /// <summary>
     /// Must call from a tool script before doing anything else
     /// </summary>
     public static bool ToolInit()

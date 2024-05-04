@@ -14,6 +14,7 @@ internal interface IBackend
     public void AddFontDefault();
     public void RebuildFontAtlas();
     public void Connect(Callable callable);
+    public void SetMainViewport(Viewport vp);
     public bool SubViewportWidget(SubViewport svp);
 }
 #endif

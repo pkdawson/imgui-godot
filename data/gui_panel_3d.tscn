@@ -1,0 +1,66 @@
+[gd_scene load_steps=6 format=3 uid="uid://dvl383ispakmn"]
+
+[ext_resource type="Script" path="res://src/gui_3d.gd" id="1_lsoqm"]
+
+[sub_resource type="QuadMesh" id="1"]
+size = Vector2(3, 2)
+
+[sub_resource type="ViewportTexture" id="2"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="3"]
+resource_local_to_scene = true
+transparency = 1
+shading_mode = 0
+albedo_texture = SubResource("2")
+
+[sub_resource type="BoxShape3D" id="4"]
+size = Vector3(3, 2, 0.1)
+
+[node name="GUIPanel3D" type="Node3D"]
+process_mode = 3
+script = ExtResource("1_lsoqm")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+gui_embed_subwindows = true
+size = Vector2i(560, 360)
+render_target_update_mode = 4
+
+[node name="GUI" type="Control" parent="SubViewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 560.0
+offset_bottom = 360.0
+mouse_filter = 1
+
+[node name="Panel" type="Panel" parent="SubViewport/GUI"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewport/GUI/Panel"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 319.0
+offset_bottom = -20.0
+grow_vertical = 2
+theme_override_constants/separation = 13
+
+[node name="Label" type="Label" parent="SubViewport/GUI/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Hello world!"
+horizontal_alignment = 1
+
+[node name="Quad" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+surface_material_override/0 = SubResource("3")
+
+[node name="Area3D" type="Area3D" parent="Quad"]
+collision_layer = 2
+input_capture_on_drag = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Quad/Area3D"]
+shape = SubResource("4")

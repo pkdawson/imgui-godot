@@ -7,18 +7,16 @@ using CursorShape = Godot.DisplayServer.CursorShape;
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class Input(Window mainWindow)
+internal class Input
 {
-    public float JoyAxisDeadZone { get; set; } = 0.15f;
     internal SubViewport? PreviousSubViewport { get; set; }
     internal SubViewport? CurrentSubViewport { get; set; }
     internal System.Numerics.Vector2 CurrentSubViewportPos { get; set; }
     private Vector2 _mouseWheel = Vector2.Zero;
     private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
-    private readonly Window _mainWindow = mainWindow;
     private readonly bool _hasMouse = DisplayServer.HasFeature(DisplayServer.Feature.Mouse);
 
-    private void UpdateMouse(ImGuiIOPtr io)
+    protected virtual void UpdateMousePos(ImGuiIOPtr io)
     {
         var mousePos = DisplayServer.MouseGetPosition();
 
@@ -51,10 +49,15 @@ internal sealed class Input(Window mainWindow)
             }
             else
             {
-                var winPos = _mainWindow.Position;
+                var winPos = ImGuiLayer.Instance!.GetWindow().Position;
                 io.AddMousePosEvent(mousePos.X - winPos.X, mousePos.Y - winPos.Y);
             }
         }
+    }
+
+    private void UpdateMouse(ImGuiIOPtr io)
+    {
+        UpdateMousePos(io);
 
         // scrolling works better if we allow no more than one event per frame
         if (_mouseWheel != Vector2.Zero)
@@ -87,10 +90,8 @@ internal sealed class Input(Window mainWindow)
         CurrentSubViewport = null;
     }
 
-    public bool ProcessInput(InputEvent evt, Window window)
+    protected void ProcessSubViewportWidget(InputEvent evt)
     {
-        var io = ImGui.GetIO();
-
         if (CurrentSubViewport != null)
         {
             if (CurrentSubViewport != PreviousSubViewport)
@@ -99,10 +100,11 @@ internal sealed class Input(Window mainWindow)
             var vpEvent = evt.Duplicate() as InputEvent;
             if (vpEvent is InputEventMouse mouseEvent)
             {
+                var io = ImGui.GetIO();
                 var mousePos = DisplayServer.MouseGetPosition();
                 var windowPos = Vector2I.Zero;
                 if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-                    windowPos = window.Position;
+                    windowPos = ImGuiLayer.Instance!.GetWindow().Position;
 
                 mouseEvent.Position = new Vector2(
                     mousePos.X - windowPos.X - CurrentSubViewportPos.X,
@@ -115,7 +117,11 @@ internal sealed class Input(Window mainWindow)
         {
             PreviousSubViewport?.Notification((int)Node.NotificationVpMouseExit);
         }
+    }
 
+    protected virtual bool HandleEvent(InputEvent evt)
+    {
+        var io = ImGui.GetIO();
         bool consumed = false;
 
         if (evt is InputEventMouseMotion mm)
@@ -196,7 +202,7 @@ internal sealed class Input(Window mainWindow)
             {
                 bool pressed = true;
                 float v = jm.AxisValue;
-                if (Math.Abs(v) < JoyAxisDeadZone)
+                if (Math.Abs(v) < State.Instance.JoyAxisDeadZone)
                 {
                     v = 0f;
                     pressed = false;
@@ -228,6 +234,12 @@ internal sealed class Input(Window mainWindow)
         }
 
         return consumed;
+    }
+
+    public bool ProcessInput(InputEvent evt)
+    {
+        ProcessSubViewportWidget(evt);
+        return HandleEvent(evt);
     }
 
     public static void ProcessNotification(long what)
