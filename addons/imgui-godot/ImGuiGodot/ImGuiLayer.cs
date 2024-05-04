@@ -1,6 +1,7 @@
 using Godot;
 using ImGuiGodot.Internal;
 #if GODOT_PC
+#nullable enable
 
 namespace ImGuiGodot;
 
