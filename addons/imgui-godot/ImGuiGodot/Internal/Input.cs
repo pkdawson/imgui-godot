@@ -49,7 +49,7 @@ internal class Input
             }
             else
             {
-                var winPos = ImGuiLayer.Instance!.GetWindow().Position;
+                var winPos = State.Instance.Layer.GetWindow().Position;
                 io.AddMousePosEvent(mousePos.X - winPos.X, mousePos.Y - winPos.Y);
             }
         }
@@ -104,7 +104,7 @@ internal class Input
                 var mousePos = DisplayServer.MouseGetPosition();
                 var windowPos = Vector2I.Zero;
                 if (!io.ConfigFlags.HasFlag(ImGuiConfigFlags.ViewportsEnable))
-                    windowPos = ImGuiLayer.Instance!.GetWindow().Position;
+                    windowPos = State.Instance.Layer.GetWindow().Position;
 
                 mouseEvent.Position = new Vector2(
                     mousePos.X - windowPos.X - CurrentSubViewportPos.X,

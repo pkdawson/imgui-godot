@@ -7,8 +7,6 @@ namespace ImGuiGodot;
 
 public partial class ImGuiLayer : CanvasLayer
 {
-    public static ImGuiLayer? Instance { get; set; }
-
     private Rid _subViewportRid;
     private Vector2I _subViewportSize = Vector2I.Zero;
     private Rid _canvasItem;
@@ -19,12 +17,8 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _EnterTree()
     {
-        if (Instance != null)
-            throw new System.InvalidOperationException();
-        Instance = this;
-
         Name = "ImGuiLayer";
-        Layer = State.Instance.Layer;
+        Layer = State.Instance.LayerNum;
 
         _parentViewport = GetViewport();
         _subViewportRid = AddLayerSubViewport(this);
@@ -45,14 +39,6 @@ public partial class ImGuiLayer : CanvasLayer
     {
         RenderingServer.FreeRid(_canvasItem);
         RenderingServer.FreeRid(_subViewportRid);
-
-        if (Instance == this)
-        {
-            Instance = null;
-            Window mainWindow = ImGuiController.Instance.GetWindow();
-            if (_parentViewport != mainWindow)
-                ImGuiController.Instance.SetMainViewport(mainWindow);
-        }
     }
 
     private void OnChangeVisibility()
@@ -83,20 +69,22 @@ public partial class ImGuiLayer : CanvasLayer
     {
         if (_visible)
         {
+            Vector2I vpSize;
 #pragma warning disable IDE0045 // Convert to conditional expression
             if (_parentViewport is Window w)
-                ViewportSize = w.Size;
+                vpSize = w.Size;
             else if (_parentViewport is SubViewport svp)
-                ViewportSize = svp.Size;
+                vpSize = svp.Size;
             else
                 throw new System.InvalidOperationException();
 #pragma warning restore IDE0045 // Convert to conditional expression
+            State.Instance.ViewportSize = vpSize;
 
             var ft = _parentViewport.GetFinalTransform();
-            if (_subViewportSize != ViewportSize || _finalTransform != ft)
+            if (_subViewportSize != vpSize || _finalTransform != ft)
             {
                 // this is more or less how SubViewportContainer works
-                _subViewportSize = ViewportSize;
+                _subViewportSize = vpSize;
                 _finalTransform = ft;
                 RenderingServer.ViewportSetSize(
                     _subViewportRid,

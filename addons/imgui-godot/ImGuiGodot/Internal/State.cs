@@ -23,9 +23,12 @@ internal sealed class State : IDisposable
     internal Fonts Fonts { get; }
     internal Input Input { get; set; }
     internal IRenderer Renderer { get; }
+
     internal float Scale { get; set; } = 1.0f;
     internal float JoyAxisDeadZone { get; set; } = 0.15f;
-    internal int Layer { get; private set; } = 128;
+    internal int LayerNum { get; private set; } = 128;
+    internal Vector2I ViewportSize { get; set; }
+    internal ImGuiLayer Layer { get; set; } = null!;
 
     internal static State Instance { get; set; } = null!;
 
@@ -122,7 +125,7 @@ internal sealed class State : IDisposable
         Instance = new(renderer)
         {
             Scale = (float)cfg.Get("Scale"),
-            Layer = (int)cfg.Get("Layer")
+            LayerNum = (int)cfg.Get("Layer")
         };
 
         ImGui.GetIO().SetIniFilename((string)cfg.Get("IniFilename"));

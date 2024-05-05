@@ -24,8 +24,7 @@ public partial class ImGuiController : Node
 
         public override void _Process(double delta)
         {
-            Vector2I vpSize = ImGuiLayer.Instance!.ViewportSize;
-            State.Instance.Update(delta, vpSize.ToImVec2());
+            State.Instance.Update(delta, State.Instance.ViewportSize.ToImVec2());
         }
     }
 
@@ -48,7 +47,7 @@ public partial class ImGuiController : Node
         AddChild(_helper);
 
         Signaler = GetParent();
-        AddChild(new ImGuiLayer());
+        SetMainViewport(_window);
     }
 
     public override void _Ready()
@@ -63,7 +62,7 @@ public partial class ImGuiController : Node
 
     public override void _Process(double delta)
     {
-        ImGuiLayer.Instance!.UpdateViewport();
+        State.Instance.Layer.UpdateViewport();
         Signaler.EmitSignal("imgui_layout");
         State.Instance.Render();
     }
@@ -73,31 +72,48 @@ public partial class ImGuiController : Node
         Internal.Input.ProcessNotification(what);
     }
 
+    public void OnLayerExiting()
+    {
+        // an ImGuiLayer is being destroyed without calling SetMainViewport
+        if (State.Instance.Layer.GetViewport() != _window)
+        {
+            // revert to main window
+            SetMainViewport(_window);
+        }
+    }
+
     public void SetMainViewport(Viewport vp)
     {
-        ImGuiLayer? oldLayer = ImGuiLayer.Instance;
-        ImGuiLayer.Instance = null;
-        oldLayer?.Free();
+        ImGuiLayer? oldLayer = State.Instance.Layer;
+        if (oldLayer != null)
+        {
+            oldLayer.TreeExiting -= OnLayerExiting;
+            oldLayer.QueueFree();
+        }
+
+        var newLayer = new ImGuiLayer();
+        newLayer.TreeExiting += OnLayerExiting;
 
         if (vp is Window window)
         {
             State.Instance.Input = new Internal.Input();
             if (window == _window)
-                AddChild(new ImGuiLayer());
+                AddChild(newLayer);
             else
-                window.AddChild(new ImGuiLayer());
+                window.AddChild(newLayer);
             ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         }
         else if (vp is SubViewport svp)
         {
             State.Instance.Input = new InputLocal();
-            svp.AddChild(new ImGuiLayer());
+            svp.AddChild(newLayer);
             ImGui.GetIO().BackendFlags &= ~ImGuiBackendFlags.PlatformHasViewports;
         }
         else
         {
             throw new System.ArgumentException("secret third kind of viewport??", nameof(vp));
         }
+        State.Instance.Layer = newLayer;
     }
 
     private void CheckContentScale()

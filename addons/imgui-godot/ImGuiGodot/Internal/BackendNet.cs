@@ -23,12 +23,8 @@ internal sealed class BackendNet : IBackend
 
     public bool Visible
     {
-        get => ImGuiLayer.Instance?.Visible ?? false;
-        set
-        {
-            if (ImGuiLayer.Instance != null)
-                ImGuiLayer.Instance!.Visible = value;
-        }
+        get => State.Instance.Layer.Visible;
+        set => State.Instance.Layer.Visible = value;
     }
 
     public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
