@@ -29,6 +29,7 @@ internal sealed class State : IDisposable
     internal int LayerNum { get; private set; } = 128;
     internal Vector2I ViewportSize { get; set; }
     internal ImGuiLayer Layer { get; set; } = null!;
+    internal bool InProcessFrame { get; set; }
 
     internal static State Instance { get; set; } = null!;
 

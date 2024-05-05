@@ -24,6 +24,7 @@ public partial class ImGuiController : Node
 
         public override void _Process(double delta)
         {
+            State.Instance.InProcessFrame = true;
             State.Instance.Update(delta, State.Instance.ViewportSize.ToImVec2());
         }
     }
@@ -65,6 +66,7 @@ public partial class ImGuiController : Node
         State.Instance.Layer.UpdateViewport();
         Signaler.EmitSignal("imgui_layout");
         State.Instance.Render();
+        State.Instance.InProcessFrame = false;
     }
 
     public override void _Notification(int what)

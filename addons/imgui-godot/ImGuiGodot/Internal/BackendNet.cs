@@ -44,6 +44,9 @@ internal sealed class BackendNet : IBackend
 
     public void RebuildFontAtlas()
     {
+        if (State.Instance.InProcessFrame)
+            throw new InvalidOperationException("fonts can't be changed during process");
+
         bool scaleToDpi = (bool)ProjectSettings.GetSetting("display/window/dpi/allow_hidpi");
         int dpiFactor = Math.Max(1, DisplayServer.ScreenGetDpi() / 96);
         State.Instance.Fonts.RebuildFontAtlas(scaleToDpi ? dpiFactor * Scale : Scale);
