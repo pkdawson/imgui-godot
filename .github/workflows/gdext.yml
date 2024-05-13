@@ -239,11 +239,17 @@ jobs:
           path: |
             ~/out
 
+      - name: Prep asset
+        working-directory: ${{ steps.prep.outputs.pkgdir }}
+        run: |
+          rm * || true
+          rm -r data doc src
+
       - name: Upload asset package
         uses: actions/upload-artifact@v4
         with:
           name: AssetLib-${{ steps.prep.outputs.pkgfn }}
-          path: ${{ steps.prep.outputs.pkgdir }}/addons
+          path: ~/out
 
   package_cs:
     name: 📦Package (C# only)
