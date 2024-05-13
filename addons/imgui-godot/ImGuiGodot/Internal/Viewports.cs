@@ -7,7 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace ImGuiGodot.Internal;
 
-internal sealed class GodotImGuiWindow
+internal sealed class GodotImGuiWindow : IDisposable
 {
     private readonly GCHandle _gcHandle;
     private readonly ImGuiViewportPtr _vp;
