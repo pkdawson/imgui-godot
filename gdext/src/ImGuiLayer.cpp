@@ -1,6 +1,6 @@
 #include "ImGuiLayer.h"
 #include "Context.h"
-#include "ImGuiLayerHelper.h"
+#include "ImGuiControllerHelper.h"
 
 #include <godot_cpp/classes/canvas_layer.hpp>
 #include <godot_cpp/classes/engine.hpp>
@@ -19,17 +19,14 @@ namespace ImGui::Godot {
 
 struct ImGuiLayer::Impl
 {
-    ImGuiLayerHelper* helper = nullptr;
-    Window* window = nullptr;
     RID subViewportRid;
     Vector2i subViewportSize{0, 0};
     RID canvasItem;
     Transform2D finalTransform{1.f, 0.f, 0.f, 1.f, 0.f, 0.f}; // identity
     bool visible = true;
-    Ref<Resource> cfg;
+    Viewport* parentViewport = nullptr;
 
     static RID AddLayerSubViewport(Node* parent);
-    void CheckContentScale() const;
 };
 
 RID ImGuiLayer::Impl::AddLayerSubViewport(Node* parent)
@@ -44,14 +41,6 @@ RID ImGuiLayer::Impl::AddLayerSubViewport(Node* parent)
     return svp;
 }
 
-void ImGuiLayer::Impl::CheckContentScale() const
-{
-    if (window->get_content_scale_mode() == Window::CONTENT_SCALE_MODE_VIEWPORT)
-    {
-        UtilityFunctions::printerr("imgui-godot: scale mode `viewport` is unsupported");
-    }
-}
-
 ImGuiLayer::ImGuiLayer() : impl(std::make_unique<Impl>())
 {
 }
@@ -62,132 +51,35 @@ ImGuiLayer::~ImGuiLayer()
 
 void ImGuiLayer::_bind_methods()
 {
-    ADD_SIGNAL(MethodInfo("imgui_layout"));
     ClassDB::bind_method(D_METHOD("on_visibility_changed"), &ImGuiLayer::on_visibility_changed);
-    ClassDB::bind_method(D_METHOD("on_frame_pre_draw"), &ImGuiLayer::on_frame_pre_draw);
 }
 
 void ImGuiLayer::_enter_tree()
 {
-    Node* parent = get_parent();
-    if (!parent)
-        return;
-    if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
-        return;
-
+    Context* ctx = GetContext();
     set_name("ImGuiLayer");
-    Engine::get_singleton()->register_singleton("ImGuiLayer", this);
-    impl->window = get_window();
+    set_layer(ctx->layerNum);
 
-    impl->CheckContentScale();
+    impl->parentViewport = get_viewport();
+    impl->subViewportRid = Impl::AddLayerSubViewport(this);
 
     RenderingServer* RS = RenderingServer::get_singleton();
-
-    impl->subViewportRid = Impl::AddLayerSubViewport(this);
     impl->canvasItem = RS->canvas_item_create();
     RS->canvas_item_set_parent(impl->canvasItem, get_canvas());
 
-    Ref<PackedScene> cfgPackedScene = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/Config.tscn");
-    Node* cfgScene = cfgPackedScene->instantiate();
-    Ref<Resource> cfg = cfgScene->get("Config");
-    memdelete(cfgScene);
-
-    if (cfg.is_null())
-    {
-        Ref<GDScript> script = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/scripts/ImGuiConfig.gd");
-        cfg = script->new_();
-    }
-    impl->cfg = cfg;
-
-    set_layer(cfg->get("Layer"));
-
-    impl->helper = memnew(ImGuiLayerHelper);
-    add_child(impl->helper);
-
-    ImGui::Godot::Init(get_window(), impl->subViewportRid, cfg);
+    ctx->renderer->InitViewport(impl->subViewportRid);
+    ctx->viewports->SetMainWindow(get_window(), impl->subViewportRid);
 }
 
 void ImGuiLayer::_ready()
 {
-    set_process_priority(std::numeric_limits<int32_t>::max());
-    set_process_mode(Node::PROCESS_MODE_ALWAYS);
-
     connect("visibility_changed", Callable(this, "on_visibility_changed"));
 }
 
 void ImGuiLayer::_exit_tree()
 {
-    Engine::get_singleton()->unregister_singleton("ImGuiLayer");
-    ImGui::Godot::Shutdown();
     RenderingServer::get_singleton()->free_rid(impl->canvasItem);
     RenderingServer::get_singleton()->free_rid(impl->subViewportRid);
-}
-
-void ImGuiLayer::_process(double delta)
-{
-#ifdef DEBUG_ENABLED
-    if (Engine::get_singleton()->is_editor_hint())
-    {
-        // verify signal connections
-        auto conns = get_signal_connection_list("imgui_layout");
-        for (int i = 0; i < conns.size(); ++i)
-        {
-            const Dictionary& conn = conns[i];
-            const Callable& cb = conn["callable"];
-            if (!cb.is_valid())
-                disconnect("imgui_layout", cb);
-        }
-    }
-#endif
-
-    if (impl->visible)
-    {
-        Vector2i winSize = impl->window->get_size();
-        Transform2D ft = impl->window->get_final_transform();
-
-        if (impl->subViewportSize != winSize ||
-            impl->finalTransform != ft
-#ifdef DEBUG_ENABLED
-            // force redraw on every frame in editor
-            || Engine::get_singleton()->is_editor_hint()
-#endif
-        )
-        {
-            // this is more or less how SubViewportContainer works
-            impl->subViewportSize = winSize;
-            impl->finalTransform = ft;
-
-            RenderingServer* RS = RenderingServer::get_singleton();
-            RS->viewport_set_size(impl->subViewportRid, impl->subViewportSize.x, impl->subViewportSize.y);
-            RID vptex = RS->viewport_get_texture(impl->subViewportRid);
-            RS->canvas_item_clear(impl->canvasItem);
-            RS->canvas_item_set_transform(impl->canvasItem, ft.affine_inverse());
-            RS->canvas_item_add_texture_rect(impl->canvasItem,
-                                             Rect2(0, 0, impl->subViewportSize.x, impl->subViewportSize.y),
-                                             vptex);
-        }
-
-        emit_signal("imgui_layout");
-    }
-
-    ImGui::Godot::Render();
-}
-
-void ImGuiLayer::_input(const Ref<InputEvent>& event)
-{
-    if (ImGui::Godot::ProcessInput(event, impl->window))
-    {
-        impl->window->set_input_as_handled();
-    }
-}
-
-void ImGuiLayer::_notification(int p_what)
-{
-    // quick filter
-    if (p_what > 2000)
-    {
-        ImGui::Godot::ProcessNotification(p_what);
-    }
 }
 
 void ImGuiLayer::on_visibility_changed()
@@ -206,9 +98,49 @@ void ImGuiLayer::on_visibility_changed()
     }
 }
 
-void ImGuiLayer::on_frame_pre_draw()
+void ImGuiLayer::_input(const Ref<InputEvent>& event)
 {
-    ImGui::Godot::OnFramePreDraw();
+    if (GetContext()->input->ProcessInput(event))
+    {
+        impl->parentViewport->set_input_as_handled();
+    }
+}
+
+void ImGuiLayer::UpdateViewport()
+{
+    if (impl->visible)
+    {
+        Vector2i vpSize;
+        if (Window* w = Object::cast_to<Window>(impl->parentViewport))
+            vpSize = w->get_size();
+        else
+            vpSize = Object::cast_to<SubViewport>(impl->parentViewport)->get_size();
+        GetContext()->viewportSize = vpSize;
+
+        Transform2D ft = impl->parentViewport->get_final_transform();
+
+        if (impl->subViewportSize != vpSize ||
+            impl->finalTransform != ft
+#ifdef DEBUG_ENABLED
+            // force redraw on every frame in editor
+            || Engine::get_singleton()->is_editor_hint()
+#endif
+        )
+        {
+            // this is more or less how SubViewportContainer works
+            impl->subViewportSize = vpSize;
+            impl->finalTransform = ft;
+
+            RenderingServer* RS = RenderingServer::get_singleton();
+            RS->viewport_set_size(impl->subViewportRid, impl->subViewportSize.x, impl->subViewportSize.y);
+            RID vptex = RS->viewport_get_texture(impl->subViewportRid);
+            RS->canvas_item_clear(impl->canvasItem);
+            RS->canvas_item_set_transform(impl->canvasItem, ft.affine_inverse());
+            RS->canvas_item_add_texture_rect(impl->canvasItem,
+                                             Rect2(0, 0, impl->subViewportSize.x, impl->subViewportSize.y),
+                                             vptex);
+        }
+    }
 }
 
 } // namespace ImGui::Godot

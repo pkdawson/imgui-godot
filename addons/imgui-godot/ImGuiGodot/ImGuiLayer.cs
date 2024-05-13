@@ -13,7 +13,6 @@ public partial class ImGuiLayer : CanvasLayer
     private Transform2D _finalTransform = Transform2D.Identity;
     private bool _visible = true;
     private Viewport _parentViewport = null!;
-    public Vector2I ViewportSize { get; private set; }
 
     public override void _EnterTree()
     {
@@ -26,7 +25,7 @@ public partial class ImGuiLayer : CanvasLayer
         RenderingServer.CanvasItemSetParent(_canvasItem, GetCanvas());
 
         State.Instance.Renderer.InitViewport(_subViewportRid);
-        State.Instance.Viewports.SetMainViewport(_parentViewport, _subViewportRid);
+        State.Instance.Viewports.SetMainWindow(GetWindow(), _subViewportRid);
     }
 
     public override void _Ready()
@@ -59,7 +58,7 @@ public partial class ImGuiLayer : CanvasLayer
 
     public override void _Input(InputEvent @event)
     {
-        if (State.Instance.ProcessInput(@event))
+        if (State.Instance.Input.ProcessInput(@event))
         {
             _parentViewport.SetInputAsHandled();
         }

@@ -11,14 +11,20 @@ target_sources(imgui-godot-native PRIVATE
     GdsCache.h
     ImGuiAPI.cpp
     ImGuiAPI.h
+    ImGuiController.cpp
+    ImGuiController.h
+    ImGuiControllerHelper.cpp
+    ImGuiControllerHelper.h
     ImGuiGD.cpp
     ImGuiGD.h
     ImGuiLayer.cpp
     ImGuiLayer.h
-    ImGuiLayerHelper.cpp
-    ImGuiLayerHelper.h
+    ImGuiSync.cpp
+    ImGuiSync.h
     Input.cpp
     Input.h
+    InputLocal.cpp
+    InputLocal.h
     main.cpp
     RdRenderer.cpp
     RdRenderer.h

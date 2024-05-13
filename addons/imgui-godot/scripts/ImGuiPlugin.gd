@@ -2,17 +2,18 @@
 extends EditorPlugin
 
 func _enter_tree():
+    Engine.register_singleton("ImGuiPlugin", self)
+    add_autoload_singleton("ImGuiRoot", "res://addons/imgui-godot/data/ImGuiRoot.tscn")
+
+    # remove obsolete ImGuiLayer autoload
     if ProjectSettings.has_setting("autoload/ImGuiLayer"):
         remove_autoload_singleton("ImGuiLayer")
-    add_autoload_singleton("ImGuiRoot", "res://addons/imgui-godot/data/ImGuiRoot.tscn")
-    Engine.register_singleton("ImGuiPlugin", self)
     
+    # warn user if csproj will fail to build
     if "C#" in ProjectSettings.get_setting("application/config/features"):
         var projPath: String = ProjectSettings.get_setting("dotnet/project/solution_directory")
         var fn: String = "%s.csproj" % ProjectSettings.get_setting("dotnet/project/assembly_name")
-        if projPath != "":
-            fn = "%s/%s" % [projPath, fn]
-        check_csproj(fn)
+        check_csproj(projPath.path_join(fn))
         
 func check_csproj(fn):
     var fi := FileAccess.open(fn, FileAccess.READ)
@@ -29,12 +30,10 @@ func check_csproj(fn):
         if netVer < 8:
             changesNeeded += "- Set target framework to .NET 8 or later\n"
             
-    idx = data.find("<AllowUnsafeBlocks>True")
-    if idx == -1:
+    if !data.contains("<AllowUnsafeBlocks>True"):
         changesNeeded += "- Allow unsafe blocks\n"
     
-    idx = data.find("<PackageReference Include=\"ImGui.NET\"")
-    if idx == -1:
+    if !data.contains("<PackageReference Include=\"ImGui.NET\""):
         changesNeeded += "- Add NuGet package ImGui.NET\n"
         
     if changesNeeded != "":

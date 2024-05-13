@@ -21,11 +21,10 @@ public:
     void _ready() override;
     void _enter_tree() override;
     void _exit_tree() override;
-    void _process(double delta) override;
     void _input(const Ref<InputEvent>& event) override;
-    void _notification(int p_what);
+
     void on_visibility_changed();
-    void on_frame_pre_draw();
+    void UpdateViewport();
 
 private:
     struct Impl;

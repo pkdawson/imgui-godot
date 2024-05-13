@@ -7,20 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace ImGuiGodot.Internal;
 
-internal interface IViewportWindow : IDisposable
-{
-    public void ShowWindow();
-    public void SetWindowPos(Vector2I pos);
-    public Vector2I GetWindowPos();
-    public void SetWindowSize(Vector2I size);
-    public Vector2I GetWindowSize();
-    public void SetWindowFocus();
-    public bool GetWindowFocus();
-    public bool GetWindowMinimized();
-    public void SetWindowTitle(string title);
-}
-
-internal sealed class GodotImGuiWindow : IViewportWindow
+internal sealed class GodotImGuiWindow
 {
     private readonly GCHandle _gcHandle;
     private readonly ImGuiViewportPtr _vp;
@@ -150,68 +137,6 @@ internal sealed class GodotImGuiWindow : IViewportWindow
     }
 }
 
-internal sealed class GodotImGuiSubViewport : IViewportWindow
-{
-    private readonly GCHandle _gcHandle;
-    private readonly SubViewport _svp;
-
-    public GodotImGuiSubViewport(ImGuiViewportPtr vp, SubViewport svp, Rid mainSubViewport)
-    {
-        _gcHandle = GCHandle.Alloc(this);
-        vp.PlatformUserData = (IntPtr)_gcHandle;
-        vp.RendererUserData = (IntPtr)mainSubViewport.Id;
-        _svp = svp;
-    }
-
-    public void Dispose()
-    {
-        if (_gcHandle.IsAllocated)
-        {
-            _gcHandle.Free();
-        }
-    }
-
-    public bool GetWindowFocus()
-    {
-        return true;
-    }
-
-    public bool GetWindowMinimized()
-    {
-        return false;
-    }
-
-    public Vector2I GetWindowPos()
-    {
-        return new(0, 0);
-    }
-
-    public Vector2I GetWindowSize()
-    {
-        return _svp.Size;
-    }
-
-    public void SetWindowFocus()
-    {
-    }
-
-    public void SetWindowPos(Vector2I pos)
-    {
-    }
-
-    public void SetWindowSize(Vector2I size)
-    {
-    }
-
-    public void SetWindowTitle(string title)
-    {
-    }
-
-    public void ShowWindow()
-    {
-    }
-}
-
 internal static class ViewportsExts
 {
     internal static Vector2 ToImVec2(this Vector2I v)
@@ -283,7 +208,7 @@ internal sealed partial class Viewports
     private delegate void Platform_SetWindowTitle(ImGuiViewportPtr vp, string title);
     private static readonly Platform_SetWindowTitle _setWindowTitle = Godot_SetWindowTitle;
 
-    private IViewportWindow _mainWindow = null!;
+    private GodotImGuiWindow _mainWindow = null!;
 
     private static void UpdateMonitors()
     {
@@ -346,17 +271,10 @@ internal sealed partial class Viewports
         UpdateMonitors();
     }
 
-    public void SetMainViewport(Viewport vp, Rid mainSubViewport)
+    public void SetMainWindow(Window window, Rid mainSubViewport)
     {
         _mainWindow?.Dispose();
-        if (vp is Window window)
-        {
-            _mainWindow = new GodotImGuiWindow(ImGui.GetMainViewport(), window, mainSubViewport);
-        }
-        else if (vp is SubViewport svp)
-        {
-            _mainWindow = new GodotImGuiSubViewport(ImGui.GetMainViewport(), svp, mainSubViewport);
-        }
+        _mainWindow = new GodotImGuiWindow(ImGui.GetMainViewport(), window, mainSubViewport);
     }
 
     private static void Godot_CreateWindow(ImGuiViewportPtr vp)
@@ -368,7 +286,7 @@ internal sealed partial class Viewports
     {
         if (vp.PlatformUserData != IntPtr.Zero)
         {
-            var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+            var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
             window.Dispose();
             vp.PlatformUserData = IntPtr.Zero;
         }
@@ -376,55 +294,55 @@ internal sealed partial class Viewports
 
     private static void Godot_ShowWindow(ImGuiViewportPtr vp)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         window.ShowWindow();
     }
 
     private static void Godot_SetWindowPos(ImGuiViewportPtr vp, Vector2 pos)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         window.SetWindowPos(pos.ToVector2I());
     }
 
     private static void Godot_GetWindowPos(ImGuiViewportPtr vp, out Vector2 pos)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         pos = window.GetWindowPos().ToImVec2();
     }
 
     private static void Godot_SetWindowSize(ImGuiViewportPtr vp, Vector2 size)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         window.SetWindowSize(size.ToVector2I());
     }
 
     private static void Godot_GetWindowSize(ImGuiViewportPtr vp, out Vector2 size)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         size = window.GetWindowSize().ToImVec2();
     }
 
     private static void Godot_SetWindowFocus(ImGuiViewportPtr vp)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         window.SetWindowFocus();
     }
 
     private static bool Godot_GetWindowFocus(ImGuiViewportPtr vp)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         return window.GetWindowFocus();
     }
 
     private static bool Godot_GetWindowMinimized(ImGuiViewportPtr vp)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         return window.GetWindowMinimized();
     }
 
     private static void Godot_SetWindowTitle(ImGuiViewportPtr vp, string title)
     {
-        var window = (IViewportWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
+        var window = (GodotImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target!;
         window.SetWindowTitle(title);
     }
 }

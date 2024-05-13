@@ -1,5 +1,6 @@
 #include "ImGuiGD.h"
 #include "Context.h"
+#include "ImGuiController.h"
 #include "ImGuiLayer.h"
 #include "common.h"
 #include <godot_cpp/classes/main_loop.hpp>
@@ -32,6 +33,8 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("Connect", "callable"), &ImGuiGD::Connect);
     ClassDB::bind_method(D_METHOD("RebuildFontAtlas"), &ImGuiGD::RebuildFontAtlas);
     ClassDB::bind_method(D_METHOD("ResetFonts"), &ImGuiGD::ResetFonts);
+    ClassDB::bind_method(D_METHOD("SetMainViewport", "vp"), &ImGuiGD::SetMainViewport);
+
     ClassDB::bind_method(D_METHOD("SubViewport", "svp"), &ImGuiGD::SubViewport);
     ClassDB::bind_method(D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
                          &ImGuiGD::GetImGuiPtrs);
@@ -96,20 +99,26 @@ void ImGuiGD::RebuildFontAtlas()
     ImGui::Godot::RebuildFontAtlas();
 }
 
+void ImGuiGD::SetMainViewport(Viewport* vp)
+{
+    ImGuiController* igc = Object::cast_to<ImGuiController>(Engine::get_singleton()->get_singleton("ImGuiController"));
+    ERR_FAIL_COND(!igc);
+    igc->SetMainViewport(vp);
+}
+
 void ImGuiGD::_SetVisible(bool visible)
 {
-    CanvasLayer* igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
-    ERR_FAIL_COND(!igl);
-    igl->set_visible(visible);
+    Context* ctx = GetContext();
+    ERR_FAIL_COND(!ctx);
+    ERR_FAIL_COND(!ctx->layer);
+    ctx->layer->set_visible(visible);
 }
 
 bool ImGuiGD::_GetVisible()
 {
-    CanvasLayer* igl = nullptr;
-    if (Engine::get_singleton()->has_singleton("ImGuiLayer"))
-        igl = Object::cast_to<CanvasLayer>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
-    if (igl)
-        return igl->is_visible();
+    Context* ctx = GetContext();
+    if (ctx && ctx->layer)
+        return ctx->layer->is_visible();
     return false;
 }
 
@@ -117,14 +126,14 @@ void ImGuiGD::_SetJoyAxisDeadZone(float zone)
 {
     Context* ctx = ImGui::Godot::GetContext();
     ERR_FAIL_COND(!ctx);
-    ctx->input->SetJoyAxisDeadZone(zone);
+    ctx->joyAxisDeadZone = zone;
 }
 
 float ImGuiGD::_GetJoyAxisDeadZone()
 {
     Context* ctx = ImGui::Godot::GetContext();
     if (ctx)
-        return ctx->input->GetJoyAxisDeadZone();
+        return ctx->joyAxisDeadZone;
     return 0.15f;
 }
 

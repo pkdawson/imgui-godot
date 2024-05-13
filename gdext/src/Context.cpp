@@ -18,10 +18,10 @@ Context* GetContext()
     return ctx.get();
 }
 
-Context::Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Renderer> r)
+Context::Context(std::unique_ptr<Renderer> r)
 {
     renderer = std::move(r);
-    input = std::make_unique<Input>(mainWindow);
+    input = std::make_unique<Input>();
     fonts = std::make_unique<Fonts>();
 
     ImGuiIO& io = ImGui::GetIO();
@@ -32,7 +32,7 @@ Context::Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Render
     io.BackendPlatformName = PlatformName;
     io.BackendRendererName = renderer->Name();
 
-    viewports = std::make_unique<Viewports>(mainWindow, mainSubViewport);
+    viewports = std::make_unique<Viewports>();
 }
 
 Context::~Context()
@@ -41,7 +41,7 @@ Context::~Context()
         ImGui::DestroyContext();
 }
 
-void Init(godot::Window* mainWindow, RID mainSubViewport, const Ref<Resource>& cfg)
+void Init(const Ref<Resource>& cfg)
 {
     // re-init not allowed
     ERR_FAIL_COND(ctx);
@@ -99,9 +99,8 @@ void Init(godot::Window* mainWindow, RID mainSubViewport, const Ref<Resource>& c
         renderer->Init();
     }
 
-    ctx = std::make_unique<Context>(mainWindow, mainSubViewport, std::move(renderer));
+    ctx = std::make_unique<Context>(std::move(renderer));
     ctx->scale = cfg->get("Scale");
-    ctx->renderer->InitViewport(mainSubViewport);
 
     String iniFilename = cfg->get("IniFilename");
     if (iniFilename.length() > 0)
@@ -124,34 +123,23 @@ void Init(godot::Window* mainWindow, RID mainSubViewport, const Ref<Resource>& c
     RebuildFontAtlas();
 }
 
-void Update(double delta, Vector2 displaySize)
+void Context::Update(double delta, Vector2 displaySize)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = displaySize;
     io.DeltaTime = static_cast<float>(delta);
 
-    ctx->input->Update();
+    input->Update();
 
     gdscache->OnNewFrame();
     ImGui::NewFrame();
 }
 
-bool ProcessInput(const Ref<InputEvent>& evt, Window* window)
-{
-    return ctx->input->ProcessInput(evt, window);
-}
-
-void ProcessNotification(int what)
-{
-    if (ctx)
-        ctx->input->ProcessNotification(what);
-}
-
-void Render()
+void Context::Render()
 {
     ImGui::Render();
     ImGui::UpdatePlatformWindows();
-    ctx->renderer->Render();
+    renderer->Render();
 }
 
 void Shutdown()
@@ -163,9 +151,9 @@ void Shutdown()
 
 void Connect(const godot::Callable& callable)
 {
-    Object* igl = Engine::get_singleton()->get_singleton("ImGuiLayer");
-    ERR_FAIL_COND(!igl);
-    igl->connect("imgui_layout", callable);
+    Object* igc = Engine::get_singleton()->get_singleton("ImGuiController");
+    ERR_FAIL_COND(!igc);
+    igc->connect("imgui_layout", callable);
 }
 
 void ResetFonts()
@@ -189,6 +177,8 @@ void AddFontDefault()
 void RebuildFontAtlas()
 {
     ERR_FAIL_COND(!ctx);
+    ERR_FAIL_COND(ctx->inProcessFrame);
+
     bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
     int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
     ctx->fonts->RebuildFontAtlas(scaleToDpi ? dpiFactor * ctx->scale : ctx->scale);
@@ -208,11 +198,6 @@ void SetIniFilename(const String& fn)
     }
     else
         io.IniFilename = nullptr;
-}
-
-void OnFramePreDraw()
-{
-    ctx->renderer->OnFramePreDraw();
 }
 
 bool SubViewportWidget(SubViewport* svp)

@@ -119,7 +119,7 @@ internal class Input
         }
     }
 
-    protected virtual bool HandleEvent(InputEvent evt)
+    protected bool HandleEvent(InputEvent evt)
     {
         var io = ImGui.GetIO();
         bool consumed = false;
@@ -236,7 +236,7 @@ internal class Input
         return consumed;
     }
 
-    public bool ProcessInput(InputEvent evt)
+    public virtual bool ProcessInput(InputEvent evt)
     {
         ProcessSubViewportWidget(evt);
         return HandleEvent(evt);

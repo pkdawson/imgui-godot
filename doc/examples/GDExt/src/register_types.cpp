@@ -5,15 +5,16 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
+#include <imgui-godot.h>
 
 using namespace godot;
 
 void initialize_example_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
-    {
         return;
-    }
+
+    ImGui::Godot::SyncImGuiPtrs();
 
     GDREGISTER_CLASS(Example);
 }
@@ -21,9 +22,7 @@ void initialize_example_module(ModuleInitializationLevel p_level)
 void uninitialize_example_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
-    {
         return;
-    }
 }
 
 extern "C" {

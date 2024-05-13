@@ -1,4 +1,5 @@
 #include "Input.h"
+#include "Context.h"
 #include "imgui-godot.h"
 
 #include <godot_cpp/classes/display_server.hpp>
@@ -21,16 +22,12 @@ namespace ImGui::Godot {
 
 struct Input::Impl
 {
-    Window* mainWindow = nullptr;
     godot::SubViewport* previousSubViewport = nullptr;
     godot::SubViewport* currentSubViewport = nullptr;
     Vector2 currentSubViewportPos;
     Vector2 mouseWheel;
     ImGuiMouseCursor currentCursor = ImGuiMouseCursor_None;
     bool hasMouse;
-    float deadZone = 0.15f;
-
-    void UpdateMouse();
 };
 
 namespace {
@@ -73,9 +70,8 @@ void UpdateKeyMods(ImGuiIO& io)
 
 } // namespace
 
-Input::Input(Window* mainWindow) : impl(std::make_unique<Impl>())
+Input::Input() : impl(std::make_unique<Impl>())
 {
-    impl->mainWindow = mainWindow;
     impl->hasMouse = DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_MOUSE);
 }
 
@@ -83,7 +79,7 @@ Input::~Input()
 {
 }
 
-void Input::Impl::UpdateMouse()
+void Input::UpdateMousePos()
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -119,44 +115,51 @@ void Input::Impl::UpdateMouse()
         }
         else
         {
-            Vector2i winPos = mainWindow->get_position();
+            Vector2i winPos = GetContext()->layer->get_window()->get_position();
             io.AddMousePosEvent(mousePos.x - winPos.x, mousePos.y - winPos.y);
         }
     }
+}
 
-    if (mouseWheel != Vector2())
+void Input::UpdateMouse()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    DisplayServer* DS = DisplayServer::get_singleton();
+
+    UpdateMousePos();
+
+    // scrolling works better if we allow no more than one event per frame
+    if (impl->mouseWheel != Vector2())
     {
-        io.AddMouseWheelEvent(mouseWheel.x, mouseWheel.y);
-        mouseWheel = Vector2();
+        io.AddMouseWheelEvent(impl->mouseWheel.x, impl->mouseWheel.y);
+        impl->mouseWheel = Vector2();
     }
 
     if (io.WantCaptureMouse && !(io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange))
     {
         ImGuiMouseCursor newCursor = ImGui::GetMouseCursor();
-        if (newCursor != currentCursor)
+        if (newCursor != impl->currentCursor)
         {
             DS->cursor_set_shape(ToCursorShape(newCursor));
         }
     }
     else
     {
-        currentCursor = ImGuiMouseCursor_None;
+        impl->currentCursor = ImGuiMouseCursor_None;
     }
 }
 
 void Input::Update()
 {
     if (impl->hasMouse)
-        impl->UpdateMouse();
+        UpdateMouse();
 
     impl->previousSubViewport = impl->currentSubViewport;
     impl->currentSubViewport = nullptr;
 }
 
-bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
+void Input::ProcessSubViewportWidget(const Ref<InputEvent>& evt)
 {
-    ImGuiIO& io = ImGui::GetIO();
-
     if (impl->currentSubViewport)
     {
         if (impl->currentSubViewport != impl->previousSubViewport)
@@ -165,10 +168,11 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         Ref<InputEvent> vpevt = evt->duplicate();
         if (Ref<InputEventMouse> me = vpevt; me.is_valid())
         {
+            ImGuiIO& io = ImGui::GetIO();
             Vector2i mousePos = DisplayServer::get_singleton()->mouse_get_position();
             Vector2i windowPos{0, 0};
             if (!(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
-                windowPos = window->get_position();
+                windowPos = GetContext()->layer->get_window()->get_position();
 
             me->set_position(Vector2(mousePos.x - windowPos.x - impl->currentSubViewportPos.x,
                                      mousePos.y - windowPos.y - impl->currentSubViewportPos.y)
@@ -180,6 +184,11 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
     {
         impl->previousSubViewport->notification(Node::NOTIFICATION_VP_MOUSE_EXIT);
     }
+}
+
+bool Input::HandleEvent(const Ref<InputEvent>& evt)
+{
+    ImGuiIO& io = ImGui::GetIO();
 
     bool consumed = false;
 
@@ -259,7 +268,7 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
         {
             bool pressed = true;
             float v = jm->get_axis_value();
-            if (std::abs(v) < impl->deadZone)
+            if (std::abs(v) < GetContext()->joyAxisDeadZone)
             {
                 v = 0;
                 pressed = false;
@@ -298,6 +307,12 @@ bool Input::ProcessInput(const Ref<InputEvent>& evt, Window* window)
     return consumed;
 }
 
+bool Input::ProcessInput(const Ref<InputEvent>& evt)
+{
+    ProcessSubViewportWidget(evt);
+    return HandleEvent(evt);
+}
+
 void Input::ProcessNotification(int what)
 {
     switch (what)
@@ -315,16 +330,6 @@ void Input::SetActiveSubViewport(godot::SubViewport* svp, Vector2 pos)
 {
     impl->currentSubViewport = svp;
     impl->currentSubViewportPos = pos;
-}
-
-void Input::SetJoyAxisDeadZone(float val)
-{
-    impl->deadZone = val;
-}
-
-float Input::GetJoyAxisDeadZone()
-{
-    return impl->deadZone;
 }
 
 } // namespace ImGui::Godot

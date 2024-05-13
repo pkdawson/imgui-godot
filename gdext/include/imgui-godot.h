@@ -38,6 +38,7 @@ using godot::SubViewport;
 using godot::Texture2D;
 using godot::TypedArray;
 using godot::Vector2;
+using godot::Viewport;
 using godot::Window;
 #else
 // module
@@ -133,6 +134,13 @@ inline void SetVisible(bool vis)
     detail::ImGuiGD->set(sn, vis);
 }
 
+inline void SetMainViewport(Viewport* vp)
+{
+    ERR_FAIL_COND(!detail::GET_IMGUIGD());
+    static const StringName sn("SetMainViewport");
+    detail::ImGuiGD->set(sn, vp);
+}
+
 inline bool ToolInit()
 {
     ERR_FAIL_COND_V(!detail::GET_IMGUIGD(), false);
@@ -142,14 +150,16 @@ inline bool ToolInit()
 
 inline void SyncImGuiPtrs()
 {
-    ERR_FAIL_COND(!detail::GET_IMGUIGD());
+    Object* obj = ClassDB::instantiate("ImGuiSync");
+    ERR_FAIL_COND(!obj);
+
     static const StringName sn("GetImGuiPtrs");
-    TypedArray<int64_t> ptrs = detail::ImGuiGD->call(sn,
-                                                     String(ImGui::GetVersion()),
-                                                     (int32_t)sizeof(ImGuiIO),
-                                                     (int32_t)sizeof(ImDrawVert),
-                                                     (int32_t)sizeof(ImDrawIdx),
-                                                     (int32_t)sizeof(ImWchar));
+    TypedArray<int64_t> ptrs = obj->call(sn,
+                                         String(ImGui::GetVersion()),
+                                         (int32_t)sizeof(ImGuiIO),
+                                         (int32_t)sizeof(ImDrawVert),
+                                         (int32_t)sizeof(ImDrawIdx),
+                                         (int32_t)sizeof(ImWchar));
 
     ERR_FAIL_COND(ptrs.size() != 3);
 
@@ -157,6 +167,7 @@ inline void SyncImGuiPtrs()
     ImGuiMemAllocFunc alloc_func = reinterpret_cast<ImGuiMemAllocFunc>((int64_t)ptrs[1]);
     ImGuiMemFreeFunc free_func = reinterpret_cast<ImGuiMemFreeFunc>((int64_t)ptrs[2]);
     ImGui::SetAllocatorFunctions(alloc_func, free_func, nullptr);
+    memdelete(obj);
 }
 
 inline ImTextureID BindTexture(Texture2D* tex)

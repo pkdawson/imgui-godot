@@ -16,6 +16,7 @@ internal sealed class BackendNative : IBackend
         public static readonly StringName Connect = "Connect";
         public static readonly StringName RebuildFontAtlas = "RebuildFontAtlas";
         public static readonly StringName ResetFonts = "ResetFonts";
+        public static readonly StringName SetMainViewport = "SetMainViewport";
         public static readonly StringName SubViewport = "SubViewport";
         public static readonly StringName ToolInit = "ToolInit";
     }
@@ -81,7 +82,7 @@ internal sealed class BackendNative : IBackend
     }
     public void SetMainViewport(Viewport vp)
     {
-        throw new NotImplementedException();
+        _gd.Call(MethodName.SetMainViewport, vp);
     }
 
     public bool SubViewportWidget(SubViewport svp)

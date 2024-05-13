@@ -11,7 +11,7 @@ internal sealed class InputLocal : Input
         // do not use global mouse position
     }
 
-    protected override bool HandleEvent(InputEvent evt)
+    public override bool ProcessInput(InputEvent evt)
     {
         // no support for SubViewport widgets
 
@@ -23,7 +23,7 @@ internal sealed class InputLocal : Input
             mm.Dispose();
             return io.WantCaptureMouse;
         }
-        return base.HandleEvent(evt);
+        return HandleEvent(evt);
     }
 }
 #endif

@@ -47,7 +47,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_transparent_background(true);
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
 
-    Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiLayer"));
+    Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiController"));
     root->add_child(vd->window);
 
     // need to do this after add_child
@@ -169,13 +169,16 @@ void Viewports::Impl::UpdateMonitors()
     }
 }
 
-Viewports::Viewports(Window* mainWindow, RID mainSubViewport) : impl(std::make_unique<Impl>())
+Viewports::Viewports() : impl(std::make_unique<Impl>())
 {
     auto& io = ImGui::GetIO();
     io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
     impl->InitPlatformInterface();
     impl->UpdateMonitors();
+}
 
+void Viewports::SetMainWindow(Window* mainWindow, RID mainSubViewport)
+{
     Godot_ViewportData* mainvd = IM_NEW(Godot_ViewportData);
     mainvd->window = mainWindow;
     ImGuiViewport* vp = ImGui::GetMainViewport();
@@ -189,7 +192,7 @@ Viewports::~Viewports()
 
 void ImGuiWindow::_input(const Ref<InputEvent>& evt)
 {
-    ImGui::Godot::ProcessInput(evt, this);
+    GetContext()->input->ProcessInput(evt);
 }
 
 } // namespace ImGui::Godot

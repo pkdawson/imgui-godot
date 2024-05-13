@@ -184,16 +184,5 @@ internal sealed class State : IDisposable
         ImGui.UpdatePlatformWindows();
         Renderer.Render();
     }
-
-    /// <summary>
-    /// Send input event to ImGui
-    /// </summary>
-    /// <returns>
-    /// True if the InputEvent was consumed
-    /// </returns>
-    public bool ProcessInput(InputEvent evt)
-    {
-        return Input.ProcessInput(evt);
-    }
 }
 #endif

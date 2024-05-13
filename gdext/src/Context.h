@@ -22,6 +22,7 @@
 #include "Fonts.h"
 #include "GdsCache.h"
 #include "ImGuiGD.h"
+#include "ImGuiLayer.h"
 #include "Input.h"
 #include "RdRenderer.h"
 #include "RdRendererThreadSafe.h"
@@ -45,19 +46,24 @@ struct Context
     std::unique_ptr<Fonts> fonts;
     std::unique_ptr<Input> input;
     std::unique_ptr<Renderer> renderer;
-    float scale = 1.0f;
 
-    Context(Window* mainWindow, RID mainSubViewport, std::unique_ptr<Renderer> r);
+    float scale = 1.0f;
+    float joyAxisDeadZone = 0.15f;
+    int layerNum = 128;
+    Vector2i viewportSize;
+    ImGuiLayer* layer = nullptr;
+    bool inProcessFrame = false;
+
+    Context(std::unique_ptr<Renderer> r);
     ~Context();
+
+    void Render();
+    void Update(double delta, Vector2 displaySize);
 };
 
 Context* GetContext();
 
-void Init(Window* mainWindow, RID mainSubViewport, const Ref<Resource>& config);
-void Update(double delta, Vector2 displaySize);
-bool ProcessInput(const Ref<InputEvent>& evt, Window* window);
-void ProcessNotification(int what);
-void Render();
+void Init(const Ref<Resource>& config);
 void Shutdown();
 void Connect(const Callable& callable);
 void ResetFonts();
@@ -69,6 +75,4 @@ void SetIniFilename(const String& fn);
 void SetVisible(bool visible);
 
 bool SubViewportWidget(SubViewport* svp);
-
-void OnFramePreDraw();
 } // namespace ImGui::Godot

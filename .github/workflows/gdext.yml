@@ -230,6 +230,7 @@ jobs:
           pkgdir=~/out/imgui-godot-${plugin_ver}
           mkdir -p $pkgdir
           mv * $pkgdir
+          echo "pkgdir=$pkgdir" >> $GITHUB_OUTPUT
 
       - name: Upload package
         uses: actions/upload-artifact@v4
@@ -237,6 +238,12 @@ jobs:
           name: ${{ steps.prep.outputs.pkgfn }}
           path: |
             ~/out
+
+      - name: Upload asset package
+        uses: actions/upload-artifact@v4
+        with:
+          name: AssetLib-${{ steps.prep.outputs.pkgfn }}
+          path: ${{ steps.prep.outputs.pkgdir }}/addons
 
   package_cs:
     name: 📦Package (C# only)

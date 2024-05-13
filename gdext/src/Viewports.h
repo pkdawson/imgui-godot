@@ -40,8 +40,10 @@ private:
 class Viewports
 {
 public:
-    Viewports(Window* mainWindow, RID mainSubViewport);
+    Viewports();
     ~Viewports();
+
+    void SetMainWindow(Window* mainWindow, RID mainSubViewport);
 
 private:
     struct Impl;

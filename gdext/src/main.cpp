@@ -12,9 +12,11 @@ static_assert(GODOT_VERSION_MAJOR == 4 && GODOT_VERSION_MINOR >= 2);
 
 #include <imgui.h>
 
+#include "ImGuiController.h"
+#include "ImGuiControllerHelper.h"
 #include "ImGuiGD.h"
 #include "ImGuiLayer.h"
-#include "ImGuiLayerHelper.h"
+#include "ImGuiSync.h"
 #include "Viewports.h"
 
 // avoid including cimgui.h elsewhere
@@ -55,13 +57,18 @@ void sync_modules()
 
 void initialize_ign_module(ModuleInitializationLevel p_level)
 {
+    if (p_level == MODULE_INITIALIZATION_LEVEL_SERVERS)
+    {
+        ImGui::CreateContext();
+        ClassDB::register_internal_class<ImGuiSync>();
+    }
+
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
 
-    ImGui::CreateContext();
-
     ClassDB::register_internal_class<ImGuiLayer>();
-    ClassDB::register_internal_class<ImGuiLayerHelper>();
+    ClassDB::register_internal_class<ImGuiControllerHelper>();
+    ClassDB::register_internal_class<ImGuiController>();
     ClassDB::register_class<ImGuiGD>();
     ClassDB::register_internal_class<ImGuiWindow>();
     register_imgui_api();
