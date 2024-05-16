@@ -51,11 +51,9 @@ bool ImGuiGD::ToolInit()
 
     Node* plugin = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiPlugin"));
     ERR_FAIL_COND_V(!plugin, false);
-    if (!plugin->get_node_or_null("ImGuiLayer"))
+    if (!plugin->get_node_or_null("ImGuiController"))
     {
-        ImGuiLayer* igl = memnew(ImGuiLayer);
-        plugin->add_child(igl);
-        igl->set_visible(true);
+        plugin->add_child(memnew(ImGuiController));
     }
     return true;
 #else
