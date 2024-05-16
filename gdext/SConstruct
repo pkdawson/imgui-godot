@@ -49,9 +49,11 @@ else:
 if not os.path.exists("gen/imgui_bindings.gen.h"):
     subprocess.call("python scripts/gds_bindings.py", shell=True)
 
+shutil.copy("imgui-godot-native.gdextension", "../addons/imgui-godot/")
+shutil.copytree("include", "../addons/imgui-godot/include", dirs_exist_ok=True)
+
 sources = Glob("src/*.cpp") + Glob("imgui/*.cpp") + Glob("gen/*.cpp")
 
-shutil.copy("imgui-godot-native.gdextension", "../addons/imgui-godot/")
 (extension_path,) = glob("../addons/imgui-godot/*.gdextension")
 addon_path = Path(extension_path).parent
 project_name = Path(extension_path).stem

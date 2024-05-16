@@ -36,7 +36,7 @@ addons/imgui-godot-native/
 gdext/proj/addons/imgui-godot/
 gdext/samples/project/addons/
 addons/imgui-godot/imgui-godot-native.gdextension
-addons/imgui-godot/include/*.h
+addons/imgui-godot/include/
 scons_cache
 doc/**/addons/
 addons/imgui-godot/include/imgui-version.txt

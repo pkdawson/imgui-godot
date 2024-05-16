@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        gdver: ["4.2.2", "4.3.0-dev.5"]
+        gdver: ["4.2.2", "4.3.0-dev.6"]
 
     steps:
       - uses: actions/checkout@v4
