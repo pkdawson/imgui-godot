@@ -138,7 +138,7 @@ inline void SetMainViewport(Viewport* vp)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("SetMainViewport");
-    detail::ImGuiGD->set(sn, vp);
+    detail::ImGuiGD->call(sn, vp);
 }
 
 inline bool ToolInit()
