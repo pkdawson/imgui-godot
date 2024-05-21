@@ -8,13 +8,13 @@ func _enter_tree():
     # remove obsolete ImGuiLayer autoload
     if ProjectSettings.has_setting("autoload/ImGuiLayer"):
         remove_autoload_singleton("ImGuiLayer")
-    
+
     # warn user if csproj will fail to build
     if "C#" in ProjectSettings.get_setting("application/config/features"):
         var projPath: String = ProjectSettings.get_setting("dotnet/project/solution_directory")
         var fn: String = "%s.csproj" % ProjectSettings.get_setting("dotnet/project/assembly_name")
         check_csproj(projPath.path_join(fn))
-        
+
 func check_csproj(fn):
     var fi := FileAccess.open(fn, FileAccess.READ)
     if !fi:
@@ -29,13 +29,13 @@ func check_csproj(fn):
         var netVer := data.substr(idx, idx_dot - idx).to_int()
         if netVer < 8:
             changesNeeded += "- Set target framework to .NET 8 or later\n"
-            
-    if !data.contains("<AllowUnsafeBlocks>True"):
+
+    if !data.contains("<AllowUnsafeBlocks>"):
         changesNeeded += "- Allow unsafe blocks\n"
-    
+
     if !data.contains("<PackageReference Include=\"ImGui.NET\""):
         changesNeeded += "- Add NuGet package ImGui.NET\n"
-        
+
     if changesNeeded != "":
         var text := "Your .csproj requires the following changes:\n\n%s" % changesNeeded
         push_warning("imgui-godot\n\n%s" % text)
