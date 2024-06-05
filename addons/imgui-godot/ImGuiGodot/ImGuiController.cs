@@ -54,6 +54,7 @@ public partial class ImGuiController : Node
     public override void _Ready()
     {
         ProcessPriority = int.MaxValue;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
     public override void _ExitTree()

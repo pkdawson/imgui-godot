@@ -84,6 +84,7 @@ void ImGuiController::_enter_tree()
 void ImGuiController::_ready()
 {
     set_process_priority(std::numeric_limits<int>::max());
+    set_process_mode(Node::PROCESS_MODE_ALWAYS);
 }
 
 void ImGuiController::_exit_tree()
