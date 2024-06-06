@@ -6,16 +6,19 @@ const csharp_controller := "res://addons/imgui-godot/ImGuiGodot/ImGuiController.
 const csharp_sync := "res://addons/imgui-godot/ImGuiGodot/ImGuiSync.cs"
 
 func _enter_tree():
-    # Engine.register_singleton("ImGuiRoot", self)
-    var features := ProjectSettings.get_setting("application/config/features")
+    var has_csharp := false
+    if ClassDB.class_exists("CSharpScript"):
+        var script := load(csharp_sync)
+        has_csharp = script.get_instance_base_type() == "Object"
+
     if ClassDB.class_exists("ImGuiController"):
         # native
         add_child(ClassDB.instantiate("ImGuiController"))
-        if "C#" in features:
+        if has_csharp:
             var obj: Object = load(csharp_sync).new()
             obj.SyncPtrs()
             obj.free()
     else:
         # C# only
-        if "C#" in features:
+        if has_csharp:
             add_child(load(csharp_controller).new())
