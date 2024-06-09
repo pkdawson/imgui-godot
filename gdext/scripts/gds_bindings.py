@@ -180,7 +180,7 @@ class ReturnType:
 class Param:
     def __init__(self, j):
         self.name = j["name"]
-        self.is_array = j["is_array"]
+        self.is_array = j["is_array"] or self.name == "values" # HACK: because is_array not set
         self.is_varargs = j["is_varargs"]
         if not self.is_varargs:
             self.orig_type = j["type"]["declaration"]

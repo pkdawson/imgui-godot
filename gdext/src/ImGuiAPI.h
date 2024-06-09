@@ -82,27 +82,35 @@ struct GdsArray
     operator T*() { return buf.data(); }
 };
 
+// TODO: take PackedFloat32Array parameters instead
+template <>
+struct GdsArray<const float>
+{
+    std::vector<float> buf;
+
+    GdsArray(Array& arr) : buf(arr.size())
+    {
+        for (int i = 0; i < arr.size(); ++i)
+        {
+            buf[i] = arr[i];
+        }
+    }
+
+    operator const float*() { return buf.data(); }
+};
+
 template <>
 struct GdsArray<const char* const>
 {
-    Array& arr;
     std::vector<CharString> buf;
     std::vector<const char*> ptrs;
 
-    GdsArray(Array& a) : arr(a), buf(a.size()), ptrs(a.size())
+    GdsArray(Array& arr) : buf(arr.size()), ptrs(arr.size())
     {
         for (int i = 0; i < arr.size(); ++i)
         {
             buf[i] = String(arr[i]).utf8();
             ptrs[i] = buf[i].get_data();
-        }
-    }
-
-    ~GdsArray()
-    {
-        for (int i = 0; i < arr.size(); ++i)
-        {
-            arr[i] = buf[i].get_data();
         }
     }
 
