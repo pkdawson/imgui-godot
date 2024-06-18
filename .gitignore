@@ -40,3 +40,4 @@ addons/imgui-godot/include/
 scons_cache
 doc/**/addons/
 addons/imgui-godot/include/imgui-version.txt
+export/
