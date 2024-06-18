@@ -1,0 +1,25 @@
+<Project Sdk="Godot.NET.Sdk/4.2.2">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants
+      Condition="'$(Configuration)'!='ExportRelease' And
+        $(DefineConstants.Contains('GODOT_PC'))">$(DefineConstants);IMGUI</DefineConstants>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('IMGUI'))">
+      <ItemGroup>
+        <PackageReference Include="ImGui.NET" Version="1.90.8.1" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="addons/imgui-godot/**" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+</Project>
