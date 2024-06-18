@@ -11,6 +11,10 @@ func _ready():
     var io := ImGui.GetIO()
     io.ConfigFlags |= ImGui.ConfigFlags_ViewportsEnable
 
+    var style := ImGui.GetStyle()
+    style.Colors[ImGui.Col_PlotHistogram] = Color.REBECCA_PURPLE
+    style.Colors[ImGui.Col_PlotHistogramHovered] = Color.SLATE_BLUE
+
 func _process(_delta: float) -> void:
     ImGui.Begin("hello")
     ImGui.Text("hello from GDScript")

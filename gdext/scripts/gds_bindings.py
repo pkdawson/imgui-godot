@@ -111,6 +111,27 @@ include_structs = (
     # "ImGuiWindowClass",
 )
 
+exclude_props = (
+    "MouseDown",
+    "KeysData",
+    "MouseClickedPos",
+    "MouseClickedTime",
+    "MouseClicked",
+    "MouseDoubleClicked",
+    "MouseClickedCount",
+    "MouseClickedLastCount",
+    "MouseReleased",
+    "MouseDownOwned",
+    "MouseDownOwnedUnlessPopupClose",
+    "MouseDownDuration",
+    "MouseDownDurationPrev",
+    "MouseDragMaxDistanceAbs",
+    "MouseDragMaxDistanceSqr",
+    "KeyMap",
+    "KeysDown",
+    "NavInputs",
+)
+
 array_types = {
     "bool*": "bool",
     "char*": "String",
@@ -338,6 +359,10 @@ class Property:
         "bool": "BOOL",
     }
 
+    array_types = {
+        "ImVec4": "PackedColorArray",
+    }
+
     def __init__(self, j, name, struct_name):
         self.struct_name = struct_name
         self.name = name
@@ -347,9 +372,13 @@ class Property:
         self.valid = False
         if self.is_internal:
             return
+        if self.name in exclude_props:
+            return
         self.gdtype = type_map.get(self.orig_type, None)
         if self.is_array:
-            self.gdtype = None
+            self.array_type, self.array_size = self.orig_type[:-1].split("[")
+            print(self.struct_name, self.name, self.is_array, self.orig_type)
+            self.gdtype = Property.array_types[self.array_type]
         if self.gdtype == "String":
             self.gdtype = None
         self.valid = self.gdtype is not None
@@ -360,6 +389,7 @@ class Property:
         return rv
 
     def gen_def(self):
+        # getter
         rv = f"{self.gdtype} {self.struct_name}::_Get{self.name}() {{ \\\n"
         fcall = f"ptr->{self.name}"
         # TODO: refactor
@@ -367,6 +397,8 @@ class Property:
             fcall = f"ToVector2({fcall})"
         elif self.orig_type in ["ImFont*"]:
             fcall = f"(int64_t){fcall}"
+        elif self.gdtype == "PackedColorArray":
+            fcall = f"ToPackedColorArray({fcall}, {self.array_size})"
 
         dv = "{}"
         if self.gdtype.startswith("BitField"):
@@ -377,13 +409,18 @@ class Property:
         rv += f"if (ptr) return {cast}{fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
+        # setter
         rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
         x = "x"
         if self.orig_type == "ImVec2":
             x = "{x.x, x.y}"
         elif self.orig_type in ["ImFont*"]:
             x = "(ImFont*)x"
-        rv += f"ptr->{self.name} = {x}; \\\n"
+
+        if self.gdtype == "PackedColorArray":
+            rv += f"FromPackedColorArray(x, ptr->{self.name}); \\\n"
+        else:
+            rv += f"ptr->{self.name} = {x}; \\\n"
         rv += "} \\\n"
         return rv
 

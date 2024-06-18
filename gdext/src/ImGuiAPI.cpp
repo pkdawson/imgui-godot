@@ -11,9 +11,29 @@ inline Vector2 ToVector2(ImVec2 v)
     return Vector2(v.x, v.y);
 }
 
-inline Color ToColor(ImVec4 v)
+inline Color ToColor(const ImVec4& v)
 {
     return Color(v.x, v.y, v.z, v.w);
+}
+
+inline ImVec4 FromColor(const Color& c)
+{
+    return ImVec4(c.r, c.g, c.b, c.a);
+}
+
+inline PackedColorArray ToPackedColorArray(ImVec4* colors, int size)
+{
+    PackedColorArray rv;
+    rv.resize(size);
+    for (int i = 0; i < size; ++i)
+        rv[i] = ToColor(colors[i]);
+    return rv;
+}
+
+inline void FromPackedColorArray(const PackedColorArray& in, ImVec4* out)
+{
+    for (int i = 0; i < in.size(); ++i)
+        out[i] = FromColor(in[i]);
 }
 
 const char* sn_to_cstr(const StringName& sn)
