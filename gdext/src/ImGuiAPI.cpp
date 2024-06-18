@@ -52,6 +52,15 @@ namespace ImGui::Godot {
 void register_imgui_api()
 {
     ClassDB::register_class<::ImGui::Godot::ImGui>();
+
+    Engine::get_singleton()->register_singleton("ImGuiAPI", memnew(::ImGui::Godot::ImGui));
+}
+
+void unregister_imgui_api()
+{
+    ::ImGui::Godot::ImGui* api = (::ImGui::Godot::ImGui*)Engine::get_singleton()->get_singleton("ImGuiAPI");
+    Engine::get_singleton()->unregister_singleton("ImGuiAPI");
+    memdelete(api);
 }
 
 void ImGui::_bind_methods()

@@ -23,6 +23,7 @@ static_assert(GODOT_VERSION_MAJOR == 4 && GODOT_VERSION_MINOR >= 2);
 
 namespace ImGui::Godot {
 void register_imgui_api();
+void unregister_imgui_api();
 }
 
 using namespace godot;
@@ -85,6 +86,7 @@ void uninitialize_ign_module(ModuleInitializationLevel p_level)
 
     Engine::get_singleton()->unregister_singleton("ImGuiGD");
     memdelete(gd);
+    unregister_imgui_api();
 }
 
 extern "C" {
