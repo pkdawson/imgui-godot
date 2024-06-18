@@ -18,7 +18,7 @@ inline Color ToColor(const ImVec4& v)
 
 inline ImVec4 FromColor(const Color& c)
 {
-    return ImVec4(c.r, c.g, c.b, c.a);
+    return {c.r, c.g, c.b, c.a};
 }
 
 inline PackedColorArray ToPackedColorArray(ImVec4* colors, int size)
