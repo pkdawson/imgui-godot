@@ -328,6 +328,7 @@ jobs:
           ls -R
           cd doc/examples/GdsGameProject
           mkdir ../export
+          $GODOT --headless --import
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
       - name: Export Debug
