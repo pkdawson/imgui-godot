@@ -329,6 +329,8 @@ jobs:
           cd doc/examples/GdsGameProject
           mkdir ../export
           godotenv addons install
+          timeout 10 $GODOT --headless --import
+          $GODOT --headless --import
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
       - name: Export Debug
