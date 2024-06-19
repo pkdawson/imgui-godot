@@ -328,6 +328,7 @@ jobs:
           ls -R
           cd doc/examples/GdsGameProject
           mkdir ../export
+          godotenv addons install
           $GODOT --headless --import
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
