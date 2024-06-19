@@ -171,7 +171,15 @@ void Viewports::Impl::UpdateMonitors()
     // fix headless
     if (pio.Monitors.size() == 0)
     {
-        pio.Monitors.push_back({});
+        ImGuiPlatformMonitor monitor;
+        monitor.MainPos = {0, 0};
+        monitor.MainSize = {640, 480};
+        monitor.DpiScale = 1.0f;
+
+        monitor.WorkPos = {0, 0};
+        monitor.WorkSize = {640, 480};
+
+        pio.Monitors.push_back(monitor);
     }
 }
 
