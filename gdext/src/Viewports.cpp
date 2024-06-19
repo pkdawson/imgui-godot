@@ -167,6 +167,12 @@ void Viewports::Impl::UpdateMonitors()
 
         pio.Monitors.push_back(monitor);
     }
+
+    // fix headless
+    if (pio.Monitors.size() == 0)
+    {
+        pio.Monitors.push_back({});
+    }
 }
 
 Viewports::Viewports() : impl(std::make_unique<Impl>())
