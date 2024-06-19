@@ -331,7 +331,7 @@ jobs:
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
       - name: Export Debug
-        run:
+        run: |
           cd $GAMEDIR
           $GODOT --headless --export-debug Linux
           cd ../export
@@ -339,7 +339,7 @@ jobs:
           rm -rf *
 
       - name: Export Release
-        run:
+        run: |
           cd $GAMEDIR
           $GODOT --headless --export-release Linux
           cd ../export
