@@ -34,7 +34,7 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
-  
+
       - uses: actions/cache@v4
         id: cache-godot-cpp
         if: github.ref_type != 'tag'
@@ -258,7 +258,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Prepare files
         id: prep_cs
         run: |
@@ -273,9 +273,22 @@ jobs:
           pkgdir=~/out/imgui-godot-${plugin_ver}
           mkdir -p $pkgdir
           mv * $pkgdir
-      
+
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prep_cs.outputs.pkgfn }}
           path: ~/out
+
+  export_linux:
+    name: 🐧Export
+    runs-on: ubuntu-latest
+    needs: [package]
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: imgui-godot-*_imgui*
+
+      - run: |
+          ls -R
