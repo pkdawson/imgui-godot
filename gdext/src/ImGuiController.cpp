@@ -31,7 +31,6 @@ void ImGuiController::Impl::CheckContentScale() const
     }
 }
 
-
 ImGuiController* ImGuiController::Instance()
 {
     return instance;
@@ -62,14 +61,37 @@ void ImGuiController::_enter_tree()
 
     impl->CheckContentScale();
 
-    Ref<PackedScene> cfgPackedScene = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/Config.tscn");
-    Node* cfgScene = cfgPackedScene->instantiate();
-    Ref<Resource> cfg = cfgScene->get("Config");
-    memdelete(cfgScene);
+    ResourceLoader* RL = ResourceLoader::get_singleton();
+    String cfgPath = ProjectSettings::get_singleton()->get_setting("addons/imgui/config", String());
+    Ref<Resource> cfg;
+    if (RL->exists(cfgPath))
+    {
+        cfg = RL->load(cfgPath);
+        bool cfgok = false;
+        TypedArray<Dictionary> propList = cfg->get_property_list();
+        for (int i = 0; i < propList.size(); ++i)
+        {
+            const Dictionary& d = propList[i];
+            if (d.get("name", String()) == String("ImGuiConfig.gd"))
+            {
+                cfgok = true;
+            }
+        }
+
+        if (!cfgok)
+        {
+            UtilityFunctions::push_error("imgui-godot: config not an ImGuiConfig resource: " + cfgPath);
+            cfg = Variant();
+        }
+    }
+    else if (cfgPath.length() > 0)
+    {
+        UtilityFunctions::push_error("imgui-godot: config does not exist: " + cfgPath);
+    }
 
     if (cfg.is_null())
     {
-        Ref<GDScript> script = ResourceLoader::get_singleton()->load("res://addons/imgui-godot/scripts/ImGuiConfig.gd");
+        Ref<GDScript> script = RL->load("res://addons/imgui-godot/scripts/ImGuiConfig.gd");
         cfg = script->new_();
     }
 

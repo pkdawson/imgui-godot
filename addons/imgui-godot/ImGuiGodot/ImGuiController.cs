@@ -36,13 +36,33 @@ public partial class ImGuiController : Node
 
         CheckContentScale();
 
-        Node cfgScene = ResourceLoader.Load<PackedScene>("res://addons/imgui-godot/Config.tscn")
-            .Instantiate();
-        Resource cfg = (Resource)cfgScene.Get("Config") ?? (Resource)((GDScript)GD.Load(
-            "res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New();
-        cfgScene.Free();
+        string cfgPath = (string)ProjectSettings.GetSetting("addons/imgui/config", "");
+        Resource? cfg = null;
+        if (ResourceLoader.Exists(cfgPath))
+        {
+            cfg = ResourceLoader.Load(cfgPath);
+            bool cfgok = false;
+            foreach (var d in cfg.GetPropertyList())
+            {
+                if (d.TryGetValue("name", out var name) && (string)name == "ImGuiConfig.gd")
+                {
+                    cfgok = true;
+                }
+            }
 
-        State.Init(cfg);
+            if (!cfgok)
+            {
+                GD.PushError($"imgui-godot: config not an ImGuiConfig resource: {cfgPath}");
+                cfg = null;
+            }
+        }
+        else if (cfgPath.Length > 0)
+        {
+            GD.PushError($"imgui-godot: config does not exist: {cfgPath}");
+        }
+
+        State.Init(cfg ?? (Resource)((GDScript)GD.Load(
+                "res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New());
 
         _helper = new ImGuiControllerHelper();
         AddChild(_helper);

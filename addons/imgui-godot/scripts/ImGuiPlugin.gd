@@ -14,17 +14,17 @@ func _enter_tree():
     add_export_plugin(_exporter)
 
     # add project setting
-    #var setting_name = "addons/imgui/config"
-    #if not ProjectSettings.has_setting(setting_name):
-        #ProjectSettings.set_setting(setting_name, String())
-    #ProjectSettings.add_property_info({
-        #"name": setting_name,
-        #"type": TYPE_STRING,
-        #"hint": PROPERTY_HINT_FILE,
-        #"hint_string": "*.tres,*.res",
-        #})
-    #ProjectSettings.set_initial_value(setting_name, String())
-    #ProjectSettings.set_as_basic(setting_name, true)
+    var setting_name = "addons/imgui/config"
+    if not ProjectSettings.has_setting(setting_name):
+        ProjectSettings.set_setting(setting_name, String())
+    ProjectSettings.add_property_info({
+        "name": setting_name,
+        "type": TYPE_STRING,
+        "hint": PROPERTY_HINT_FILE,
+        "hint_string": "*.tres,*.res",
+        })
+    ProjectSettings.set_initial_value(setting_name, String())
+    ProjectSettings.set_as_basic(setting_name, true)
 
     # remove obsolete ImGuiLayer autoload
     if ProjectSettings.has_setting("autoload/ImGuiLayer"):
@@ -79,12 +79,14 @@ class ImGuiExporter extends EditorExportPlugin:
 
     func _get_export_options(platform: EditorExportPlatform) -> Array[Dictionary]:
         var rv: Array[Dictionary] = []
+        var desktop_platform := platform.get_os_name() in ["Windows", "macOS", "Linux"]
+
         rv.append({
             "option": {
                 "name": "imgui/debug",
                 "type": TYPE_BOOL,
             },
-            "default_value": true,
+            "default_value": desktop_platform,
         })
         rv.append({
             "option": {
@@ -96,7 +98,6 @@ class ImGuiExporter extends EditorExportPlugin:
         return rv
 
     func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
-        print("BEGIN ", path, " ", flags)
         extension_list_file = PackedByteArray()
         gdext_file = PackedByteArray()
 
@@ -134,7 +135,6 @@ class ImGuiExporter extends EditorExportPlugin:
                 fi.close()
 
     func _export_end() -> void:
-        print("END ", self)
         if not export_imgui:
             # restore autoload
             plugin.add_autoload_singleton("ImGuiRoot", imgui_root)
