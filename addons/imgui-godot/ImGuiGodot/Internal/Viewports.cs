@@ -29,8 +29,11 @@ internal sealed class GodotImGuiWindow : IDisposable
         Window mainWindow = ImGuiController.Instance.GetWindow();
         if (mainWindow.GuiEmbedSubwindows)
         {
-            GD.PushWarning(
-                "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            if ((bool)ProjectSettings.GetSetting("display/window/subwindows/embed_subwindows"))
+            {
+                GD.PushWarning(
+                    "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            }
             mainWindow.GuiEmbedSubwindows = false;
         }
 
@@ -237,6 +240,8 @@ internal sealed partial class Viewports
             monitor.WorkPos = r.Position.ToImVec2();
             monitor.WorkSize = r.Size.ToImVec2();
         }
+
+        // TODO: add monitor if headless
     }
 
     private static unsafe void InitPlatformInterface()
