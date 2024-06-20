@@ -30,8 +30,11 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
         Window* mainWindow = mainvd->window;
         if (mainWindow->is_embedding_subwindows())
         {
-            UtilityFunctions::push_warning(
-                "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            if (ProjectSettings::get_singleton()->get("display/window/subwindows/embed_subwindows"))
+            {
+                UtilityFunctions::push_warning(
+                    "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            }
             mainWindow->set_embedding_subwindows(false);
         }
     }
@@ -164,6 +167,20 @@ void Viewports::Impl::UpdateMonitors()
         Rect2i rect = DS->screen_get_usable_rect(i);
         monitor.WorkPos = rect.position;
         monitor.WorkSize = rect.size;
+
+        pio.Monitors.push_back(monitor);
+    }
+
+    // fix headless
+    if (pio.Monitors.size() == 0)
+    {
+        ImGuiPlatformMonitor monitor;
+        monitor.MainPos = {0, 0};
+        monitor.MainSize = {640, 480};
+        monitor.DpiScale = 1.0f;
+
+        monitor.WorkPos = {0, 0};
+        monitor.WorkSize = {640, 480};
 
         pio.Monitors.push_back(monitor);
     }
