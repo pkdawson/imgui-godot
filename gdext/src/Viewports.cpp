@@ -30,8 +30,11 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
         Window* mainWindow = mainvd->window;
         if (mainWindow->is_embedding_subwindows())
         {
-            UtilityFunctions::push_warning(
-                "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            if (ProjectSettings::get_singleton()->get("display/window/subwindows/embed_subwindows"))
+            {
+                UtilityFunctions::push_warning(
+                    "ImGui Viewports: 'display/window/subwindows/embed_subwindows' needs to be disabled");
+            }
             mainWindow->set_embedding_subwindows(false);
         }
     }
