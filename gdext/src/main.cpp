@@ -1,6 +1,7 @@
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/main_loop.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
@@ -24,7 +25,7 @@ static_assert(GODOT_VERSION_MAJOR == 4 && GODOT_VERSION_MINOR >= 2);
 namespace ImGui::Godot {
 void register_imgui_api();
 void unregister_imgui_api();
-}
+} // namespace ImGui::Godot
 
 using namespace godot;
 using namespace ImGui::Godot;
@@ -77,6 +78,11 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
     gd = memnew(ImGuiGD);
     Engine::get_singleton()->register_singleton("ImGuiGD", gd);
     sync_modules();
+
+    if (!ProjectSettings::get_singleton()->has_setting("autoload/ImGuiRoot"))
+    {
+        UtilityFunctions::push_warning("[imgui-godot] Plugin is not enabled. If you call ImGui methods, your project will crash!");
+    }
 }
 
 void uninitialize_ign_module(ModuleInitializationLevel p_level)
