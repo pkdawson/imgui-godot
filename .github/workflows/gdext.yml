@@ -287,14 +287,14 @@ jobs:
 
     strategy:
       matrix:
-        gdver: ["4.2.2", "4.3.0-beta.1"]
+        gdver: ["4.2.2", "4.3.0-beta.2"]
         include:
           - gdver: "4.2.2"
             gdver_full: 4.2.2.stable
             templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
-          - gdver: "4.3.0-beta.1"
-            gdver_full: 4.3.beta1
-            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta1/Godot_v4.3-beta1_export_templates.tpz
+          - gdver: "4.3.0-beta.2"
+            gdver_full: 4.3.beta2
+            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
 
 
     steps:
