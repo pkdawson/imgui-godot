@@ -101,11 +101,6 @@ class ImGuiExporter extends EditorExportPlugin:
         extension_list_file = PackedByteArray()
         gdext_file = PackedByteArray()
 
-        if ClassDB.class_exists("CSharpScript") and \
-            not "C#" in ProjectSettings.get_setting("application/config/features"):
-            printerr("imgui-godot: EXPORTED PROJECT IS PROBABLY BROKEN/CRASHING")
-            printerr("imgui-godot: can't export non-C# project with 'mono' editor")
-
         if is_debug:
             export_imgui = get_option("imgui/debug")
         else:
