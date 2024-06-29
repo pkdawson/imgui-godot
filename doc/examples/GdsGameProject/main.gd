@@ -1,6 +1,7 @@
 extends Node
 
 func _ready() -> void:
+    # disabling vsync reduces input lag
     if DisplayServer.window_get_vsync_mode() == DisplayServer.VSYNC_DISABLED:
         var refreshRate := DisplayServer.screen_get_refresh_rate()
         Engine.max_fps = int(refreshRate) if refreshRate > 0.0 else 60

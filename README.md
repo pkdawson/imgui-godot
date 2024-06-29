@@ -40,6 +40,8 @@ download the full package which includes GDExtension binaries.
 
 [![download](https://img.shields.io/static/v1?label=imgui-godot&message=latest%20release&color=blueviolet&logo=github)](https://github.com/pkdawson/imgui-godot/releases/latest)
 
+You can also find Dear ImGui for Godot in the Asset Library.
+
 ## Getting Started (C#)
 
 1. Create a project and, if you haven't already added some C# code, use `Project > Tools > C# > Create C# solution`.
@@ -78,9 +80,8 @@ ImGuiGD.Connect(OnImGuiLayout);
 
 ### Configuration
 
-If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then open the
-scene `res://addons/imgui-godot/Config.tscn`, select the `Config` node, and set its `Config`
-property.
+If you want to customize fonts or other settings, create an `ImGuiConfig` resource, then go to
+`Project > Project Settings > Addons > Imgui` and set the `Config` resource path.
 
 ### Widgets
 
@@ -96,17 +97,17 @@ This is the rest of the public API. You typically won't need to call any of thes
 
 That's about it. Everything else is provided by ImGui itself, via ImGui.NET.
 
-### Mobile export
+### Export
 
-ImGui.NET does not support iOS, Android, or web, so all ImGui related code should be conditionally disabled if you want to export for these platforms. For example:
+See the wiki page [Export](https://github.com/pkdawson/imgui-godot/wiki/Export) for details about
+exporting without ImGui, such as for release builds or for mobile platforms.
 
-```csharp
-#if GODOT_PC
-ImGui.Begin("my window");
-// ...
-ImGui.End();
-#endif
-```
+### Examples
+
+There are several [example projects](https://github.com/pkdawson/imgui-godot/tree/master/doc/examples)
+showing off different features. [GdsGameProject](https://github.com/pkdawson/imgui-godot/tree/master/doc/examples/GdsGameProject)
+and [CSharpGameProject](https://github.com/pkdawson/imgui-godot/tree/master/doc/examples/CSharpGameProject)
+try to demonstrate "best practices", particularly for setting up a typical project for export.
 
 ## Package managers
 
@@ -118,7 +119,7 @@ to install and update imgui-godot. The configuration should be something like:
   "addons": {
     "imgui-godot": {
       "url": "https://github.com/pkdawson/imgui-godot",
-      "checkout": "5.x",
+      "checkout": "6.x",
       "subfolder": "addons/imgui-godot"
     }
   }
