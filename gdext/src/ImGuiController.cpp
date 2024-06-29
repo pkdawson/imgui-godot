@@ -72,7 +72,8 @@ void ImGuiController::_enter_tree()
         for (int i = 0; i < propList.size(); ++i)
         {
             const Dictionary& d = propList[i];
-            if (d.get("name", String()) == String("ImGuiConfig.gd"))
+            String name = d.get("name", String());
+            if (name == String("ImGuiConfig.gd"))
             {
                 cfgok = true;
             }
