@@ -53,6 +53,7 @@ struct Context
     Vector2i viewportSize;
     ImGuiLayer* layer = nullptr;
     bool inProcessFrame = false;
+    std::vector<char> iniFilename;
 
     Context(std::unique_ptr<Renderer> r);
     ~Context();

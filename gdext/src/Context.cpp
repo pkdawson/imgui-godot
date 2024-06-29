@@ -187,14 +187,13 @@ void RebuildFontAtlas()
 void SetIniFilename(const String& fn)
 {
     ImGuiIO& io = ImGui::GetIO();
-    static std::vector<char> iniFilename;
     if (fn.length() > 0)
     {
         std::string globalfn = ProjectSettings::get_singleton()->globalize_path(fn).utf8().get_data();
-        iniFilename.resize(globalfn.length() + 1);
-        std::copy(globalfn.begin(), globalfn.end(), iniFilename.begin());
-        iniFilename.back() = '\0';
-        io.IniFilename = iniFilename.data();
+        ctx->iniFilename.resize(globalfn.length() + 1);
+        std::copy(globalfn.begin(), globalfn.end(), ctx->iniFilename.begin());
+        ctx->iniFilename.back() = '\0';
+        io.IniFilename = ctx->iniFilename.data();
     }
     else
         io.IniFilename = nullptr;
