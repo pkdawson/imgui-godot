@@ -361,7 +361,7 @@ jobs:
           - os: macos-14
             name: 🍎Test
 
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} ({{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/download-artifact@v4
@@ -372,6 +372,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Brew
+        if: runner.os == 'macOS'
+        run: |
+          brew install coreutils
 
       - name: Download Godot
         run: |
