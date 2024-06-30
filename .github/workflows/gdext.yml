@@ -390,7 +390,8 @@ jobs:
           cd imgui-godot-*
           cd doc/test
           godotenv addons install
-          timeout 15 $GODOT --headless --import || true
+          mkdir .godot
+          echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
           $GODOT --headless --import
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
