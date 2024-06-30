@@ -19,8 +19,8 @@ runs:
       run: |
         gdver_full=$(echo ${{ inputs.version }} | sed 's:0-::' | sed 's:beta\.:beta:')
         echo "gdver_full=$gdver_full" >> $GITHUB_ENV
-        gdver_url=$(echo ${{ inputs.version }} | sed 's:0-:-:' | sed 's:beta\.:beta:')
-        templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_full}_export_templates.tpz"
+        gdver_url=$(echo ${{ inputs.version }} | sed 's:\.0-:-:' | sed 's:beta\.:beta:')
+        templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
         echo "templates_url=$templates_url" >> $GITHUB_ENV
 
     # 4.2.2 -> 4.2.2.stable
