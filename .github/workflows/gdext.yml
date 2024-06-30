@@ -286,41 +286,19 @@ jobs:
     needs: [package]
 
     strategy:
+      fail-fast: false
       matrix:
         gdver: ["4.2.2", "4.3.0-beta.2"]
-        include:
-          - gdver: "4.2.2"
-            gdver_full: 4.2.2.stable
-            templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
-          - gdver: "4.3.0-beta.2"
-            gdver_full: 4.3.beta2
-            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
-
 
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Install Godot
+        uses: ./.github/actions/install-godot
         with:
-          dotnet-version: 8.0.x
-
-      - name: Download Godot
-        run: |
-          dotnet tool install --global Chickensoft.GodotEnv
-          godotenv godot install ${{ matrix.gdver }} --no-dotnet
-          echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
-
-      - name: Download export templates
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          cd ~/.local/share/godot/export_templates
-          wget -q ${{ matrix.templates_url }}
-          unzip *.tpz
-          rm *.tpz
-          mv templates ${{ matrix.gdver_full }}
+          version: ${{ matrix.gdver }}
 
       - name: Prep
         run: |
@@ -360,21 +338,12 @@ jobs:
           - os: ubuntu-latest
             name: 🐧Test
             test_exe: test.x86_64
-            template_path: $HOME/.local/share/godot/export_templates
           - os: macos-14
             name: 🍎Test
             test_exe: test.app/Contents/MacOS/test
-            template_path: $HOME/Library/Application Support/Godot/export_templates
           - os: windows-latest
             name: 🪟Test
             test_exe: test.exe
-            template_path: $APPDATA/Godot/export_templates
-          - gdver: "4.2.2"
-            gdver_full: 4.2.2.stable
-            templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
-          - gdver: "4.3.0-beta.2"
-            gdver_full: 4.3.beta2
-            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
@@ -385,7 +354,8 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - uses: ./.github/actions/install-godot
+      - name: Install Godot
+        uses: ./.github/actions/install-godot
         with:
           version: ${{ matrix.gdver }}
 
