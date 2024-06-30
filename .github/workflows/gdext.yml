@@ -322,7 +322,6 @@ jobs:
         shell: bash
         run: |
           cd $GAMEDIR
-          ls -R
           $GODOT --headless --export-debug $RUNNER_OS
           cd export
           ./${{ matrix.exe }} --headless --quit-after 10
