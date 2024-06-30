@@ -312,7 +312,7 @@ jobs:
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-debug $RUNNER_OS
-          cd ../export
+          cd export
           ./GdsGameProject.x86_64 --headless --quit-after 10
           rm -rf *
 
@@ -321,7 +321,7 @@ jobs:
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-release $RUNNER_OS
-          cd ../export
+          cd export
           ./GdsGameProject.x86_64 --headless --quit-after 10
 
   test:
