@@ -359,11 +359,11 @@ jobs:
           - os: ubuntu-latest
             name: 🐧Test
             test_exe: test.x86_64
-            template_path: ~/.local/share/godot/export_templates
+            template_path: $HOME/.local/share/godot/export_templates
           - os: macos-14
             name: 🍎Test
             test_exe: test.app/Contents/MacOS/test
-            template_path:  ~/Library/Application Support/Godot/export_templates
+            template_path:  $HOME/Library/Application Support/Godot/export_templates
           - gdver: "4.2.2"
             gdver_full: 4.2.2.stable
             templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
