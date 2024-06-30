@@ -348,3 +348,48 @@ jobs:
           $GODOT --headless --export-release Linux
           cd ../export
           ./GdsGameProject.x86_64 --headless --quit-after 10
+
+  test:
+    needs: [package]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14]
+        gdver: ["4.2.2", "4.3.0-beta.2"]
+        include:
+          - os: ubuntu-latest
+            name: 🐧Test
+          - os: macos-14
+            name: 🍎Test
+
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: imgui-godot-*_imgui*
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Download Godot
+        run: |
+          dotnet tool install --global Chickensoft.GodotEnv
+          godotenv godot install ${{ matrix.gdver }} --no-dotnet
+          echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
+
+      - name: Prep
+        run: |
+          cd imgui-godot-*
+          cd imgui-godot-*
+          cd doc/test
+          godotenv addons install
+          timeout 10 $GODOT --headless --import || true
+          $GODOT --headless --import
+          echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: |
+          cd $GAMEDIR
+          $GODOT --headless --debug
