@@ -404,12 +404,14 @@ jobs:
 
       - name: Export debug
         run: |
+          cd $GAMEDIR
           $GODOT --headless --export-debug $RUNNER_OS
           cd export
           ./${{ matrix.test_exe }} --headless
 
       - name: Export release
         run: |
+          cd $GAMEDIR
           $GODOT --headless --export-release $RUNNER_OS
           cd export
           ./${{ matrix.test_exe }} --headless
