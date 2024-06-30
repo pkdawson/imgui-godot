@@ -396,8 +396,8 @@ jobs:
 
       - name: Download export templates
         run: |
-          mkdir -p ${{ matrix.template_path }}
-          cd ${{ matrix.template_path }}
+          mkdir -p "${{ matrix.template_path }}"
+          cd "${{ matrix.template_path }}"
           wget -q ${{ matrix.templates_url }}
           unzip *.tpz
           rm *.tpz
