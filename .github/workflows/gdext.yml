@@ -402,6 +402,8 @@ jobs:
           unzip *.tpz
           rm *.tpz
           mv templates ${{ matrix.gdver_full }}
+          pwd
+          ls -R
 
       - name: Prep
         run: |
