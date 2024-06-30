@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ImGuiConfig" load_steps=2 format=3 uid="uid://su0bdciskixm"]
+
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiConfig.gd" id="1_o27t7"]
+
+[resource]
+script = ExtResource("1_o27t7")
+Fonts = Array[Resource("res://addons/imgui-godot/scripts/ImGuiFont.gd")]([])
+AddDefaultFont = true
+Scale = 2.0
+IniFilename = "user://imgui.ini"
+Renderer = "RenderingDevice"
+Layer = 128

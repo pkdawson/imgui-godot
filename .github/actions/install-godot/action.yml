@@ -1,0 +1,97 @@
+name: Install Godot
+description: Install Godot
+inputs:
+  version:
+    description: NuGet name
+    required: true
+  dotnet:
+    description: Use .NET build
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    # 4.3.0-beta.2 -> 4.3.beta2
+    # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
+    # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_mono_export_templates.tpz
+    - if: contains(inputs.version, 'beta')
+      shell: bash
+      run: |
+        gdver_full=$(echo ${{ inputs.version }} | sed 's:0-::' | sed 's:beta\.:beta:')
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          gdver_full="$gdver_full.mono"
+        fi
+        echo "gdver_full=$gdver_full" >> $GITHUB_ENV
+        gdver_url=$(echo ${{ inputs.version }} | sed 's:\.0-:-:' | sed 's:beta\.:beta:')
+        templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_url}_mono_export_templates.tpz"
+        fi
+        echo "templates_url=$templates_url" >> $GITHUB_ENV
+
+    # 4.2.2 -> 4.2.2.stable
+    # https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
+    # https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_mono_export_templates.tpz
+    - if: "!contains(inputs.version, 'beta')"
+      shell: bash
+      run: |
+        gdver_full=${{ inputs.version }}.stable
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          gdver_full="$gdver_full.mono"
+        fi
+        echo "gdver_full=$gdver_full" >> $GITHUB_ENV
+        gdver_url=${{ inputs.version }}-stable
+        templates_url="https://github.com/godotengine/godot/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          templates_url="https://github.com/godotengine/godot/releases/download/${gdver_url}/Godot_v${gdver_url}_mono_export_templates.tpz"
+        fi
+        echo "templates_url=$templates_url" >> $GITHUB_ENV
+
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        echo "templates_path=$HOME/.local/share/godot/export_templates" >> $GITHUB_ENV
+
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        echo "templates_path=$HOME/Library/Application Support/Godot/export_templates" >> $GITHUB_ENV
+
+    - if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        choco install wget
+        echo "templates_path=$APPDATA/Godot/export_templates" >> $GITHUB_ENV
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install Godot
+      if: inputs.dotnet != 'true'
+      shell: bash
+      run: |
+        dotnet tool install --global Chickensoft.GodotEnv
+        godotenv godot install ${{ inputs.version }} --no-dotnet
+        echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
+
+    - name: Install Godot (.NET)
+      if: inputs.dotnet == 'true'
+      shell: bash
+      run: |
+        dotnet tool install --global Chickensoft.GodotEnv
+        godotenv godot install ${{ inputs.version }}
+        echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
+
+    - name: Install export templates
+      shell: bash
+      run: |
+        mkdir -p "${{ env.templates_path }}"
+        cd "${{ env.templates_path }}"
+        wget -q ${{ env.templates_url }}
+        unzip *.tpz
+        rm *.tpz
+        mv templates ${{ env.gdver_full }}
+        pwd
+        ls -R

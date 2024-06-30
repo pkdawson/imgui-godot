@@ -1,0 +1,8 @@
+{
+    "addons": {
+        "imgui-godot": {
+            "url": "../../../addons/imgui-godot",
+            "source": "symlink"
+        }
+    }
+}

@@ -1,0 +1,21 @@
+name: Import
+description: Import
+inputs:
+  path:
+    description: Path
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Prep
+      shell: bash
+      run: |
+        cd imgui-godot-*
+        cd imgui-godot-*
+        cd ${{ inputs.path }}
+        godotenv addons install
+        mkdir .godot
+        echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
+        $GODOT --headless --import || true
+        echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV

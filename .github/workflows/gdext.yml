@@ -280,71 +280,136 @@ jobs:
           name: ${{ steps.prep_cs.outputs.pkgfn }}
           path: ~/out
 
-  export_linux:
-    name: 🐧Export
-    runs-on: ubuntu-latest
+  gds_game:
     needs: [package]
-
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
         gdver: ["4.2.2", "4.3.0-beta.2"]
         include:
-          - gdver: "4.2.2"
-            gdver_full: 4.2.2.stable
-            templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
-          - gdver: "4.3.0-beta.2"
-            gdver_full: 4.3.beta2
-            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
+          - os: ubuntu-latest
+            name: 🐧GdsGameProject
+            exe: GdsGameProject.x86_64
+          - os: macos-14
+            name: 🍎GdsGameProject
+            exe: GdsGameProject.app/Contents/MacOS/GdsGameProject
+          - os: windows-latest
+            name: 🪟GdsGameProject
+            exe: GdsGameProject.exe
 
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
+    runs-on: ${{ matrix.os }}
 
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Install Godot
+        uses: ./.github/actions/install-godot
         with:
-          dotnet-version: 8.0.x
+          version: ${{ matrix.gdver }}
 
-      - name: Download Godot
-        run: |
-          dotnet tool install --global Chickensoft.GodotEnv
-          godotenv godot install ${{ matrix.gdver }} --no-dotnet
-          echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
-
-      - name: Download export templates
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          cd ~/.local/share/godot/export_templates
-          wget -q ${{ matrix.templates_url }}
-          unzip *.tpz
-          rm *.tpz
-          mv templates ${{ matrix.gdver_full }}
-
-      - name: Prep
-        run: |
-          cd imgui-godot-*
-          cd imgui-godot-*
-          ls -R
-          cd doc/examples/GdsGameProject
-          mkdir ../export
-          godotenv addons install
-          timeout 10 $GODOT --headless --import || true
-          $GODOT --headless --import
-          echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/examples/GdsGameProject
 
       - name: Export Debug
+        shell: bash
         run: |
           cd $GAMEDIR
-          $GODOT --headless --export-debug Linux
-          cd ../export
-          ./GdsGameProject.x86_64 --headless --quit-after 10
+          $GODOT --headless --export-debug $RUNNER_OS
+
+      # TODO: check output for unexpected errors
+      # Godot 4.2.2 exits with error code 1 on Mac/Win, this is fixed in 4.3
+      # https://github.com/godotengine/godot/pull/89229
+      - name: Run Debug (workaround)
+        if: runner.os != 'Linux' && matrix.gdver == '4.2.2'
+        shell: bash
+        run: |
+          cd $GAMEDIR/export
+          ./${{ matrix.exe }} --headless --quit-after 10 || true
+          rm -rf *
+
+      - name: Run Debug
+        if: runner.os == 'Linux' || matrix.gdver != '4.2.2'
+        shell: bash
+        run: |
+          cd $GAMEDIR/export
+          ./${{ matrix.exe }} --headless --quit-after 10
           rm -rf *
 
       - name: Export Release
+        shell: bash
         run: |
           cd $GAMEDIR
-          $GODOT --headless --export-release Linux
-          cd ../export
-          ./GdsGameProject.x86_64 --headless --quit-after 10
+          $GODOT --headless --export-release $RUNNER_OS
+
+      - name: Run Release (workaround)
+        shell: bash
+        run: |
+          cd $GAMEDIR/export
+          ./${{ matrix.exe }} --headless --quit-after 10 || true
+
+  test:
+    needs: [package]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        gdver: ["4.2.2", "4.3.0-beta.2"]
+        include:
+          - os: ubuntu-latest
+            name: 🐧Test
+            test_exe: test.x86_64
+          - os: macos-14
+            name: 🍎Test
+            test_exe: test.app/Contents/MacOS/test
+          - os: windows-latest
+            name: 🪟Test
+            test_exe: test.exe
+
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: imgui-godot-*_imgui*
+
+      - name: Install Godot
+        uses: ./.github/actions/install-godot
+        with:
+          version: ${{ matrix.gdver }}
+
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/test
+
+      - name: Run tests
+        shell: bash
+        run: |
+          cd $GAMEDIR
+          $GODOT --headless --debug
+
+      - name: Export debug
+        shell: bash
+        run: |
+          cd $GAMEDIR
+          $GODOT --headless --export-debug $RUNNER_OS
+          cd export
+          ./${{ matrix.test_exe }} --headless
+
+      - name: Export release
+        shell: bash
+        run: |
+          cd $GAMEDIR
+          $GODOT --headless --export-release $RUNNER_OS
+          cd export
+          ./${{ matrix.test_exe }} --headless
