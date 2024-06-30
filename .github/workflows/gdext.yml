@@ -358,8 +358,10 @@ jobs:
         include:
           - os: ubuntu-latest
             name: 🐧Test
+            test_exe: test.x86_64
           - os: macos-14
             name: 🍎Test
+            test_exe: test.app/Contents/MacOS/test
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
@@ -399,3 +401,15 @@ jobs:
         run: |
           cd $GAMEDIR
           $GODOT --headless --debug
+
+      - name: Export debug
+        run: |
+          $GODOT --headless --export-debug $RUNNER_OS
+          cd export
+          ./${{ matrix.test_exe }} --headless
+
+      - name: Export release
+        run: |
+          $GODOT --headless --export-release $RUNNER_OS
+          cd export
+          ./${{ matrix.test_exe }} --headless

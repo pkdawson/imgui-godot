@@ -67,21 +67,12 @@ void ImGuiController::_enter_tree()
     if (RL->exists(cfgPath))
     {
         cfg = RL->load(cfgPath);
-        bool cfgok = false;
-        TypedArray<Dictionary> propList = cfg->get_property_list();
-        for (int i = 0; i < propList.size(); ++i)
-        {
-            const Dictionary& d = propList[i];
-            String name = d.get("name", String());
-            if (name == String("ImGuiConfig.gd"))
-            {
-                cfgok = true;
-            }
-        }
+        float scale = cfg->get("Scale");
+        bool cfgok = scale > 0.0f;
 
         if (!cfgok)
         {
-            UtilityFunctions::push_error("imgui-godot: config not an ImGuiConfig resource: " + cfgPath);
+            UtilityFunctions::push_error("imgui-godot: config not a valid ImGuiConfig resource: " + cfgPath);
             cfg = Variant();
         }
     }
