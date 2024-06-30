@@ -15,45 +15,40 @@ runs:
     # 4.3.0-beta.2 -> 4.3.beta2
     # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
     - if: contains(inputs.version, 'beta')
-      id: vars
       shell: bash
       run: |
         gdver_full=$(echo ${{ inputs.version }} | sed 's:0-::' | sed 's:beta\.:beta:')
-        echo "gdver_full=$gdver_full" >> $GITHUB_OUTPUT
+        echo "gdver_full=$gdver_full" >> $GITHUB_ENV
         gdver_url=$(echo ${{ inputs.version }} | sed 's:0-:-:' | sed 's:beta\.:beta:')
         templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_full}_export_templates.tpz"
-        echo "templates_url=$templates_url" >> $GITHUB_OUTPUT
+        echo "templates_url=$templates_url" >> $GITHUB_ENV
 
     # 4.2.2 -> 4.2.2.stable
     # https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
     - if: "!contains(inputs.version, 'beta')"
-      id: vars
       shell: bash
       run: |
         gdver_full=${{ inputs.version }}.stable
-        echo "gdver_full=$gdver_full" >> $GITHUB_OUTPUT
+        echo "gdver_full=$gdver_full" >> $GITHUB_ENV
         gdver_url=${{ inputs.version }}-stable
         templates_url="https://github.com/godotengine/godot/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
-        echo "templates_url=$templates_url" >> $GITHUB_OUTPUT
+        echo "templates_url=$templates_url" >> $GITHUB_ENV
 
     - if: runner.os == 'Linux'
-      id: osvars
       shell: bash
       run: |
-        echo "templates_path=\"$HOME/.local/share/godot/export_templates\"" >> $GITHUB_OUTPUT
+        echo "templates_path=\"$HOME/.local/share/godot/export_templates\"" >> $GITHUB_ENV
 
     - if: runner.os == 'macOS'
-      id: osvars
       shell: bash
       run: |
-        echo "templates_path=\"$HOME/Library/Application Support/Godot/export_templates\"" >> $GITHUB_OUTPUT
+        echo "templates_path=\"$HOME/Library/Application Support/Godot/export_templates\"" >> $GITHUB_ENV
 
     - if: runner.os == 'Windows'
-      id: osvars
       shell: bash
       run: |
         choco install wget
-        echo "templates_path=\"$APPDATA/Godot/export_templates\"" >> $GITHUB_OUTPUT
+        echo "templates_path=\"$APPDATA/Godot/export_templates\"" >> $GITHUB_ENV
 
     - uses: actions/setup-dotnet@v4
       with:
@@ -78,11 +73,11 @@ runs:
     - name: Download export templates
       shell: bash
       run: |
-        mkdir -p "${{ steps.osvars.templates_path }}"
-        cd "${{ steps.osvars.templates_path }}"
-        wget -q ${{ steps.vars.templates_url }}
+        mkdir -p "${{ env.templates_path }}"
+        cd "${{ env.templates_path }}"
+        wget -q ${{ env.templates_url }}
         unzip *.tpz
         rm *.tpz
-        mv templates ${{ steps.vars.gdver_full }}
+        mv templates ${{ env.gdver_full }}
         pwd
         ls -R
