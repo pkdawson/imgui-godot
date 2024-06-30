@@ -363,7 +363,7 @@ jobs:
           - os: macos-14
             name: 🍎Test
             test_exe: test.app/Contents/MacOS/test
-            template_path:  $HOME/Library/Application Support/Godot/export_templates
+            template_path: $HOME/Library/Application Support/Godot/export_templates
           - os: windows-latest
             name: 🪟Test
             test_exe: test.exe
@@ -387,35 +387,9 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Brew
-        if: runner.os == 'macOS'
-        run: |
-          brew install coreutils
-
-      - name: Choco
-        if: runner.os == 'Windows'
-        run: |
-          choco install wget
-
-      - name: Download Godot
-        shell: bash
-        run: |
-          env
-          dotnet tool install --global Chickensoft.GodotEnv
-          godotenv godot install ${{ matrix.gdver }} --no-dotnet
-          echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
-
-      - name: Download export templates
-        shell: bash
-        run: |
-          mkdir -p "${{ matrix.template_path }}"
-          cd "${{ matrix.template_path }}"
-          wget -q ${{ matrix.templates_url }}
-          unzip *.tpz
-          rm *.tpz
-          mv templates ${{ matrix.gdver_full }}
-          pwd
-          ls -R
+      - uses: ./.github/actions/install-godot
+        with:
+          version: ${{ matrix.gdver }}
 
       - name: Prep
         shell: bash
