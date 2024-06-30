@@ -291,6 +291,8 @@ jobs:
         gdver: ["4.2.2", "4.3.0-beta.2"]
 
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           pattern: imgui-godot-*_imgui*
@@ -300,19 +302,13 @@ jobs:
         with:
           version: ${{ matrix.gdver }}
 
-      - name: Prep
-        run: |
-          cd imgui-godot-*
-          cd imgui-godot-*
-          ls -R
-          cd doc/examples/GdsGameProject
-          mkdir ../export
-          godotenv addons install
-          timeout 10 $GODOT --headless --import || true
-          $GODOT --headless --import
-          echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/examples/GdsGameProject
 
       - name: Export Debug
+        shell: bash
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-debug $RUNNER_OS
@@ -321,6 +317,7 @@ jobs:
           rm -rf *
 
       - name: Export Release
+        shell: bash
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-release $RUNNER_OS
@@ -359,17 +356,10 @@ jobs:
         with:
           version: ${{ matrix.gdver }}
 
-      - name: Prep
-        shell: bash
-        run: |
-          cd imgui-godot-*
-          cd imgui-godot-*
-          cd doc/test
-          godotenv addons install
-          mkdir .godot
-          echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
-          $GODOT --headless --import || true
-          echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/test
 
       - name: Run tests
         shell: bash
