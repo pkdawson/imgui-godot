@@ -378,14 +378,11 @@ jobs:
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           pattern: imgui-godot-*_imgui*
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
 
       - uses: ./.github/actions/install-godot
         with:
