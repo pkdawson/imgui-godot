@@ -6,8 +6,7 @@ inputs:
     required: true
   dotnet:
     description: Use .NET build
-    required: false
-    default: 'false'
+    required: true
 
 runs:
   using: composite
@@ -70,7 +69,8 @@ runs:
         godotenv godot install ${{ inputs.version }}
         echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
 
-    - name: Download export templates
+    # TODO: .NET templates
+    - name: Install export templates
       shell: bash
       run: |
         mkdir -p "${{ env.templates_path }}"

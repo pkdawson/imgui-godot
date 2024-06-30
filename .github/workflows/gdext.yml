@@ -387,6 +387,7 @@ jobs:
       - uses: ./.github/actions/install-godot
         with:
           version: ${{ matrix.gdver }}
+          dotnet: false
 
       - name: Prep
         shell: bash
