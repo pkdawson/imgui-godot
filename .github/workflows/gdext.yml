@@ -362,6 +362,12 @@ jobs:
           - os: macos-14
             name: 🍎Test
             test_exe: test.app/Contents/MacOS/test
+          - gdver: "4.2.2"
+            gdver_full: 4.2.2.stable
+            templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
+          - gdver: "4.3.0-beta.2"
+            gdver_full: 4.3.beta2
+            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
@@ -385,6 +391,15 @@ jobs:
           dotnet tool install --global Chickensoft.GodotEnv
           godotenv godot install ${{ matrix.gdver }} --no-dotnet
           echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
+
+      - name: Download export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          cd ~/.local/share/godot/export_templates
+          wget -q ${{ matrix.templates_url }}
+          unzip *.tpz
+          rm *.tpz
+          mv templates ${{ matrix.gdver_full }}
 
       - name: Prep
         run: |
