@@ -337,7 +337,7 @@ jobs:
       - name: Export Debug
         run: |
           cd $GAMEDIR
-          $GODOT --headless --export-debug Linux
+          $GODOT --headless --export-debug $RUNNER_OS
           cd ../export
           ./GdsGameProject.x86_64 --headless --quit-after 10
           rm -rf *
@@ -345,7 +345,7 @@ jobs:
       - name: Export Release
         run: |
           cd $GAMEDIR
-          $GODOT --headless --export-release Linux
+          $GODOT --headless --export-release $RUNNER_OS
           cd ../export
           ./GdsGameProject.x86_64 --headless --quit-after 10
 
@@ -361,7 +361,7 @@ jobs:
           - os: macos-14
             name: 🍎Test
 
-    name: ${{ matrix.name }} ({{ matrix.gdver }})
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/download-artifact@v4
@@ -390,7 +390,7 @@ jobs:
           cd imgui-godot-*
           cd doc/test
           godotenv addons install
-          timeout 10 $GODOT --headless --import || true
+          timeout 15 $GODOT --headless --import || true
           $GODOT --headless --import
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
