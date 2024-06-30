@@ -37,18 +37,18 @@ runs:
     - if: runner.os == 'Linux'
       shell: bash
       run: |
-        echo "templates_path=\"$HOME/.local/share/godot/export_templates\"" >> $GITHUB_ENV
+        echo "templates_path=$HOME/.local/share/godot/export_templates" >> $GITHUB_ENV
 
     - if: runner.os == 'macOS'
       shell: bash
       run: |
-        echo "templates_path=\"$HOME/Library/Application Support/Godot/export_templates\"" >> $GITHUB_ENV
+        echo "templates_path=$HOME/Library/Application Support/Godot/export_templates" >> $GITHUB_ENV
 
     - if: runner.os == 'Windows'
       shell: bash
       run: |
         choco install wget
-        echo "templates_path=\"$APPDATA/Godot/export_templates\"" >> $GITHUB_ENV
+        echo "templates_path=$APPDATA/Godot/export_templates" >> $GITHUB_ENV
 
     - uses: actions/setup-dotnet@v4
       with:
