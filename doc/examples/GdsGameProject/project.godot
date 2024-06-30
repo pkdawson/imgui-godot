@@ -32,3 +32,7 @@ window/vsync/vsync_mode=0
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

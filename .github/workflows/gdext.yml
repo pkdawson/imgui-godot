@@ -296,7 +296,7 @@ jobs:
             exe: GdsGameProject.app/Contents/MacOS/GdsGameProject
           - os: windows-latest
             name: 🪟GdsGameProject
-            exe: test.exe
+            exe: GdsGameProject.exe
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
