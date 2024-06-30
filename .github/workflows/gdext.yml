@@ -353,7 +353,7 @@ jobs:
     needs: [package]
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-14]
+        os: [ubuntu-latest, macos-14, windows-latest]
         gdver: ["4.2.2", "4.3.0-beta.2"]
         include:
           - os: ubuntu-latest
@@ -364,6 +364,10 @@ jobs:
             name: 🍎Test
             test_exe: test.app/Contents/MacOS/test
             template_path:  $HOME/Library/Application Support/Godot/export_templates
+          - os: windows-latest
+            name: 🪟Test
+            test_exe: test.exe
+            template_path: $HOME/AppData
           - gdver: "4.2.2"
             gdver_full: 4.2.2.stable
             templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
@@ -389,12 +393,15 @@ jobs:
           brew install coreutils
 
       - name: Download Godot
+        shell: bash
         run: |
+          env
           dotnet tool install --global Chickensoft.GodotEnv
           godotenv godot install ${{ matrix.gdver }} --no-dotnet
           echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
 
       - name: Download export templates
+        shell: bash
         run: |
           mkdir -p "${{ matrix.template_path }}"
           cd "${{ matrix.template_path }}"
@@ -406,6 +413,7 @@ jobs:
           ls -R
 
       - name: Prep
+        shell: bash
         run: |
           cd imgui-godot-*
           cd imgui-godot-*
@@ -417,11 +425,13 @@ jobs:
           echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
 
       - name: Run tests
+        shell: bash
         run: |
           cd $GAMEDIR
           $GODOT --headless --debug
 
       - name: Export debug
+        shell: bash
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-debug $RUNNER_OS
@@ -429,6 +439,7 @@ jobs:
           ./${{ matrix.test_exe }} --headless
 
       - name: Export release
+        shell: bash
         run: |
           cd $GAMEDIR
           $GODOT --headless --export-release $RUNNER_OS
