@@ -12,28 +12,40 @@ inputs:
 runs:
   using: composite
   steps:
-    # TODO: .NET templates
-
     # 4.3.0-beta.2 -> 4.3.beta2
     # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
+    # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_mono_export_templates.tpz
     - if: contains(inputs.version, 'beta')
       shell: bash
       run: |
         gdver_full=$(echo ${{ inputs.version }} | sed 's:0-::' | sed 's:beta\.:beta:')
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          gdver_full="$gdver_full.mono"
+        fi
         echo "gdver_full=$gdver_full" >> $GITHUB_ENV
         gdver_url=$(echo ${{ inputs.version }} | sed 's:\.0-:-:' | sed 's:beta\.:beta:')
         templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          templates_url="https://github.com/godotengine/godot-builds/releases/download/${gdver_url}/Godot_v${gdver_url}_mono_export_templates.tpz"
+        fi
         echo "templates_url=$templates_url" >> $GITHUB_ENV
 
     # 4.2.2 -> 4.2.2.stable
     # https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
+    # https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_mono_export_templates.tpz
     - if: "!contains(inputs.version, 'beta')"
       shell: bash
       run: |
         gdver_full=${{ inputs.version }}.stable
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          gdver_full="$gdver_full.mono"
+        fi
         echo "gdver_full=$gdver_full" >> $GITHUB_ENV
         gdver_url=${{ inputs.version }}-stable
         templates_url="https://github.com/godotengine/godot/releases/download/${gdver_url}/Godot_v${gdver_url}_export_templates.tpz"
+        if [[ "${{ inputs.dotnet}}" == "true" ]]; then
+          templates_url="https://github.com/godotengine/godot/releases/download/${gdver_url}/Godot_v${gdver_url}_mono_export_templates.tpz"
+        fi
         echo "templates_url=$templates_url" >> $GITHUB_ENV
 
     - if: runner.os == 'Linux'

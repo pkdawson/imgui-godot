@@ -280,15 +280,26 @@ jobs:
           name: ${{ steps.prep_cs.outputs.pkgfn }}
           path: ~/out
 
-  export_linux:
-    name: 🐧Export
-    runs-on: ubuntu-latest
+  gds_game:
     needs: [package]
-
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
         gdver: ["4.2.2", "4.3.0-beta.2"]
+        include:
+          - os: ubuntu-latest
+            name: 🐧GdsGameProject
+            exe: GdsGameProject.x86_64
+          - os: macos-14
+            name: 🍎GdsGameProject
+            exe: GdsGameProject.app/Contents/MacOS/GdsGameProject
+          - os: windows-latest
+            name: 🪟GdsGameProject
+            exe: test.exe
+
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -311,9 +322,10 @@ jobs:
         shell: bash
         run: |
           cd $GAMEDIR
+          ls -R
           $GODOT --headless --export-debug $RUNNER_OS
           cd export
-          ./GdsGameProject.x86_64 --headless --quit-after 10
+          ./${{ matrix.exe }} --headless --quit-after 10
           rm -rf *
 
       - name: Export Release
@@ -322,7 +334,7 @@ jobs:
           cd $GAMEDIR
           $GODOT --headless --export-release $RUNNER_OS
           cd export
-          ./GdsGameProject.x86_64 --headless --quit-after 10
+          ./${{ matrix.exe }} --headless --quit-after 10
 
   test:
     needs: [package]
