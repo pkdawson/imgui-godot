@@ -6,11 +6,14 @@ inputs:
     required: true
   dotnet:
     description: Use .NET build
-    required: true
+    required: false
+    default: 'false'
 
 runs:
   using: composite
   steps:
+    # TODO: .NET templates
+
     # 4.3.0-beta.2 -> 4.3.beta2
     # https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_export_templates.tpz
     - if: contains(inputs.version, 'beta')
@@ -54,7 +57,7 @@ runs:
         dotnet-version: 8.0.x
 
     - name: Install Godot
-      if: "!inputs.dotnet"
+      if: inputs.dotnet != 'true'
       shell: bash
       run: |
         dotnet tool install --global Chickensoft.GodotEnv
@@ -62,14 +65,13 @@ runs:
         echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
 
     - name: Install Godot (.NET)
-      if: inputs.dotnet
+      if: inputs.dotnet == 'true'
       shell: bash
       run: |
         dotnet tool install --global Chickensoft.GodotEnv
         godotenv godot install ${{ inputs.version }}
         echo "GODOT=$(godotenv godot env path)" >> $GITHUB_ENV
 
-    # TODO: .NET templates
     - name: Install export templates
       shell: bash
       run: |
