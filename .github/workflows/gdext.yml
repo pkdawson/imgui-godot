@@ -367,7 +367,7 @@ jobs:
           - os: windows-latest
             name: 🪟Test
             test_exe: test.exe
-            template_path: $HOME/AppData
+            template_path: $APPDATA/Godot/export_templates
           - gdver: "4.2.2"
             gdver_full: 4.2.2.stable
             templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
@@ -391,6 +391,11 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install coreutils
+
+      - name: Choco
+        if: runner.os == 'Windows'
+        run: |
+          choco install wget
 
       - name: Download Godot
         shell: bash
