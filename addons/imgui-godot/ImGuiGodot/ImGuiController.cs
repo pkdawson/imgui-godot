@@ -41,18 +41,12 @@ public partial class ImGuiController : Node
         if (ResourceLoader.Exists(cfgPath))
         {
             cfg = ResourceLoader.Load(cfgPath);
-            bool cfgok = false;
-            foreach (var d in cfg.GetPropertyList())
-            {
-                if (d.TryGetValue("name", out var name) && (string)name == "ImGuiConfig.gd")
-                {
-                    cfgok = true;
-                }
-            }
+            float scale = (float)cfg.Get("Scale");
+            bool cfgok = scale > 0.0f;
 
             if (!cfgok)
             {
-                GD.PushError($"imgui-godot: config not an ImGuiConfig resource: {cfgPath}");
+                GD.PushError($"imgui-godot: config not a valid ImGuiConfig resource: {cfgPath}");
                 cfg = null;
             }
         }
