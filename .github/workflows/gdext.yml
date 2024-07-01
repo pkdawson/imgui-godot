@@ -313,6 +313,8 @@ jobs:
           pattern: imgui-godot-*_imgui*
 
       - uses: chickensoft-games/setup-godot@v2
+        env:
+          ACTIONS_RUNTIME_TOKEN:
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: false
@@ -392,6 +394,8 @@ jobs:
           pattern: imgui-godot-*_imgui*
 
       - uses: chickensoft-games/setup-godot@v2
+        env:
+          ACTIONS_RUNTIME_TOKEN:
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: false
@@ -439,6 +443,8 @@ jobs:
           pattern: imgui-godot-*_imgui*
 
       - uses: chickensoft-games/setup-godot@v2
+        env:
+          ACTIONS_RUNTIME_TOKEN:
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: true
