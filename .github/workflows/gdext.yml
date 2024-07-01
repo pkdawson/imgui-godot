@@ -282,6 +282,8 @@ jobs:
 
   gds_game:
     needs: [package]
+    env:
+      ACTIONS_CACHE_URL:
     strategy:
       fail-fast: false
       matrix:
@@ -362,6 +364,8 @@ jobs:
 
   test_gdscript:
     needs: [package]
+    env:
+      ACTIONS_CACHE_URL:
     strategy:
       fail-fast: false
       matrix:
@@ -392,6 +396,8 @@ jobs:
           pattern: imgui-godot-*_imgui*
 
       - uses: chickensoft-games/setup-godot@v2
+        env:
+          ACTIONS_CACHE_URL:
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: false
@@ -439,6 +445,8 @@ jobs:
           pattern: imgui-godot-*_imgui*
 
       - uses: chickensoft-games/setup-godot@v2
+        env:
+          ACTIONS_CACHE_URL:
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: true

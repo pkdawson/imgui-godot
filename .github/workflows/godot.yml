@@ -4,6 +4,9 @@ on:
   - push
   - pull_request
 
+env:
+  ACTIONS_CACHE_URL:
+
 jobs:
   test_csharp_only:
     strategy:
