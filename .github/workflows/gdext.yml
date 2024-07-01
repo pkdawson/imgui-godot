@@ -317,6 +317,7 @@ jobs:
           version: ${{ matrix.gdver }}
           use-dotnet: false
           include-templates: true
+          cache: false
 
       - name: Import
         uses: ./.github/actions/import
@@ -396,6 +397,7 @@ jobs:
           version: ${{ matrix.gdver }}
           use-dotnet: false
           include-templates: true
+          cache: false
 
       - name: Import
         uses: ./.github/actions/import
@@ -443,6 +445,7 @@ jobs:
           version: ${{ matrix.gdver }}
           use-dotnet: true
           include-templates: true
+          cache: false
 
       - name: Import
         uses: ./.github/actions/import
