@@ -17,6 +17,5 @@ runs:
         godotenv addons install
         mkdir .godot
         echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
-        sleep 1
         $GODOT --headless --import || true
         echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
