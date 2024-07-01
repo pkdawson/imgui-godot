@@ -297,6 +297,10 @@ jobs:
           - os: windows-latest
             name: 🪟GdsGameProject
             exe: GdsGameProject.exe
+        exclude:
+          # frequently gets stuck on import despite workaround
+          - os: windows-latest
+            gdver: "4.2.2"
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
@@ -308,10 +312,12 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: pkdawson/setup-godot@cache-option
         with:
           version: ${{ matrix.gdver }}
+          use-dotnet: false
+          include-templates: true
+          cache: false
 
       - name: Import
         uses: ./.github/actions/import
@@ -355,7 +361,7 @@ jobs:
           cd $GAMEDIR/export
           ./${{ matrix.exe }} --headless --quit-after 10 || true
 
-  test:
+  test_gdscript:
     needs: [package]
     strategy:
       fail-fast: false
@@ -364,14 +370,18 @@ jobs:
         gdver: ["4.2.2", "4.3.0-beta.2"]
         include:
           - os: ubuntu-latest
-            name: 🐧Test
-            test_exe: test.x86_64
+            name: 🐧🧪GDScript
+            exe: test.x86_64
           - os: macos-14
-            name: 🍎Test
-            test_exe: test.app/Contents/MacOS/test
+            name: 🍎🧪GDScript
+            exe: test.app/Contents/MacOS/test
           - os: windows-latest
-            name: 🪟Test
-            test_exe: test.exe
+            name: 🪟🧪GDScript
+            exe: test.exe
+        exclude:
+          # frequently gets stuck on import despite workaround
+          - os: windows-latest
+            gdver: "4.2.2"
 
     name: ${{ matrix.name }} (${{ matrix.gdver }})
     runs-on: ${{ matrix.os }}
@@ -382,34 +392,73 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
+          use-dotnet: false
+          include-templates: true
+          cache: false
 
       - name: Import
         uses: ./.github/actions/import
         with:
-          path: doc/test
+          path: doc/test/gdscript
 
       - name: Run tests
-        shell: bash
-        run: |
-          cd $GAMEDIR
-          $GODOT --headless --debug
+        uses: ./.github/actions/run-test-project
+        with:
+          exe: ${{ matrix.exe }}
 
-      - name: Export debug
-        shell: bash
-        run: |
-          cd $GAMEDIR
-          $GODOT --headless --export-debug $RUNNER_OS
-          cd export
-          ./${{ matrix.test_exe }} --headless
+  test_csharp:
+    needs: [package]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        gdver: ["4.2.2", "4.3.0-beta.2"]
+        include:
+          - os: ubuntu-latest
+            name: 🐧🧪C#
+            exe: test.x86_64
+          - os: macos-14
+            name: 🍎🧪C#
+            exe: test.app/Contents/MacOS/test
+          - os: windows-latest
+            name: 🪟🧪C#
+            exe: test.exe
+        exclude:
+          # frequently gets stuck on import despite workaround
+          - os: windows-latest
+            gdver: "4.2.2"
 
-      - name: Export release
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: imgui-godot-*_imgui*
+
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ matrix.gdver }}
+          use-dotnet: true
+          include-templates: true
+          cache: false
+
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/test/csharp
+
+      - name: Build
         shell: bash
         run: |
           cd $GAMEDIR
-          $GODOT --headless --export-release $RUNNER_OS
-          cd export
-          ./${{ matrix.test_exe }} --headless
+          dotnet build
+
+      - name: Run tests
+        uses: ./.github/actions/run-test-project
+        with:
+          exe: ${{ matrix.exe }}

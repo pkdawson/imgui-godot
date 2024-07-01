@@ -8,14 +8,24 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install GodotEnv
+      shell: bash
+      run: |
+        dotnet tool install --global Chickensoft.GodotEnv
+
     - name: Prep
       shell: bash
       run: |
-        cd imgui-godot-*
-        cd imgui-godot-*
+        cd imgui-godot-*/imgui-godot-* || true
         cd ${{ inputs.path }}
         godotenv addons install
-        mkdir .godot
-        echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
+        if [[ -f addons/imgui-godot/imgui-godot-native.gdextension ]]; then
+          mkdir .godot
+          echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
+        fi
         $GODOT --headless --import || true
         echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV

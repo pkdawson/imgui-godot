@@ -1,63 +1,51 @@
 name: 🤖 Godot Checks
 
 on:
-  push:
-    branches-ignore:
-      - godot3
-  pull_request:
-    branches-ignore:
-      - godot3
+  - push
+  - pull_request
 
 jobs:
-  linux_dotnet:
-    name: 🐧.NET Only
-    runs-on: ubuntu-latest
-
+  test_csharp_only:
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
         gdver: ["4.2.2", "4.3.0-beta.2"]
         include:
-          - gdver: "4.2.2"
-            gdver_full: 4.2.2.stable.mono
-            templates_url: https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_mono_export_templates.tpz
-          - gdver: "4.3.0-beta.2"
-            gdver_full: 4.3.beta2.mono
-            templates_url: https://github.com/godotengine/godot-builds/releases/download/4.3-beta2/Godot_v4.3-beta2_mono_export_templates.tpz
+          - os: ubuntu-latest
+            name: 🐧🧪C# Only
+            exe: test.x86_64
+          - os: macos-14
+            name: 🍎🧪C# Only
+            exe: test.app/Contents/MacOS/test
+          - os: windows-latest
+            name: 🪟🧪C# Only
+            exe: test.exe
 
+    name: ${{ matrix.name }} (${{ matrix.gdver }})
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: pkdawson/setup-godot@cache-option
         with:
-          dotnet-version: 8.0.x
+          version: ${{ matrix.gdver }}
+          use-dotnet: true
+          include-templates: true
+          cache: false
 
-      - name: Download Godot
-        run: |
-          dotnet tool install --global Chickensoft.GodotEnv
-          godotenv godot install ${{ matrix.gdver }}
+      - name: Import
+        uses: ./.github/actions/import
+        with:
+          path: doc/test/csharp
 
-      - name: Import resources and build
+      - name: Build
+        shell: bash
         run: |
+          cd $GAMEDIR
           dotnet build
-          $(godotenv godot env path) --headless --import
 
-      - name: Run project
-        run: |
-          $(godotenv godot env path) --headless --quit-after 10
-
-      - name: Download export templates
-        run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          cd ~/.local/share/godot/export_templates
-          wget -q ${{ matrix.templates_url }}
-          unzip *.tpz
-          rm *.tpz
-          mv templates ${{ matrix.gdver_full }}
-
-      - name: Export
-        run: |
-          mkdir export
-          $(godotenv godot env path) --headless --export-release Linux
-          cd export
-          ./demo --headless --quit-after 10
+      - name: Run tests
+        uses: ./.github/actions/run-test-project
+        with:
+          exe: ${{ matrix.exe }}

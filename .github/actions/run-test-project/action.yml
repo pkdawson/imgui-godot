@@ -1,0 +1,33 @@
+name: Run test project
+description: Run test project
+inputs:
+  exe:
+    description: Executable
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Run tests
+      shell: bash
+      run: |
+        cd $GAMEDIR
+        $GODOT --headless --debug
+
+    - name: Export debug
+      shell: bash
+      run: |
+        cd $GAMEDIR
+        $GODOT --headless --export-debug $RUNNER_OS
+        cd export
+        ./${{ inputs.exe }} --headless
+        rm -rf *
+
+    - name: Export release
+      shell: bash
+      run: |
+        cd $GAMEDIR
+        $GODOT --headless --export-release $RUNNER_OS
+        cd export
+        ./${{ inputs.exe }} --headless
+        rm -rf *
