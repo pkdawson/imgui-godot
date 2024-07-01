@@ -18,28 +18,6 @@
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
-
-using godot::AtlasTexture;
-using godot::Callable;
-using godot::CharString;
-using godot::Color;
-using godot::Engine;
-using godot::FontFile;
-using godot::InputEvent;
-using godot::JoyButton;
-using godot::Key;
-using godot::Object;
-using godot::PackedInt32Array;
-using godot::Ref;
-using godot::Resource;
-using godot::RID;
-using godot::String;
-using godot::SubViewport;
-using godot::Texture2D;
-using godot::TypedArray;
-using godot::Vector2;
-using godot::Viewport;
-using godot::Window;
 #else
 // module
 #include "core/config/engine.h"
@@ -52,12 +30,34 @@ using godot::Window;
 #include "scene/resources/texture.h"
 #endif
 
-static_assert(sizeof(RID) == 8);
 static_assert(sizeof(void*) == 8);
 static_assert(sizeof(ImDrawIdx) == 2);
 static_assert(sizeof(ImWchar) == 2);
 
 namespace ImGui::Godot {
+
+#if defined(IGN_GDEXT)
+using godot::AtlasTexture;
+using godot::Callable;
+using godot::ClassDB;
+using godot::Color;
+using godot::Engine;
+using godot::FontFile;
+using godot::JoyButton;
+using godot::Key;
+using godot::Object;
+using godot::PackedInt32Array;
+using godot::Ref;
+using godot::RID;
+using godot::String;
+using godot::StringName;
+using godot::Texture2D;
+using godot::TypedArray;
+using godot::Vector2;
+using godot::Viewport;
+#endif
+
+static_assert(sizeof(RID) == 8);
 #ifndef IGN_EXPORT
 // C++ user interface
 namespace detail {
@@ -675,6 +675,14 @@ inline ImGuiKey ToImGuiKey(JoyButton btn)
 #ifndef IGN_EXPORT
 // widgets
 namespace ImGui {
+#if defined(IGN_GDEXT)
+using godot::AtlasTexture;
+using godot::Ref;
+using godot::StringName;
+using godot::SubViewport;
+using godot::Texture2D;
+#endif
+
 inline bool SubViewport(SubViewport* svp)
 {
     ERR_FAIL_COND_V(!ImGui::Godot::detail::GET_IMGUIGD(), false);
