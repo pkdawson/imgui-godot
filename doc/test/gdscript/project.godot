@@ -10,7 +10,7 @@ config_version=5
 
 [addons]
 
-imgui/config="res://config_scale2x.tres"
+imgui/config="res://addons/TestData/config_scale2x.tres"
 
 [application]
 

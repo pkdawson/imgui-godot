@@ -390,7 +390,7 @@ jobs:
       - name: Import
         uses: ./.github/actions/import
         with:
-          path: doc/test
+          path: doc/test/gdscript
 
       - name: Run tests
         shell: bash
