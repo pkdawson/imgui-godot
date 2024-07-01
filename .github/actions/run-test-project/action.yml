@@ -21,6 +21,7 @@ runs:
         $GODOT --headless --export-debug $RUNNER_OS
         cd export
         ./${{ inputs.exe }} --headless
+        rm -rf *
 
     - name: Export release
       shell: bash
@@ -29,3 +30,4 @@ runs:
         $GODOT --headless --export-release $RUNNER_OS
         cd export
         ./${{ inputs.exe }} --headless
+        rm -rf *
