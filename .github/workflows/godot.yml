@@ -27,9 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - shell: bash
-        run: ls -R
-
       - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
@@ -40,9 +37,6 @@ jobs:
         uses: ./.github/actions/import
         with:
           path: doc/test/csharp
-
-      - shell: bash
-        run: ls -R
 
       - name: Build
         shell: bash

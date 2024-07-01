@@ -312,10 +312,10 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
+          include-templates: true
 
       - name: Import
         uses: ./.github/actions/import
@@ -390,10 +390,10 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
+          include-templates: true
 
       - name: Import
         uses: ./.github/actions/import
@@ -436,11 +436,11 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
-          dotnet: 'true'
+          use-dotnet: true
+          include-templates: true
 
       - name: Import
         uses: ./.github/actions/import
