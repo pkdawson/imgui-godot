@@ -447,6 +447,12 @@ jobs:
         with:
           path: doc/test/csharp
 
+      - name: Build
+        shell: bash
+        run: |
+          cd $GAMEDIR
+          dotnet build
+
       - name: Run tests
         uses: ./.github/actions/run-test-project
         with:
