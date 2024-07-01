@@ -315,6 +315,7 @@ jobs:
       - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
+          use-dotnet: false
           include-templates: true
 
       - name: Import
@@ -393,6 +394,7 @@ jobs:
       - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
+          use-dotnet: false
           include-templates: true
 
       - name: Import
