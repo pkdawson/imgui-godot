@@ -27,11 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Godot
-        uses: ./.github/actions/install-godot
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: chickensoft-games/setup-godot@v1
         with:
           version: ${{ matrix.gdver }}
-          dotnet: 'true'
+          use-dotnet: true
+          include-templates: true
 
       - name: Import
         uses: ./.github/actions/import
