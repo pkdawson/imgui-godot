@@ -8,44 +8,38 @@ namespace test;
 
 public partial class Main : Node
 {
-    private int _frame = 0;
+    [Signal]
+    public delegate void WithinProcessEventHandler();
 
-    public override void _Ready()
-    {
-    }
-
-    public override void _Process(double delta)
+    public override async void _Ready()
     {
         try
         {
-            if (_frame == 0)
-                FrameZero();
-            else
-                FrameOne();
+            await ToSignal(this, SignalName.WithinProcess);
+
+            Assert.Equal(ImGuiGD.Scale, 2);
+            Assert.Equal(ImGui.GetFontSize(), 26.0f);
+
+            CallDeferred(nameof(ChangeScale));
+
+            await ToSignal(this, SignalName.WithinProcess);
+
+            Assert.Equal(ImGuiGD.Scale, 4);
+            Assert.Equal(ImGui.GetFontSize(), 52.0f);
+
+            GD.Print("All tests passed.");
+            GetTree().Quit(0);
         }
         catch (Exception e)
         {
             GD.Print(e);
             GetTree().Quit(1);
         }
-        _frame++;
     }
 
-    private void FrameZero()
+    public override void _Process(double delta)
     {
-        Assert.Equal(ImGuiGD.Scale, 2);
-        Assert.Equal(ImGui.GetFontSize(), 26.0f);
-
-        CallDeferred(nameof(ChangeScale));
-    }
-
-    private void FrameOne()
-    {
-        Assert.Equal(ImGuiGD.Scale, 4);
-        Assert.Equal(ImGui.GetFontSize(), 52.0f);
-
-        GD.Print("All tests passed.");
-        GetTree().Quit(0);
+        EmitSignal(SignalName.WithinProcess);
     }
 
     private static void ChangeScale()
