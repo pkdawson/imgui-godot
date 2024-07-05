@@ -83,7 +83,8 @@ internal sealed class GodotImGuiWindow : IDisposable
             {
                 State.Instance.Renderer
                     .CloseViewport(Util.ConstructRid((ulong)_vp.RendererUserData));
-                _window.QueueFree();
+                _window.GetParent().RemoveChild(_window);
+                _window.Free();
             }
             _gcHandle.Free();
         }

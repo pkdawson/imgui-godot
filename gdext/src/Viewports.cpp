@@ -72,7 +72,8 @@ static void Godot_DestroyWindow(ImGuiViewport* vp)
     {
         if (vd->window && vp != ImGui::GetMainViewport())
         {
-            vd->window->queue_free();
+            vd->window->get_parent()->remove_child(vd->window);
+            memdelete(vd->window);
         }
         IM_DELETE(vd);
         vp->PlatformUserData = nullptr;
