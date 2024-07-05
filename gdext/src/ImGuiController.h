@@ -28,6 +28,7 @@ public:
 
     void OnLayerExiting();
     void on_frame_pre_draw();
+    void window_input_callback(Ref<InputEvent> evt);
 
 private:
     struct Impl;

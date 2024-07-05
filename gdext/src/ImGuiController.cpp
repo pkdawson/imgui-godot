@@ -41,6 +41,7 @@ void ImGuiController::_bind_methods()
     ADD_SIGNAL(MethodInfo("imgui_layout"));
     ClassDB::bind_method(D_METHOD("on_frame_pre_draw"), &ImGuiController::on_frame_pre_draw);
     ClassDB::bind_method(D_METHOD("OnLayerExiting"), &ImGuiController::OnLayerExiting);
+    ClassDB::bind_method(D_METHOD("window_input_callback"), &ImGuiController::window_input_callback);
 }
 
 ImGuiController::ImGuiController() : impl(std::make_unique<Impl>())
@@ -181,6 +182,11 @@ void ImGuiController::SetMainViewport(Viewport* vp)
 void ImGuiController::on_frame_pre_draw()
 {
     GetContext()->renderer->OnFramePreDraw();
+}
+
+void ImGuiController::window_input_callback(Ref<InputEvent> evt)
+{
+    GetContext()->input->ProcessInput(evt);
 }
 
 } // namespace ImGui::Godot

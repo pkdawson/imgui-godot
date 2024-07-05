@@ -27,8 +27,6 @@ public:
         connect("size_changed", Callable(this, "_size_changed"));
     }
 
-    void _input(const Ref<InputEvent>& evt) override;
-
     void _close_requested() { _vp->PlatformRequestClose = true; }
 
     void _size_changed() { _vp->PlatformRequestResize = true; }

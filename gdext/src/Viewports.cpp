@@ -1,5 +1,6 @@
 #include "Viewports.h"
 #include "Context.h"
+#include "ImGuiController.h"
 #include <imgui.h>
 
 #include <godot_cpp/classes/display_server.hpp>
@@ -49,6 +50,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_size(winRect.size);
     vd->window->set_transparent_background(true);
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
+    vd->window->set_flag(Window::FLAG_ALWAYS_ON_TOP, vp->Flags & ImGuiViewportFlags_TopMost);
 
     Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiController"));
     root->add_child(vd->window);
@@ -59,6 +61,11 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     // it's our window, so just draw directly to the root viewport
     RID vprid = vd->window->get_viewport_rid();
     vp->RendererUserData = (void*)vprid.get_id();
+
+    int32_t windowID = vd->window->get_window_id();
+    DisplayServer::get_singleton()->window_set_input_event_callback(
+        Callable(ImGuiController::Instance(), "window_input_callback"),
+        windowID);
 
     RenderingServer* RS = RenderingServer::get_singleton();
     ImGui::Godot::GetContext()->renderer->InitViewport(vprid);
@@ -206,11 +213,6 @@ void Viewports::SetMainWindow(Window* mainWindow, RID mainSubViewport)
 
 Viewports::~Viewports()
 {
-}
-
-void ImGuiWindow::_input(const Ref<InputEvent>& evt)
-{
-    GetContext()->input->ProcessInput(evt);
 }
 
 } // namespace ImGui::Godot
