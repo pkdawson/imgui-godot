@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(godot-cpp)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG v1.90.8-docking
+    GIT_TAG v1.90.9-docking
 )
 FetchContent_MakeAvailable(imgui)
 

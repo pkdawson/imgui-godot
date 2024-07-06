@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 IMGUI_GODOT_INCLUDE = "../../../addons/imgui-godot/include"
-IMGUI_TAG = "v1.90.8-docking"
+IMGUI_TAG = "v1.90.9-docking"
 
 import os
 import subprocess
