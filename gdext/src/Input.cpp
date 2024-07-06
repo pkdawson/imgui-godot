@@ -105,6 +105,16 @@ void Input::UpdateMousePos()
         else
         {
             io.AddMousePosEvent(mousePos.x, mousePos.y);
+            ImGuiID viewportID = 0;
+            int32_t windowID = DS->get_window_at_screen_position(mousePos);
+            if (windowID != -1)
+            {
+                if (ImGuiViewport* vp = ImGui::FindViewportByPlatformHandle((void*)windowID))
+                {
+                    viewportID = vp->ID;
+                }
+            }
+            io.AddMouseViewportEvent(viewportID);
         }
     }
     else

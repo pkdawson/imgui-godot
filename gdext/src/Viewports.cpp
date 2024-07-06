@@ -51,6 +51,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_transparent_background(true);
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
     vd->window->set_flag(Window::FLAG_ALWAYS_ON_TOP, vp->Flags & ImGuiViewportFlags_TopMost);
+    vd->window->set_flag(Window::FLAG_NO_FOCUS, vp->Flags & ImGuiViewportFlags_NoFocusOnClick);
 
     Node* root = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiController"));
     root->add_child(vd->window);
@@ -63,6 +64,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vp->RendererUserData = (void*)vprid.get_id();
 
     int32_t windowID = vd->window->get_window_id();
+    vp->PlatformHandle = (void*)windowID;
     DisplayServer::get_singleton()->window_set_input_event_callback(
         Callable(ImGuiController::Instance(), "window_input_callback"),
         windowID);
@@ -197,7 +199,6 @@ void Viewports::Impl::UpdateMonitors()
 Viewports::Viewports() : impl(std::make_unique<Impl>())
 {
     auto& io = ImGui::GetIO();
-    io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
     impl->InitPlatformInterface();
     impl->UpdateMonitors();
 }

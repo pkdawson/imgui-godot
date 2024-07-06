@@ -168,13 +168,14 @@ void ImGuiController::SetMainViewport(Viewport* vp)
             add_child(newLayer);
         else
             vp->add_child(newLayer);
-        ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+        ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_PlatformHasViewports | ImGuiBackendFlags_HasMouseHoveredViewport;
     }
     else
     {
         ctx->input = std::make_unique<InputLocal>();
         vp->add_child(newLayer);
         ImGui::GetIO().BackendFlags &= ~ImGuiBackendFlags_PlatformHasViewports;
+        ImGui::GetIO().BackendFlags &= ~ImGuiBackendFlags_HasMouseHoveredViewport;
     }
     ctx->layer = newLayer;
 }
