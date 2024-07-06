@@ -13,6 +13,7 @@ type_map = {
     "const char*": "String",
     "const float*": "Array",
     "const ImGuiTableColumnSortSpecs*": "Array",
+    "const ImGuiWindowClass*": "Ref<ImGuiWindowClassPtr>",
     "double": "double",
     "double*": "Array",
     "float": "float",
@@ -108,8 +109,10 @@ include_structs = (
     # "ImGuiTableColumnSortSpecs",
     # "ImGuiTableSortSpecs",
     # "ImGuiTextFilter",
-    # "ImGuiWindowClass",
+    "ImGuiWindowClass",
 )
+
+constructible_structs = ("ImGuiWindowClass",)
 
 exclude_props = (
     "MouseDown",
@@ -201,7 +204,9 @@ class ReturnType:
 class Param:
     def __init__(self, j):
         self.name = j["name"]
-        self.is_array = j["is_array"] or self.name == "values" # HACK: because is_array not set
+        self.is_array = (
+            j["is_array"] or self.name == "values"
+        )  # HACK: because is_array not set
         self.is_varargs = j["is_varargs"]
         if not self.is_varargs:
             self.orig_type = j["type"]["declaration"]
@@ -229,6 +234,8 @@ class Param:
                 dv = dv.replace("NULL", f"{self.gdtype}()")
         self.dv = dv
         self.is_struct = self.gdtype and self.gdtype.endswith("Ptr>")
+        # if self.gdtype is None:
+        #     print(f"no type for param {self.orig_type} {self.name}")
 
     def gen_decl(self):
         rv = f"{self.gdtype} {self.name}"
@@ -310,6 +317,9 @@ class Function:
                 if p.gdtype is None:
                     self.valid = False
 
+        # if not self.valid and not self.orig_name in exclude_funcs:
+        #     print(f"skip function {self.orig_name}")
+
     def gen_decl(self):
         return f'static {self.rt.gdtype} {self.name}({", ".join(p.gen_decl() for p in self.params)}); \\\n'
 
@@ -377,11 +387,13 @@ class Property:
         self.gdtype = type_map.get(self.orig_type, None)
         if self.is_array:
             self.array_type, self.array_size = self.orig_type[:-1].split("[")
-            print(self.struct_name, self.name, self.is_array, self.orig_type)
             self.gdtype = Property.array_types[self.array_type]
         if self.gdtype == "String":
             self.gdtype = None
         self.valid = self.gdtype is not None
+
+        if not self.valid:
+            print(f"skip property {self.orig_type} {self.struct_name}::{self.name}")
 
     def gen_decl(self):
         rv = f"{self.gdtype} _Get{self.name}(); \\\n"
@@ -440,6 +452,7 @@ class Struct:
         self.orig_name = j["name"]
         self.name = self.orig_name + "Ptr"
         self.valid = self.orig_name in include_structs
+        self.constructible = self.orig_name in constructible_structs
         self.properties = []
 
         if not self.valid:
@@ -454,13 +467,29 @@ class Struct:
         rv = f"class {self.name} : public RefCounted {{ \\\n"
         rv += f"GDCLASS({self.name}, RefCounted); \\\n"
         rv += "protected: static void _bind_methods(); \\\n"
+
         rv += "public: \\\n"
-        rv += f"void _SetPtr({self.orig_name}* p) {{ ptr = p; }} \\\n"
-        rv += f"{self.orig_name}* _GetPtr() {{ return ptr; }} \\\n"
+
+        # needs constructor for non-zero values
+        if self.orig_name == "ImGuiWindowClass":
+            rv += "ImGuiWindowClassPtr() { ptr->ParentViewportId = -1; ptr->DockingAllowUnclassed = true; } \\\n"
+
+        if not self.constructible:
+            rv += f"void _SetPtr({self.orig_name}* p) {{ ptr = p; }} \\\n"
+            rv += f"{self.orig_name}* _GetPtr() {{ return ptr; }} \\\n"
+        else:
+            rv += f"{self.orig_name}* _GetPtr() {{ return ptr.get(); }} \\\n"
+
         for prop in self.properties:
             rv += prop.gen_decl()
+
         rv += "private: \\\n"
-        rv += f"{self.orig_name}* ptr = nullptr; \\\n"
+
+        if not self.constructible:
+            rv += f"{self.orig_name}* ptr = nullptr; \\\n"
+        else:
+            rv += f"std::unique_ptr<{self.orig_name}> ptr = std::make_unique<{self.orig_name}>(); \\\n"
+
         rv += "}; \\\n"
         return rv
 

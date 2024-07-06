@@ -134,6 +134,7 @@ struct GdsZeroArray
 class ImGuiIOPtr;
 class ImGuiStylePtr;
 class ImDrawListPtr;
+class ImGuiWindowClassPtr;
 
 class ImGui : public Object
 {
