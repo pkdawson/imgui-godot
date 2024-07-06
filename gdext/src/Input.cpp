@@ -109,7 +109,7 @@ void Input::UpdateMousePos()
             int32_t windowID = DS->get_window_at_screen_position(mousePos);
             if (windowID != -1)
             {
-                if (ImGuiViewport* vp = ImGui::FindViewportByPlatformHandle((void*)windowID))
+                if (ImGuiViewport* vp = ImGui::FindViewportByPlatformHandle((void*)(int64_t)windowID))
                 {
                     viewportID = vp->ID;
                 }

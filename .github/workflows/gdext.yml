@@ -312,7 +312,7 @@ jobs:
         with:
           pattern: imgui-godot-*_imgui*
 
-      - uses: pkdawson/setup-godot@cache-option
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: false

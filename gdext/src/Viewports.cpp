@@ -64,7 +64,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vp->RendererUserData = (void*)vprid.get_id();
 
     int32_t windowID = vd->window->get_window_id();
-    vp->PlatformHandle = (void*)windowID;
+    vp->PlatformHandle = (void*)(int64_t)windowID;
     DisplayServer::get_singleton()->window_set_input_event_callback(
         Callable(ImGuiController::Instance(), "window_input_callback"),
         windowID);

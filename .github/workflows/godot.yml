@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pkdawson/setup-godot@cache-option
+      - uses: chickensoft-games/setup-godot@v2
         with:
           version: ${{ matrix.gdver }}
           use-dotnet: true
