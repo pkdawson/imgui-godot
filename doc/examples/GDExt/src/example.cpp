@@ -2,7 +2,8 @@
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <imgui-godot.h>
 
-using namespace godot;
+using godot::ResourceLoader;
+using godot::Engine;
 
 void Example::_bind_methods()
 {

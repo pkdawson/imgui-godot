@@ -2,7 +2,9 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/atlas_texture.hpp>
 
-using namespace godot;
+using godot::Node;
+using godot::Ref;
+using godot::AtlasTexture;
 
 class Example : public Node
 {

@@ -7,7 +7,7 @@
 #include <godot_cpp/godot.hpp>
 #include <imgui-godot.h>
 
-using namespace godot;
+using godot::MODULE_INITIALIZATION_LEVEL_SCENE;
 
 void initialize_example_module(ModuleInitializationLevel p_level)
 {
@@ -16,7 +16,7 @@ void initialize_example_module(ModuleInitializationLevel p_level)
 
     ImGui::Godot::SyncImGuiPtrs();
 
-    GDREGISTER_CLASS(Example);
+    godot::ClassDB::register_class<Example>();
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level)
