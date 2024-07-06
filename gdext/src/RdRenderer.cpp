@@ -2,6 +2,7 @@
 #include "common.h"
 #include <array>
 #include <godot_cpp/classes/object.hpp>
+#include <godot_cpp/classes/rd_attachment_format.hpp>
 #include <godot_cpp/classes/rd_pipeline_color_blend_state.hpp>
 #include <godot_cpp/classes/rd_pipeline_color_blend_state_attachment.hpp>
 #include <godot_cpp/classes/rd_pipeline_depth_stencil_state.hpp>
@@ -202,8 +203,19 @@ bool RdRenderer::Init()
     raster_state.instantiate();
     raster_state->set_front_face(RenderingDevice::POLYGON_FRONT_FACE_COUNTER_CLOCKWISE);
 
+    Ref<RDAttachmentFormat> af;
+    af.instantiate();
+    af->set_format(RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM);
+    af->set_samples(RenderingDevice::TEXTURE_SAMPLES_1);
+    af->set_usage_flags(RenderingDevice::TEXTURE_USAGE_COLOR_ATTACHMENT_BIT);
+
+    TypedArray<RDAttachmentFormat> afs;
+    afs.push_back(af);
+
+    int64_t fb_format = RD->framebuffer_format_create(afs);
+
     impl->pipeline = RD->render_pipeline_create(impl->shader,
-                                                RD->screen_get_framebuffer_format(),
+                                                fb_format,
                                                 impl->vtxFormat,
                                                 RenderingDevice::RENDER_PRIMITIVE_TRIANGLES,
                                                 raster_state,
