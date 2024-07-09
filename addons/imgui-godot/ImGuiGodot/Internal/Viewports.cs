@@ -43,12 +43,14 @@ internal sealed class GodotImGuiWindow : IDisposable
             Position = winRect.Position,
             Size = winRect.Size,
             Transparent = true,
-            TransparentBg = true
+            TransparentBg = true,
+            AlwaysOnTop = vp.Flags.HasFlag(ImGuiViewportFlags.TopMost),
+            Unfocusable = vp.Flags.HasFlag(ImGuiViewportFlags.NoFocusOnClick)
         };
 
         _window.CloseRequested += () => _vp.PlatformRequestClose = true;
         _window.SizeChanged += () => _vp.PlatformRequestResize = true;
-        _window.WindowInput += OnWindowInput;
+        _window.WindowInput += ImGuiController.WindowInputCallback;
 
         ImGuiController.Instance.AddChild(_window);
 
@@ -58,6 +60,7 @@ internal sealed class GodotImGuiWindow : IDisposable
         // it's our window, so just draw directly to the root viewport
         var vprid = _window.GetViewportRid();
         _vp.RendererUserData = (IntPtr)vprid.Id;
+        _vp.PlatformHandle = _window.GetWindowId();
 
         State.Instance.Renderer.InitViewport(vprid);
         RenderingServer.ViewportSetTransparentBackground(_window.GetViewportRid(), true);
@@ -88,11 +91,6 @@ internal sealed class GodotImGuiWindow : IDisposable
             }
             _gcHandle.Free();
         }
-    }
-
-    private void OnWindowInput(InputEvent evt)
-    {
-        State.Instance.Input.ProcessInput(evt);
     }
 
     public void ShowWindow()
@@ -272,7 +270,6 @@ internal sealed partial class Viewports
 
     public Viewports()
     {
-        ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         InitPlatformInterface();
         UpdateMonitors();
     }

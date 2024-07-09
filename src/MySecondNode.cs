@@ -15,6 +15,7 @@ public partial class MySecondNode : Node
     private ImFontPtr _proggy;
     private ColorRect _background = null!;
     private int _numClicks = 0;
+    private ImGuiWindowClassPtr _wcTopMost = null!;
 
     private static bool _fontLoaded = false;
     private static readonly System.Numerics.Vector4 MyTextColor = Colors.Aquamarine.ToVector4();
@@ -65,6 +66,12 @@ public partial class MySecondNode : Node
         _vp = GetNode<SubViewport>("%SubViewport");
         _scale = ImGuiGD.Scale;
         GetNode<Button>("%ShowHideButton").Pressed += OnShowHidePressed;
+
+        unsafe
+        {
+            _wcTopMost = ImGuiNative.ImGuiWindowClass_ImGuiWindowClass();
+            _wcTopMost.ViewportFlagsOverrideSet = ImGuiViewportFlags.TopMost;
+        }
     }
 
     private void OnImGuiLayout()
@@ -151,6 +158,13 @@ public partial class MySecondNode : Node
         if (ImGui.ColorEdit3("background color", ref col))
             _background.Color = col.ToColor();
 
+        ImGui.End();
+
+        ImGui.SetNextWindowClass(_wcTopMost);
+        ImGui.SetNextWindowSize(new(200, 200), ImGuiCond.Once);
+        ImGui.Begin("topmost viewport window");
+        ImGui.TextWrapped(
+            "when this is a viewport window outside the main window, it will stay on top");
         ImGui.End();
     }
 

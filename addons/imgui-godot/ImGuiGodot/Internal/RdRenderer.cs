@@ -121,10 +121,19 @@ internal class RdRenderer : IRenderer
             FrontFace = RenderingDevice.PolygonFrontFace.CounterClockwise
         };
 
+        using var af = new RDAttachmentFormat()
+        {
+            Format = RenderingDevice.DataFormat.R8G8B8A8Unorm,
+            Samples = RenderingDevice.TextureSamples.Samples1,
+            UsageFlags = (uint)RenderingDevice.TextureUsageBits.ColorAttachmentBit,
+        };
+
+        long fbFormat = RD.FramebufferFormatCreate([af]);
+
         // pipeline
         _pipeline = RD.RenderPipelineCreate(
             _shader,
-            RD.ScreenGetFramebufferFormat(),
+            fbFormat,
             _vtxFormat,
             RenderingDevice.RenderPrimitive.Triangles,
             rasterizationState,

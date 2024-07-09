@@ -39,6 +39,20 @@ internal class Input
             else
             {
                 io.AddMousePosEvent(mousePos.X, mousePos.Y);
+                uint viewportID = 0;
+                int windowID = DisplayServer.GetWindowAtScreenPosition(mousePos);
+                if (windowID != -1)
+                {
+                    unsafe
+                    {
+                        var vp = ImGui.FindViewportByPlatformHandle(windowID);
+                        if (vp.NativePtr != null)
+                        {
+                            viewportID = vp.ID;
+                        }
+                    }
+                }
+                io.AddMouseViewportEvent(viewportID);
             }
         }
         else

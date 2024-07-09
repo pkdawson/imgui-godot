@@ -118,13 +118,15 @@ public partial class ImGuiController : Node
                 AddChild(newLayer);
             else
                 window.AddChild(newLayer);
-            ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
+            ImGui.GetIO().BackendFlags |= ImGuiBackendFlags.PlatformHasViewports
+                | ImGuiBackendFlags.HasMouseHoveredViewport;
         }
         else if (vp is SubViewport svp)
         {
             State.Instance.Input = new InputLocal();
             svp.AddChild(newLayer);
             ImGui.GetIO().BackendFlags &= ~ImGuiBackendFlags.PlatformHasViewports;
+            ImGui.GetIO().BackendFlags &= ~ImGuiBackendFlags.HasMouseHoveredViewport;
         }
         else
         {
@@ -139,6 +141,11 @@ public partial class ImGuiController : Node
         {
             GD.PrintErr("imgui-godot: scale mode `viewport` is unsupported");
         }
+    }
+
+    public static void WindowInputCallback(InputEvent evt)
+    {
+        State.Instance.Input.ProcessInput(evt);
     }
 }
 #endif
