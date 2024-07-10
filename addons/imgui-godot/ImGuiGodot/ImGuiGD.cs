@@ -128,5 +128,10 @@ public static class ImGuiGD
     {
         return _backend.SubViewportWidget(svp);
     }
+
+    public static void SetIniFilename(string filename)
+    {
+        _backend.SetIniFilename(filename);
+    }
 }
 #endif

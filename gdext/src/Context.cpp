@@ -103,8 +103,7 @@ void Init(const Ref<Resource>& cfg)
     ctx->scale = cfg->get("Scale");
 
     String iniFilename = cfg->get("IniFilename");
-    if (iniFilename.length() > 0)
-        SetIniFilename(iniFilename);
+    SetIniFilename(iniFilename);
 
     Array fonts = cfg->get("Fonts");
     for (int i = 0; i < fonts.size(); ++i)

@@ -57,6 +57,11 @@ internal sealed class BackendNet : IBackend
         State.Instance.Fonts.ResetFonts();
     }
 
+    public void SetIniFilename(string filename)
+    {
+        State.Instance.SetIniFilename(filename);
+    }
+
     public void SetMainViewport(Viewport vp)
     {
         ImGuiController.Instance.SetMainViewport(vp);

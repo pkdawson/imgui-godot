@@ -38,6 +38,7 @@ public:
     float _GetScale();
 
     void SetMainViewport(Viewport* vp);
+    void SetIniFilename(String fn);
 
     PackedInt64Array GetFontPtrs();
     PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);

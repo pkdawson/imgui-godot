@@ -16,5 +16,6 @@ internal interface IBackend
     public void Connect(Callable callable);
     public void SetMainViewport(Viewport vp);
     public bool SubViewportWidget(SubViewport svp);
+    public void SetIniFilename(string filename);
 }
 #endif

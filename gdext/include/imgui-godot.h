@@ -148,6 +148,13 @@ inline bool ToolInit()
     return detail::ImGuiGD->call(sn);
 }
 
+inline void SetIniFilename(String fn)
+{
+    ERR_FAIL_COND(!detail::GET_IMGUIGD());
+    static const StringName sn("SetIniFilename");
+    detail::ImGuiGD->call(sn, fn);
+}
+
 inline void SyncImGuiPtrs()
 {
     Object* obj = ClassDB::instantiate("ImGuiSync");

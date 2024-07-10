@@ -61,7 +61,8 @@ public static class ImGuiExtensions
     /// </summary>
     public static void SetIniFilename(this ImGuiIOPtr io, string fileName)
     {
-        Internal.State.Instance.SetIniFilename(io, fileName);
+        _ = io;
+        ImGuiGD.SetIniFilename(fileName);
     }
 }
 #endif

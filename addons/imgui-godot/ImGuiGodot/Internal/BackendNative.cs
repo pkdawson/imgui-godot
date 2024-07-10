@@ -18,6 +18,7 @@ internal sealed class BackendNative : IBackend
         public static readonly StringName SetMainViewport = "SetMainViewport";
         public static readonly StringName SubViewport = "SubViewport";
         public static readonly StringName ToolInit = "ToolInit";
+        public static readonly StringName SetIniFilename = "SetIniFilename";
     }
 
     private sealed class PropertyName
@@ -93,6 +94,11 @@ internal sealed class BackendNative : IBackend
     {
         _gd.Call(MethodName.ToolInit);
         ImGuiSync.SyncPtrs();
+    }
+
+    public void SetIniFilename(string filename)
+    {
+        _gd.Call(MethodName.SetIniFilename, filename);
     }
 }
 #endif

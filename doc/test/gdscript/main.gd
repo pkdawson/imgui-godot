@@ -3,6 +3,8 @@ extends "res://test_base.gd"
 signal within_process
 
 func _ready() -> void:
+    ImGuiGD.SetIniFilename("")
+
     await within_process
 
     # ImGuiConfig loads properly
@@ -16,6 +18,14 @@ func _ready() -> void:
 
     assert_equal(ImGuiGD.Scale, 4)
     assert_equal(ImGui.GetFontSize(), 52)
+
+    # IniSavingRate
+    get_tree().create_timer(5.1).timeout.connect(on_timeout)
+
+func on_timeout():
+    await within_process
+
+    assert_false(FileAccess.file_exists("user://imgui.ini"))
 
     exit_with_status()
 

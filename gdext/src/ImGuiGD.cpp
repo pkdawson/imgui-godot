@@ -39,6 +39,7 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("GetImGuiPtrs", "version", "ioSize", "vertSize", "idxSize", "charSize"),
                          &ImGuiGD::GetImGuiPtrs);
     ClassDB::bind_method(D_METHOD("ToolInit"), &ImGuiGD::ToolInit);
+    ClassDB::bind_method(D_METHOD("SetIniFilename", "filename"), &ImGuiGD::SetIniFilename);
 
     ClassDB::bind_method(D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
 }
@@ -188,6 +189,11 @@ PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize,
 bool ImGuiGD::SubViewport(godot::SubViewport* svp)
 {
     return ImGui::Godot::SubViewportWidget(svp);
+}
+
+void ImGuiGD::SetIniFilename(String fn)
+{
+    ImGui::Godot::SetIniFilename(fn);
 }
 
 } // namespace ImGui::Godot

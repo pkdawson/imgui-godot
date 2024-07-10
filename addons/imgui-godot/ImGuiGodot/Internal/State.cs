@@ -149,8 +149,9 @@ internal sealed class State : IDisposable
         ImGuiGD.RebuildFontAtlas();
     }
 
-    public unsafe void SetIniFilename(ImGuiIOPtr io, string fileName)
+    public unsafe void SetIniFilename(string fileName)
     {
+        var io = ImGui.GetIO();
         io.NativePtr->IniFilename = null;
 
         if (_iniFilenameBuffer != IntPtr.Zero)

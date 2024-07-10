@@ -15,6 +15,9 @@ public partial class Main : Node
     {
         try
         {
+            var io = ImGui.GetIO();
+            io.SetIniFilename("");
+
             await ToSignal(this, SignalName.WithinProcess);
 
             Assert.Equal(ImGuiGD.Scale, 2);
@@ -26,6 +29,24 @@ public partial class Main : Node
 
             Assert.Equal(ImGuiGD.Scale, 4);
             Assert.Equal(ImGui.GetFontSize(), 52.0f);
+
+            // IniSavingRate
+            GetTree().CreateTimer(5.1).Timeout += OnTimeout;
+        }
+        catch (Exception e)
+        {
+            GD.Print(e);
+            GetTree().Quit(1);
+        }
+    }
+
+    public async void OnTimeout()
+    {
+        try
+        {
+            await ToSignal(this, SignalName.WithinProcess);
+
+            Assert.False(FileAccess.FileExists("user://imgui.ini"));
 
             GD.Print("All tests passed.");
             GetTree().Quit(0);
