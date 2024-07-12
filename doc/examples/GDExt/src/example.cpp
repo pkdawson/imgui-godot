@@ -1,9 +1,10 @@
 #include "example.h"
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <imgui-godot.h>
+#include <implot.h>
 
-using godot::ResourceLoader;
 using godot::Engine;
+using godot::ResourceLoader;
 
 void Example::_bind_methods()
 {
@@ -38,4 +39,6 @@ void Example::_process(double delta)
     ImGui::Separator();
     ImGui::Image(_img, {64, 64});
     ImGui::End();
+
+    ImPlot::ShowDemoWindow();
 }

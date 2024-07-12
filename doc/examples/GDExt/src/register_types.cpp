@@ -6,6 +6,7 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 #include <imgui-godot.h>
+#include <implot.h>
 
 using godot::MODULE_INITIALIZATION_LEVEL_SCENE;
 
@@ -15,6 +16,7 @@ void initialize_example_module(ModuleInitializationLevel p_level)
         return;
 
     ImGui::Godot::SyncImGuiPtrs();
+    ImPlot::CreateContext();
 
     godot::ClassDB::register_class<Example>();
 }
@@ -23,6 +25,8 @@ void uninitialize_example_module(ModuleInitializationLevel p_level)
 {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE)
         return;
+
+    ImPlot::DestroyContext();
 }
 
 extern "C" {

@@ -15,6 +15,9 @@ if not os.path.exists("imgui"):
     subprocess.call("git clone -b docking https://github.com/ocornut/imgui", shell=True)
     subprocess.call(f"git -C imgui checkout {IMGUI_TAG}", shell=True)
 
+if not os.path.exists("implot"):
+    subprocess.call("git clone https://github.com/epezent/implot", shell=True)
+
 env = SConscript("godot-cpp/SConstruct")
 env = env.Clone()
 
@@ -25,6 +28,10 @@ sources = Glob("src/*.cpp")
 sources += Glob(f"imgui/*.cpp")
 env.Append(CPPDEFINES=['IMGUI_USER_CONFIG="\\"imconfig-godot.h\\""'])
 env.Append(CPPPATH=["imgui", IMGUI_GODOT_INCLUDE])
+
+# ImPlot
+sources += Glob(f"implot/*.cpp")
+env.Append(CPPPATH=["implot", IMGUI_GODOT_INCLUDE])
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

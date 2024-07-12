@@ -21,6 +21,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
+FetchContent_Declare(
+    implot
+    GIT_REPOSITORY https://github.com/epezent/implot
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(implot)
+
 add_library(gdexample SHARED)
 target_compile_features(gdexample PRIVATE cxx_std_20)
 target_compile_definitions(gdexample PUBLIC
@@ -28,12 +35,16 @@ target_compile_definitions(gdexample PUBLIC
     )
 
 target_sources(gdexample PRIVATE
-    imgui/imgui.cpp
-    imgui/imgui_demo.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_tables.cpp
-    imgui/imgui_widgets.cpp
-    imgui/imgui.h
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui.cpp
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_demo.cpp
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_draw.cpp
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_tables.cpp
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_widgets.cpp
+    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui.h
+    ${FETCHCONTENT_BASE_DIR}/implot-src/implot.cpp
+    ${FETCHCONTENT_BASE_DIR}/implot-src/implot_demo.cpp
+    ${FETCHCONTENT_BASE_DIR}/implot-src/implot_items.cpp
+    ${FETCHCONTENT_BASE_DIR}/implot-src/implot.h
     src/example.cpp
     src/example.h
     src/register_types.cpp
@@ -42,7 +53,12 @@ target_sources(gdexample PRIVATE
 
 target_link_libraries(gdexample PUBLIC godot-cpp)
 
-target_include_directories(gdexample PRIVATE src ${IMGUI_GODOT_INCLUDE} imgui)
+target_include_directories(gdexample PRIVATE
+    src
+    ${IMGUI_GODOT_INCLUDE}
+    ${FETCHCONTENT_BASE_DIR}/imgui-src
+    ${FETCHCONTENT_BASE_DIR}/implot-src
+    )
 
 set_property(TARGET gdexample
     PROPERTY OUTPUT_NAME "libgdexample.windows.template_$<IF:$<CONFIG:Debug>,debug,release>.x86_64")
