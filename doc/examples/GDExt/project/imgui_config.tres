@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="ImGuiConfig" load_steps=11 format=3 uid="uid://c58buectmbwmf"]
+
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiFont.gd" id="1_0saup"]
+[ext_resource type="FontFile" uid="uid://2se0brkpdxhs" path="res://Hack-Regular.ttf" id="1_7tey3"]
+[ext_resource type="Script" path="res://addons/imgui-godot/scripts/ImGuiConfig.gd" id="1_nq4e5"]
+[ext_resource type="FontFile" uid="uid://geey1pyskdev" path="res://Hack-Bold.ttf" id="3_5fv0r"]
+[ext_resource type="FontFile" uid="uid://ccn210ltcrs6i" path="res://Hack-Italic.ttf" id="4_34el5"]
+
+[sub_resource type="Resource" id="Resource_57j4v"]
+script = ExtResource("1_0saup")
+FontData = ExtResource("1_7tey3")
+FontSize = 16
+Merge = false
+
+[sub_resource type="Resource" id="Resource_4trot"]
+script = ExtResource("1_0saup")
+FontData = ExtResource("3_5fv0r")
+FontSize = 32
+Merge = false
+
+[sub_resource type="Resource" id="Resource_okot8"]
+script = ExtResource("1_0saup")
+FontData = ExtResource("3_5fv0r")
+FontSize = 24
+Merge = false
+
+[sub_resource type="Resource" id="Resource_3knfi"]
+script = ExtResource("1_0saup")
+FontData = ExtResource("3_5fv0r")
+FontSize = 16
+Merge = false
+
+[sub_resource type="Resource" id="Resource_2wpqv"]
+script = ExtResource("1_0saup")
+FontData = ExtResource("4_34el5")
+FontSize = 16
+Merge = false
+
+[resource]
+script = ExtResource("1_nq4e5")
+Fonts = Array[ExtResource("1_0saup")]([SubResource("Resource_57j4v"), SubResource("Resource_4trot"), SubResource("Resource_okot8"), SubResource("Resource_3knfi"), SubResource("Resource_2wpqv")])
+AddDefaultFont = false
+Scale = 1.0
+IniFilename = "user://imgui.ini"
+Renderer = "RenderingDevice"
+Layer = 128

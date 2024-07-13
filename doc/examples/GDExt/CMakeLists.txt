@@ -28,6 +28,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(implot)
 
+FetchContent_Declare(
+    imgui_markdown
+    GIT_REPOSITORY https://github.com/enkisoftware/imgui_markdown
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(imgui_markdown)
+
 add_library(gdexample SHARED)
 target_compile_features(gdexample PRIVATE cxx_std_20)
 target_compile_definitions(gdexample PUBLIC
@@ -45,10 +52,13 @@ target_sources(gdexample PRIVATE
     ${FETCHCONTENT_BASE_DIR}/implot-src/implot_demo.cpp
     ${FETCHCONTENT_BASE_DIR}/implot-src/implot_items.cpp
     ${FETCHCONTENT_BASE_DIR}/implot-src/implot.h
+    ${FETCHCONTENT_BASE_DIR}/imgui_markdown-src/imgui_markdown.h
     src/example.cpp
     src/example.h
     src/register_types.cpp
     src/register_types.h
+    src/gdmarkdown.cpp
+    src/gdmarkdown.h
     )
 
 target_link_libraries(gdexample PUBLIC godot-cpp)
@@ -58,6 +68,7 @@ target_include_directories(gdexample PRIVATE
     ${IMGUI_GODOT_INCLUDE}
     ${FETCHCONTENT_BASE_DIR}/imgui-src
     ${FETCHCONTENT_BASE_DIR}/implot-src
+    ${FETCHCONTENT_BASE_DIR}/imgui_markdown-src
     )
 
 set_property(TARGET gdexample

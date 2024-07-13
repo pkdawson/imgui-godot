@@ -8,11 +8,16 @@
 
 config_version=5
 
+[addons]
+
+imgui/config="res://imgui_config.tres"
+
 [application]
 
 config/name="GDExt"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
+run/max_fps=144
 config/icon="res://icon.svg"
 
 [autoload]
@@ -22,6 +27,7 @@ ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
 [display]
 
 window/subwindows/embed_subwindows=false
+window/vsync/vsync_mode=0
 
 [editor_plugins]
 
