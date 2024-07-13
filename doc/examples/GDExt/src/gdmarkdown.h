@@ -1,6 +1,6 @@
-#include <string>
+#include <string_view>
 
 namespace ImGui {
 void InitMarkdown();
-void Markdown(const std::string& text);
+void Markdown(std::string_view text);
 } // namespace ImGui

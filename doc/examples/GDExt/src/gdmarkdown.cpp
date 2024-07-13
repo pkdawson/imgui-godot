@@ -105,7 +105,7 @@ void ImGui::InitMarkdown()
     italicFont = fonts[4];
 }
 
-void ImGui::Markdown(const std::string& text)
+void ImGui::Markdown(std::string_view text)
 {
-    ImGui::Markdown(text.c_str(), text.length(), mdConfig);
+    ImGui::Markdown(text.data(), text.length(), mdConfig);
 }

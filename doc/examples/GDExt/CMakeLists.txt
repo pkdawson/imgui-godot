@@ -39,37 +39,41 @@ add_library(gdexample SHARED)
 target_compile_features(gdexample PRIVATE cxx_std_20)
 target_compile_definitions(gdexample PUBLIC
     IMGUI_USER_CONFIG="imconfig-godot.h"
-    )
+)
+if (MSVC)
+    target_compile_options(godot-cpp PRIVATE "/MP")
+    target_compile_options(gdexample PRIVATE "/MP")
+endif()
 
 target_sources(gdexample PRIVATE
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui.cpp
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_demo.cpp
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_draw.cpp
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_tables.cpp
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui_widgets.cpp
-    ${FETCHCONTENT_BASE_DIR}/imgui-src/imgui.h
-    ${FETCHCONTENT_BASE_DIR}/implot-src/implot.cpp
-    ${FETCHCONTENT_BASE_DIR}/implot-src/implot_demo.cpp
-    ${FETCHCONTENT_BASE_DIR}/implot-src/implot_items.cpp
-    ${FETCHCONTENT_BASE_DIR}/implot-src/implot.h
-    ${FETCHCONTENT_BASE_DIR}/imgui_markdown-src/imgui_markdown.h
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/imgui.h
+    ${implot_SOURCE_DIR}/implot.cpp
+    ${implot_SOURCE_DIR}/implot_demo.cpp
+    ${implot_SOURCE_DIR}/implot_items.cpp
+    ${implot_SOURCE_DIR}/implot.h
+    ${imgui_markdown_SOURCE_DIR}/imgui_markdown.h
     src/example.cpp
     src/example.h
     src/register_types.cpp
     src/register_types.h
     src/gdmarkdown.cpp
     src/gdmarkdown.h
-    )
+)
 
 target_link_libraries(gdexample PUBLIC godot-cpp)
 
 target_include_directories(gdexample PRIVATE
     src
     ${IMGUI_GODOT_INCLUDE}
-    ${FETCHCONTENT_BASE_DIR}/imgui-src
-    ${FETCHCONTENT_BASE_DIR}/implot-src
-    ${FETCHCONTENT_BASE_DIR}/imgui_markdown-src
-    )
+    ${imgui_SOURCE_DIR}
+    ${implot_SOURCE_DIR}
+    ${imgui_markdown_SOURCE_DIR}
+)
 
 set_property(TARGET gdexample
     PROPERTY OUTPUT_NAME "libgdexample.windows.template_$<IF:$<CONFIG:Debug>,debug,release>.x86_64")
@@ -78,4 +82,4 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/project")
 
 install(TARGETS gdexample
     RUNTIME DESTINATION bin
-    )
+)
