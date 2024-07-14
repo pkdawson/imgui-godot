@@ -7,8 +7,7 @@
 using godot::Engine;
 using godot::ResourceLoader;
 
-static const std::string markdownText = R"(
-# H1 Header
+static const std::string markdownText = R"(# H1 Header
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
@@ -27,6 +26,8 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 Link: [Godot Engine](https://godotengine.org)
 
 robot eye ![an atlas texture](res://robot_eye.tres)
+
+___
 
 big robot
 ![](res://icon.svg)

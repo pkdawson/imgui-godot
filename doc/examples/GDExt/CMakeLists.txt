@@ -43,6 +43,7 @@ target_compile_definitions(gdexample PUBLIC
 if (MSVC)
     target_compile_options(godot-cpp PRIVATE "/MP")
     target_compile_options(gdexample PRIVATE "/MP")
+    set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD ON)
 endif()
 
 target_sources(gdexample PRIVATE

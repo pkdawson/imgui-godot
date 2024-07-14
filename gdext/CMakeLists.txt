@@ -36,6 +36,7 @@ target_compile_definitions(imgui-godot-native PUBLIC
 if (MSVC)
     target_compile_options(godot-cpp PRIVATE "/MP")
     target_compile_options(imgui-godot-native PRIVATE "/MP")
+    set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD ON)
 endif()
 
 add_subdirectory(src)

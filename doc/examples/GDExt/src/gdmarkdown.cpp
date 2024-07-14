@@ -21,8 +21,7 @@ void MdLinkCallback(ImGui::MarkdownLinkCallbackData data)
 {
     if (!data.isImage)
     {
-        String link(data.link);
-        link = link.substr(0, data.linkLength);
+        String link = String::utf8(data.link, data.linkLength);
         OS::get_singleton()->shell_open(link);
     }
 }
@@ -31,8 +30,7 @@ ImGui::MarkdownImageData MdImageCallback(ImGui::MarkdownLinkCallbackData data)
 {
     ImGui::MarkdownImageData imageData;
 
-    String link(data.link);
-    link = link.substr(0, data.linkLength);
+    String link = String::utf8(data.link, data.linkLength);
     Ref<Texture2D> tex = ResourceLoader::get_singleton()->load(link);
 
     if (tex.is_valid())
@@ -67,6 +65,27 @@ void MdFormatCallback(const ImGui::MarkdownFormatInfo& fmt, bool start)
         else
             ImGui::PopFont();
     }
+    else if (fmt.type == ImGui::MarkdownFormatType::HEADING)
+    {
+        // default has excessive whitespace
+
+        int32_t level = std::min(fmt.level, ImGui::MarkdownConfig::NUMHEADINGS);
+        ImGui::MarkdownHeadingFormat hfmt = fmt.config->headingFormats[level - 1];
+
+        if (start)
+        {
+            ImGui::NewLine();
+            if (hfmt.font)
+                ImGui::PushFont(hfmt.font);
+        }
+        else
+        {
+            if (hfmt.separator)
+                ImGui::Separator();
+            if (hfmt.font)
+                ImGui::PopFont();
+        }
+    }
     else
     {
         ImGui::defaultMarkdownFormatCallback(fmt, start);
@@ -91,16 +110,16 @@ void MdTooltipCallback(ImGui::MarkdownTooltipCallbackData data)
 
 void ImGui::InitMarkdown()
 {
-    auto& io = ImGui::GetIO();
+    const auto& io = ImGui::GetIO();
     const auto& fonts = io.Fonts->Fonts;
 
     mdConfig.linkCallback = MdLinkCallback;
     mdConfig.tooltipCallback = MdTooltipCallback;
     mdConfig.imageCallback = MdImageCallback;
+    mdConfig.formatCallback = MdFormatCallback;
     mdConfig.headingFormats[0] = {fonts[1], true};
     mdConfig.headingFormats[1] = {fonts[2], true};
     mdConfig.headingFormats[2] = {fonts[3], false};
-    mdConfig.formatCallback = MdFormatCallback;
 
     italicFont = fonts[4];
 }
