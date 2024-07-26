@@ -33,9 +33,12 @@ if config == "release":
         env.Append(CPPDEFINES=["NDEBUG"])
 
 if windows:
-    triplet = "x64-windows-static"
-    if not os.path.exists("vcpkg_installed"):
-        subprocess.call(f"%VCPKG_ROOT%/vcpkg install --triplet {triplet}", shell=True)
+    if env["arch"] == "arm64":
+        triplet = "arm64-windows-static"
+    else:
+        triplet = "x64-windows-static"
+    if not os.path.exists(f"vcpkg_installed/{triplet}"):
+        subprocess.call(f'"%VCPKG_ROOT%/vcpkg" install --triplet {triplet}', shell=True)
 elif linux:
     triplet = "x64-linux"
     if not os.path.exists("vcpkg_installed"):

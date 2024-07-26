@@ -8,7 +8,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="doc\**" />
+    <Compile Remove="gdext\**" />
     <EmbeddedResource Remove="doc\**" />
+    <EmbeddedResource Remove="gdext\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.90.9.1" />
