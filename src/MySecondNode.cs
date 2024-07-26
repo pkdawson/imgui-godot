@@ -70,7 +70,8 @@ public partial class MySecondNode : Node
         unsafe
         {
             _wcTopMost = ImGuiNative.ImGuiWindowClass_ImGuiWindowClass();
-            _wcTopMost.ViewportFlagsOverrideSet = ImGuiViewportFlags.TopMost;
+            _wcTopMost.ViewportFlagsOverrideSet = ImGuiViewportFlags.TopMost
+                | ImGuiViewportFlags.NoAutoMerge;
         }
     }
 
