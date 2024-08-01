@@ -115,6 +115,7 @@ public partial class MySecondNode : Node
         ImGui.PushFont(_proggy);
         ImGui.TextColored(MyTextColor, VersionString);
         ImGui.PopFont();
+        ImGui.TextLinkOpenURL("Godot Engine", "https://godotengine.org");
 
         ImGui.Separator();
         ImGui.Text("Textures");

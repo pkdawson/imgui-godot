@@ -36,6 +36,25 @@ inline void FromPackedColorArray(const PackedColorArray& in, ImVec4* out)
         out[i] = FromColor(in[i]);
 }
 
+inline Array FromImVector(const ImVector_ImGuiSelectionRequest& in)
+{
+    Array rv;
+    for (int i = 0; i < in.Size; ++i)
+    {
+        Ref<ImGui::Godot::ImGuiSelectionRequestPtr> req;
+        req.instantiate();
+        req->_SetPtr(&in.Data[i]);
+        rv.append(req);
+    }
+    return rv;
+}
+
+inline ImVector_ImGuiSelectionRequest ToImVector(const Array& in)
+{
+    ERR_FAIL_V_MSG({}, "ToImVector not implemented");
+    return {};
+}
+
 const char* sn_to_cstr(const StringName& sn)
 {
     static std::unordered_map<StringName, std::string> stringname_cache;

@@ -24,7 +24,7 @@ struct GdsPtr
     GdsPtr(Array& x) : arr(x)
     {
         // safety for tool script reload, and programming errors
-        if (arr.size() == 0)
+        if (arr.size() == 0) [[unlikely]]
             arr.append(T());
         val = arr[0];
     }
@@ -131,10 +131,7 @@ struct GdsZeroArray
 #define GDS_PTR(T, a) a.size() == 0 ? nullptr : (T*)GdsPtr<T>(a)
 // #define GDS_PTR_STR(a, len, label) a.size() == 0 ? nullptr : (char*)GdsPtr<String>(a, len, label)
 
-class ImGuiIOPtr;
-class ImGuiStylePtr;
-class ImDrawListPtr;
-class ImGuiWindowClassPtr;
+FORWARD_DECLARE_IMGUI_STRUCTS()
 
 class ImGui : public Object
 {

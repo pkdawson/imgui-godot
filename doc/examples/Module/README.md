@@ -2,7 +2,7 @@ Run, for example:
 
 ```
 git clone https://github.com/ocornut/imgui
-git -C imgui checkout v1.90.9-docking
+git -C imgui checkout v1.91.0-docking
 git clone https://github.com/godotengine/godot
 cd godot
 scons custom_modules=../modules

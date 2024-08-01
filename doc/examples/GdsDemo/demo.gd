@@ -3,10 +3,12 @@ extends Node
 var myfloat := [0.0]
 var mystr := [""]
 var values := [2.0, 4.0, 0.0, 3.0, 1.0, 5.0]
-var items := ["zero", "one", "two", "three"]
+var items := ["zero", "one", "two", "three", "four", "five"]
 var current_item := [2]
 var anim_counter := 0
 var wc_topmost: ImGuiWindowClassPtr
+var ms_items := items
+var ms_selection := []
 
 func _ready():
     var io := ImGui.GetIO()
@@ -22,8 +24,17 @@ func _ready():
 func _process(_delta: float) -> void:
     ImGui.ShowDemoWindow()
 
-    ImGui.Begin("hello")
-    ImGui.Text("hello from GDScript")
+    var gdver: String = Engine.get_version_info()["string"]
+
+    ImGui.Begin("Demo")
+    ImGui.Text("ImGui in")
+    ImGui.SameLine()
+    ImGui.TextLinkOpenURLEx("Godot %s" % gdver, "https://www.godotengine.org")
+    ImGui.Text("mem %.1f KiB / peak %.1f KiB" % [
+        OS.get_static_memory_usage() / 1024.0,
+        OS.get_static_memory_peak_usage() / 1024.0])
+    ImGui.Separator()
+
     ImGui.DragFloat("myfloat", myfloat)
     ImGui.Text(str(myfloat[0]))
     ImGui.InputText("mystr", mystr, 32)
@@ -34,6 +45,16 @@ func _process(_delta: float) -> void:
     ImGui.ListBox("choices", current_item, items, items.size())
     ImGui.Combo("combo", current_item, items)
     ImGui.Text("choice = %s" % items[current_item[0]])
+
+    ImGui.SeparatorText("Multi-Select")
+    var ms_io := ImGui.BeginMultiSelectEx(ImGui.MultiSelectFlags_None, ms_items.size(), ms_selection.size())
+    apply_selection_requests(ms_io)
+    for i in range(items.size()):
+        var is_selected := ms_selection.has(i)
+        ImGui.SetNextItemSelectionUserData(i)
+        ImGui.SelectableEx(ms_items[i], is_selected)
+    ms_io = ImGui.EndMultiSelect()
+    apply_selection_requests(ms_io)
     ImGui.End()
 
     ImGui.SetNextWindowClass(wc_topmost)
@@ -47,3 +68,17 @@ func _physics_process(_delta: float) -> void:
     if anim_counter >= 10:
         anim_counter = 0
         values.push_back(values.pop_front())
+
+func apply_selection_requests(ms_io: ImGuiMultiSelectIOPtr) -> void:
+    for req: ImGuiSelectionRequestPtr in ms_io.Requests:
+        if req.Type == ImGui.SelectionRequestType_SetAll:
+            if req.Selected:
+                ms_selection = range(ms_items.size())
+            else:
+                ms_selection.clear()
+        elif req.Type == ImGui.SelectionRequestType_SetRange:
+            for i in range(req.RangeFirstItem, req.RangeLastItem + 1):
+                if req.Selected:
+                    ms_selection.append(i)
+                else:
+                    ms_selection.erase(i)

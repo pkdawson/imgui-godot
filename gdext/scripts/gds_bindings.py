@@ -2,8 +2,8 @@ import json
 import os
 import subprocess
 
+# TODO: GodotType as class
 # TODO: callbacks as Callable
-# TODO: array wrappers
 
 type_map = {
     "bool": "bool",
@@ -18,47 +18,22 @@ type_map = {
     "double*": "Array",
     "float": "float",
     "float*": "Array",
-    "ImDrawFlags": "BitField<ImGui::DrawFlags>",
     "ImDrawList*": "Ref<ImDrawListPtr>",
     "ImFont*": "int64_t",
-    "ImGuiBackendFlags": "BitField<ImGui::BackendFlags>",
-    "ImGuiButtonFlags": "BitField<ImGui::ButtonFlags>",
-    "ImGuiChildFlags": "BitField<ImGui::ChildFlags>",
-    "ImGuiCol": "Col",
-    "ImGuiColorEditFlags": "BitField<ImGui::ColorEditFlags>",
-    "ImGuiComboFlags": "BitField<ImGui::ComboFlags>",
-    "ImGuiCond": "Cond",
-    "ImGuiConfigFlags": "BitField<ImGui::ConfigFlags>",
-    "ImGuiDataType": "DataType",
-    "ImGuiDir": "ImGui::Dir",
-    "ImGuiDockNodeFlags": "BitField<ImGui::DockNodeFlags>",
-    "ImGuiFocusedFlags": "BitField<ImGui::FocusedFlags>",
-    "ImGuiHoveredFlags": "BitField<ImGui::HoveredFlags>",
     "ImGuiID": "uint32_t",
-    "ImGuiInputTextFlags": "BitField<ImGui::InputTextFlags>",
     "ImGuiIO*": "Ref<ImGuiIOPtr>",
-    "ImGuiKey": "ImGui::Key",
-    "ImGuiMouseButton": "MouseButton",
-    "ImGuiPopupFlags": "BitField<ImGui::PopupFlags>",
-    "ImGuiSliderFlags": "BitField<SliderFlags>",
-    "ImGuiSortDirection": "SortDirection",
+    "ImGuiSelectionUserData": "int64_t",
     "ImGuiStyle*": "Ref<ImGuiStylePtr>",
-    "ImGuiStyleVar": "StyleVar",
-    "ImGuiTabBarFlags": "BitField<ImGui::TabBarFlags>",
-    "ImGuiTabItemFlags": "BitField<ImGui::TabItemFlags>",
-    "ImGuiTableColumnFlags": "BitField<ImGui::TableColumnFlags>",
-    "ImGuiTableFlags": "BitField<ImGui::TableFlags>",
-    "ImGuiTableRowFlags": "BitField<ImGui::TableRowFlags>",
-    "ImGuiTreeNodeFlags": "BitField<TreeNodeFlags>",
-    "ImGuiViewportFlags": "BitField<ImGui::ViewportFlags>",
-    "ImGuiWindowFlags": "BitField<ImGui::WindowFlags>",
     "ImS16": "int16_t",
+    "ImS64": "int64_t",
+    "ImS8": "int8_t",
     "ImTextureID": "Ref<Texture2D>",
     "ImU16": "uint16_t",
     "ImU32": "Color",
     "ImU8": "uint8_t",
     "ImVec2": "Vector2",
     "ImVec4": "Color",
+    "ImVector_ImGuiSelectionRequest": "Array",
     "int": "int",
     "int*": "Array",
     "short": "short",
@@ -110,6 +85,9 @@ include_structs = (
     # "ImGuiTableSortSpecs",
     # "ImGuiTextFilter",
     "ImGuiWindowClass",
+    "ImGuiMultiSelectIO",
+    "ImGuiSelectionRequest",
+    # "ImGuiSelectionBasicStorage", # not useful
 )
 
 constructible_structs = ("ImGuiWindowClass",)
@@ -143,6 +121,8 @@ array_types = {
     "double*": "double",
     "const float*": "float",
 }
+
+non_bitfield_enums = []
 
 
 def is_obsolete(j):
@@ -193,12 +173,17 @@ class Enum:
             rv += f"{macro}({kv[0]}); \\\n"
         return rv
 
+    def __str__(self):
+        return f"Enum {self.name} ({self.orig_name})"
+
 
 class ReturnType:
     def __init__(self, j):
         self.orig_type = j["declaration"]
         self.gdtype = type_map.get(self.orig_type)
         self.is_struct = self.gdtype and self.gdtype.endswith("Ptr>")
+        if self.gdtype is None:
+            print(f"no type for rt {self.orig_type}")
 
 
 class Param:
@@ -317,8 +302,8 @@ class Function:
                 if p.gdtype is None:
                     self.valid = False
 
-        # if not self.valid and not self.orig_name in exclude_funcs:
-        #     print(f"skip function {self.orig_name}")
+        if not self.valid and not self.orig_name in exclude_funcs:
+            print(f"skip function {self.orig_name}")
 
     def gen_decl(self):
         return f'static {self.rt.gdtype} {self.name}({", ".join(p.gen_decl() for p in self.params)}); \\\n'
@@ -334,6 +319,8 @@ class Function:
             fcall = f"To{self.rt.gdtype}({fcall})"
         elif self.rt.orig_type in ["ImFont*"]:
             fcall = f"({self.rt.gdtype}){fcall}"
+        elif self.rt.gdtype in non_bitfield_enums:
+            fcall = f"static_cast<{self.rt.gdtype}>({fcall})"
 
         rv = f'{self.rt.gdtype} ImGui::{self.name}({", ".join(p.gen_def() for p in self.params)}) {{ \\\n'
 
@@ -415,10 +402,11 @@ class Property:
         dv = "{}"
         if self.gdtype.startswith("BitField"):
             dv = "0"
-        cast = ""
-        if self.gdtype == "ImGui::Dir":
-            cast = f"({self.gdtype})"
-        rv += f"if (ptr) return {cast}{fcall}; else return {dv};\\\n"
+        elif self.gdtype in non_bitfield_enums:
+            fcall = f"static_cast<{self.gdtype}>({fcall})"
+        elif self.orig_type.startswith("ImVector_"):
+            fcall = f"FromImVector({fcall})"
+        rv += f"if (ptr) [[likely]] return {fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
         # setter
@@ -428,6 +416,10 @@ class Property:
             x = "{x.x, x.y}"
         elif self.orig_type in ["ImFont*"]:
             x = "(ImFont*)x"
+        elif self.gdtype in non_bitfield_enums:
+            x = f"static_cast<{self.orig_type}>(x)"
+        elif self.orig_type.startswith("ImVector_"):
+            x = "ToImVector(x)"
 
         if self.gdtype == "PackedColorArray":
             rv += f"FromPackedColorArray(x, ptr->{self.name}); \\\n"
@@ -529,6 +521,7 @@ class JsonParser:
         self.func_binds = "#define BIND_IMGUI_FUNCS() \\\n"
         self.func_defs = "#define DEFINE_IMGUI_FUNCS() \\\n"
         self.struct_decls = "#define DECLARE_IMGUI_STRUCTS() \\\n"
+        self.struct_decls_fwd = "#define FORWARD_DECLARE_IMGUI_STRUCTS() \\\n"
         self.struct_defs = "#define DEFINE_IMGUI_STRUCTS() \\\n"
         self.struct_binds = "#define BIND_IMGUI_STRUCTS() \\\n"
 
@@ -543,6 +536,7 @@ class JsonParser:
             fi.write(self.enum_defs)
             fi.write(self.enum_binds)
             fi.write(self.enum_casts)
+            fi.write(self.struct_decls_fwd)
             fi.write(self.struct_decls)
             fi.write(self.struct_defs)
             fi.write(self.struct_binds)
@@ -558,6 +552,11 @@ class JsonParser:
             self.enum_casts += e.gen_cast()
             self.enum_binds += e.gen_bindings()
             enums.append(e)
+            if e.bitfield:
+                type_map[e.orig_name.strip("_")] = f"BitField<ImGui::{e.name}>"
+            else:
+                type_map[e.orig_name.strip("_")] = f"ImGui::{e.name}"
+                non_bitfield_enums.append(f"ImGui::{e.name}")
         self.enum_defs += "\n\n"
         self.enum_binds += "\n\n"
         self.enum_casts += "\n\n"
@@ -567,9 +566,11 @@ class JsonParser:
             if s.valid:
                 self.structs.append(s)
         for s in self.structs:
+            self.struct_decls_fwd += f"class {s.name};"
             self.struct_decls += s.gen_decl()
             self.struct_defs += s.gen_def()
             self.struct_binds += s.gen_bindings()
+        self.struct_decls_fwd += "\n\n"
         self.struct_decls += "\n\n"
         self.struct_defs += "\n\n"
         self.struct_binds += "\n\n"
