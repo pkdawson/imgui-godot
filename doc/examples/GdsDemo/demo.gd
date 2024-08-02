@@ -9,6 +9,7 @@ var anim_counter := 0
 var wc_topmost: ImGuiWindowClassPtr
 var ms_items := items
 var ms_selection := []
+var table_items := []
 
 func _ready():
     var io := ImGui.GetIO()
@@ -20,6 +21,9 @@ func _ready():
     var style := ImGui.GetStyle()
     style.Colors[ImGui.Col_PlotHistogram] = Color.REBECCA_PURPLE
     style.Colors[ImGui.Col_PlotHistogramHovered] = Color.SLATE_BLUE
+
+    for i in range(items.size()):
+        table_items.append([i, items[i]])
 
 func _process(_delta: float) -> void:
     ImGui.ShowDemoWindow()
@@ -47,14 +51,43 @@ func _process(_delta: float) -> void:
     ImGui.Text("choice = %s" % items[current_item[0]])
 
     ImGui.SeparatorText("Multi-Select")
-    var ms_io := ImGui.BeginMultiSelectEx(ImGui.MultiSelectFlags_None, ms_items.size(), ms_selection.size())
-    apply_selection_requests(ms_io)
-    for i in range(items.size()):
-        var is_selected := ms_selection.has(i)
-        ImGui.SetNextItemSelectionUserData(i)
-        ImGui.SelectableEx(ms_items[i], is_selected)
-    ms_io = ImGui.EndMultiSelect()
-    apply_selection_requests(ms_io)
+    if ImGui.BeginChild("MSItems", Vector2(0,0), ImGui.ChildFlags_FrameStyle):
+        var flags := ImGui.MultiSelectFlags_ClearOnEscape | ImGui.MultiSelectFlags_BoxSelect1d
+        var ms_io := ImGui.BeginMultiSelectEx(flags, ms_selection.size(), ms_items.size())
+        apply_selection_requests(ms_io)
+        for i in range(items.size()):
+            var is_selected := ms_selection.has(i)
+            ImGui.SetNextItemSelectionUserData(i)
+            ImGui.SelectableEx(ms_items[i], is_selected)
+        ms_io = ImGui.EndMultiSelect()
+        apply_selection_requests(ms_io)
+        ImGui.EndChild()
+    ImGui.End()
+
+    ImGui.Begin("Sortable Table")
+    if ImGui.BeginTable("sortable_table", 2, ImGui.TableFlags_Sortable):
+        ImGui.TableSetupColumn("ID", ImGui.TableColumnFlags_DefaultSort)
+        ImGui.TableSetupColumn("Name")
+        ImGui.TableSetupScrollFreeze(0, 1)
+        ImGui.TableHeadersRow()
+
+        var sort_specs := ImGui.TableGetSortSpecs()
+        if sort_specs.SpecsDirty:
+            for spec: ImGuiTableColumnSortSpecsPtr in sort_specs.Specs:
+                var col := spec.ColumnIndex
+                if spec.SortDirection == ImGui.SortDirection_Ascending:
+                    table_items.sort_custom(func(lhs, rhs): return lhs[col] < rhs[col])
+                else:
+                    table_items.sort_custom(func(lhs, rhs): return lhs[col] > rhs[col])
+            sort_specs.SpecsDirty = false
+
+        for i in range(table_items.size()):
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            ImGui.Text("%d" % table_items[i][0])
+            ImGui.TableNextColumn()
+            ImGui.Text(table_items[i][1])
+        ImGui.EndTable()
     ImGui.End()
 
     ImGui.SetNextWindowClass(wc_topmost)

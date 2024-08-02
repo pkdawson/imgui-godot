@@ -55,6 +55,21 @@ inline ImVector_ImGuiSelectionRequest ToImVector(const Array& in)
     return {};
 }
 
+inline Array SpecsToArray(const ImGuiTableSortSpecs* p)
+{
+    ERR_FAIL_COND_V(!p, {});
+
+    Array rv;
+    for (int i = 0; i < p->SpecsCount; ++i)
+    {
+        Ref<ImGui::Godot::ImGuiTableColumnSortSpecsPtr> col;
+        col.instantiate();
+        col->_SetPtr(const_cast<ImGuiTableColumnSortSpecs*>(&p->Specs[i]));
+        rv.append(col);
+    }
+    return rv;
+}
+
 const char* sn_to_cstr(const StringName& sn)
 {
     static std::unordered_map<StringName, std::string> stringname_cache;

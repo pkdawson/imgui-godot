@@ -22,6 +22,7 @@ type_map = {
     "ImFont*": "int64_t",
     "ImGuiID": "uint32_t",
     "ImGuiIO*": "Ref<ImGuiIOPtr>",
+    "ImGuiListClipper*": "Ref<ImGuiListClipperPtr>",
     "ImGuiSelectionUserData": "int64_t",
     "ImGuiStyle*": "Ref<ImGuiStylePtr>",
     "ImS16": "int16_t",
@@ -81,16 +82,17 @@ include_structs = (
     "ImGuiIO",
     "ImGuiStyle",
     "ImDrawList",
-    # "ImGuiTableColumnSortSpecs",
-    # "ImGuiTableSortSpecs",
+    "ImGuiTableColumnSortSpecs",
+    "ImGuiTableSortSpecs",
     # "ImGuiTextFilter",
     "ImGuiWindowClass",
     "ImGuiMultiSelectIO",
     "ImGuiSelectionRequest",
     # "ImGuiSelectionBasicStorage", # not useful
+    "ImGuiListClipper",
 )
 
-constructible_structs = ("ImGuiWindowClass",)
+constructible_structs = ("ImGuiWindowClass", "ImGuiListClipper")
 
 exclude_props = (
     "MouseDown",
@@ -219,8 +221,8 @@ class Param:
                 dv = dv.replace("NULL", f"{self.gdtype}()")
         self.dv = dv
         self.is_struct = self.gdtype and self.gdtype.endswith("Ptr>")
-        # if self.gdtype is None:
-        #     print(f"no type for param {self.orig_type} {self.name}")
+        if self.gdtype is None:
+            print(f"no type for param {self.orig_type} {self.name}")
 
     def gen_decl(self):
         rv = f"{self.gdtype} {self.name}"
@@ -296,13 +298,16 @@ class Function:
             and not self.orig_name.endswith("V")
             and not self.orig_name.startswith("ImGuiIO_")
             and not self.orig_name.startswith("ImFont_")
+            # double underscore = internal
+            and not self.orig_name.startswith("ImDrawList__")
         )
+
         if self.valid:
             for p in self.params:
                 if p.gdtype is None:
                     self.valid = False
 
-        if not self.valid and not self.orig_name in exclude_funcs:
+        if not self.valid and not self.orig_name in exclude_funcs and not self.obsolete:
             print(f"skip function {self.orig_name}")
 
     def gen_decl(self):
@@ -377,6 +382,12 @@ class Property:
             self.gdtype = Property.array_types[self.array_type]
         if self.gdtype == "String":
             self.gdtype = None
+        try:
+            self.is_const = (
+                "const" in j["type"]["description"]["inner_type"]["storage_classes"]
+            )
+        except:
+            self.is_const = False
         self.valid = self.gdtype is not None
 
         if not self.valid:
@@ -406,25 +417,31 @@ class Property:
             fcall = f"static_cast<{self.gdtype}>({fcall})"
         elif self.orig_type.startswith("ImVector_"):
             fcall = f"FromImVector({fcall})"
+        elif self.orig_type == "const ImGuiTableColumnSortSpecs*":
+            fcall = f"SpecsToArray(ptr)"
+
         rv += f"if (ptr) [[likely]] return {fcall}; else return {dv};\\\n"
         rv += "} \\\n"
 
         # setter
         rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
-        x = "x"
-        if self.orig_type == "ImVec2":
-            x = "{x.x, x.y}"
-        elif self.orig_type in ["ImFont*"]:
-            x = "(ImFont*)x"
-        elif self.gdtype in non_bitfield_enums:
-            x = f"static_cast<{self.orig_type}>(x)"
-        elif self.orig_type.startswith("ImVector_"):
-            x = "ToImVector(x)"
-
-        if self.gdtype == "PackedColorArray":
-            rv += f"FromPackedColorArray(x, ptr->{self.name}); \\\n"
+        if self.is_const:
+            rv += f'ERR_FAIL_MSG("{self.name} is const");'
         else:
-            rv += f"ptr->{self.name} = {x}; \\\n"
+            x = "x"
+            if self.orig_type == "ImVec2":
+                x = "{x.x, x.y}"
+            elif self.orig_type in ["ImFont*"]:
+                x = "(ImFont*)x"
+            elif self.gdtype in non_bitfield_enums:
+                x = f"static_cast<{self.orig_type}>(x)"
+            elif self.orig_type.startswith("ImVector_"):
+                x = "ToImVector(x)"
+
+            if self.gdtype == "PackedColorArray":
+                rv += f"FromPackedColorArray(x, ptr->{self.name}); \\\n"
+            else:
+                rv += f"ptr->{self.name} = {x}; \\\n"
         rv += "} \\\n"
         return rv
 
