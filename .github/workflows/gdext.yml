@@ -10,6 +10,7 @@ env:
   vcpkg_tag: 1de2026f28ead93ff1773e6e680387643e914ea1 # 2024.07.12
 
 jobs:
+  # TODO: refactor to matrix
   windows:
     name: 🪟Windows
     runs-on: windows-latest
@@ -35,13 +36,17 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
+      - shell: bash
+        run: |
+          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
+
       - uses: actions/cache@v4
         id: cache-godot-cpp
         if: github.ref_type != 'tag'
         with:
           path: |
             gdext/scons_cache
-          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+          key: ${{ env.cache_key }}
 
       - name: Build
         if: github.ref_type != 'tag'
@@ -93,12 +98,16 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
+      - shell: bash
+        run: |
+          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
+
       - uses: actions/cache@v4
         id: cache-godot-cpp
         with:
           path: |
             gdext/scons_cache
-          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+          key: ${{ env.cache_key }}
 
       - name: Build debug
         run: |
@@ -144,12 +153,16 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
+      - shell: bash
+        run: |
+          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
+
       - uses: actions/cache@v4
         id: cache-godot-cpp
         with:
           path: |
             gdext/scons_cache
-          key: godot-cpp-${{ runner.os }}-${{ hashFiles('gdext/godot-cpp/gdextension/extension_api.json') }}
+          key: ${{ env.cache_key }}
 
       - name: Build debug
         run: |
