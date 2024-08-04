@@ -8,7 +8,7 @@
 
 ![screenshot](doc/screenshot.png)
 
-[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin, with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET), allows you to use ImGui in Godot with C#, C++, and GDScript.
+[Dear ImGui](https://github.com/ocornut/imgui) is a popular library for rapidly building tools for debugging and development. This plugin allows you to use ImGui in Godot with C# (with the aid of [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)), C++, and GDScript.
 
 After installing the plugin, usage is as simple as this:
 
