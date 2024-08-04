@@ -50,11 +50,14 @@ bool ImGuiGD::ToolInit()
     if (!Engine::get_singleton()->is_editor_hint())
         return false;
 
-    Node* plugin = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiPlugin"));
+    const Node* plugin = Object::cast_to<Node>(Engine::get_singleton()->get_singleton("ImGuiPlugin"));
     ERR_FAIL_COND_V(!plugin, false);
-    if (!plugin->get_node_or_null("ImGuiController"))
+    Window* parent = plugin->get_window();
+    ERR_FAIL_COND_V(!parent, false);
+
+    if (!parent->get_node_or_null("ImGuiController"))
     {
-        plugin->add_child(memnew(ImGuiController));
+        parent->add_child(memnew(ImGuiController));
     }
     return true;
 #else
