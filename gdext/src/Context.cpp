@@ -50,7 +50,7 @@ void Init(const Ref<Resource>& cfg)
     RenderingServer* RS = RenderingServer::get_singleton();
     ProjectSettings* PS = ProjectSettings::get_singleton();
 
-    RendererType rendererType;
+    RendererType rendererType = RendererType::Dummy;
 
     String rendererName = cfg->get("Renderer");
     if (rendererName == "Dummy")
@@ -68,7 +68,7 @@ void Init(const Ref<Resource>& cfg)
         rendererType = RendererType::Canvas;
 
     // there's no way to get the actual current thread model, eg if --render-thread is used
-    int threadModel = PS->get_setting("rendering/driver/threads/thread_model");
+    const int threadModel = PS->get_setting("rendering/driver/threads/thread_model");
 
     std::unique_ptr<Renderer> renderer;
     switch (rendererType)
@@ -110,8 +110,8 @@ void Init(const Ref<Resource>& cfg)
     {
         Ref<Resource> fontres = fonts[i];
         Ref<FontFile> fontData = fontres->get("FontData");
-        int fontSize = fontres->get("FontSize");
-        bool merge = fontres->get("Merge");
+        const int fontSize = fontres->get("FontSize");
+        const bool merge = fontres->get("Merge");
         if (i == 0)
             AddFont(fontData, fontSize);
         else
@@ -178,8 +178,8 @@ void RebuildFontAtlas()
     ERR_FAIL_COND(!ctx);
     ERR_FAIL_COND(ctx->inProcessFrame);
 
-    bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
-    int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
+    const bool scaleToDpi = ProjectSettings::get_singleton()->get_setting("display/window/dpi/allow_hidpi");
+    const int dpiFactor = std::max(1, DisplayServer::get_singleton()->screen_get_dpi() / 96);
     ctx->fonts->RebuildFontAtlas(scaleToDpi ? dpiFactor * ctx->scale : ctx->scale);
 }
 
@@ -200,9 +200,9 @@ void SetIniFilename(const String& fn)
 
 bool SubViewportWidget(SubViewport* svp)
 {
-    ImVec2 vpSize = svp->get_size();
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImVec2 pos_max = {pos.x + vpSize.x, pos.y + vpSize.y};
+    const ImVec2 vpSize = svp->get_size();
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const ImVec2 pos_max = {pos.x + vpSize.x, pos.y + vpSize.y};
     ImGui::GetWindowDrawList()->AddImage((ImTextureID)svp->get_texture()->get_rid().get_id(), pos, pos_max);
 
     ImGui::PushID(svp->get_instance_id());

@@ -27,7 +27,7 @@ struct Input::Impl
     Vector2 currentSubViewportPos;
     Vector2 mouseWheel;
     ImGuiMouseCursor currentCursor = ImGuiMouseCursor_None;
-    bool hasMouse;
+    bool hasMouse = false;
 };
 
 namespace {

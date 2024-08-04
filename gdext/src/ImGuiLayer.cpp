@@ -117,7 +117,7 @@ void ImGuiLayer::UpdateViewport()
             vpSize = Object::cast_to<SubViewport>(impl->parentViewport)->get_size();
         GetContext()->viewportSize = vpSize;
 
-        Transform2D ft = impl->parentViewport->get_final_transform();
+        const Transform2D ft = impl->parentViewport->get_final_transform();
 
         if (impl->subViewportSize != vpSize ||
             impl->finalTransform != ft
@@ -133,7 +133,7 @@ void ImGuiLayer::UpdateViewport()
 
             RenderingServer* RS = RenderingServer::get_singleton();
             RS->viewport_set_size(impl->subViewportRid, impl->subViewportSize.x, impl->subViewportSize.y);
-            RID vptex = RS->viewport_get_texture(impl->subViewportRid);
+            const RID vptex = RS->viewport_get_texture(impl->subViewportRid);
             RS->canvas_item_clear(impl->canvasItem);
             RS->canvas_item_set_transform(impl->canvasItem, ft.affine_inverse());
             RS->canvas_item_add_texture_rect(impl->canvasItem,

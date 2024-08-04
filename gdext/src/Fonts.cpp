@@ -43,7 +43,7 @@ struct Fonts::Impl
 
     static void ResetStyle()
     {
-        ImGuiStyle defaultStyle;
+        const ImGuiStyle defaultStyle;
         ImGuiStyle& style = ImGui::GetStyle();
 
         style.WindowPadding = defaultStyle.WindowPadding;
@@ -79,7 +79,7 @@ struct Fonts::Impl
 void Fonts::Impl::AddFontToAtlas(const FontParams& fp, float scale)
 {
     auto& io = ImGui::GetIO();
-    int fontSize = fp.fontSize * scale;
+    const int fontSize = fp.fontSize * scale;
     ImFontConfig fc;
 
     if (fp.merge)
@@ -106,7 +106,7 @@ void Fonts::Impl::AddFontToAtlas(const FontParams& fp, float scale)
         std::copy(fontdesc.begin(), fontdesc.end(), fc.Name);
         fc.Name[fontdesc.length()] = '\0';
 
-        int64_t len = fp.font->get_data().size();
+        const int64_t len = fp.font->get_data().size();
         // let ImGui manage this memory
         void* p = ImGui::MemAlloc(len);
         memcpy(p, fp.font->get_data().ptr(), len);

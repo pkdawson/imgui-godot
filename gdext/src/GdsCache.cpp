@@ -19,7 +19,7 @@ struct GdsCache::Impl
     static void CopyInput(std::vector<char>& buf, const Array& a)
     {
         CharString cs = String(a[0]).utf8();
-        std::string_view sv = cs.get_data();
+        const std::string_view sv = cs.get_data();
         if (sv.size() >= buf.size())
             return;
         std::copy(sv.begin(), sv.end(), buf.begin());
@@ -54,7 +54,7 @@ void GdsCache::OnNewFrame()
 
 std::vector<char>& GdsCache::GetTextBuf(const StringName& label, size_t size, const Array& a)
 {
-    int64_t hash = ImGui::GetID((void*)label.hash());
+    const int64_t hash = ImGui::GetID((void*)label.hash());
     impl->used[hash] = true;
     auto it = impl->bufs.find(hash);
     if (it == impl->bufs.end())
@@ -75,7 +75,7 @@ std::vector<char>& GdsCache::GetTextBuf(const StringName& label, size_t size, co
 
 const std::vector<char>& GdsCache::GetZeroArray(const Array& a)
 {
-    int64_t hash = a.hash();
+    const int64_t hash = a.hash();
     impl->used[hash] = true;
     if (auto it = impl->bufs.find(hash); it != impl->bufs.end())
     {
@@ -87,7 +87,7 @@ const std::vector<char>& GdsCache::GetZeroArray(const Array& a)
     for (int i = 0; i < a.size(); ++i)
     {
         CharString cs = String(a[i]).utf8();
-        std::string_view sv = cs.get_data();
+        const std::string_view sv = cs.get_data();
         std::copy(sv.begin(), sv.end(), std::back_inserter(buf));
         buf.push_back('\0');
     }

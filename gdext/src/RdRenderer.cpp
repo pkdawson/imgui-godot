@@ -61,7 +61,7 @@ RID RdRenderer::GetFramebuffer(RID vprid)
     if (!vprid.is_valid())
         return RID();
 
-    RenderingServer* RS = RenderingServer::get_singleton();
+    const RenderingServer* RS = RenderingServer::get_singleton();
     RenderingDevice* RD = RS->get_rendering_device();
     auto it = impl->framebuffers.find(vprid);
     if (it != impl->framebuffers.end())
@@ -71,7 +71,7 @@ RID RdRenderer::GetFramebuffer(RID vprid)
             return fb;
     }
 
-    RID vptex = RS->texture_get_rd_texture(RS->viewport_get_texture(vprid));
+    const RID vptex = RS->texture_get_rd_texture(RS->viewport_get_texture(vprid));
     godot::TypedArray<godot::RID> arr;
     arr.push_back(vptex);
     RID fb = RD->framebuffer_create(arr);
@@ -86,11 +86,11 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
     int globalIdxOffset = 0;
     int globalVtxOffset = 0;
 
-    int idxBufSize = drawData->TotalIdxCount * sizeof(ImDrawIdx);
+    const int idxBufSize = drawData->TotalIdxCount * sizeof(ImDrawIdx);
     godot::PackedByteArray idxBuf;
     idxBuf.resize(idxBufSize);
 
-    int vertBufSize = drawData->TotalVtxCount * sizeof(ImDrawVert);
+    const int vertBufSize = drawData->TotalVtxCount * sizeof(ImDrawVert);
     godot::PackedByteArray vertBuf;
     vertBuf.resize(vertBufSize);
 
@@ -112,10 +112,10 @@ void RdRenderer::Impl::SetupBuffers(ImDrawData* drawData)
         for (int cmdi = 0; cmdi < cmdList->CmdBuffer.Size; ++cmdi)
         {
             const ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
-            ImTextureID texid = drawCmd.GetTexID();
+            const ImTextureID texid = drawCmd.GetTexID();
             if (!texid)
                 continue;
-            RID texrid = make_rid(texid);
+            const RID texrid = make_rid(texid);
             if (!RD->texture_is_valid(texrid))
                 continue;
 
@@ -212,7 +212,7 @@ bool RdRenderer::Init()
     TypedArray<RDAttachmentFormat> afs;
     afs.push_back(af);
 
-    int64_t fb_format = RD->framebuffer_format_create(afs);
+    const int64_t fb_format = RD->framebuffer_format_create(afs);
 
     impl->pipeline = RD->render_pipeline_create(impl->shader,
                                                 fb_format,
@@ -280,12 +280,12 @@ void RdRenderer::Render(RID fb, ImDrawData* drawData)
         impl->SetupBuffers(drawData);
 
     // draw
-    int64_t dl = RD->draw_list_begin(fb,
-                                     RenderingDevice::INITIAL_ACTION_CLEAR,
-                                     RenderingDevice::FINAL_ACTION_READ,
-                                     RenderingDevice::INITIAL_ACTION_CLEAR,
-                                     RenderingDevice::FINAL_ACTION_READ,
-                                     impl->clearColors);
+    const int64_t dl = RD->draw_list_begin(fb,
+                                           RenderingDevice::INITIAL_ACTION_CLEAR,
+                                           RenderingDevice::FINAL_ACTION_READ,
+                                           RenderingDevice::INITIAL_ACTION_CLEAR,
+                                           RenderingDevice::FINAL_ACTION_READ,
+                                           impl->clearColors);
 
     RD->draw_list_bind_render_pipeline(dl, impl->pipeline);
     RD->draw_list_set_push_constant(dl, pcbuf, pcbuf.size());
@@ -298,19 +298,19 @@ void RdRenderer::Render(RID fb, ImDrawData* drawData)
 
         for (int cmdi = 0; cmdi < cmdList->CmdBuffer.Size; ++cmdi)
         {
-            ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
+            const ImDrawCmd& drawCmd = cmdList->CmdBuffer[cmdi];
             if (drawCmd.ElemCount == 0)
                 continue;
             if (!impl->uniformSets.contains(drawCmd.GetTexID()))
                 continue;
 
-            RID idxArray =
+            const RID idxArray =
                 RD->index_array_create(impl->idxBuffer, drawCmd.IdxOffset + globalIdxOffset, drawCmd.ElemCount);
 
-            int64_t voff = (drawCmd.VtxOffset + globalVtxOffset) * sizeof(ImDrawVert);
+            const int64_t voff = (drawCmd.VtxOffset + globalVtxOffset) * sizeof(ImDrawVert);
             impl->srcBuffers[0] = impl->srcBuffers[1] = impl->srcBuffers[2] = impl->vtxBuffer;
             impl->vtxOffsets[0] = impl->vtxOffsets[1] = impl->vtxOffsets[2] = voff;
-            RID vtxArray =
+            const RID vtxArray =
                 RD->vertex_array_create(cmdList->VtxBuffer.Size, impl->vtxFormat, impl->srcBuffers, impl->vtxOffsets);
 
             RD->draw_list_bind_uniform_set(dl, impl->uniformSets[drawCmd.GetTexID()], 0);
@@ -380,7 +380,7 @@ void RdRenderer::Render()
         if (!(vp->Flags & ImGuiViewportFlags_IsMinimized))
         {
             ReplaceTextureRIDs(vp->DrawData);
-            RID vprid = make_rid(vp->RendererUserData);
+            const RID vprid = make_rid(vp->RendererUserData);
             Render(GetFramebuffer(vprid), vp->DrawData);
         }
     }
@@ -389,7 +389,7 @@ void RdRenderer::Render()
 
 void RdRenderer::ReplaceTextureRIDs(ImDrawData* drawData)
 {
-    RenderingServer* RS = RenderingServer::get_singleton();
+    const RenderingServer* RS = RenderingServer::get_singleton();
     for (int i = 0; i < drawData->CmdListsCount; ++i)
     {
         ImDrawList* cmdList = drawData->CmdLists[i];

@@ -17,7 +17,7 @@ ImGuiController* instance = nullptr;
 
 struct ImGuiController::Impl
 {
-    Window* window;
+    Window* window = nullptr;
     ImGuiControllerHelper* helper = nullptr;
 
     void CheckContentScale() const;
@@ -168,7 +168,8 @@ void ImGuiController::SetMainViewport(Viewport* vp)
             add_child(newLayer);
         else
             vp->add_child(newLayer);
-        ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_PlatformHasViewports | ImGuiBackendFlags_HasMouseHoveredViewport;
+        ImGui::GetIO().BackendFlags |=
+            ImGuiBackendFlags_PlatformHasViewports | ImGuiBackendFlags_HasMouseHoveredViewport;
     }
     else
     {

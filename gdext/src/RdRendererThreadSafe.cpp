@@ -53,7 +53,8 @@ struct RdRendererThreadSafe::Impl
 RdRendererThreadSafe::RdRendererThreadSafe() : impl(std::make_unique<Impl>())
 {
     RenderingServer* RS = RenderingServer::get_singleton();
-    RS->connect("frame_pre_draw", Callable(Engine::get_singleton()->get_singleton("ImGuiController"), "on_frame_pre_draw"));
+    RS->connect("frame_pre_draw",
+                Callable(Engine::get_singleton()->get_singleton("ImGuiController"), "on_frame_pre_draw"));
 }
 
 RdRendererThreadSafe::~RdRendererThreadSafe()

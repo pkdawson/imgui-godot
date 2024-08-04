@@ -40,7 +40,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
         }
     }
 
-    Rect2i winRect = Rect2i(vp->Pos, vp->Size);
+    const Rect2i winRect = Rect2i(vp->Pos, vp->Size);
 
     ImGuiWindow* igwin = memnew(ImGuiWindow);
     igwin->init(vp);
@@ -60,7 +60,7 @@ static void Godot_CreateWindow(ImGuiViewport* vp)
     vd->window->set_flag(Window::FLAG_TRANSPARENT, true);
 
     // it's our window, so just draw directly to the root viewport
-    RID vprid = vd->window->get_viewport_rid();
+    const RID vprid = vd->window->get_viewport_rid();
     vp->RendererUserData = (void*)vprid.get_id();
 
     int32_t windowID = vd->window->get_window_id();
@@ -163,8 +163,8 @@ void Viewports::Impl::InitPlatformInterface()
 void Viewports::Impl::UpdateMonitors()
 {
     auto& pio = ImGui::GetPlatformIO();
-    DisplayServer* DS = DisplayServer::get_singleton();
-    int screenCount = DS->get_screen_count();
+    const DisplayServer* DS = DisplayServer::get_singleton();
+    const int screenCount = DS->get_screen_count();
 
     pio.Monitors.resize(0);
     for (int i = 0; i < screenCount; ++i)
@@ -174,7 +174,7 @@ void Viewports::Impl::UpdateMonitors()
         monitor.MainSize = DS->screen_get_size(i);
         monitor.DpiScale = DS->screen_get_scale(i);
 
-        Rect2i rect = DS->screen_get_usable_rect(i);
+        const Rect2i rect = DS->screen_get_usable_rect(i);
         monitor.WorkPos = rect.position;
         monitor.WorkSize = rect.size;
 
@@ -198,7 +198,6 @@ void Viewports::Impl::UpdateMonitors()
 
 Viewports::Viewports() : impl(std::make_unique<Impl>())
 {
-    auto& io = ImGui::GetIO();
     impl->InitPlatformInterface();
     impl->UpdateMonitors();
 }
