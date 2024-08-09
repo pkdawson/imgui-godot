@@ -449,3 +449,22 @@ jobs:
         uses: ./.github/actions/run-test-project
         with:
           exe: ${{ matrix.exe }}
+
+  create_release:
+    name: 🪄Release
+    needs: [package, package_cs]
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - shell: bash
+        run: ls -al
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            imgui-godot-*
+            AssetLib-*
+            pdbs*
