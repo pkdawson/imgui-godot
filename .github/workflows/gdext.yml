@@ -53,7 +53,7 @@ jobs:
           - os: windows-latest
             name: 🪟Windows
 
-    name: ${{ matrix.name }} build (precision=${{ matrix.precision }})
+    name: ${{ matrix.name }} (precision=${{ matrix.precision }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -103,11 +103,13 @@ jobs:
             gdext/scons_cache
           key: ${{ env.cache_key }}
 
+      # TODO: restore gdext api cache if double
+
       - name: Build
         if: github.ref_type != 'tag' || runner.os != 'Windows'
         run: |
           cd gdext
-          scons precision=${{ matrix.precision }}godot-cpp
+          scons precision=${{ matrix.precision }} godot-cpp
           scons precision=${{ matrix.precision }}
           scons precision=${{ matrix.precision }} target=template_release godot-cpp
           scons precision=${{ matrix.precision }} target=template_release
