@@ -26,6 +26,8 @@ runs:
         if [[ -f addons/imgui-godot/imgui-godot-native.gdextension ]]; then
           mkdir .godot
           echo "res://addons/imgui-godot/imgui-godot-native.gdextension" > .godot/extension_list.cfg
+          cat .godot/*
         fi
+        ls -RL
         $GODOT --headless --import || true
         echo "GAMEDIR=$(pwd)" >> $GITHUB_ENV
