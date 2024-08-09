@@ -134,6 +134,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
 
+    strategy:
+      fail-fast: false
+      matrix:
+        precision: [single, double]
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -142,7 +147,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: addons/imgui-godot/bin
-          pattern: gdext-single-*
+          pattern: gdext-${{ matrix.precision }}-*
 
       - run: ls -R
         working-directory: addons/imgui-godot/bin
@@ -180,7 +185,7 @@ jobs:
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
           plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
-          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}
+          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}${{ matrix.precision == 'double' && '_double-precision' || '' }}
           echo $pkgfn
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
@@ -198,12 +203,14 @@ jobs:
             ~/out
 
       - name: Prep asset
+        if: matrix.precision == 'single'
         working-directory: ${{ steps.prep.outputs.pkgdir }}
         run: |
           rm * || true
           rm -r data doc src
 
       - name: Upload asset package
+        if: matrix.precision == 'single'
         uses: actions/upload-artifact@v4
         with:
           name: AssetLib-${{ steps.prep.outputs.pkgfn }}
