@@ -20,6 +20,7 @@ runs:
     - name: Prep
       shell: bash
       run: |
+        ls -R
         cd imgui-godot-*/imgui-godot-* || true
         cd ${{ inputs.path }}
         godotenv addons install
