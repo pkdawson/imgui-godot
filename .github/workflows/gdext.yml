@@ -21,6 +21,7 @@ jobs:
           path: gdextension
           key: gdextension-api-double-${{ env.stable_gdver }}
           lookup-only: true
+          enableCrossOsArchive: true
 
       - uses: actions/checkout@v4
         if: steps.cache.outputs.cache-hit != 'true'
@@ -103,20 +104,18 @@ jobs:
             gdext/scons_cache
           key: ${{ env.cache_key }}
 
-      - if: matrix.precision == 'double'
-        shell: bash
-        run: rm -rf gdext/godot-cpp/gdextension
-
       - uses: actions/cache/restore@v4
         if: matrix.precision == 'double'
         with:
           path: gdextension
           key: gdextension-api-double-${{ env.stable_gdver }}
           fail-on-cache-miss: true
+          enableCrossOsArchive: true
 
       - if: matrix.precision == 'double'
         shell: bash
         run: |
+          rm -rf gdext/godot-cpp/gdextension
           mv gdextension gdext/godot-cpp
           ls -al gdext/godot-cpp/gdextension
 
