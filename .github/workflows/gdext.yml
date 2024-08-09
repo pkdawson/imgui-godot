@@ -153,6 +153,10 @@ jobs:
       matrix:
         precision: [single, double]
 
+    outputs:
+      pkg_single: ${{ steps.prep.outputs.pkg_single }}
+      pkg_double: ${{ steps.prep.outputs.pkg_double }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -202,7 +206,7 @@ jobs:
           pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}${{ matrix.precision == 'double' && '_double-precision' || '' }}
           echo $pkgfn
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
-          echo "pkg_${{ matrix.precision }}=$pkgfn" >> $GITHUB_ENV
+          echo "pkg_${{ matrix.precision }}=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
 
           pkgdir=~/out/imgui-godot-${plugin_ver}
@@ -290,7 +294,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: ${{ env.pkg_single }}
+          name: ${{ needs.package.outputs.pkg_single }}
 
       - uses: chickensoft-games/setup-godot@v2
         with:
@@ -370,7 +374,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: ${{ env.pkg_single }}
+          name: ${{ needs.package.outputs.pkg_single }}
 
       - uses: chickensoft-games/setup-godot@v2
         with:
@@ -418,7 +422,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: ${{ env.pkg_single }}
+          name: ${{ needs.package.outputs.pkg_single }}
 
       - uses: chickensoft-games/setup-godot@v2
         with:
