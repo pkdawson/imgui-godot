@@ -10,7 +10,21 @@ env:
   vcpkg_tag: 1de2026f28ead93ff1773e6e680387643e914ea1 # 2024.07.12
 
 jobs:
+  dump_interface:
+    name: Dump GDExtension API (double)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: godotengine/godot
+          ref: 4.2.2-stable
+
+      - run: |
+          pwd
+          ls -al
+
   build:
+    needs: [dump_interface]
     strategy:
       fail-fast: false
       matrix:
@@ -212,7 +226,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧GdsGameProject
@@ -293,7 +307,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪GDScript
@@ -341,7 +355,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪C#
