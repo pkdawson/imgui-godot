@@ -8,25 +8,25 @@ on:
 
 env:
   vcpkg_tag: 1de2026f28ead93ff1773e6e680387643e914ea1 # 2024.07.12
+  stable_gdver: 4.2.2-stable
 
 jobs:
   dump_interface:
     name: Dump GDExtension API (double)
     runs-on: ubuntu-latest
-    env:
-      gdver: 4.2.2-stable
     steps:
       - uses: actions/cache@v4
         id: cache
         with:
           path: gdextension
-          key: gdextension-api-double-${{ env.gdver }}
+          key: gdextension-api-double-${{ env.stable_gdver }}
+          lookup-only: true
 
       - uses: actions/checkout@v4
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           repository: godotengine/godot
-          ref: ${{ env.gdver }}
+          ref: ${{ env.stable_gdver }}
 
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
@@ -103,7 +103,20 @@ jobs:
             gdext/scons_cache
           key: ${{ env.cache_key }}
 
-      # TODO: restore gdext api cache if double
+      - if: matrix.precision == 'double'
+        run: ls -al gdext/godot-cpp/gdextension
+
+      - uses: actions/cache/restore@v4
+        if: matrix.precision == 'double'
+        with:
+          path: gdext/godot-cpp/gdextension
+          key: gdextension-api-double-${{ env.stable_gdver }}
+          fail-on-cache-miss: true
+
+      - if: matrix.precision == 'double'
+        run: |
+          ls -al gdext/godot-cpp/gdextension
+          ls -R gdext/godot-cpp
 
       - name: Build
         if: github.ref_type != 'tag' || runner.os != 'Windows'
