@@ -44,6 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-14, windows-latest]
+        precision: [single, double]
         include:
           - os: ubuntu-latest
             name: 🐧Linux
@@ -52,7 +53,7 @@ jobs:
           - os: windows-latest
             name: 🪟Windows
 
-    name: ${{ matrix.name }} Build
+    name: ${{ matrix.name }} build (precision=${{ matrix.precision }})
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -92,7 +93,7 @@ jobs:
       - name: Make cache key
         shell: bash
         run: |
-          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
+          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ matrix.precision }}_${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
 
       - uses: actions/cache@v4
         id: cache-godot-cpp
@@ -106,24 +107,24 @@ jobs:
         if: github.ref_type != 'tag' || runner.os != 'Windows'
         run: |
           cd gdext
-          scons godot-cpp
-          scons
-          scons target=template_release godot-cpp
-          scons target=template_release
+          scons precision=${{ matrix.precision }}godot-cpp
+          scons precision=${{ matrix.precision }}
+          scons precision=${{ matrix.precision }} target=template_release godot-cpp
+          scons precision=${{ matrix.precision }} target=template_release
 
       - name: Build (with debug symbols)
         if: github.ref_type == 'tag' && runner.os == 'Windows'
         run: |
           cd gdext
-          scons debug_symbols=yes godot-cpp
-          scons debug_symbols=yes
-          scons debug_symbols=yes target=template_release godot-cpp
-          scons debug_symbols=yes target=template_release
+          scons precision=${{ matrix.precision }} debug_symbols=yes godot-cpp
+          scons precision=${{ matrix.precision }} debug_symbols=yes
+          scons precision=${{ matrix.precision }} debug_symbols=yes target=template_release godot-cpp
+          scons precision=${{ matrix.precision }} debug_symbols=yes target=template_release
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: gdext-${{ runner.os }}
+          name: gdext-${{ matrix.precision }}-${{ runner.os }}
           path: addons/imgui-godot/bin
 
   package:
@@ -139,7 +140,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: addons/imgui-godot/bin
-          pattern: gdext-*
+          pattern: gdext-single-*
 
       - run: ls -R
         working-directory: addons/imgui-godot/bin
