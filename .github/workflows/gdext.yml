@@ -104,21 +104,19 @@ jobs:
           key: ${{ env.cache_key }}
 
       - if: matrix.precision == 'double'
-        run: |
-          ls -al gdext/godot-cpp/gdextension
-          rm -rf gdext/godot-cpp/gdextension
+        run: rm -rf gdext/godot-cpp/gdextension
 
       - uses: actions/cache/restore@v4
         if: matrix.precision == 'double'
         with:
-          path: gdext/godot-cpp/gdextension
+          path: gdextension
           key: gdextension-api-double-${{ env.stable_gdver }}
           fail-on-cache-miss: true
 
       - if: matrix.precision == 'double'
         run: |
+          mv gdextension gdext/godot-cpp
           ls -al gdext/godot-cpp/gdextension
-          ls -R gdext/godot-cpp
 
       - name: Build
         if: github.ref_type != 'tag' || runner.os != 'Windows'
