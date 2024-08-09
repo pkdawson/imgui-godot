@@ -104,7 +104,9 @@ jobs:
           key: ${{ env.cache_key }}
 
       - if: matrix.precision == 'double'
-        run: ls -al gdext/godot-cpp/gdextension
+        run: |
+          ls -al gdext/godot-cpp/gdextension
+          rm -rf gdext/godot-cpp/gdextension
 
       - uses: actions/cache/restore@v4
         if: matrix.precision == 'double'
