@@ -31,7 +31,12 @@ target_compile_definitions(imgui-godot-native PUBLIC
     IMGUI_ENABLE_FREETYPE
 #    IMGUI_ENABLE_FREETYPE_LUNASVG
     IGN_EXPORT
+    # REAL_T_IS_DOUBLE
     )
+
+# target_compile_definitions(godot-cpp PUBLIC
+#     REAL_T_IS_DOUBLE
+# )
 
 if (MSVC)
     target_compile_options(godot-cpp PRIVATE "/MP")
