@@ -13,15 +13,29 @@ jobs:
   dump_interface:
     name: Dump GDExtension API (double)
     runs-on: ubuntu-latest
+    env:
+      gdver: 4.2.2-stable
     steps:
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: gdextension
+          key: gdextension-api-double-${{ env.gdver }}
+
       - uses: actions/checkout@v4
+        if: steps.cache.outputs.cache-hit != 'true'
         with:
           repository: godotengine/godot
-          ref: 4.2.2-stable
+          ref: ${{ env.gdver }}
 
-      - run: |
-          pwd
-          ls -al
+      - name: Build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          scons precision=double
+          mkdir gdextension
+          cd gdextension
+          ../bin/godot.* --headless --dump-extension-api --dump-gdextension-interface
+
 
   build:
     needs: [dump_interface]
