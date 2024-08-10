@@ -144,7 +144,9 @@ public static class Widgets
         Godot.Vector2 atlasSize = tex.Atlas.GetSize();
         Godot.Vector2 guv0 = tex.Region.Position / atlasSize;
         Godot.Vector2 guv1 = tex.Region.End / atlasSize;
-        return (new(guv0.X, guv0.Y), new(guv1.X, guv1.Y));
+#pragma warning disable IDE0004 // Remove Unnecessary Cast
+        return (new((float)guv0.X, (float)guv0.Y), new((float)guv1.X, (float)guv1.Y));
+#pragma warning restore IDE0004 // Remove Unnecessary Cast
     }
 }
 #endif

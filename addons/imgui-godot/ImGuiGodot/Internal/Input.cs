@@ -76,7 +76,9 @@ internal class Input
         // scrolling works better if we allow no more than one event per frame
         if (_mouseWheel != Vector2.Zero)
         {
-            io.AddMouseWheelEvent(_mouseWheel.X, _mouseWheel.Y);
+#pragma warning disable IDE0004 // Remove Unnecessary Cast
+            io.AddMouseWheelEvent((float)_mouseWheel.X, (float)_mouseWheel.Y);
+#pragma warning restore IDE0004 // Remove Unnecessary Cast
             _mouseWheel = Vector2.Zero;
         }
 
