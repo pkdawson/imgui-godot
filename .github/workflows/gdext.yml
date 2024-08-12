@@ -179,7 +179,7 @@ jobs:
           rm *.lib
 
       - name: Upload PDBs
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' && matrix.precision == 'single'
         uses: actions/upload-artifact@v4
         with:
           name: pdbs
