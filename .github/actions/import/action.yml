@@ -20,7 +20,7 @@ runs:
     - name: Prep
       shell: bash
       run: |
-        cd imgui-godot-*/imgui-godot-* || true
+        cd imgui-godot-* || true
         cd ${{ inputs.path }}
         godotenv addons install
         if [[ -f addons/imgui-godot/imgui-godot-native.gdextension ]]; then

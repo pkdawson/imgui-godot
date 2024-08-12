@@ -19,7 +19,9 @@ internal sealed class InputLocal : Input
         {
             var io = ImGui.GetIO();
             var mousePos = mm.Position;
-            io.AddMousePosEvent(mousePos.X, mousePos.Y);
+#pragma warning disable IDE0004 // Remove Unnecessary Cast
+            io.AddMousePosEvent((float)mousePos.X, (float)mousePos.Y);
+#pragma warning restore IDE0004 // Remove Unnecessary Cast
             mm.Dispose();
             return io.WantCaptureMouse;
         }

@@ -124,14 +124,14 @@ bool ImGuiGD::_GetVisible()
     return false;
 }
 
-void ImGuiGD::_SetJoyAxisDeadZone(float zone)
+void ImGuiGD::_SetJoyAxisDeadZone(real_t zone)
 {
     Context* ctx = ImGui::Godot::GetContext();
     ERR_FAIL_COND(!ctx);
     ctx->joyAxisDeadZone = zone;
 }
 
-float ImGuiGD::_GetJoyAxisDeadZone()
+real_t ImGuiGD::_GetJoyAxisDeadZone()
 {
     Context* ctx = ImGui::Godot::GetContext();
     if (ctx)
@@ -139,14 +139,14 @@ float ImGuiGD::_GetJoyAxisDeadZone()
     return 0.15f;
 }
 
-void ImGuiGD::_SetScale(float scale)
+void ImGuiGD::_SetScale(real_t scale)
 {
     Context* ctx = ImGui::Godot::GetContext();
     ERR_FAIL_COND(!ctx);
     ctx->scale = scale;
 }
 
-float ImGuiGD::_GetScale()
+real_t ImGuiGD::_GetScale()
 {
     Context* ctx = ImGui::Godot::GetContext();
     if (ctx)

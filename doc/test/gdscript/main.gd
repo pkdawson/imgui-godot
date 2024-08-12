@@ -11,6 +11,9 @@ func _ready() -> void:
     assert_equal(ImGuiGD.Scale, 2)
     assert_equal(ImGui.GetFontSize(), 26)
 
+    # StringName conversion
+    assert_equal(ImGui.GetID("test_id"), 2044763162)
+
     # rescale
     call_deferred("change_scale")
 

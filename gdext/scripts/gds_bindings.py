@@ -16,7 +16,7 @@ type_map = {
     "const ImGuiWindowClass*": "Ref<ImGuiWindowClassPtr>",
     "double": "double",
     "double*": "Array",
-    "float": "float",
+    "float": "real_t",
     "float*": "Array",
     "ImDrawList*": "Ref<ImDrawListPtr>",
     "ImFont*": "int64_t",
@@ -55,7 +55,6 @@ sn_names = (
 )
 
 exclude_funcs = (
-    "ImGui_GetKeyIndex",
     "ImGui_ColorConvertFloat4ToU32",
     "ImGui_ColorConvertHSVtoRGB",
     "ImGui_ColorConvertU32ToFloat4",
@@ -69,6 +68,8 @@ exclude_funcs = (
     "ImGui_GetColorU32ImU32Ex",
     "ImGui_GetColorU32ImVec4",
     "ImGui_GetCurrentContext",
+    "ImGui_GetIDStr",
+    "ImGui_GetKeyIndex",
     "ImGui_NewFrame",
     "ImGui_Render",
     "ImGui_RenderPlatformWindowsDefault",
@@ -158,22 +159,22 @@ class Enum:
                 self.vals.append((gdname, name))
 
     def gen_def(self):
-        rv = f"enum {self.name} {{ \\\n"
+        rv = f"enum {self.name} {{ "
         for kv in self.vals:
             rv += f"{kv[0]} = {kv[1]}, "
-        rv += "}; \\\n"
-        return rv
+        rv += "};"
+        return [rv]
 
     def gen_cast(self):
         macro = "VARIANT_BITFIELD_CAST" if self.bitfield else "VARIANT_ENUM_CAST"
-        return f"{macro}(ImGui::Godot::ImGui::{self.name}); \\\n"
+        return [f"{macro}(ImGui::Godot::ImGui::{self.name});"]
 
     def gen_bindings(self):
         macro = "BIND_BITFIELD_FLAG" if self.bitfield else "BIND_ENUM_CONSTANT"
         rv = ""
         for kv in self.vals:
-            rv += f"{macro}({kv[0]}); \\\n"
-        return rv
+            rv += f"{macro}({kv[0]});"
+        return [rv]
 
     def __str__(self):
         return f"Enum {self.name} ({self.orig_name})"
@@ -244,7 +245,7 @@ class Param:
                 else:
                     return rv
         elif self.gdtype == "Vector2":
-            return f"{{{self.name}.x, {self.name}.y}}"
+            return f"{{static_cast<float>({self.name}.x), static_cast<float>({self.name}.y)}}"
         elif self.gdtype == "Ref<Texture2D>":
             return f"(ImTextureID){self.name}->get_rid().get_id()"
         elif self.gdtype == "Color":
@@ -311,7 +312,9 @@ class Function:
             print(f"skip function {self.orig_name}")
 
     def gen_decl(self):
-        return f'static {self.rt.gdtype} {self.name}({", ".join(p.gen_decl() for p in self.params)}); \\\n'
+        return [
+            f'static {self.rt.gdtype} {self.name}({", ".join(p.gen_decl() for p in self.params)});'
+        ]
 
     def gen_def(self):
         fname = self.orig_name
@@ -327,20 +330,20 @@ class Function:
         elif self.rt.gdtype in non_bitfield_enums:
             fcall = f"static_cast<{self.rt.gdtype}>({fcall})"
 
-        rv = f'{self.rt.gdtype} ImGui::{self.name}({", ".join(p.gen_def() for p in self.params)}) {{ \\\n'
+        rv = f'{self.rt.gdtype} ImGui::{self.name}({", ".join(p.gen_def() for p in self.params)}) {{'
 
         if self.rt.is_struct:
-            rv += f"{self.rt.gdtype} rv; \\\n"
-            rv += "rv.instantiate(); \\\n"
-            rv += f"rv->_SetPtr({fcall}); \\\n"
+            rv += f"{self.rt.gdtype} rv;"
+            rv += "rv.instantiate();"
+            rv += f"rv->_SetPtr({fcall});"
             rv += "return rv"
         else:
             if self.rt.gdtype != "void":
                 rv += "return "
             rv += fcall
 
-        rv += "; } \\\n"
-        return rv
+        rv += "; }"
+        return [rv]
 
     def gen_bindings(self):
         rv = f'ClassDB::bind_static_method("ImGui", D_METHOD("{self.name}"'
@@ -350,8 +353,8 @@ class Function:
         for p in self.params:
             if p.dv is not None:
                 rv += f", DEFVAL({p.dv})"
-        rv += "); \\\n"
-        return rv
+        rv += ");"
+        return [rv]
 
 
 class Property:
@@ -394,13 +397,13 @@ class Property:
             print(f"skip property {self.orig_type} {self.struct_name}::{self.name}")
 
     def gen_decl(self):
-        rv = f"{self.gdtype} _Get{self.name}(); \\\n"
-        rv += f"void _Set{self.name}({self.gdtype} x); \\\n"
+        rv = f"{self.gdtype} _Get{self.name}();"
+        rv += f"void _Set{self.name}({self.gdtype} x);"
         return rv
 
     def gen_def(self):
         # getter
-        rv = f"{self.gdtype} {self.struct_name}::_Get{self.name}() {{ \\\n"
+        rv = f"{self.gdtype} {self.struct_name}::_Get{self.name}() {{"
         fcall = f"ptr->{self.name}"
         # TODO: refactor
         if self.orig_type == "ImVec2":
@@ -420,17 +423,17 @@ class Property:
         elif self.orig_type == "const ImGuiTableColumnSortSpecs*":
             fcall = f"SpecsToArray(ptr)"
 
-        rv += f"if (ptr) [[likely]] return {fcall}; else return {dv};\\\n"
-        rv += "} \\\n"
+        rv += f"if (ptr) [[likely]] return {fcall}; else return {dv};"
+        rv += "}"
 
         # setter
-        rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{ \\\n"
+        rv += f"void {self.struct_name}::_Set{self.name}({self.gdtype} x) {{"
         if self.is_const:
             rv += f'ERR_FAIL_MSG("{self.name} is const");'
         else:
             x = "x"
             if self.orig_type == "ImVec2":
-                x = "{x.x, x.y}"
+                x = "{static_cast<float>(x.x), static_cast<float>(x.y)}"
             elif self.orig_type in ["ImFont*"]:
                 x = "(ImFont*)x"
             elif self.gdtype in non_bitfield_enums:
@@ -439,20 +442,20 @@ class Property:
                 x = "ToImVector(x)"
 
             if self.gdtype == "PackedColorArray":
-                rv += f"FromPackedColorArray(x, ptr->{self.name}); \\\n"
+                rv += f"FromPackedColorArray(x, ptr->{self.name});"
             else:
-                rv += f"ptr->{self.name} = {x}; \\\n"
-        rv += "} \\\n"
+                rv += f"ptr->{self.name} = {x};"
+        rv += "}"
         return rv
 
     def gen_bindings(self):
         getter = f"_Get{self.name}"
         setter = f"_Set{self.name}"
-        rv = f'ClassDB::bind_method(D_METHOD("{getter}"), &{self.struct_name}::{getter}); \\\n'
-        rv += f'ClassDB::bind_method(D_METHOD("{setter}", "x"), &{self.struct_name}::{setter}); \\\n'
+        rv = f'ClassDB::bind_method(D_METHOD("{getter}"), &{self.struct_name}::{getter});'
+        rv += f'ClassDB::bind_method(D_METHOD("{setter}", "x"), &{self.struct_name}::{setter});'
 
         vtype = Property.variant_types.get(self.gdtype, "INT")
-        rv += f'ADD_PROPERTY(PropertyInfo(Variant::{vtype}, "{self.name}"), "{setter}", "{getter}"); \\\n'
+        rv += f'ADD_PROPERTY(PropertyInfo(Variant::{vtype}, "{self.name}"), "{setter}", "{getter}");'
         return rv
 
 
@@ -473,46 +476,46 @@ class Struct:
                 self.properties.append(prop)
 
     def gen_decl(self):
-        rv = f"class {self.name} : public RefCounted {{ \\\n"
-        rv += f"GDCLASS({self.name}, RefCounted); \\\n"
-        rv += "protected: static void _bind_methods(); \\\n"
+        rv = f"class {self.name} : public RefCounted {{"
+        rv += f"GDCLASS({self.name}, RefCounted);"
+        rv += "protected: static void _bind_methods();"
 
-        rv += "public: \\\n"
+        rv += "public:"
 
         # needs constructor for non-zero values
         if self.orig_name == "ImGuiWindowClass":
-            rv += "ImGuiWindowClassPtr() { ptr->ParentViewportId = -1; ptr->DockingAllowUnclassed = true; } \\\n"
+            rv += "ImGuiWindowClassPtr() { ptr->ParentViewportId = -1; ptr->DockingAllowUnclassed = true; }"
 
         if not self.constructible:
-            rv += f"void _SetPtr({self.orig_name}* p) {{ ptr = p; }} \\\n"
-            rv += f"{self.orig_name}* _GetPtr() {{ return ptr; }} \\\n"
+            rv += f"void _SetPtr({self.orig_name}* p) {{ ptr = p; }}"
+            rv += f"{self.orig_name}* _GetPtr() {{ return ptr; }}"
         else:
-            rv += f"{self.orig_name}* _GetPtr() {{ return ptr.get(); }} \\\n"
+            rv += f"{self.orig_name}* _GetPtr() {{ return ptr.get(); }}"
 
         for prop in self.properties:
             rv += prop.gen_decl()
 
-        rv += "private: \\\n"
+        rv += "private:"
 
         if not self.constructible:
-            rv += f"{self.orig_name}* ptr = nullptr; \\\n"
+            rv += f"{self.orig_name}* ptr = nullptr;"
         else:
-            rv += f"std::unique_ptr<{self.orig_name}> ptr = std::make_unique<{self.orig_name}>(); \\\n"
+            rv += f"std::unique_ptr<{self.orig_name}> ptr = std::make_unique<{self.orig_name}>();"
 
-        rv += "}; \\\n"
-        return rv
+        rv += "};"
+        return [rv]
 
     def gen_def(self):
-        rv = f"void {self.name}::_bind_methods() {{ \\\n"
+        rv = f"void {self.name}::_bind_methods() {{"
         for prop in self.properties:
             rv += prop.gen_bindings()
-        rv += "} \\\n"
+        rv += "}"
         for prop in self.properties:
             rv += prop.gen_def()
-        return rv
+        return [rv]
 
     def gen_bindings(self):
-        return f"ClassDB::register_class<{self.name}>(); \\\n"
+        return [f"ClassDB::register_class<{self.name}>();"]
 
 
 class JsonParser:
@@ -531,16 +534,17 @@ class JsonParser:
         self.enums = []
         self.structs = []
         self.funcs = []
-        self.enum_defs = "#define DEFINE_IMGUI_ENUMS() \\\n"
-        self.enum_casts = "#define CAST_IMGUI_ENUMS() \\\n"
-        self.enum_binds = "#define REGISTER_IMGUI_ENUMS() \\\n"
-        self.func_decls = "#define DECLARE_IMGUI_FUNCS() \\\n"
-        self.func_binds = "#define BIND_IMGUI_FUNCS() \\\n"
-        self.func_defs = "#define DEFINE_IMGUI_FUNCS() \\\n"
-        self.struct_decls = "#define DECLARE_IMGUI_STRUCTS() \\\n"
-        self.struct_decls_fwd = "#define FORWARD_DECLARE_IMGUI_STRUCTS() \\\n"
-        self.struct_defs = "#define DEFINE_IMGUI_STRUCTS() \\\n"
-        self.struct_binds = "#define BIND_IMGUI_STRUCTS() \\\n"
+
+        self.enum_defs = []
+        self.enum_casts = []
+        self.enum_binds = []
+        self.func_decls = []
+        self.func_binds = []
+        self.func_defs = []
+        self.struct_decls = []
+        self.struct_decls_fwd = []
+        self.struct_defs = []
+        self.struct_binds = []
 
     def write(self):
         try:
@@ -549,17 +553,35 @@ class JsonParser:
             pass
 
         with open("gen/imgui_bindings.gen.h", "w") as fi:
-            fi.write("#include <cimgui.h>\n\n")
-            fi.write(self.enum_defs)
-            fi.write(self.enum_binds)
-            fi.write(self.enum_casts)
-            fi.write(self.struct_decls_fwd)
-            fi.write(self.struct_decls)
-            fi.write(self.struct_defs)
-            fi.write(self.struct_binds)
-            fi.write(self.func_decls)
-            fi.write(self.func_binds)
-            fi.write(self.func_defs)
+            out = (
+                ["namespace ImGui::Godot {"]
+                + self.struct_decls_fwd
+                + [
+                    "class ImGui : public Object {",
+                    "    GDCLASS(ImGui, Object);",
+                    "protected:",
+                    "    static void _bind_methods();" "public:",
+                ]
+                + self.enum_defs
+                + self.func_decls
+                + ["};"]
+                + self.struct_decls
+                + ["} // namespace ImGui::Godot"]
+                + self.enum_casts
+            )
+            fi.write("\n".join(out))
+
+        with open("gen/imgui_bindings_impl.gen.h", "w") as fi:
+            out = (
+                ["void ImGui::_bind_methods() {"]
+                + self.enum_binds
+                + self.struct_binds
+                + self.func_binds
+                + ["}"]
+                + self.struct_defs
+                + self.func_defs
+            )
+            fi.write("\n".join(out))
 
     def load(self, jdat):
         enums = []
@@ -574,23 +596,16 @@ class JsonParser:
             else:
                 type_map[e.orig_name.strip("_")] = f"ImGui::{e.name}"
                 non_bitfield_enums.append(f"ImGui::{e.name}")
-        self.enum_defs += "\n\n"
-        self.enum_binds += "\n\n"
-        self.enum_casts += "\n\n"
 
         for js in jdat["structs"]:
             s = Struct(js)
             if s.valid:
                 self.structs.append(s)
         for s in self.structs:
-            self.struct_decls_fwd += f"class {s.name};"
+            self.struct_decls_fwd += [f"class {s.name};"]
             self.struct_decls += s.gen_decl()
             self.struct_defs += s.gen_def()
             self.struct_binds += s.gen_bindings()
-        self.struct_decls_fwd += "\n\n"
-        self.struct_decls += "\n\n"
-        self.struct_defs += "\n\n"
-        self.struct_binds += "\n\n"
 
         for jf in jdat["functions"]:
             f = Function(jf)
@@ -600,10 +615,6 @@ class JsonParser:
             self.func_decls += f.gen_decl()
             self.func_defs += f.gen_def()
             self.func_binds += f.gen_bindings()
-
-        self.func_decls += "\n\n"
-        self.func_defs += "\n\n"
-        self.func_binds += "\n\n"
 
 
 def main():
@@ -618,7 +629,7 @@ def main():
         parser.load(jdat)
     parser.write()
 
-    subprocess.call("clang-format -i gen/imgui_bindings.gen.h", shell=True)
+    subprocess.call("clang-format -i gen/imgui_bindings*", shell=True)
 
 
 if __name__ == "__main__":

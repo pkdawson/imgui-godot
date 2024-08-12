@@ -72,12 +72,13 @@ inline Array SpecsToArray(const ImGuiTableSortSpecs* p)
 
 const char* sn_to_cstr(const StringName& sn)
 {
-    static std::unordered_map<StringName, std::string> stringname_cache;
-    if (!stringname_cache.contains(sn))
+    static std::unordered_map<int64_t, std::string> stringname_cache;
+    const int64_t hash = sn.hash();
+    if (!stringname_cache.contains(hash))
     {
-        stringname_cache[sn] = std::string(String(sn).utf8().get_data());
+        stringname_cache[hash] = std::string(String(sn).utf8().get_data());
     }
-    return stringname_cache[sn].c_str();
+    return stringname_cache[hash].c_str();
 }
 } // namespace
 
@@ -97,15 +98,6 @@ void unregister_imgui_api()
     memdelete(api);
 }
 
-void ImGui::_bind_methods()
-{
-    REGISTER_IMGUI_ENUMS();
-    BIND_IMGUI_STRUCTS();
-    BIND_IMGUI_FUNCS();
-}
-
-DEFINE_IMGUI_STRUCTS()
-
-DEFINE_IMGUI_FUNCS()
+#include "imgui_bindings_impl.gen.h"
 
 } // namespace ImGui::Godot

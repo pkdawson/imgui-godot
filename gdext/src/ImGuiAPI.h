@@ -8,7 +8,7 @@
 #include <memory>
 #include <string_view>
 
-#include "imgui_bindings.gen.h"
+#include <cimgui.h>
 
 using namespace godot;
 
@@ -131,22 +131,6 @@ struct GdsZeroArray
 #define GDS_PTR(T, a) a.size() == 0 ? nullptr : (T*)GdsPtr<T>(a)
 // #define GDS_PTR_STR(a, len, label) a.size() == 0 ? nullptr : (char*)GdsPtr<String>(a, len, label)
 
-FORWARD_DECLARE_IMGUI_STRUCTS()
-
-class ImGui : public Object
-{
-    GDCLASS(ImGui, Object);
-
-protected:
-    static void _bind_methods();
-
-public:
-    DEFINE_IMGUI_ENUMS()
-    DECLARE_IMGUI_FUNCS()
-};
-
-DECLARE_IMGUI_STRUCTS()
-
 } // namespace ImGui::Godot
 
-CAST_IMGUI_ENUMS()
+#include "imgui_bindings.gen.h"

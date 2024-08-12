@@ -8,73 +8,54 @@ on:
 
 env:
   vcpkg_tag: 1de2026f28ead93ff1773e6e680387643e914ea1 # 2024.07.12
+  stable_gdver: 4.2.2-stable
 
 jobs:
-  # TODO: refactor to matrix
-  windows:
-    name: 🪟Windows
-    runs-on: windows-latest
-
+  dump_interface:
+    name: Dump GDExtension API (double)
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - name: Setup Python 3.x
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-
-      - name: Install tools
-        run: |
-          python -m pip install "scons<4.8"
-          scons --version
-          pip install ply
-
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
-
-      - shell: bash
-        run: |
-          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
-
       - uses: actions/cache@v4
-        id: cache-godot-cpp
-        if: github.ref_type != 'tag'
+        id: cache
         with:
-          path: |
-            gdext/scons_cache
-          key: ${{ env.cache_key }}
+          path: gdextension
+          key: gdextension-api-double-${{ env.stable_gdver }}
+          lookup-only: true
+          enableCrossOsArchive: true
+
+      - uses: actions/checkout@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          repository: godotengine/godot
+          ref: ${{ env.stable_gdver }}
 
       - name: Build
-        if: github.ref_type != 'tag'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          cd gdext
-          scons godot-cpp
-          scons
-          scons target=template_release godot-cpp
-          scons target=template_release
+          python -m pip install "scons<4.8"
+          scons precision=double
+          mkdir gdextension
+          cd gdextension
+          ../bin/godot.* --headless --dump-extension-api --dump-gdextension-interface
 
-      - name: Build (with debug symbols)
-        if: github.ref_type == 'tag'
-        run: |
-          cd gdext
-          scons debug_symbols=yes godot-cpp
-          scons debug_symbols=yes
-          scons debug_symbols=yes target=template_release godot-cpp
-          scons debug_symbols=yes target=template_release
 
-      - name: Upload binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: gdext-windows
-          path: addons/imgui-godot/bin
+  build:
+    needs: [dump_interface]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        precision: [single, double]
+        include:
+          - os: ubuntu-latest
+            name: 🐧Linux
+          - os: macos-latest
+            name: 🍎macOS
+          - os: windows-latest
+            name: 🪟Windows
 
-  linux:
-    name: 🐧Linux
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }} (precision=${{ matrix.precision }})
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -87,65 +68,22 @@ jobs:
           python-version: 3.12
 
       - name: Install tools
+        shell: bash
         run: |
           python -m pip install "scons<4.8"
           scons --version
           pip install ply
+
+      - name: Linux tools
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
           sudo apt install clang-format
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ${{ env.vcpkg_tag }}
-
-      - shell: bash
+      - name: macOS tools
+        if: runner.os == 'macOS'
+        shell: bash
         run: |
-          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        id: cache-godot-cpp
-        with:
-          path: |
-            gdext/scons_cache
-          key: ${{ env.cache_key }}
-
-      - name: Build debug
-        run: |
-          cd gdext
-          scons godot-cpp
-          scons
-
-      - name: Build release
-        run: |
-          cd gdext
-          scons target=template_release godot-cpp
-          scons target=template_release
-
-      - name: Upload binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: gdext-linux
-          path: addons/imgui-godot/bin
-
-  macos:
-    name: 🍎macOS
-    runs-on: macos-14
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - name: Setup Python 3.x
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-
-      - name: Install tools
-        run: |
-          python -m pip install "scons<4.8"
-          scons --version
-          pip install ply
           brew install clang-format ninja
 
       - name: Setup vcpkg
@@ -153,41 +91,71 @@ jobs:
         with:
           vcpkgGitCommitId: ${{ env.vcpkg_tag }}
 
-      - shell: bash
+      - name: Make cache key
+        shell: bash
         run: |
-          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
+          echo "cache_key=godot-cpp-$(git -C gdext/godot-cpp rev-parse --short HEAD)-${{ matrix.precision }}_${{ runner.os }}-$ImageVersion" >> $GITHUB_ENV
 
       - uses: actions/cache@v4
         id: cache-godot-cpp
+        if: github.ref_type != 'tag'
         with:
           path: |
             gdext/scons_cache
           key: ${{ env.cache_key }}
 
-      - name: Build debug
-        run: |
-          export PATH="$(brew --prefix llvm@15)/bin:$PATH"
-          cd gdext
-          scons godot-cpp
-          scons
+      - uses: actions/cache/restore@v4
+        if: matrix.precision == 'double'
+        with:
+          path: gdextension
+          key: gdextension-api-double-${{ env.stable_gdver }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
 
-      - name: Build release
+      - if: matrix.precision == 'double'
+        shell: bash
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin:$PATH"
+          rm -rf gdext/godot-cpp/gdextension
+          mv gdextension gdext/godot-cpp
+          ls -al gdext/godot-cpp/gdextension
+
+      - name: Build
+        if: github.ref_type != 'tag' || runner.os != 'Windows'
+        run: |
           cd gdext
-          scons target=template_release godot-cpp
-          scons target=template_release
+          scons precision=${{ matrix.precision }} godot-cpp
+          scons precision=${{ matrix.precision }}
+          scons precision=${{ matrix.precision }} target=template_release godot-cpp
+          scons precision=${{ matrix.precision }} target=template_release
+
+      - name: Build (with debug symbols)
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
+        run: |
+          cd gdext
+          scons precision=${{ matrix.precision }} debug_symbols=yes godot-cpp
+          scons precision=${{ matrix.precision }} debug_symbols=yes
+          scons precision=${{ matrix.precision }} debug_symbols=yes target=template_release godot-cpp
+          scons precision=${{ matrix.precision }} debug_symbols=yes target=template_release
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: gdext-macos
+          name: gdext-${{ matrix.precision }}-${{ runner.os }}
           path: addons/imgui-godot/bin
 
   package:
     name: 📦Package
     runs-on: ubuntu-latest
-    needs: [windows, linux, macos]
+    needs: [build]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        precision: [single, double]
+
+    outputs:
+      pkg_single: ${{ steps.prep.outputs.pkg_single }}
+      pkg_double: ${{ steps.prep.outputs.pkg_double }}
 
     steps:
       - uses: actions/checkout@v4
@@ -197,7 +165,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: addons/imgui-godot/bin
-          pattern: gdext-*
+          pattern: gdext-${{ matrix.precision }}-*
 
       - run: ls -R
         working-directory: addons/imgui-godot/bin
@@ -235,9 +203,10 @@ jobs:
           env
           imgui_ver=$(grep -m 1 "^#define IMGUI_VERSION " < gdext/imgui/imgui.h | awk '{ print $3 }' | sed 's/"//g')
           plugin_ver=$(grep -m 1 "version=" < addons/imgui-godot/plugin.cfg | sed 's/version=//' | sed 's/"//g')
-          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}
+          pkgfn=imgui-godot-${plugin_ver}_imgui-${imgui_ver}${{ matrix.precision == 'double' && '_double-precision' || '' }}
           echo $pkgfn
           echo "pkgfn=$pkgfn" >> $GITHUB_OUTPUT
+          echo "pkg_${{ matrix.precision }}=$pkgfn" >> $GITHUB_OUTPUT
           rm -rf gdext
 
           pkgdir=~/out/imgui-godot-${plugin_ver}
@@ -253,12 +222,14 @@ jobs:
             ~/out
 
       - name: Prep asset
+        if: matrix.precision == 'single'
         working-directory: ${{ steps.prep.outputs.pkgdir }}
         run: |
           rm * || true
           rm -r data doc src
 
       - name: Upload asset package
+        if: matrix.precision == 'single'
         uses: actions/upload-artifact@v4
         with:
           name: AssetLib-${{ steps.prep.outputs.pkgfn }}
@@ -267,7 +238,7 @@ jobs:
   package_cs:
     name: 📦Package (C# only)
     runs-on: ubuntu-latest
-    needs: [windows, linux, macos]
+    needs: [build]
 
     steps:
       - uses: actions/checkout@v4
@@ -298,13 +269,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧GdsGameProject
             exe: GdsGameProject.x86_64
-          - os: macos-14
+          - os: macos-latest
             name: 🍎GdsGameProject
             exe: GdsGameProject.app/Contents/MacOS/GdsGameProject
           - os: windows-latest
@@ -323,7 +294,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: imgui-godot-*_imgui*
+          name: ${{ needs.package.outputs.pkg_single }}
 
       - uses: chickensoft-games/setup-godot@v2
         with:
@@ -379,13 +350,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪GDScript
             exe: test.x86_64
-          - os: macos-14
+          - os: macos-latest
             name: 🍎🧪GDScript
             exe: test.app/Contents/MacOS/test
           - os: windows-latest
@@ -403,7 +374,10 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: imgui-godot-*_imgui*
+          name: ${{ needs.package.outputs.pkg_single }}
+
+      - shell: bash
+        run: ls -R
 
       - uses: chickensoft-games/setup-godot@v2
         with:
@@ -427,13 +401,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.2"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        gdver: ["4.2.2", "4.3.0-rc.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪C#
             exe: test.x86_64
-          - os: macos-14
+          - os: macos-latest
             name: 🍎🧪C#
             exe: test.app/Contents/MacOS/test
           - os: windows-latest
@@ -451,7 +425,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: imgui-godot-*_imgui*
+          name: ${{ needs.package.outputs.pkg_single }}
 
       - uses: chickensoft-games/setup-godot@v2
         with:
@@ -475,3 +449,22 @@ jobs:
         uses: ./.github/actions/run-test-project
         with:
           exe: ${{ matrix.exe }}
+
+  create_release:
+    name: 🪄Release
+    needs: [package, package_cs]
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - shell: bash
+        run: ls -al
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            imgui-godot-*
+            AssetLib-*
+            pdbs*

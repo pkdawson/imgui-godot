@@ -120,7 +120,7 @@ inline void ResetFonts()
     detail::ImGuiGD->call(sn);
 }
 
-inline void SetJoyAxisDeadZone(float deadZone)
+inline void SetJoyAxisDeadZone(real_t deadZone)
 {
     ERR_FAIL_COND(!detail::GET_IMGUIGD());
     static const StringName sn("JoyAxisDeadZone");

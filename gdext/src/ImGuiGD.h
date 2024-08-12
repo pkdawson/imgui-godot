@@ -28,14 +28,14 @@ public:
     void AddFontDefault();
     void RebuildFontAtlas();
 
-    void _SetJoyAxisDeadZone(float zone);
-    float _GetJoyAxisDeadZone();
+    void _SetJoyAxisDeadZone(real_t zone);
+    real_t _GetJoyAxisDeadZone();
 
     void _SetVisible(bool visible);
     bool _GetVisible();
 
-    void _SetScale(float scale);
-    float _GetScale();
+    void _SetScale(real_t scale);
+    real_t _GetScale();
 
     void SetMainViewport(Viewport* vp);
     void SetIniFilename(String fn);
