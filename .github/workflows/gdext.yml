@@ -270,7 +270,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.3"]
+        gdver: ["4.2.2", "4.3.0"]
         include:
           - os: ubuntu-latest
             name: 🐧GdsGameProject
@@ -351,7 +351,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.3"]
+        gdver: ["4.2.2", "4.3.0"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪GDScript
@@ -402,7 +402,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0-rc.3"]
+        gdver: ["4.2.2", "4.3.0"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪C#
