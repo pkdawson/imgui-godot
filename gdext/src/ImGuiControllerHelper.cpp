@@ -35,7 +35,7 @@ void ImGuiControllerHelper::_process(double delta)
 {
     Context* ctx = GetContext();
     ctx->inProcessFrame = true;
-    ctx->Update(delta, ctx->viewportSize);
+    ctx->Update(delta, ctx->layer->UpdateViewport());
 }
 
 } // namespace ImGui::Godot

@@ -125,7 +125,6 @@ void ImGuiController::_process(double delta)
 #endif
 
     Context* ctx = GetContext();
-    ctx->layer->UpdateViewport();
     emit_signal("imgui_layout");
     ctx->Render();
     ctx->inProcessFrame = false;

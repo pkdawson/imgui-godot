@@ -106,17 +106,16 @@ void ImGuiLayer::_input(const Ref<InputEvent>& event)
     }
 }
 
-void ImGuiLayer::UpdateViewport()
+Vector2i ImGuiLayer::UpdateViewport()
 {
+    Vector2i vpSize;
+    if (Window* w = Object::cast_to<Window>(impl->parentViewport))
+        vpSize = w->get_size();
+    else
+        vpSize = Object::cast_to<SubViewport>(impl->parentViewport)->get_size();
+
     if (impl->visible)
     {
-        Vector2i vpSize;
-        if (Window* w = Object::cast_to<Window>(impl->parentViewport))
-            vpSize = w->get_size();
-        else
-            vpSize = Object::cast_to<SubViewport>(impl->parentViewport)->get_size();
-        GetContext()->viewportSize = vpSize;
-
         const Transform2D ft = impl->parentViewport->get_final_transform();
 
         if (impl->subViewportSize != vpSize ||
@@ -141,6 +140,8 @@ void ImGuiLayer::UpdateViewport()
                                              vptex);
         }
     }
+
+    return vpSize;
 }
 
 } // namespace ImGui::Godot

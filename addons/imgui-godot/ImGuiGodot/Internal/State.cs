@@ -27,7 +27,6 @@ internal sealed class State : IDisposable
     internal float Scale { get; set; } = 1.0f;
     internal float JoyAxisDeadZone { get; set; } = 0.15f;
     internal int LayerNum { get; private set; } = 128;
-    internal Vector2I ViewportSize { get; set; }
     internal ImGuiLayer Layer { get; set; } = null!;
     internal bool InProcessFrame { get; set; }
 

@@ -50,7 +50,6 @@ struct Context
     float scale = 1.0f;
     float joyAxisDeadZone = 0.15f;
     int layerNum = 128;
-    Vector2i viewportSize;
     ImGuiLayer* layer = nullptr;
     bool inProcessFrame = false;
     std::vector<char> iniFilename;

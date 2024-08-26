@@ -24,7 +24,8 @@ public:
     void _input(const Ref<InputEvent>& event) override;
 
     void on_visibility_changed();
-    void UpdateViewport();
+
+    Vector2i UpdateViewport();
 
 private:
     struct Impl;

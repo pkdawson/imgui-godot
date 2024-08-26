@@ -15,12 +15,12 @@ public partial class ViewportArea : Area3D
         _decalTexture = GD.Load<Texture2D>("res://data/icon.svg");
     }
 
-    public override void _InputEvent(Camera3D camera, InputEvent @event, Vector3 position,
+    public override void _InputEvent(Camera3D camera, InputEvent @event, Vector3 eventPosition,
         Vector3 normal, int shapeIdx)
     {
         if (@event is InputEventMouseMotion mm)
         {
-            _piece.Position = position;
+            _piece.Position = eventPosition;
             mm.Dispose(); // prevent "leaks"
         }
         else if (@event is InputEventMouseButton mb && mb.Pressed)
@@ -31,7 +31,7 @@ public partial class ViewportArea : Area3D
                 {
                     TextureAlbedo = _decalTexture,
                     Scale = new(10, 10, 10),
-                    Position = position,
+                    Position = eventPosition,
                     CullMask = 1,
                 });
             }
