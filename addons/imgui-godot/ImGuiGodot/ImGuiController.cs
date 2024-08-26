@@ -24,8 +24,8 @@ public partial class ImGuiController : Node
 
         public override void _Process(double delta)
         {
-            State.Instance.InProcessFrame = true;
-            State.Instance.Update(delta, State.Instance.Layer.UpdateViewport().ToImVec2());
+            Internal.State.Instance.InProcessFrame = true;
+            Internal.State.Instance.Update(delta, Internal.State.Instance.Layer.UpdateViewport().ToImVec2());
         }
     }
 
@@ -55,7 +55,7 @@ public partial class ImGuiController : Node
             GD.PushError($"imgui-godot: config does not exist: {cfgPath}");
         }
 
-        State.Init(cfg ?? (Resource)((GDScript)GD.Load(
+        Internal.State.Init(cfg ?? (Resource)((GDScript)GD.Load(
                 "res://addons/imgui-godot/scripts/ImGuiConfig.gd")).New());
 
         _helper = new ImGuiControllerHelper();
@@ -73,14 +73,14 @@ public partial class ImGuiController : Node
 
     public override void _ExitTree()
     {
-        State.Instance.Dispose();
+        Internal.State.Instance.Dispose();
     }
 
     public override void _Process(double delta)
     {
         Signaler.EmitSignal("imgui_layout");
-        State.Instance.Render();
-        State.Instance.InProcessFrame = false;
+        Internal.State.Instance.Render();
+        Internal.State.Instance.InProcessFrame = false;
     }
 
     public override void _Notification(int what)
@@ -91,7 +91,7 @@ public partial class ImGuiController : Node
     public void OnLayerExiting()
     {
         // an ImGuiLayer is being destroyed without calling SetMainViewport
-        if (State.Instance.Layer.GetViewport() != _window)
+        if (Internal.State.Instance.Layer.GetViewport() != _window)
         {
             // revert to main window
             SetMainViewport(_window);
@@ -100,7 +100,7 @@ public partial class ImGuiController : Node
 
     public void SetMainViewport(Viewport vp)
     {
-        ImGuiLayer? oldLayer = State.Instance.Layer;
+        ImGuiLayer? oldLayer = Internal.State.Instance.Layer;
         if (oldLayer != null)
         {
             oldLayer.TreeExiting -= OnLayerExiting;
@@ -112,7 +112,7 @@ public partial class ImGuiController : Node
 
         if (vp is Window window)
         {
-            State.Instance.Input = new Internal.Input();
+            Internal.State.Instance.Input = new Internal.Input();
             if (window == _window)
                 AddChild(newLayer);
             else
@@ -122,7 +122,7 @@ public partial class ImGuiController : Node
         }
         else if (vp is SubViewport svp)
         {
-            State.Instance.Input = new InputLocal();
+            Internal.State.Instance.Input = new Internal.InputLocal();
             svp.AddChild(newLayer);
             ImGui.GetIO().BackendFlags &= ~ImGuiBackendFlags.PlatformHasViewports;
             ImGui.GetIO().BackendFlags &= ~ImGuiBackendFlags.HasMouseHoveredViewport;
@@ -131,7 +131,7 @@ public partial class ImGuiController : Node
         {
             throw new System.ArgumentException("secret third kind of viewport??", nameof(vp));
         }
-        State.Instance.Layer = newLayer;
+        Internal.State.Instance.Layer = newLayer;
     }
 
     private void CheckContentScale()
@@ -144,7 +144,7 @@ public partial class ImGuiController : Node
 
     public static void WindowInputCallback(InputEvent evt)
     {
-        State.Instance.Input.ProcessInput(evt);
+        Internal.State.Instance.Input.ProcessInput(evt);
     }
 }
 #endif
