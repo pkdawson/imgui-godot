@@ -163,6 +163,8 @@ internal static class ImGuiInit
 }
 ```
 
+If you do this and still don't see the "hello world Test" text, keep in mind that ImGui will be rendered somewhere in the Godot Editor window, not constrained to the Camera viewport.  It might be hiding in plain sight, like this image shows:  
+![image](https://github.com/user-attachments/assets/b64375b4-a89a-4eb6-92b9-2c528651930b)
 
 
 ## Credits
