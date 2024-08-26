@@ -1,7 +1,6 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiGodot.Internal;
 using ImGuiNET;
 
 namespace ImGuiGodot;
@@ -25,7 +24,8 @@ public partial class ImGuiController : Node
         public override void _Process(double delta)
         {
             Internal.State.Instance.InProcessFrame = true;
-            Internal.State.Instance.Update(delta, Internal.State.Instance.Layer.UpdateViewport().ToImVec2());
+            var vpSize = Internal.State.Instance.Layer.UpdateViewport();
+            Internal.State.Instance.Update(delta, new(vpSize.X, vpSize.Y));
         }
     }
 
