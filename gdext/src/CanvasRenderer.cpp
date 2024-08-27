@@ -115,10 +115,10 @@ void CanvasRenderer::Impl::RenderOne(RID vprid, ImDrawData* drawData)
             if (drawCmd.VtxOffset > 0)
             {
                 // slow implementation of RendererHasVtxOffset
-                int localSize = cmdList->VtxBuffer.size() - drawCmd.VtxOffset;
-                cmdvertices = vertices.slice(drawCmd.VtxOffset, localSize);
-                cmdcolors = colors.slice(drawCmd.VtxOffset, localSize);
-                cmduvs = uvs.slice(drawCmd.VtxOffset, localSize);
+                const int sliceEnd = cmdList->VtxBuffer.size();
+                cmdvertices = vertices.slice(drawCmd.VtxOffset, sliceEnd);
+                cmdcolors = colors.slice(drawCmd.VtxOffset, sliceEnd);
+                cmduvs = uvs.slice(drawCmd.VtxOffset, sliceEnd);
             }
 
             RID child = children[nodeN++];
