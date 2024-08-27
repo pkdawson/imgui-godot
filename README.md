@@ -2,6 +2,7 @@
 
 ![](https://img.shields.io/static/v1?label=Godot&message=4.2&color=blue&logo=godotengine)
 ![](https://img.shields.io/static/v1?label=Godot&message=4.3&color=blue&logo=godotengine)
+![](https://img.shields.io/static/v1?label=Godot&message=4.4&color=blue&logo=godotengine)
 
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/dotnet.yml/badge.svg)
 ![](https://github.com/pkdawson/imgui-godot/actions/workflows/godot.yml/badge.svg)
