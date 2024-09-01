@@ -11,6 +11,21 @@ namespace {
 std::unique_ptr<Context> ctx;
 
 const char* PlatformName = "godot4";
+
+void SetImeData(ImGuiContext* ctx, ImGuiViewport* vp, ImGuiPlatformImeData* data)
+{
+    DisplayServer* DS = DisplayServer::get_singleton();
+    const int32_t windowID = (int32_t)(intptr_t)vp->PlatformHandle;
+
+    DS->window_set_ime_active(data->WantVisible, windowID);
+    if (data->WantVisible)
+    {
+        Vector2i pos;
+        pos.x = data->InputPos.x - vp->Pos.x;
+        pos.y = data->InputPos.y - vp->Pos.y + data->InputLineHeight;
+        DS->window_set_ime_position(pos, windowID);
+    }
+}
 } // namespace
 
 Context* GetContext()
@@ -31,6 +46,7 @@ Context::Context(std::unique_ptr<Renderer> r)
 
     io.BackendPlatformName = PlatformName;
     io.BackendRendererName = renderer->Name();
+    io.PlatformSetImeDataFn = SetImeData;
 
     viewports = std::make_unique<Viewports>();
 }

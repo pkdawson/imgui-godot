@@ -50,7 +50,7 @@ struct GdsPtr<String>
     {
         if (bufhash != std::hash<std::string_view>{}({buf.begin(), buf.end()}))
         {
-            arr[0] = String(buf.data());
+            arr[0] = String::utf8(buf.data());
         }
     }
 

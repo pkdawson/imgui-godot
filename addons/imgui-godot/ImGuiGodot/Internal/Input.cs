@@ -15,6 +15,7 @@ internal class Input
     private Vector2 _mouseWheel = Vector2.Zero;
     private ImGuiMouseCursor _currentCursor = ImGuiMouseCursor.None;
     private readonly bool _hasMouse = DisplayServer.HasFeature(DisplayServer.Feature.Mouse);
+    private bool _takingTextInput = false;
 
     protected virtual void UpdateMousePos(ImGuiIOPtr io)
     {
@@ -140,6 +141,15 @@ internal class Input
         var io = ImGui.GetIO();
         bool consumed = false;
 
+        if (io.WantTextInput && !_takingTextInput)
+        {
+            // avoid IME issues if a text input control was focused
+            State.Instance.Layer.GetViewport().GuiReleaseFocus();
+
+            // TODO: show virtual keyboard?
+        }
+        _takingTextInput = io.WantTextInput;
+
         if (evt is InputEventMouseMotion mm)
         {
             consumed = io.WantCaptureMouse;
@@ -184,15 +194,19 @@ internal class Input
         {
             UpdateKeyMods(io);
             ImGuiKey igk = ConvertKey(k.Keycode);
+            bool pressed = k.Pressed;
+            long unicode = k.Unicode;
+
             if (igk != ImGuiKey.None)
             {
-                io.AddKeyEvent(igk, k.Pressed);
-
-                if (k.Pressed && k.Unicode != 0 && io.WantTextInput)
-                {
-                    io.AddInputCharacter((uint)k.Unicode);
-                }
+                io.AddKeyEvent(igk, pressed);
             }
+
+            if (pressed && unicode != 0 && io.WantTextInput)
+            {
+                io.AddInputCharacterUTF16((ushort)unicode);
+            }
+
             consumed = io.WantCaptureKeyboard || io.WantTextInput;
             k.Dispose();
         }
@@ -267,6 +281,10 @@ internal class Input
                 break;
             case MainLoop.NotificationApplicationFocusOut:
                 ImGui.GetIO().AddFocusEvent(false);
+                break;
+            case MainLoop.NotificationOsImeUpdate:
+                // workaround for Godot suppressing key up events during IME
+                ImGui.GetIO().ClearInputKeys();
                 break;
         }
     }

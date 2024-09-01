@@ -32,6 +32,13 @@ internal sealed class State : IDisposable
 
     internal static State Instance { get; set; } = null!;
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void PlatformSetImeDataFn(
+        nint ctx,
+        ImGuiViewportPtr vp,
+        ImGuiPlatformImeDataPtr data);
+    private static readonly PlatformSetImeDataFn _setImeData = SetImeData;
+
     public State(IRenderer renderer)
     {
         Renderer = renderer;
@@ -63,6 +70,7 @@ internal sealed class State : IDisposable
         {
             io.NativePtr->BackendPlatformName = (byte*)_backendName;
             io.NativePtr->BackendRendererName = (byte*)_rendererName;
+            io.NativePtr->PlatformSetImeDataFn = Marshal.GetFunctionPointerForDelegate(_setImeData);
         }
 
         Viewports = new Viewports();
@@ -183,6 +191,21 @@ internal sealed class State : IDisposable
         ImGui.Render();
         ImGui.UpdatePlatformWindows();
         Renderer.Render();
+    }
+
+    private static void SetImeData(nint ctx, ImGuiViewportPtr vp, ImGuiPlatformImeDataPtr data)
+    {
+        int windowID = (int)vp.PlatformHandle;
+
+        DisplayServer.WindowSetImeActive(data.WantVisible, windowID);
+        if (data.WantVisible)
+        {
+            Vector2I pos = new(
+                (int)(data.InputPos.X - vp.Pos.X),
+                (int)(data.InputPos.Y - vp.Pos.Y + data.InputLineHeight)
+                );
+            DisplayServer.WindowSetImePosition(pos, windowID);
+        }
     }
 }
 #endif

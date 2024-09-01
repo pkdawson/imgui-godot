@@ -11,6 +11,7 @@ public partial class ImGuiController : Node
     public static ImGuiController Instance { get; private set; } = null!;
     private ImGuiControllerHelper _helper = null!;
     public Node Signaler { get; private set; } = null!;
+    private readonly StringName _signalName = "imgui_layout";
 
     private sealed partial class ImGuiControllerHelper : Node
     {
@@ -78,7 +79,7 @@ public partial class ImGuiController : Node
 
     public override void _Process(double delta)
     {
-        Signaler.EmitSignal("imgui_layout");
+        Signaler.EmitSignal(_signalName);
         Internal.State.Instance.Render();
         Internal.State.Instance.InProcessFrame = false;
     }

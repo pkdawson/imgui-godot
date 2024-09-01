@@ -124,8 +124,10 @@ void ImGuiController::_process(double delta)
     }
 #endif
 
+    static const StringName signalName("imgui_layout");
+    emit_signal(signalName);
+
     Context* ctx = GetContext();
-    emit_signal("imgui_layout");
     ctx->Render();
     ctx->inProcessFrame = false;
 }

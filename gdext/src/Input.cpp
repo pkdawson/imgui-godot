@@ -28,6 +28,7 @@ struct Input::Impl
     Vector2 mouseWheel;
     ImGuiMouseCursor currentCursor = ImGuiMouseCursor_None;
     bool hasMouse = false;
+    bool takingTextInput = false;
 };
 
 namespace {
@@ -199,8 +200,16 @@ void Input::ProcessSubViewportWidget(const Ref<InputEvent>& evt)
 bool Input::HandleEvent(const Ref<InputEvent>& evt)
 {
     ImGuiIO& io = ImGui::GetIO();
-
     bool consumed = false;
+
+    if (io.WantTextInput && !impl->takingTextInput)
+    {
+        // avoid IME issues if a text input control was focused
+        GetContext()->layer->get_viewport()->gui_release_focus();
+
+        // TODO: show virtual keyboard?
+    }
+    impl->takingTextInput = io.WantTextInput;
 
     if (Ref<InputEventMouseMotion> mm = evt; mm.is_valid())
     {
@@ -247,14 +256,17 @@ bool Input::HandleEvent(const Ref<InputEvent>& evt)
     {
         UpdateKeyMods(io);
         ImGuiKey igk = ToImGuiKey(k->get_keycode());
+        bool pressed = k->is_pressed();
+        uint32_t unicode = k->get_unicode();
+
         if (igk != ImGuiKey_None)
         {
-            bool pressed = k->is_pressed();
-            io.AddKeyEvent(igk, k->is_pressed());
-            if (pressed && k->get_unicode() != 0 && io.WantTextInput)
-            {
-                io.AddInputCharacter(k->get_unicode());
-            }
+            io.AddKeyEvent(igk, pressed);
+        }
+
+        if (pressed && unicode != 0 && io.WantTextInput)
+        {
+            io.AddInputCharacterUTF16(unicode);
         }
         consumed = io.WantCaptureKeyboard || io.WantTextInput;
     }
@@ -332,6 +344,10 @@ void Input::ProcessNotification(int what)
         break;
     case Node::NOTIFICATION_APPLICATION_FOCUS_OUT:
         ImGui::GetIO().AddFocusEvent(false);
+        break;
+    case MainLoop::NOTIFICATION_OS_IME_UPDATE:
+        // workaround for Godot suppressing key up events during IME
+        ImGui::GetIO().ClearInputKeys();
         break;
     };
 }
