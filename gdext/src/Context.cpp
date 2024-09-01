@@ -26,6 +26,25 @@ void SetImeData(ImGuiContext* ctx, ImGuiViewport* vp, ImGuiPlatformImeData* data
         DS->window_set_ime_position(pos, windowID);
     }
 }
+
+void SetClipboardText(void* user_data, const char* text)
+{
+    DisplayServer::get_singleton()->clipboard_set(String::utf8(text));
+}
+
+const char* GetClipboardText(void* user_data)
+{
+    static std::vector<char> clipbuf;
+
+    CharString cbtext = DisplayServer::get_singleton()->clipboard_get().utf8();
+    const std::string_view sv(cbtext.get_data(), cbtext.length());
+
+    clipbuf.resize(sv.size() + 1);
+    std::copy(sv.begin(), sv.end(), clipbuf.begin());
+    clipbuf[sv.size()] = '\0';
+
+    return clipbuf.data();
+}
 } // namespace
 
 Context* GetContext()
@@ -47,6 +66,8 @@ Context::Context(std::unique_ptr<Renderer> r)
     io.BackendPlatformName = PlatformName;
     io.BackendRendererName = renderer->Name();
     io.PlatformSetImeDataFn = SetImeData;
+    io.SetClipboardTextFn = SetClipboardText;
+    io.GetClipboardTextFn = GetClipboardText;
 
     viewports = std::make_unique<Viewports>();
 }
