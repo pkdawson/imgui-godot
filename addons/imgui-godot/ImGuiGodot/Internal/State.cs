@@ -17,6 +17,7 @@ internal sealed class State : IDisposable
 
     private static readonly IntPtr _backendName = Marshal.StringToCoTaskMemAnsi("godot4_net");
     private static IntPtr _rendererName = IntPtr.Zero;
+    private static nint _clipBuf = 0;
     private IntPtr _iniFilenameBuffer = IntPtr.Zero;
 
     internal Viewports Viewports { get; }
@@ -38,6 +39,14 @@ internal sealed class State : IDisposable
         ImGuiViewportPtr vp,
         ImGuiPlatformImeDataPtr data);
     private static readonly PlatformSetImeDataFn _setImeData = SetImeData;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void SetClipboardTextFn(nint ud, nint text);
+    private static readonly SetClipboardTextFn _setClipboardText = SetClipboardText;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate nint GetClipboardTextFn(nint ud);
+    private static readonly GetClipboardTextFn _getClipboardText = GetClipboardText;
 
     public State(IRenderer renderer)
     {
@@ -71,6 +80,10 @@ internal sealed class State : IDisposable
             io.NativePtr->BackendPlatformName = (byte*)_backendName;
             io.NativePtr->BackendRendererName = (byte*)_rendererName;
             io.NativePtr->PlatformSetImeDataFn = Marshal.GetFunctionPointerForDelegate(_setImeData);
+            io.NativePtr->SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(
+                _setClipboardText);
+            io.NativePtr->GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(
+                _getClipboardText);
         }
 
         Viewports = new Viewports();
@@ -206,6 +219,19 @@ internal sealed class State : IDisposable
                 );
             DisplayServer.WindowSetImePosition(pos, windowID);
         }
+    }
+
+    private static void SetClipboardText(nint ud, nint text)
+    {
+        DisplayServer.ClipboardSet(Marshal.PtrToStringUTF8(text));
+    }
+
+    private static nint GetClipboardText(nint ud)
+    {
+        if (_clipBuf != 0)
+            Marshal.FreeCoTaskMem(_clipBuf);
+        _clipBuf = Marshal.StringToCoTaskMemUTF8(DisplayServer.ClipboardGet());
+        return _clipBuf;
     }
 }
 #endif
