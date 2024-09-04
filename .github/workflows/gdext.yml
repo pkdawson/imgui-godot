@@ -218,8 +218,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prep.outputs.pkgfn }}
-          path: |
-            ~/out
+          path: ~/out
+          include-hidden-files: true
 
       - name: Prep asset
         if: matrix.precision == 'single'
@@ -234,6 +234,7 @@ jobs:
         with:
           name: AssetLib-${{ steps.prep.outputs.pkgfn }}
           path: ~/out
+          include-hidden-files: true
 
   package_cs:
     name: 📦Package (C# only)
@@ -263,6 +264,7 @@ jobs:
         with:
           name: ${{ steps.prep_cs.outputs.pkgfn }}
           path: ~/out
+          include-hidden-files: true
 
   gds_game:
     needs: [package]
