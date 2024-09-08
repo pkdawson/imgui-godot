@@ -8,10 +8,9 @@ namespace ImGui::Godot {
 
 inline RID make_rid(int64_t id)
 {
-    // ugly, may break in the future
+    // HACK: only way to set a RID value
     RID rv;
-    *reinterpret_cast<int64_t*>(rv._native_ptr()) = id;
-    IM_ASSERT(rv.get_id() == id);
+    memcpy(rv._native_ptr(), &id, sizeof(int64_t));
     return rv;
 }
 
@@ -25,5 +24,5 @@ inline RID make_rid(ImTextureID id)
 template <>
 struct std::hash<RID>
 {
-    std::size_t operator()(const RID& rid) const noexcept { return std::hash<int64_t>{}(rid.get_id()); }
+    std::size_t operator()(const RID& rid) const noexcept { return rid.get_id(); }
 };

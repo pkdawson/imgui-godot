@@ -41,3 +41,6 @@ scons_cache
 doc/**/addons/
 addons/imgui-godot/include/imgui-version.txt
 export/
+**/bin/Debug/
+**/bin/Release/
+**/obj/
