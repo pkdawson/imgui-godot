@@ -294,7 +294,7 @@ internal class RdRenderer : IRenderer
         // allocate merged index and vertex buffers
         if (_idxBufferSize < drawData.TotalIdxCount)
         {
-            if (_idxBuffer.Id != 0)
+            if (_idxBuffer.IsValid)
                 RD.FreeRid(_idxBuffer);
             _idxBuffer = RD.IndexBufferCreate(
                 (uint)drawData.TotalIdxCount,
@@ -304,17 +304,17 @@ internal class RdRenderer : IRenderer
 
         if (_vtxBufferSize < drawData.TotalVtxCount)
         {
-            if (_vtxBuffer.Id != 0)
+            if (_vtxBuffer.IsValid)
                 RD.FreeRid(_vtxBuffer);
             _vtxBuffer = RD.VertexBufferCreate((uint)(drawData.TotalVtxCount * vertSize));
             _vtxBufferSize = drawData.TotalVtxCount;
         }
 
         // check if our font texture is still valid
-        foreach (var kv in _uniformSets)
+        foreach (var (texid, uniformSetRid) in _uniformSets)
         {
-            if (!RD.UniformSetIsValid(kv.Value))
-                _uniformSets.Remove(kv.Key);
+            if (!RD.UniformSetIsValid(uniformSetRid))
+                _uniformSets.Remove(texid);
         }
 
         if (drawData.CmdListsCount > 0)
@@ -396,9 +396,9 @@ internal class RdRenderer : IRenderer
     {
         RD.FreeRid(_sampler);
         RD.FreeRid(_shader);
-        if (_idxBuffer.Id != 0)
+        if (_idxBuffer.IsValid)
             RD.FreeRid(_idxBuffer);
-        if (_vtxBuffer.Id != 0)
+        if (_vtxBuffer.IsValid)
             RD.FreeRid(_vtxBuffer);
     }
 

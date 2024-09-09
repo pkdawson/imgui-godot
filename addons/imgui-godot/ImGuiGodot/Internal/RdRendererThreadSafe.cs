@@ -57,9 +57,9 @@ internal sealed class DisposableList<T, U> : List<Tuple<T, U>>, IDisposable wher
 
     public void Dispose()
     {
-        foreach (var tuple in this)
+        foreach (var (_, u) in this)
         {
-            tuple.Item2.Dispose();
+            u.Dispose();
         }
         Clear();
     }
@@ -69,7 +69,41 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
 {
     public new string Name => "godot4_net_rd_mt";
 
-    private readonly object _sharedDataLock = new();
+#if GODOT4_3_OR_GREATER
+    public new void Render()
+    {
+        var pio = ImGui.GetPlatformIO();
+        var newData = new SharedList(pio.Viewports.Size);
+
+        for (int i = 0; i < pio.Viewports.Size; ++i)
+        {
+            var vp = pio.Viewports[i];
+            if (vp.Flags.HasFlag(ImGuiViewportFlags.IsMinimized))
+                continue;
+
+            Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
+            newData.Add(new(vprid, new(vp.DrawData)));
+        }
+
+        RenderingServer.CallOnRenderThread(Callable.From(() => DrawOnRenderThread(newData)));
+    }
+
+    private void DrawOnRenderThread(SharedList dataArray)
+    {
+        foreach (var (vprid, clone) in dataArray)
+        {
+            Rid fb = GetFramebuffer(vprid);
+            if (RD.FramebufferIsValid(fb))
+            {
+                ReplaceTextureRids(clone.Data);
+                RenderOne(fb, clone.Data);
+            }
+        }
+
+        FreeUnusedTextures();
+        dataArray.Dispose();
+    }
+#else
     private SharedList? _dataToDraw;
 
     public RdRendererThreadSafe()
@@ -99,22 +133,15 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
             newData.Add(new(GetFramebuffer(vprid), new(vp.DrawData)));
         }
 
-        lock (_sharedDataLock)
-        {
-            // if a frame was skipped, free old data
-            _dataToDraw?.Dispose();
-            _dataToDraw = newData;
-        }
+        // if a frame was skipped, free old data
+        var oldData = Interlocked.Exchange(ref _dataToDraw, newData);
+        oldData?.Dispose();
     }
 
     private SharedList TakeSharedData()
     {
-        lock (_sharedDataLock)
-        {
-            var rv = _dataToDraw;
-            _dataToDraw = null;
-            return rv ?? [];
-        }
+        var rv = Interlocked.Exchange(ref _dataToDraw, null);
+        return rv ?? [];
     }
 
     private void OnFramePreDraw()
@@ -122,13 +149,14 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         // take ownership of shared data
         using SharedList dataArray = TakeSharedData();
 
-        foreach (var kv in dataArray)
+        foreach (var (fb, clone) in dataArray)
         {
-            if (RD.FramebufferIsValid(kv.Item1))
-                RenderOne(kv.Item1, kv.Item2.Data);
+            if (RD.FramebufferIsValid(fb))
+                RenderOne(fb, clone.Data);
         }
 
         FreeUnusedTextures();
     }
+#endif
 }
 #endif

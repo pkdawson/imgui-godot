@@ -1,5 +1,6 @@
 #include "RdRendererThreadSafe.h"
 #include "common.h"
+#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <mutex>
@@ -44,17 +45,33 @@ struct RdRendererThreadSafe::Impl
         ImDrawData* data;
     };
 
+    bool isGodot42 = false;
+
     using SharedData = std::pair<RID, std::unique_ptr<ClonedDrawData>>;
 
+    // mutex overhead should be minimal (near-zero contention), and refactoring to atomic is ugly
     std::mutex sharedDataMutex;
     std::vector<SharedData> dataToDraw;
 };
 
 RdRendererThreadSafe::RdRendererThreadSafe() : impl(std::make_unique<Impl>())
 {
-    RenderingServer* RS = RenderingServer::get_singleton();
-    RS->connect("frame_pre_draw",
-                Callable(Engine::get_singleton()->get_singleton("ImGuiController"), "on_frame_pre_draw"));
+    // TODO: remove 4.2 compatibility when 4.4 is released
+    Dictionary vinfo = Engine::get_singleton()->get_version_info();
+    impl->isGodot42 = (int)vinfo["hex"] < 0x040300;
+
+    if (impl->isGodot42)
+    {
+        RenderingServer* RS = RenderingServer::get_singleton();
+        RS->connect("frame_pre_draw",
+                    Callable(Engine::get_singleton()->get_singleton("ImGuiController"), "on_frame_pre_draw"));
+    }
+
+    if (DisplayServer::get_singleton()->window_get_vsync_mode() == DisplayServer::VSYNC_DISABLED)
+    {
+        UtilityFunctions::push_warning(
+            "[imgui-godot] Multi-threaded renderer with vsync disabled will probably crash");
+    }
 }
 
 RdRendererThreadSafe::~RdRendererThreadSafe()
@@ -72,15 +89,28 @@ void RdRendererThreadSafe::Render()
         if (vp->Flags & ImGuiViewportFlags_IsMinimized)
             continue;
 
-        ReplaceTextureRIDs(vp->DrawData);
         RID vprid = make_rid(vp->RendererUserData);
-        newData[i].first = GetFramebuffer(vprid);
+        if (impl->isGodot42)
+        {
+            ReplaceTextureRIDs(vp->DrawData);
+            newData[i].first = GetFramebuffer(vprid);
+        }
+        else
+        {
+            newData[i].first = vprid;
+        }
         newData[i].second = std::make_unique<Impl::ClonedDrawData>(vp->DrawData);
     }
 
     {
         std::unique_lock<std::mutex> lock(impl->sharedDataMutex);
         impl->dataToDraw = std::move(newData);
+    }
+
+    if (!impl->isGodot42)
+    {
+        RenderingServer::get_singleton()->call_on_render_thread(
+            Callable(Engine::get_singleton()->get_singleton("ImGuiController"), "on_frame_pre_draw"));
     }
 }
 
@@ -95,10 +125,21 @@ void RdRendererThreadSafe::OnFramePreDraw()
     }
 
     RenderingDevice* RD = RenderingServer::get_singleton()->get_rendering_device();
-    for (auto& kv : dataArray)
+    for (const auto& kv : dataArray)
     {
-        if (RD->framebuffer_is_valid(kv.first))
-            RdRenderer::Render(kv.first, kv.second->data);
+        RID fb = kv.first;
+        ImDrawData* drawData = kv.second->data;
+
+        if (!impl->isGodot42)
+        {
+            fb = GetFramebuffer(fb);
+            ReplaceTextureRIDs(drawData);
+        }
+
+        if (RD->framebuffer_is_valid(fb))
+        {
+            RdRenderer::Render(fb, drawData);
+        }
     }
 
     FreeUnusedTextures();

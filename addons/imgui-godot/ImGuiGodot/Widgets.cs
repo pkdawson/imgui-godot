@@ -1,4 +1,3 @@
-#if GODOT_PC
 using Godot;
 using ImGuiNET;
 using System;
@@ -135,7 +134,7 @@ public static class Widgets
         Vector4 bg_col,
         Vector4 tint_col)
     {
-        (Vector2 uv0, Vector2 uv1) = GetAtlasUVs(tex);
+        var (uv0, uv1) = GetAtlasUVs(tex);
         return ImGui.ImageButton(str_id, (IntPtr)tex.GetRid().Id, size, uv0, uv1, bg_col, tint_col);
     }
 
@@ -149,4 +148,7 @@ public static class Widgets
 #pragma warning restore IDE0004 // Remove Unnecessary Cast
     }
 }
+
+#if NET9_0_OR_GREATER
+// TODO: implicit extension GodotWidgets for ImGui
 #endif
