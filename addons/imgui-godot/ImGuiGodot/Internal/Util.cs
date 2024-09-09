@@ -1,14 +1,15 @@
 using Godot;
 using System;
+using System.Runtime.InteropServices;
 
 namespace ImGuiGodot.Internal;
 
 internal static class Util
 {
-    public static unsafe Rid ConstructRid(ulong id)
+    public static Rid ConstructRid(ulong id)
     {
-        Rid rv;
-        Buffer.MemoryCopy(&id, &rv, sizeof(Rid), sizeof(ulong));
-        return rv;
+        ReadOnlySpan<ulong> uspan = new(in id);
+        ReadOnlySpan<byte> bytes = MemoryMarshal.Cast<ulong, byte>(uspan);
+        return MemoryMarshal.Read<Rid>(bytes);
     }
 }
