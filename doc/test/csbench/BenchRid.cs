@@ -2,6 +2,7 @@ using Godot;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace csbench;
 
@@ -57,6 +58,15 @@ public class BenchRid
         ReadOnlySpan<byte> bytes = MemoryMarshal.Cast<ulong, byte>(uspan);
         return MemoryMarshal.Read<Rid>(bytes);
     }
+
+    [Benchmark]
+    public Rid ConstructRid_UnsafeAccessor()
+    {
+        return RidConstructor(_id);
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern Rid RidConstructor(ulong id);
 
     [Benchmark(Baseline = true)]
     public unsafe Rid ConstructRid_Unsafe_DirectCopy()
