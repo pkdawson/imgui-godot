@@ -3,6 +3,7 @@
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #include <mutex>
 
 using namespace godot;
@@ -69,8 +70,7 @@ RdRendererThreadSafe::RdRendererThreadSafe() : impl(std::make_unique<Impl>())
 
     if (DisplayServer::get_singleton()->window_get_vsync_mode() == DisplayServer::VSYNC_DISABLED)
     {
-        UtilityFunctions::push_warning(
-            "[imgui-godot] Multi-threaded renderer with vsync disabled will probably crash");
+        UtilityFunctions::push_warning("[imgui-godot] Multi-threaded renderer with vsync disabled will probably crash");
     }
 }
 

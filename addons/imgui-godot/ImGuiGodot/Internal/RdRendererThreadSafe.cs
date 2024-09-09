@@ -134,13 +134,13 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
         }
 
         // if a frame was skipped, free old data
-        var oldData = Interlocked.Exchange(ref _dataToDraw, newData);
+        var oldData = System.Threading.Interlocked.Exchange(ref _dataToDraw, newData);
         oldData?.Dispose();
     }
 
     private SharedList TakeSharedData()
     {
-        var rv = Interlocked.Exchange(ref _dataToDraw, null);
+        var rv = System.Threading.Interlocked.Exchange(ref _dataToDraw, null);
         return rv ?? [];
     }
 
