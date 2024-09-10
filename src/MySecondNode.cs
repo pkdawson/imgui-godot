@@ -104,7 +104,7 @@ public partial class MySecondNode : Node
                 _vp.CallDeferred(SubViewport.MethodName.SetSize,
                     new Vector2I((int)size.X - 5, (int)size.Y - 5));
 
-                Widgets.SubViewport(_vp);
+                ImGuiGD.SubViewport(_vp);
             }
         }
 
@@ -119,15 +119,15 @@ public partial class MySecondNode : Node
 
         ImGui.Separator();
         ImGui.Text("Textures");
-        Widgets.Image(_iconTexture, new(_iconSize, _iconSize));
+        ImGuiGD.Image(_iconTexture, new(_iconSize, _iconSize));
         ImGui.SameLine();
-        Widgets.Image(_atlasTexture, new(_iconSize, _iconSize));
+        ImGuiGD.Image(_atlasTexture, new(_iconSize, _iconSize));
         ImGui.DragInt("size", ref _iconSize, 1.0f, 32, 512);
 
         ImGui.Separator();
         ImGui.Text("ImageButton");
 
-        if (Widgets.ImageButton("myimgbtn", _iconTexture, new(128, 128)))
+        if (ImGuiGD.ImageButton("myimgbtn", _iconTexture, new(128, 128)))
             ++_numClicks;
 
         ImGui.SameLine();

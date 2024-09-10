@@ -5,7 +5,7 @@ using System;
 
 namespace ImGuiGodot;
 
-public static class ImGuiGD
+public static partial class ImGuiGD
 {
     private static readonly Internal.IBackend _backend;
 
@@ -123,11 +123,6 @@ public static class ImGuiGD
         }
 
         return false;
-    }
-
-    internal static bool SubViewportWidget(SubViewport svp)
-    {
-        return _backend.SubViewportWidget(svp);
     }
 
     public static void SetIniFilename(string filename)

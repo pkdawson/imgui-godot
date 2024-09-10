@@ -6,7 +6,7 @@ using Vector4 = System.Numerics.Vector4;
 
 namespace ImGuiGodot;
 
-public static class Widgets
+public static partial class ImGuiGD
 {
     /// <summary>
     /// Display an interactable SubViewport
@@ -17,9 +17,9 @@ public static class Widgets
     /// <returns>
     /// True if active (mouse hovered)
     /// </returns>
-    public static bool SubViewport(SubViewport vp)
+    public static bool SubViewport(SubViewport svp)
     {
-        return ImGuiGD.SubViewportWidget(vp);
+        return _backend.SubViewportWidget(svp);
     }
 
     public static void Image(Texture2D tex, Vector2 size)
@@ -149,6 +149,91 @@ public static class Widgets
     }
 }
 
-#if NET9_0_OR_GREATER
+/// <summary>
+/// for backward compatibility
+/// </summary>
+/// <remarks>
+/// will eventually add [Obsolete("Use ImGuiGD instead")]
+/// </remarks>
+public static class Widgets
+{
+    public static bool SubViewport(SubViewport svp) => ImGuiGD.SubViewport(svp);
+
+    public static void Image(Texture2D tex, Vector2 size) => ImGuiGD.Image(tex, size);
+
+    public static void Image(Texture2D tex, Vector2 size, Vector2 uv0)
+        => ImGuiGD.Image(tex, size, uv0);
+
+    public static void Image(Texture2D tex, Vector2 size, Vector2 uv0, Vector2 uv1)
+        => ImGuiGD.Image(tex, size, uv0, uv1);
+
+    public static void Image(
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 tint_col) => ImGuiGD.Image(tex, size, uv0, uv1, tint_col);
+
+    public static void Image(
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 tint_col,
+        Vector4 border_col) => ImGuiGD.Image(tex, size, uv0, uv1, tint_col, border_col);
+
+    public static void Image(AtlasTexture tex, Vector2 size) => ImGuiGD.Image(tex, size);
+
+    public static void Image(AtlasTexture tex, Vector2 size, Vector4 tint_col)
+        => ImGuiGD.Image(tex, size, tint_col);
+
+    public static void Image(AtlasTexture tex, Vector2 size, Vector4 tint_col, Vector4 border_col)
+        => ImGuiGD.Image(tex, size, tint_col, border_col);
+
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size)
+        => ImGuiGD.ImageButton(str_id, tex, size);
+
+    public static bool ImageButton(string str_id, Texture2D tex, Vector2 size, Vector2 uv0)
+        => ImGuiGD.ImageButton(str_id, tex, size, uv0);
+
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1) => ImGuiGD.ImageButton(str_id, tex, size, uv0, uv1);
+
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 bg_col) => ImGuiGD.ImageButton(str_id, tex, size, uv0, uv1, bg_col);
+
+    public static bool ImageButton(
+        string str_id,
+        Texture2D tex,
+        Vector2 size,
+        Vector2 uv0,
+        Vector2 uv1,
+        Vector4 bg_col,
+        Vector4 tint_col) => ImGuiGD.ImageButton(str_id, tex, size, uv0, uv1, bg_col, tint_col);
+
+    public static bool ImageButton(string str_id, AtlasTexture tex, Vector2 size)
+        => ImGuiGD.ImageButton(str_id, tex, size);
+
+    public static bool ImageButton(string str_id, AtlasTexture tex, Vector2 size, Vector4 bg_col)
+        => ImGuiGD.ImageButton(str_id, tex, size, bg_col);
+
+    public static bool ImageButton(
+        string str_id,
+        AtlasTexture tex,
+        Vector2 size,
+        Vector4 bg_col,
+        Vector4 tint_col) => ImGuiGD.ImageButton(str_id, tex, size, bg_col, tint_col);
+}
+
+#if NET10_0_OR_GREATER
 // TODO: implicit extension GodotWidgets for ImGui
 #endif
