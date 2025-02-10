@@ -27,12 +27,12 @@ void SetImeData(ImGuiContext* ctx, ImGuiViewport* vp, ImGuiPlatformImeData* data
     }
 }
 
-void SetClipboardText(void* user_data, const char* text)
+void SetClipboardText(ImGuiContext* c, const char* text)
 {
     DisplayServer::get_singleton()->clipboard_set(String::utf8(text));
 }
 
-const char* GetClipboardText(void* user_data)
+const char* GetClipboardText(ImGuiContext* c)
 {
     static std::vector<char> clipbuf;
 
@@ -65,9 +65,11 @@ Context::Context(std::unique_ptr<Renderer> r)
 
     io.BackendPlatformName = PlatformName;
     io.BackendRendererName = renderer->Name();
-    io.PlatformSetImeDataFn = SetImeData;
-    io.SetClipboardTextFn = SetClipboardText;
-    io.GetClipboardTextFn = GetClipboardText;
+
+    ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+    pio.Platform_SetImeDataFn = SetImeData;
+    pio.Platform_SetClipboardTextFn = SetClipboardText;
+    pio.Platform_GetClipboardTextFn = GetClipboardText;
 
     viewports = std::make_unique<Viewports>();
 }

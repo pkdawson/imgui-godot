@@ -13,7 +13,7 @@
   <Choose>
     <When Condition="$(DefineConstants.Contains('IMGUI'))">
       <ItemGroup>
-        <PackageReference Include="ImGui.NET" Version="1.91.0.1" />
+        <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
       </ItemGroup>
     </When>
     <Otherwise>
