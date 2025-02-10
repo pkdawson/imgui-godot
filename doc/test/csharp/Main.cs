@@ -23,6 +23,9 @@ public partial class Main : Node
             Assert.Equal(ImGuiGD.Scale, 2);
             Assert.Equal(ImGui.GetFontSize(), 26.0f);
 
+            // just for comparison with GDScript test
+            Assert.Equal(ImGui.GetID("test_id"), 3584119329u);
+
             CallDeferred(nameof(ChangeScale));
 
             await ToSignal(this, SignalName.WithinProcess);
