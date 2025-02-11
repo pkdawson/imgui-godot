@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet: ["8.0.x"]
+        dotnet: ["8.0.x", "9.0.x"]
 
     name: .NET ${{ matrix.dotnet }}
 
