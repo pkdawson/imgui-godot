@@ -326,7 +326,7 @@ internal class RdRenderer : IRenderer
 #if GODOT4_4_OR_GREATER
         long dl = RD.DrawListBegin(
             fb,
-            RenderingDevice.DrawFlags.DefaultAll,
+            RenderingDevice.DrawFlags.ClearAll,
             _clearColors,
             1f,
             0,
