@@ -7,7 +7,7 @@ on:
 
 
 env:
-  vcpkg_tag: 1de2026f28ead93ff1773e6e680387643e914ea1 # 2024.07.12
+  vcpkg_tag: 6f29f12e82a8293156836ad81cc9bf5af41fe836 # 2025.01.13
   stable_gdver: 4.2.2-stable
 
 jobs:
@@ -272,7 +272,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-dev.2"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
         include:
           - os: ubuntu-latest
             name: 🐧GdsGameProject
@@ -353,7 +353,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-dev.2"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪GDScript
@@ -404,7 +404,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-dev.2"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪C#

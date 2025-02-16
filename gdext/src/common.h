@@ -14,9 +14,9 @@ inline RID make_rid(int64_t id)
     return rv;
 }
 
-inline RID make_rid(ImTextureID id)
+inline RID make_rid(void* p)
 {
-    return make_rid(reinterpret_cast<int64_t>(id));
+    return make_rid(reinterpret_cast<int64_t>(p));
 }
 
 } // namespace ImGui::Godot

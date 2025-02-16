@@ -41,7 +41,9 @@ internal class RdRenderer : IRenderer
     private readonly HashSet<IntPtr> _usedTextures = new(8);
 
     private readonly Rect2 _zeroRect = new(new(0f, 0f), new(0f, 0f));
+#if !GODOT4_4_OR_GREATER
     private readonly Godot.Collections.Array<Rid> _storageTextures = [];
+#endif
     private readonly Godot.Collections.Array<Rid> _srcBuffers = [];
     private readonly long[] _vtxOffsets = new long[3];
     private readonly Godot.Collections.Array<RDUniform> _uniformArray = [];
@@ -321,6 +323,15 @@ internal class RdRenderer : IRenderer
             SetupBuffers(drawData);
 
         // draw
+#if GODOT4_4_OR_GREATER
+        long dl = RD.DrawListBegin(
+            fb,
+            RenderingDevice.DrawFlags.ClearAll,
+            _clearColors,
+            1f,
+            0,
+            _zeroRect);
+#else
         const RenderingDevice.FinalAction finalAction =
 #if GODOT4_3_OR_GREATER
         RenderingDevice.FinalAction.Store;
@@ -331,6 +342,7 @@ internal class RdRenderer : IRenderer
                 RenderingDevice.InitialAction.Clear, finalAction,
                 RenderingDevice.InitialAction.Clear, finalAction,
                 _clearColors, 1f, 0, _zeroRect, _storageTextures);
+#endif
 
         RD.DrawListBindRenderPipeline(dl, _pipeline);
         RD.DrawListSetPushConstant(dl, _pcbuf, (uint)_pcbuf.Length);

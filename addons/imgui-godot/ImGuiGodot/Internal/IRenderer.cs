@@ -6,10 +6,10 @@ namespace ImGuiGodot.Internal;
 
 internal interface IRenderer : IDisposable
 {
-    public string Name { get; }
-    public void InitViewport(Rid vprid);
-    public void CloseViewport(Rid vprid);
-    public void Render();
-    public void OnHide();
+    string Name { get; }
+    void InitViewport(Rid vprid);
+    void CloseViewport(Rid vprid);
+    void Render();
+    void OnHide();
 }
 #endif
