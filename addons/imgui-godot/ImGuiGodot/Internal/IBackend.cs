@@ -6,16 +6,16 @@ namespace ImGuiGodot.Internal;
 
 internal interface IBackend
 {
-    public bool Visible { get; set; }
-    public float JoyAxisDeadZone { get; set; }
-    public float Scale { get; set; }
-    public void ResetFonts();
-    public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges);
-    public void AddFontDefault();
-    public void RebuildFontAtlas();
-    public void Connect(Callable callable);
-    public void SetMainViewport(Viewport vp);
-    public bool SubViewportWidget(SubViewport svp);
-    public void SetIniFilename(string filename);
+    bool Visible { get; set; }
+    float JoyAxisDeadZone { get; set; }
+    float Scale { get; set; }
+    void ResetFonts();
+    void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges);
+    void AddFontDefault();
+    void RebuildFontAtlas();
+    void Connect(Callable callable);
+    void SetMainViewport(Viewport vp);
+    bool SubViewportWidget(SubViewport svp);
+    void SetIniFilename(string filename);
 }
 #endif
