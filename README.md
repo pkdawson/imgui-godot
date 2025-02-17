@@ -127,6 +127,47 @@ to install and update imgui-godot. The configuration should be something like:
 }
 ```
 
+## [Tool] use (ImGui in the Godot Editor)
+
+Lets start with a simple example:
+
+```csharp
+[Tool]
+public partial class Hello : Node3D
+{
+	public override void _Process(double delta)
+	{
+		ImGui.Begin("ImGui on Godot 4");
+		ImGui.Text("hello world Test");
+		ImGui.End();
+	}
+}
+```
+
+To use ImGui from within the Godot Editor, you must do the following:
+
+1. Install the full GDExtension version of ImGui-Godot
+2. call ImGuiGD.ToolInit() first.
+
+Failure to do these will cause the godot editor to hard crash when running the above example.  Comment out the `ImGui.` lines and rebuild to prevent future crashes.
+
+An easy way to ensure `ImGuiGD.ToolInit()` is always called is to use a `[ModuleInitializer]`, as shown:
+
+```csharp
+internal static class ImGuiInit
+{
+	[ModuleInitializer]
+	public static void DoInit()
+	{
+		ImGuiGD.ToolInit();
+	}
+}
+```
+
+If you do this and still don't see the "hello world Test" text, keep in mind that ImGui will be rendered somewhere in the Godot Editor window, not constrained to the Camera viewport.  It might be hiding in plain sight, like this image shows:  
+![image](https://github.com/user-attachments/assets/b64375b4-a89a-4eb6-92b9-2c528651930b)
+
+
 ## Credits
 
 Code written by Patrick Dawson and contributors, released under the MIT license
