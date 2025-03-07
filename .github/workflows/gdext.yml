@@ -44,10 +44,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         precision: [single, double]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             name: 🐧Linux
           - os: macos-latest
             name: 🍎macOS
@@ -272,7 +272,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0"]
         include:
           - os: ubuntu-latest
             name: 🐧GdsGameProject
@@ -353,7 +353,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪GDScript
@@ -404,7 +404,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        gdver: ["4.2.2", "4.3.0", "4.4.0-beta.3"]
+        gdver: ["4.2.2", "4.3.0", "4.4.0"]
         include:
           - os: ubuntu-latest
             name: 🐧🧪C#
