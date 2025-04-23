@@ -70,7 +70,7 @@ void initialize_ign_module(ModuleInitializationLevel p_level)
 
     ClassDB::register_internal_class<ImGuiLayer>();
     ClassDB::register_internal_class<ImGuiControllerHelper>();
-    ClassDB::register_internal_class<ImGuiController>();
+    ClassDB::register_class<ImGuiController>();
     ClassDB::register_class<ImGuiGD>();
     ClassDB::register_internal_class<ImGuiWindow>();
     register_imgui_api();
