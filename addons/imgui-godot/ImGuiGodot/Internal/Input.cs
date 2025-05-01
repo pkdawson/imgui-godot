@@ -1,7 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using System;
 using CursorShape = Godot.DisplayServer.CursorShape;
 
@@ -46,8 +46,8 @@ internal class Input
                 {
                     unsafe
                     {
-                        var vp = ImGui.FindViewportByPlatformHandle(windowID);
-                        if (vp.NativePtr != null)
+                        var vp = ImGui.FindViewportByPlatformHandle((void*)windowID);
+                        if (!vp.IsNull)
                         {
                             viewportID = vp.ID;
                         }
@@ -302,10 +302,10 @@ internal class Input
         ImGuiMouseCursor.Arrow => CursorShape.Arrow,
         ImGuiMouseCursor.TextInput => CursorShape.Ibeam,
         ImGuiMouseCursor.ResizeAll => CursorShape.Move,
-        ImGuiMouseCursor.ResizeNS => CursorShape.Vsize,
-        ImGuiMouseCursor.ResizeEW => CursorShape.Hsize,
-        ImGuiMouseCursor.ResizeNESW => CursorShape.Bdiagsize,
-        ImGuiMouseCursor.ResizeNWSE => CursorShape.Fdiagsize,
+        ImGuiMouseCursor.ResizeNs => CursorShape.Vsize,
+        ImGuiMouseCursor.ResizeEw => CursorShape.Hsize,
+        ImGuiMouseCursor.ResizeNesw => CursorShape.Bdiagsize,
+        ImGuiMouseCursor.ResizeNwse => CursorShape.Fdiagsize,
         ImGuiMouseCursor.Hand => CursorShape.PointingHand,
         ImGuiMouseCursor.NotAllowed => CursorShape.Forbidden,
         _ => CursorShape.Arrow,
@@ -352,16 +352,16 @@ internal class Input
         Key.Alt => ImGuiKey.LeftAlt,
         Key.Meta => ImGuiKey.LeftSuper,
         Key.Menu => ImGuiKey.Menu,
-        Key.Key0 => ImGuiKey._0,
-        Key.Key1 => ImGuiKey._1,
-        Key.Key2 => ImGuiKey._2,
-        Key.Key3 => ImGuiKey._3,
-        Key.Key4 => ImGuiKey._4,
-        Key.Key5 => ImGuiKey._5,
-        Key.Key6 => ImGuiKey._6,
-        Key.Key7 => ImGuiKey._7,
-        Key.Key8 => ImGuiKey._8,
-        Key.Key9 => ImGuiKey._9,
+        Key.Key0 => ImGuiKey.Key0,
+        Key.Key1 => ImGuiKey.Key1,
+        Key.Key2 => ImGuiKey.Key2,
+        Key.Key3 => ImGuiKey.Key3,
+        Key.Key4 => ImGuiKey.Key4,
+        Key.Key5 => ImGuiKey.Key5,
+        Key.Key6 => ImGuiKey.Key6,
+        Key.Key7 => ImGuiKey.Key7,
+        Key.Key8 => ImGuiKey.Key8,
+        Key.Key9 => ImGuiKey.Key9,
         Key.Apostrophe => ImGuiKey.Apostrophe,
         Key.Comma => ImGuiKey.Comma,
         Key.Minus => ImGuiKey.Minus,

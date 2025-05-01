@@ -1,6 +1,6 @@
 using Godot;
 using ImGuiGodot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 
 namespace DemoProject;
 

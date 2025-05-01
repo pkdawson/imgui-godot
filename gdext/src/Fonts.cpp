@@ -43,12 +43,15 @@ struct Fonts::Impl
 
     static void ResetStyle()
     {
+        // reset all properties scaled by ImGuiStyle::ScaleAllSizes()
+
         const ImGuiStyle defaultStyle;
         ImGuiStyle& style = ImGui::GetStyle();
 
         style.WindowPadding = defaultStyle.WindowPadding;
         style.WindowRounding = defaultStyle.WindowRounding;
         style.WindowMinSize = defaultStyle.WindowMinSize;
+        style.WindowBorderHoverPadding = defaultStyle.WindowBorderHoverPadding;
         style.ChildRounding = defaultStyle.ChildRounding;
         style.PopupRounding = defaultStyle.PopupRounding;
         style.FramePadding = defaultStyle.FramePadding;
@@ -64,12 +67,13 @@ struct Fonts::Impl
         style.GrabMinSize = defaultStyle.GrabMinSize;
         style.GrabRounding = defaultStyle.GrabRounding;
         style.LogSliderDeadzone = defaultStyle.LogSliderDeadzone;
+        style.ImageBorderSize = defaultStyle.ImageBorderSize;
         style.TabRounding = defaultStyle.TabRounding;
-        style.TabMinWidthForCloseButton = defaultStyle.TabMinWidthForCloseButton;
+        style.TabCloseButtonMinWidthSelected = defaultStyle.TabCloseButtonMinWidthSelected;
+        style.TabCloseButtonMinWidthUnselected = defaultStyle.TabCloseButtonMinWidthUnselected;
+        style.TabBarOverlineSize = defaultStyle.TabBarOverlineSize;
         style.SeparatorTextPadding = defaultStyle.SeparatorTextPadding;
-#if IMGUI_VERSION_NUM >= 18980
         style.DockingSeparatorSize = defaultStyle.DockingSeparatorSize;
-#endif
         style.DisplayWindowPadding = defaultStyle.DisplayWindowPadding;
         style.DisplaySafeAreaPadding = defaultStyle.DisplaySafeAreaPadding;
         style.MouseCursorScale = defaultStyle.MouseCursorScale;

@@ -1,7 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -23,22 +23,23 @@ internal sealed class ClonedDrawData : IDisposable
         long ddsize = Marshal.SizeOf<ImDrawData>();
 
         // start with a shallow copy
-        Data = new(ImGui.MemAlloc((uint)ddsize));
-        Buffer.MemoryCopy(inp.NativePtr, Data.NativePtr, ddsize, ddsize);
+        Data = new((ImDrawData*)ImGui.MemAlloc((uint)ddsize));
+        Buffer.MemoryCopy(inp.Handle, Data.Handle, ddsize, ddsize);
 
         // clone the draw data
         int numLists = inp.CmdLists.Size;
-        IntPtr cmdListPtrs = ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * numLists));
-        Data.NativePtr->CmdLists = new ImVector(numLists, numLists, cmdListPtrs);
+        nint cmdListPtrs = (nint)ImGui.MemAlloc((uint)(Marshal.SizeOf<IntPtr>() * numLists));
+        Data.Handle->CmdLists = new ImVector<ImDrawListPtr>(numLists, numLists,
+            (ImDrawListPtr*)cmdListPtrs);
         for (int i = 0; i < inp.CmdLists.Size; ++i)
         {
-            Data.CmdLists[i] = (IntPtr)inp.CmdLists[i].CloneOutput().NativePtr;
+            Data.CmdLists[i] = inp.CmdLists[i].CloneOutput();
         }
     }
 
     public unsafe void Dispose()
     {
-        if (Data.NativePtr == null)
+        if (Data.Handle == null)
             return;
 
         for (int i = 0; i < Data.CmdListsCount; ++i)
@@ -81,8 +82,11 @@ internal sealed class RdRendererThreadSafe : RdRenderer, IRenderer
             if (vp.Flags.HasFlag(ImGuiViewportFlags.IsMinimized))
                 continue;
 
-            Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
-            newData.Add(new(vprid, new(vp.DrawData)));
+            unsafe
+            {
+                Rid vprid = Util.ConstructRid((ulong)vp.RendererUserData);
+                newData.Add(new(vprid, new(vp.DrawData)));
+            }
         }
 
         RenderingServer.CallOnRenderThread(Callable.From(() => DrawOnRenderThread(newData)));

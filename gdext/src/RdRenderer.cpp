@@ -161,43 +161,47 @@ bool RdRenderer::Init()
 
     TypedArray<RDVertexAttribute> vattrs;
 
-    RDVertexAttribute attr_points;
-    attr_points.set_location(0);
-    attr_points.set_format(RenderingDevice::DATA_FORMAT_R32G32_SFLOAT);
-    attr_points.set_stride(sizeof(ImDrawVert));
-    attr_points.set_offset(0);
+    Ref<RDVertexAttribute> attr_points;
+    attr_points.instantiate();
+    attr_points->set_location(0);
+    attr_points->set_format(RenderingDevice::DATA_FORMAT_R32G32_SFLOAT);
+    attr_points->set_stride(sizeof(ImDrawVert));
+    attr_points->set_offset(0);
 
-    RDVertexAttribute attr_uvs;
-    attr_uvs.set_location(1);
-    attr_uvs.set_format(RenderingDevice::DATA_FORMAT_R32G32_SFLOAT);
-    attr_uvs.set_stride(sizeof(ImDrawVert));
-    attr_uvs.set_offset(sizeof(float) * 2);
+    Ref<RDVertexAttribute> attr_uvs;
+    attr_uvs.instantiate();
+    attr_uvs->set_location(1);
+    attr_uvs->set_format(RenderingDevice::DATA_FORMAT_R32G32_SFLOAT);
+    attr_uvs->set_stride(sizeof(ImDrawVert));
+    attr_uvs->set_offset(sizeof(float) * 2);
 
-    RDVertexAttribute attr_colors;
-    attr_colors.set_location(2);
-    attr_colors.set_format(RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM);
-    attr_colors.set_stride(sizeof(ImDrawVert));
-    attr_colors.set_offset(sizeof(float) * 4);
+    Ref<RDVertexAttribute> attr_colors;
+    attr_colors.instantiate();
+    attr_colors->set_location(2);
+    attr_colors->set_format(RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM);
+    attr_colors->set_stride(sizeof(ImDrawVert));
+    attr_colors->set_offset(sizeof(float) * 4);
 
-    vattrs.append(&attr_points);
-    vattrs.append(&attr_uvs);
-    vattrs.append(&attr_colors);
+    vattrs.append(attr_points);
+    vattrs.append(attr_uvs);
+    vattrs.append(attr_colors);
 
     impl->vtxFormat = RD->vertex_format_create(vattrs);
 
-    RDPipelineColorBlendStateAttachment bsa;
-    bsa.set_enable_blend(true);
-    bsa.set_src_color_blend_factor(RenderingDevice::BLEND_FACTOR_SRC_ALPHA);
-    bsa.set_dst_color_blend_factor(RenderingDevice::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-    bsa.set_color_blend_op(RenderingDevice::BLEND_OP_ADD);
-    bsa.set_src_alpha_blend_factor(RenderingDevice::BLEND_FACTOR_ONE);
-    bsa.set_dst_alpha_blend_factor(RenderingDevice::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-    bsa.set_alpha_blend_op(RenderingDevice::BLEND_OP_ADD);
+    Ref<RDPipelineColorBlendStateAttachment> bsa;
+    bsa.instantiate();
+    bsa->set_enable_blend(true);
+    bsa->set_src_color_blend_factor(RenderingDevice::BLEND_FACTOR_SRC_ALPHA);
+    bsa->set_dst_color_blend_factor(RenderingDevice::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+    bsa->set_color_blend_op(RenderingDevice::BLEND_OP_ADD);
+    bsa->set_src_alpha_blend_factor(RenderingDevice::BLEND_FACTOR_ONE);
+    bsa->set_dst_alpha_blend_factor(RenderingDevice::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+    bsa->set_alpha_blend_op(RenderingDevice::BLEND_OP_ADD);
 
     Ref<RDPipelineColorBlendState> blend;
     blend.instantiate();
     blend->set_blend_constant(Color(0.0f, 0.0f, 0.0f, 0.0f));
-    blend->get_attachments().append(&bsa);
+    blend->get_attachments().append(bsa);
 
     Ref<RDPipelineRasterizationState> raster_state;
     raster_state.instantiate();
@@ -226,15 +230,16 @@ bool RdRenderer::Init()
     if (!impl->pipeline.is_valid())
         return false;
 
-    RDSamplerState sampler_state;
-    sampler_state.set_min_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
-    sampler_state.set_mag_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
-    sampler_state.set_mip_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
-    sampler_state.set_repeat_u(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
-    sampler_state.set_repeat_v(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
-    sampler_state.set_repeat_w(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
+    Ref<RDSamplerState> sampler_state;
+    sampler_state.instantiate();
+    sampler_state->set_min_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
+    sampler_state->set_mag_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
+    sampler_state->set_mip_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
+    sampler_state->set_repeat_u(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
+    sampler_state->set_repeat_v(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
+    sampler_state->set_repeat_w(RenderingDevice::SAMPLER_REPEAT_MODE_REPEAT);
 
-    impl->sampler = RD->sampler_create(&sampler_state);
+    impl->sampler = RD->sampler_create(sampler_state);
 
     impl->srcBuffers.resize(3);
     impl->uniforms.resize(1);

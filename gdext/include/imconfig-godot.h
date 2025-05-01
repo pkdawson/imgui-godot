@@ -1,6 +1,8 @@
 #pragma once
 
-#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS // match ImGui.NET
+// match Hexa.NET.ImGui
+#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+#define IMGUI_USE_WCHAR32
 
 #if __has_include("godot_cpp/godot.hpp") // GDExtension
 #include <godot_cpp/variant/color.hpp>

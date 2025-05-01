@@ -62,7 +62,7 @@ public static partial class ImGuiGD
         FontFile fontData,
         int fontSize,
         bool merge = false,
-        ushort[]? glyphRanges = null)
+        uint[]? glyphRanges = null)
     {
         _backend.AddFont(fontData, fontSize, merge, glyphRanges);
     }
@@ -71,12 +71,16 @@ public static partial class ImGuiGD
     /// Add a font using glyph ranges from ImGui.GetIO().Fonts.GetGlyphRanges*()
     /// </summary>
     /// <param name="glyphRanges">pointer to an array of ushorts terminated by 0</param>
-    public static unsafe void AddFont(FontFile fontData, int fontSize, bool merge, nint glyphRanges)
+    public static unsafe void AddFont(
+        FontFile fontData,
+        int fontSize,
+        bool merge,
+        uint* glyphRanges)
     {
-        ushort* p = (ushort*)glyphRanges;
+        uint* p = glyphRanges;
         int len = 1;
         while (p[len++] != 0) ;
-        ushort[] gr = new ushort[len];
+        uint[] gr = new uint[len];
         for (int i = 0; i < len; ++i)
             gr[i] = p[i];
         _backend.AddFont(fontData, fontSize, merge, gr);

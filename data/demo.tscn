@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://2cvgmt2fmpao" path="res://data/icon.svg" id="1_c7hdb"]
 [ext_resource type="FontFile" uid="uid://c2o4vx2jik43e" path="res://data/Hack-Regular.ttf" id="3_fjiyg"]
-[ext_resource type="Script" path="res://src/MyNode.cs" id="3_qvd0t"]
+[ext_resource type="Script" uid="uid://c0hn2oganiw6d" path="res://src/MyNode.cs" id="3_qvd0t"]
 [ext_resource type="ButtonGroup" uid="uid://ucf261yyiwkq" path="res://data/buttongroup.tres" id="4_7oj01"]
 
 [node name="Control" type="Control"]

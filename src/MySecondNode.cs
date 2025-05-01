@@ -1,6 +1,6 @@
 using Godot;
 using ImGuiGodot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 
 namespace DemoProject;
 
@@ -32,7 +32,7 @@ public partial class MySecondNode : Node
         $"Godot {Engine.GetVersionInfo()["string"].AsString()} with .NET " +
         $"{System.Environment.Version}";
 
-    public override void _EnterTree()
+    public override unsafe void _EnterTree()
     {
         if (!_fontLoaded)
         {
@@ -67,12 +67,9 @@ public partial class MySecondNode : Node
         _scale = ImGuiGD.Scale;
         GetNode<Button>("%ShowHideButton").Pressed += OnShowHidePressed;
 
-        unsafe
-        {
-            _wcTopMost = ImGuiNative.ImGuiWindowClass_ImGuiWindowClass();
-            _wcTopMost.ViewportFlagsOverrideSet = ImGuiViewportFlags.TopMost
-                | ImGuiViewportFlags.NoAutoMerge;
-        }
+        _wcTopMost = ImGui.ImGuiWindowClass();
+        _wcTopMost.ViewportFlagsOverrideSet = ImGuiViewportFlags.TopMost
+            | ImGuiViewportFlags.NoAutoMerge;
     }
 
     private void OnImGuiLayout()

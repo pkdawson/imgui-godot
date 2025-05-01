@@ -1,6 +1,6 @@
 #if GODOT_PC
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Vector3 = System.Numerics.Vector3;
 using Vector4 = System.Numerics.Vector4;
 

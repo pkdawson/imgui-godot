@@ -10,7 +10,7 @@ internal interface IBackend
     float JoyAxisDeadZone { get; set; }
     float Scale { get; set; }
     void ResetFonts();
-    void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges);
+    void AddFont(FontFile fontData, int fontSize, bool merge, uint[]? glyphRanges);
     void AddFontDefault();
     void RebuildFontAtlas();
     void Connect(Callable callable);

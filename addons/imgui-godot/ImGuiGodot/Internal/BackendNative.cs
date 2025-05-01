@@ -46,13 +46,13 @@ internal sealed class BackendNative : IBackend
         set => _gd.Set(PropertyName.Visible, value);
     }
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
+    public void AddFont(FontFile fontData, int fontSize, bool merge, uint[]? glyphRanges)
     {
         if (glyphRanges != null)
         {
             int[] gr = new int[glyphRanges.Length];
             for (int i = 0; i < glyphRanges.Length; ++i)
-                gr[i] = glyphRanges[i];
+                gr[i] = (int)glyphRanges[i];
             _gd.Call(MethodName.AddFont, fontData, fontSize, merge, gr);
         }
         else

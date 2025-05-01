@@ -1,6 +1,10 @@
 using Godot;
 using ImGuiGodot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
+using Hexa.NET.ImGuizmo;
+using Hexa.NET.ImNodes;
+using Hexa.NET.ImPlot;
+using Hexa.NET.ImGui.Widgets;
 
 namespace DemoProject;
 
@@ -25,12 +29,29 @@ public partial class MyNode : Node
             int refreshRate = (int)DisplayServer.ScreenGetRefreshRate();
             Engine.MaxFps = refreshRate > 0 ? refreshRate : 60;
         }
+
+        ImPlot.SetImGuiContext(ImGui.GetCurrentContext());
+        ImPlot.CreateContext();
+
+        ImNodes.SetImGuiContext(ImGui.GetCurrentContext());
+        ImNodes.CreateContext();
+
+        ImGuizmo.SetImGuiContext(ImGui.GetCurrentContext());
+
+    }
+
+    public override void _ExitTree()
+    {
+        ImPlot.DestroyContext();
+        ImNodes.DestroyContext();
     }
 
     public override void _Process(double delta)
     {
 #if GODOT_PC
         ImGui.ShowDemoWindow();
+        ImPlot.ShowDemoWindow();
+        ImGuiProgressBar.ProgressBar(42f, new(100, 50), 0xffff, 0x5678);
 #endif
     }
 

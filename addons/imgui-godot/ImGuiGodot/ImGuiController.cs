@@ -1,7 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 
 namespace ImGuiGodot;
 

@@ -171,7 +171,7 @@ PackedInt64Array ImGuiGD::GetImGuiPtrs(String version, int ioSize, int vertSize,
     if (version != String(ImGui::GetVersion()) || ioSize != sizeof(ImGuiIO) || vertSize != sizeof(ImDrawVert) ||
         idxSize != sizeof(ImDrawIdx) || charSize != sizeof(ImWchar))
     {
-        UtilityFunctions::push_error("ImGui version mismatch, use v", ImGui::GetVersion(), "-docking");
+        UtilityFunctions::push_error("ImGui version mismatch, use v", ImGui::GetVersion(), "-docking (wchar32)");
         return {};
     }
 

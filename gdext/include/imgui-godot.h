@@ -30,9 +30,9 @@
 #include "scene/resources/texture.h"
 #endif
 
-static_assert(sizeof(void*) == 8);
-static_assert(sizeof(ImDrawIdx) == 2);
-static_assert(sizeof(ImWchar) == 2);
+static_assert(sizeof(void*) == 8);     // 64-bit pointers
+static_assert(sizeof(ImDrawIdx) == 2); // 16-bit indices
+static_assert(sizeof(ImWchar) == 4);   // wchar32
 
 namespace ImGui::Godot {
 

@@ -1,6 +1,6 @@
 #if GODOT_PC
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 
 namespace ImGuiGodot.Internal;
 

@@ -1,6 +1,6 @@
 #if GODOT_PC
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using System;
 using System.Runtime.InteropServices;
 
@@ -54,7 +54,7 @@ internal sealed class State : IDisposable
         Input = new Input();
         Fonts = new Fonts();
 
-        if (ImGui.GetCurrentContext() != IntPtr.Zero)
+        if (!ImGui.GetCurrentContext().IsNull)
         {
             ImGui.DestroyContext();
         }
@@ -77,14 +77,14 @@ internal sealed class State : IDisposable
 
         unsafe
         {
-            io.NativePtr->BackendPlatformName = (byte*)_backendName;
-            io.NativePtr->BackendRendererName = (byte*)_rendererName;
+            io.BackendPlatformName = (byte*)_backendName;
+            io.BackendRendererName = (byte*)_rendererName;
 
-            var pio = ImGui.GetPlatformIO().NativePtr;
-            pio->Platform_SetImeDataFn = Marshal.GetFunctionPointerForDelegate(_setImeData);
-            pio->Platform_SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(
+            var pio = ImGui.GetPlatformIO();
+            pio.PlatformSetImeDataFn = (void*)Marshal.GetFunctionPointerForDelegate(_setImeData);
+            pio.PlatformSetClipboardTextFn = (void*)Marshal.GetFunctionPointerForDelegate(
                 _setClipboardText);
-            pio->Platform_GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate(
+            pio.PlatformGetClipboardTextFn = (void*)Marshal.GetFunctionPointerForDelegate(
                 _getClipboardText);
         }
 
@@ -93,7 +93,7 @@ internal sealed class State : IDisposable
 
     public void Dispose()
     {
-        if (ImGui.GetCurrentContext() != IntPtr.Zero)
+        if (!ImGui.GetCurrentContext().IsNull)
             ImGui.DestroyContext();
         Renderer.Dispose();
     }
@@ -174,7 +174,7 @@ internal sealed class State : IDisposable
     public unsafe void SetIniFilename(string fileName)
     {
         var io = ImGui.GetIO();
-        io.NativePtr->IniFilename = null;
+        io.IniFilename = null;
 
         if (_iniFilenameBuffer != IntPtr.Zero)
         {
@@ -186,7 +186,7 @@ internal sealed class State : IDisposable
         {
             fileName = ProjectSettings.GlobalizePath(fileName);
             _iniFilenameBuffer = Marshal.StringToCoTaskMemUTF8(fileName);
-            io.NativePtr->IniFilename = (byte*)_iniFilenameBuffer;
+            io.IniFilename = (byte*)_iniFilenameBuffer;
         }
     }
 
@@ -208,9 +208,12 @@ internal sealed class State : IDisposable
         Renderer.Render();
     }
 
-    private static void SetImeData(nint ctx, ImGuiViewportPtr vp, ImGuiPlatformImeDataPtr data)
+    private static unsafe void SetImeData(
+        nint ctx,
+        ImGuiViewportPtr vp,
+        ImGuiPlatformImeDataPtr data)
     {
-        int windowID = (int)vp.PlatformHandle;
+        int windowID = (int)(nint)vp.PlatformHandle;
 
         DisplayServer.WindowSetImeActive(data.WantVisible, windowID);
         if (data.WantVisible)

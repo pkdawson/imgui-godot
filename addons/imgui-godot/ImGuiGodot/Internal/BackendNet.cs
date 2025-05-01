@@ -1,7 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using System;
 using Vector2 = System.Numerics.Vector2;
 
@@ -27,7 +27,7 @@ internal sealed class BackendNet : IBackend
         set => State.Instance.Layer.Visible = value;
     }
 
-    public void AddFont(FontFile fontData, int fontSize, bool merge, ushort[]? glyphRanges)
+    public void AddFont(FontFile fontData, int fontSize, bool merge, uint[]? glyphRanges)
     {
         State.Instance.Fonts.AddFont(fontData, fontSize, merge, glyphRanges);
     }
@@ -67,14 +67,14 @@ internal sealed class BackendNet : IBackend
         ImGuiController.Instance.SetMainViewport(vp);
     }
 
-    public bool SubViewportWidget(SubViewport svp)
+    public unsafe bool SubViewportWidget(SubViewport svp)
     {
         Vector2 vpSize = new(svp.Size.X, svp.Size.Y);
         var pos = ImGui.GetCursorScreenPos();
         var pos_max = new Vector2(pos.X + vpSize.X, pos.Y + vpSize.Y);
-        ImGui.GetWindowDrawList().AddImage((IntPtr)svp.GetTexture().GetRid().Id, pos, pos_max);
+        ImGui.GetWindowDrawList().AddImage(svp.GetTexture().GetRid().Id, pos, pos_max);
 
-        ImGui.PushID(svp.NativeInstance);
+        ImGui.PushID((void*)svp.NativeInstance);
         ImGui.InvisibleButton("godot_subviewport", vpSize);
         ImGui.PopID();
 

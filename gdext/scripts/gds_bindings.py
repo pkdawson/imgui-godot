@@ -105,6 +105,7 @@ exclude_props = (
     "MouseClickedCount",
     "MouseClickedLastCount",
     "MouseReleased",
+    "MouseReleasedTime",
     "MouseDownOwned",
     "MouseDownOwnedUnlessPopupClose",
     "MouseDownDuration",

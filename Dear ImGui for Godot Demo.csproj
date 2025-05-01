@@ -1,6 +1,6 @@
-﻿<Project Sdk="Godot.NET.Sdk/4.3.0">
+﻿<Project Sdk="Godot.NET.Sdk/4.5.0-dev.1">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>DemoProject</RootNamespace>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -25,20 +25,25 @@
     <EmbeddedResource Remove="gdext\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.13.0">
+    <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+    <PackageReference Include="Hexa.NET.ImGui.Widgets" Version="1.2.13" />
+    <PackageReference Include="Hexa.NET.ImGui.Widgets.Extras" Version="1.0.6" />
+    <PackageReference Include="Hexa.NET.ImGuizmo" Version="2.2.7" />
+    <PackageReference Include="Hexa.NET.ImNodes" Version="2.2.7" />
+    <PackageReference Include="Hexa.NET.ImPlot" Version="2.2.7" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="4.13.0">
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.CodeFixes" Version="4.13.0">
+    <PackageReference Include="Roslynator.CodeFixes" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.13.0">
+    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -1,7 +1,7 @@
 #if GODOT_PC
 #nullable enable
 using Godot;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -17,7 +17,7 @@ internal sealed class Fonts
         public FontFile? Font { get; init; }
         public int FontSize { get; init; }
         public bool Merge { get; init; }
-        public ushort[]? Ranges { get; init; }
+        public uint[]? Ranges { get; init; }
     }
     private readonly List<FontParams> _fontConfiguration = [];
 
@@ -30,11 +30,11 @@ internal sealed class Fonts
     {
         var io = ImGui.GetIO();
         io.Fonts.Clear();
-        unsafe { io.NativePtr->FontDefault = null; }
+        unsafe { io.Handle->FontDefault = null; }
         _fontConfiguration.Clear();
     }
 
-    public void AddFont(FontFile? fontData, int fontSize, bool merge, ushort[]? ranges)
+    public void AddFont(FontFile? fontData, int fontSize, bool merge, uint[]? ranges)
     {
         _fontConfiguration.Add(
             new FontParams
@@ -50,23 +50,21 @@ internal sealed class Fonts
     {
         var io = ImGui.GetIO();
         int fontSize = (int)(fp.FontSize * scale);
-        ImFontConfig* fc = ImGuiNative.ImFontConfig_ImFontConfig();
+
+        ImFontConfigPtr fc = ImGui.ImFontConfig();
 
         if (fp.Merge)
         {
-            fc->MergeMode = 1;
+            fc.MergeMode = true;
         }
 
         if (fp.Font == null)
         {
             // default font
-            var fcptr = new ImFontConfigPtr(fc)
-            {
-                SizePixels = fontSize,
-                OversampleH = 1,
-                OversampleV = 1,
-                PixelSnapH = true
-            };
+            fc.SizePixels = fontSize;
+            fc.OversampleH = 1;
+            fc.OversampleV = 1;
+            fc.PixelSnapH = true;
             io.Fonts.AddFontDefault(fc);
         }
         else
@@ -74,23 +72,23 @@ internal sealed class Fonts
             string name = $"{System.IO.Path.GetFileName(fp.Font.ResourcePath)}, {fontSize}px";
             for (int i = 0; i < name.Length && i < 40; ++i)
             {
-                fc->Name[i] = Convert.ToByte(name[i]);
+                fc.Name[i] = Convert.ToByte(name[i]);
             }
 
             int len = fp.Font.Data.Length;
             // let ImGui manage this memory
-            IntPtr p = ImGui.MemAlloc((uint)len);
-            Marshal.Copy(fp.Font.Data, 0, p, len);
+            void* p = ImGui.MemAlloc((uint)len);
+            Marshal.Copy(fp.Font.Data, 0, (nint)p, len);
             if (fp.Ranges == null)
             {
-                ImVector ranges = GetRanges(fp.Font);
+                ImVector<uint> ranges = GetRanges(fp.Font);
                 io.Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, ranges.Data);
             }
             else
             {
-                fixed (ushort* pranges = fp.Ranges)
+                fixed (uint* pranges = fp.Ranges)
                 {
-                    io.Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, (nint)pranges);
+                    io.Fonts.AddFontFromMemoryTTF(p, len, fontSize, fc, pranges);
                 }
             }
         }
@@ -98,27 +96,28 @@ internal sealed class Fonts
         if (fp.Merge)
             io.Fonts.Build();
 
-        ImGuiNative.ImFontConfig_destroy(fc);
+        fc.Destroy();
     }
 
-    private static unsafe ImVector GetRanges(Font font)
+    private static unsafe ImVector<uint> GetRanges(Font font)
     {
-        var builder = new ImFontGlyphRangesBuilderPtr(
-            ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+        var builder = ImGui.ImFontGlyphRangesBuilder();
         builder.AddText(font.GetSupportedChars());
-        builder.BuildRanges(out ImVector vec);
+        ImVector<uint> outRanges = new();
+        builder.BuildRanges(ref outRanges);
         builder.Destroy();
-        return vec;
+        return outRanges;
     }
 
     private static unsafe void ResetStyle()
     {
-        ImGuiStylePtr defaultStyle = new(ImGuiNative.ImGuiStyle_ImGuiStyle());
+        ImGuiStylePtr defaultStyle = ImGui.ImGuiStyle();
         ImGuiStylePtr style = ImGui.GetStyle();
 
         style.WindowPadding = defaultStyle.WindowPadding;
         style.WindowRounding = defaultStyle.WindowRounding;
         style.WindowMinSize = defaultStyle.WindowMinSize;
+        style.WindowBorderHoverPadding = defaultStyle.WindowBorderHoverPadding;
         style.ChildRounding = defaultStyle.ChildRounding;
         style.PopupRounding = defaultStyle.PopupRounding;
         style.FramePadding = defaultStyle.FramePadding;
@@ -134,8 +133,11 @@ internal sealed class Fonts
         style.GrabMinSize = defaultStyle.GrabMinSize;
         style.GrabRounding = defaultStyle.GrabRounding;
         style.LogSliderDeadzone = defaultStyle.LogSliderDeadzone;
+        style.ImageBorderSize = defaultStyle.ImageBorderSize;
         style.TabRounding = defaultStyle.TabRounding;
-        style.TabMinWidthForCloseButton = defaultStyle.TabMinWidthForCloseButton;
+        style.TabCloseButtonMinWidthSelected = defaultStyle.TabCloseButtonMinWidthSelected;
+        style.TabCloseButtonMinWidthUnselected = defaultStyle.TabCloseButtonMinWidthUnselected;
+        style.TabBarOverlineSize = defaultStyle.TabBarOverlineSize;
         style.SeparatorTextPadding = defaultStyle.SeparatorTextPadding;
         style.DockingSeparatorSize = defaultStyle.DockingSeparatorSize;
         style.DisplayWindowPadding = defaultStyle.DisplayWindowPadding;
@@ -151,17 +153,17 @@ internal sealed class Fonts
         int fontIndex = -1;
 
         // save current font index
-        if (io.NativePtr->FontDefault != null)
+        if (!io.FontDefault.IsNull)
         {
             for (int i = 0; i < io.Fonts.Fonts.Size; ++i)
             {
-                if (io.Fonts.Fonts[i].NativePtr == io.FontDefault.NativePtr)
+                if (io.Fonts.Fonts[i] == io.FontDefault)
                 {
                     fontIndex = i;
                     break;
                 }
             }
-            io.NativePtr->FontDefault = null;
+            io.FontDefault = null;
         }
         io.Fonts.Clear();
 
@@ -170,11 +172,13 @@ internal sealed class Fonts
             AddFontToAtlas(fontParams, scale);
         }
 
+        byte* pixelData = null;
+        int width = 0, height = 0, bytesPerPixel = 0;
         io.Fonts.GetTexDataAsRGBA32(
-            out byte* pixelData,
-            out int width,
-            out int height,
-            out int bytesPerPixel);
+            ref pixelData,
+            ref width,
+            ref height,
+            ref bytesPerPixel);
 
         byte[] pixels = new byte[width * height * bytesPerPixel];
         Marshal.Copy((IntPtr)pixelData, pixels, 0, pixels.Length);
@@ -182,13 +186,13 @@ internal sealed class Fonts
         var img = Image.CreateFromData(width, height, false, Image.Format.Rgba8, pixels);
 
         _fontTexture = ImageTexture.CreateFromImage(img);
-        io.Fonts.SetTexID((IntPtr)_fontTexture.GetRid().Id);
+        io.Fonts.SetTexID(_fontTexture.GetRid().Id);
         io.Fonts.ClearTexData();
 
         // maintain selected font when rescaling
         if (fontIndex != -1 && fontIndex < io.Fonts.Fonts.Size)
         {
-            io.NativePtr->FontDefault = io.Fonts.Fonts[fontIndex].NativePtr;
+            io.FontDefault = io.Fonts.Fonts[fontIndex];
         }
 
         ResetStyle();

@@ -54,8 +54,8 @@ func check_csproj(fn):
     if !data.contains("<AllowUnsafeBlocks>"):
         changesNeeded += "- Allow unsafe blocks\n"
 
-    if !data.contains("<PackageReference Include=\"ImGui.NET\""):
-        changesNeeded += "- Add NuGet package ImGui.NET\n"
+    if !data.contains("<PackageReference Include=\"Hexa.NET.ImGui\""):
+        changesNeeded += "- Add NuGet package Hexa.NET.ImGui\n"
 
     if changesNeeded != "":
         var text := "Your .csproj requires the following changes:\n\n%s" % changesNeeded
