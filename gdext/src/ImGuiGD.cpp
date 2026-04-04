@@ -42,6 +42,13 @@ void ImGuiGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("SetIniFilename", "filename"), &ImGuiGD::SetIniFilename);
 
     ClassDB::bind_method(D_METHOD("GetFontPtrs"), &ImGuiGD::GetFontPtrs);
+
+    ClassDB::bind_method(D_METHOD("SetDragDropPayload", "type", "data", "cond"),
+                         &ImGuiGD::SetDragDropPayload, DEFVAL(0));
+    ClassDB::bind_method(D_METHOD("AcceptDragDropPayload", "type", "flags"),
+                         &ImGuiGD::AcceptDragDropPayload, DEFVAL(0));
+    ClassDB::bind_method(D_METHOD("GetDragDropPayload"),
+                         &ImGuiGD::GetDragDropPayload);
 }
 
 bool ImGuiGD::ToolInit()
@@ -198,5 +205,26 @@ void ImGuiGD::SetIniFilename(String fn)
 {
     ImGui::Godot::SetIniFilename(fn);
 }
+bool ImGuiGD::SetDragDropPayload(const String& type, const Variant& data, int cond)
+{
+    _dragDropPayload = data;
+    static int dummy = 0;
+    return ::ImGui::SetDragDropPayload(type.utf8().get_data(), &dummy, sizeof(dummy), cond);
+}
 
+Variant ImGuiGD::AcceptDragDropPayload(const String& type, int flags)
+{
+    const ImGuiPayload* payload = ::ImGui::AcceptDragDropPayload(type.utf8().get_data(), flags);
+    if (payload)
+        return _dragDropPayload;
+    return Variant();
+}
+
+Variant ImGuiGD::GetDragDropPayload()
+{
+    const ImGuiPayload* payload = ::ImGui::GetDragDropPayload();
+    if (payload)
+        return _dragDropPayload;
+    return Variant();
+}
 } // namespace ImGui::Godot

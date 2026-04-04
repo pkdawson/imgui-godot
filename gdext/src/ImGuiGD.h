@@ -44,6 +44,14 @@ public:
     PackedInt64Array GetImGuiPtrs(String version, int ioSize, int vertSize, int idxSize, int charSize);
 
     bool SubViewport(godot::SubViewport* svp);
+
+    // Drag and drop
+    bool SetDragDropPayload(const String& type, const Variant& data, int cond = 0);
+    Variant AcceptDragDropPayload(const String& type, int flags = 0);
+    Variant GetDragDropPayload();
+
+private:
+    Variant _dragDropPayload;
 };
 
 } // namespace ImGui::Godot
