@@ -75,7 +75,7 @@ libs += [
     # "lunasvg",
     "bz2",
     "libpng16" if windows else "png16",
-    "zlib" if windows else "z",
+    "zs" if windows else "z",
     "brotlidec",
     "brotlicommon",
 ]
